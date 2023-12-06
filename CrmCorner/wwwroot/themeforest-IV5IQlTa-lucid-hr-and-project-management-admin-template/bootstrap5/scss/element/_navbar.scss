@@ -1,0 +1,88 @@
+/* Top Nav Bar */
+.navbar-fixed-top {
+    background: var(--card-color);
+    position: fixed;
+    top: 5px;
+    left: 0;
+    width: 100%;
+    z-index: 99;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+
+    @include media-breakpoint-down(md) {
+        top: 2px;
+    }
+
+    .navbar-btn {
+        display: none;
+        float: left;
+
+        button {
+            color: var(--color-500);
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 20px;
+            line-height: 0.7;
+        }
+
+        @include media-breakpoint-down(xs) {
+            margin-left: 0;
+        }
+
+        @include media-breakpoint-down(xl) {
+            display: block;
+        }
+    }
+}
+
+.navbar-nav {
+    .icon-menu {
+        padding: 15px;
+        position: relative;
+
+        i {
+            color: var(--color-500);
+        }
+
+        &::after {
+            display: none;
+        }
+
+        .notification-dot {
+            @include border-radius(50%);
+            width: 8px;
+            height: 8px;
+            position: absolute;
+            top: 12px;
+            right: 7px;
+            background-color: var(--primary-color);
+        }
+    }
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        &.notification{
+            width: 360px;
+        }
+    }
+}
+
+.search-form {
+    position: relative;
+    .btn {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        border: none;
+        color: var(--color-500);
+        background-color: transparent;
+        transform: translateY(-50%);
+
+        &:hover,
+        &:focus {
+        background-color: inherit;
+        border-left: none;
+        border-color: inherit;
+        }
+    }
+}

@@ -1,0 +1,137 @@
+.metismenu {
+  .arrow {
+    float: right;
+    line-height: 1.42857;
+  }
+  .glyphicon.arrow {
+    &:before {
+      content: "\e079";
+    }
+  }
+  .mm-active {
+    > a {
+      > .glyphicon.arrow {
+        &:before {
+          content: "\e114";
+        }
+      }
+      > .fa.arrow {
+        &:before {
+          content: "\f107";
+        }
+      }
+      > .ion.arrow {
+        &:before {
+          content: "\f3d0";
+        }
+      }
+      > .fa.plus-times {
+        transform: rotate(45deg);
+      }
+      > .fa.plus-minus {
+        &:before {
+          content: "\f068";
+        }
+      }
+    }
+    > .has-arrow {
+      &::after {
+        transform: rotate(-135deg) translate(0, -50%);
+      }
+    }
+  }
+  .fa.arrow {
+    &:before {
+      content: "\f104";
+    }
+  }
+  .ion.arrow {
+    &:before {
+      content: "\f3d2";
+    }
+  }
+  .plus-times {
+    float: right;
+  }
+  .fa.plus-times {
+    &:before {
+      content: "\f067";
+    }
+  }
+  .plus-minus {
+    float: right;
+  }
+  .fa.plus-minus {
+    &:before {
+      content: "\f067";
+    }
+  }
+  .mm-collapse {
+    &:not(.mm-show) {
+      display: none;
+    }
+  }
+  .mm-collapsing {
+    position: relative;
+    height: 0;
+    overflow: hidden;
+    transition-timing-function: ease;
+    transition-duration: 0.35s;
+    transition-property: height, visibility;
+  }
+  .has-arrow {
+    position: relative;
+    &::after {
+      position: absolute;
+      content: "";
+      width: 0.5em;
+      height: 0.5em;
+      border-width: 1px 0 0 1px;
+      border-style: solid;
+      border-color: currentColor;
+      border-color: initial;
+      right: 1em;
+      transform: rotate(-45deg) translate(0, -50%);
+      transform-origin: top;
+      top: 50%;
+      transition: all 0.3s ease-out;
+    }
+  }
+  .has-arrow[aria-expanded="true"] {
+    &::after {
+      transform: rotate(-135deg) translate(0, -50%);
+    }
+  }
+}
+*[dir="rtl"] {
+  .metismenu {
+    .arrow {
+      float: left;
+    }
+    .plus-times {
+      float: left;
+    }
+    .plus-minus {
+      float: left;
+    }
+    .has-arrow {
+      &::after {
+        right: auto;
+        left: 1em;
+        transform: rotate(135deg) translate(0, -50%);
+      }
+    }
+    .mm-active {
+      > .has-arrow {
+        &::after {
+          transform: rotate(225deg) translate(0, -50%);
+        }
+      }
+    }
+    .has-arrow[aria-expanded="true"] {
+      &::after {
+        transform: rotate(225deg) translate(0, -50%);
+      }
+    }
+  }
+}

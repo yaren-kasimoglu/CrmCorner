@@ -1,0 +1,210 @@
+/* General Styles */
+body {
+    background-color: var(--body-color);
+    font-family: $font-family;
+    font-size: $font-size;
+    color: var(--color-500);
+}
+a {
+    text-decoration: none;
+    &:hover,
+    &:focus {
+        text-decoration: none;
+        outline: none;
+        box-shadow: none;
+    }
+}
+
+.btn-toggle-fullwidth {
+    position: relative;
+    top: -1px;
+    @include media-breakpoint-down(xl) {
+        display: none;
+    }
+}
+
+.page-loader-wrapper {
+    color: var(--primary-color);
+    overflow: hidden;
+    position: fixed;
+    z-index: 99999999;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+
+    .loader {
+        position: relative;
+        top: calc(40% - 30px);
+    }
+}
+
+footer {
+    position: absolute;
+    padding: 0 30px;
+    padding-bottom: 15px;
+    right: 0;
+
+    @include media-breakpoint-up(sm) {
+        position: relative;
+        text-align: center;
+    }
+}
+
+.btn-toolbar > .btn-group {
+  margin-left: 5px;
+}
+div#donut_chart {
+    display: flex;
+    align-items: center;
+}
+.datepicker {
+    padding: 0;
+}
+
+.apexcharts-canvas{
+    line,
+    circle{
+		stroke: var(--border-color);
+	}
+	text{
+		fill: var(--color-500);
+	}
+	.apexcharts-legend-text{
+		color: var(--color-500) !important;
+    }
+    .apexcharts-pie{
+        path{
+           stroke: var(--border-color);
+        }
+    }
+    .apexcharts-legend-marker{
+        height: 3px !important;
+    }
+}
+.ac-line-transparent{
+    line{
+        stroke: var(--card-color);
+    }
+}
+.apexcharts-line-0{
+    line{
+        display: none;
+    }
+}
+.sparkline_chart{
+    canvas{
+        width: 100% !important;
+    }
+}
+
+.fc{
+    * {
+        color: var(--color-600);
+    }
+    .fc-col-header-cell-cushion{
+        color: var(--color-600);
+    }
+    .fc-h-event .fc-event-title{
+        color: var(--white-color);
+    }
+
+    @media only screen and (max-width: $break-medium - 1px) {
+        .fc-toolbar-title{
+            font-size: 1.2em;
+        }
+        .fc-button{
+            padding: .1em .40em;
+        }
+    }
+}
+
+.fc-theme-standard{
+    .fc-scrollgrid,
+    td,
+    th{
+        border-color: var(--color-100);
+    }
+}
+
+.note-editor{
+    &.note-airframe,
+    &.note-frame{
+        background: var(--card-color);
+        border: 1px solid var(--border-color);
+        border-radius: .25rem;
+    }
+    .note-btn{
+        color: var(--color-500);
+        .note-icon-caret{
+            display: none;
+        }
+    }
+    .note-dropdown-menu{
+        box-shadow: 0 0 10px rgba($dark, .15);
+        top: 100%;
+        a{
+            color: var(--color-600);
+        }
+        &.dropdown-style{
+            min-width: 210px;
+            padding: 1rem;
+        }        
+    }
+}
+
+.noUi-target{
+    background: var(--border-color);
+    border-color: var(--border-color);
+    box-shadow: none;
+}
+
+.cd-horizontal-timeline{
+    .events {
+        background: var(--border-color);
+        a{
+            color: var(--color-500);
+            &::after{
+                border-color: var(--border-color);
+                background-color: var(--primary-color);
+            }
+        }
+    }
+    .cd-timeline-navigation a{
+        border-color: var(--border-color);
+    }
+}
+
+.dd{
+    .dd-handle{
+        border-color: var(--border-color);
+        background: var(--border-color);
+    }
+    .dd-content{
+        border-color: var(--border-color);
+        background: var(--card-color);
+    }
+}
+
+input[type=range]{
+    background: var(--border-color);
+}
+
+.gauge-chart{
+    color: var(--color-600);
+    text{
+        fill: var(--color-600);
+    }
+}
+
+#m_area_chart2,
+#e_area_chart,
+#m_bar_chart{
+    path{
+        stroke: var(--border-color);
+    }
+}
+

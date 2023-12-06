@@ -1,0 +1,191 @@
+:root {
+  --dark-color: #323a45;
+
+  --color-fff: #ffffff;
+  --color-100: #f0f0f0;
+  --color-200: #eeeeee;
+  --color-300: #e0e0e0;
+  --color-400: #bdbdbd;
+  --color-500: #555555;
+  --color-600: #757575;
+  --color-700: #616161;
+  --color-800: #424242;
+  --color-900: #212121;
+  --color-000: #000000;
+
+  --border-color:   #f0f0f0;
+  --card-color:     #ffffff;
+  --body-color:     #f9fbfd;
+  --white-color:    #ffffff;
+  --sidebar-color:  #fcfcfc;
+
+  --hc-font-color:  #555555;
+  --hc-bg-color:    #f0f0f0;
+  --bs-gradient: linear-gradient( 180deg, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.35) );
+}
+
+[data-theme="dark"] {
+  --dark-color: #323a45;
+
+  --color-fff: #000000;
+  --color-100: #212121;
+  --color-200: #424242;
+  --color-300: #616161;
+  --color-400: #757575;
+  --color-500: #8f8f8f;
+  --color-600: #bdbdbd;
+  --color-700: #e0e0e0;
+  --color-800: #eeeeee;
+  --color-900: #f0f0f0;
+  --color-000: #ffffff;
+
+  --border-color: #353535;
+  --card-color: #1c222c;
+  --body-color: #191f28;
+  --white-color: #ffffff;
+  --sidebar-color: #fcfcfc;
+
+  --hc-font-color: #555555;
+  --hc-bg-color: #f0f0f0;
+
+  [class="theme-purple"] {
+    --primary-color: #5e2597;
+  }
+
+  [class="theme-cyan"] {
+    --primary-color: #00bdaa;
+  }
+
+  [class="theme-blue"] {
+    --primary-color: #2e7bec;
+    --border-color: #1a1f2d;
+    --card-color: #10141f;
+    --body-color: #080b13;
+  }
+
+  [class="theme-orange"] {
+    --border-color: #252c38;
+    --card-color: #1c222c;
+    --body-color: #191f28;
+  }
+
+  [class="theme-blush"] {
+    --border-color: #242331;
+    --card-color: #1a1925;
+    --body-color: #15141f;
+  }
+}
+[data-theme="high-contrast"] {
+  --dark-color: #323a45;
+
+  --color-fff: #000000;
+  --color-100: #000000;
+  --color-200: #ffffff;
+  --color-300: #ffffff;
+  --color-400: #000000;
+  --color-500: #ffffff;
+  --color-600: #ffffff;
+  --color-700: #ffffff;
+  --color-800: #ffffff;
+  --color-900: #ffffff;
+  --color-000: #ffffff;
+
+  --border-color: #262727;
+  --card-color: #0e0e0e;
+  --body-color: #000000;
+  --white-color: #ffffff;
+  --sidebar-color: #fcfcfc;
+
+  --hc-font-color: #555555;
+  --hc-bg-color: #f0f0f0;
+
+  // some spacific class css in " high-contrast theme "
+  .avatar.no-thumbnail {
+    background-color: $dark;
+  }
+  .form-control {
+    &::placeholder {
+      color: var(--white-color);
+    }
+  }
+  .modal {
+    color: $dark;
+    .card {
+      border-color: var(--hc-bg-color);
+      background-color: var(--white-color);
+    }
+  }
+}
+
+[class="theme-purple"] {
+  --primary-color: #3B185F;
+  --secondary-color: #FEC260;
+
+  --chart-color1:	 	#3B185F;
+	--chart-color2: 	#FEC260;
+	--chart-color3: 	#ff80ad;
+	--chart-color4: 	#FF8474;
+	--chart-color5: 	#9F5F80;
+
+	--primary-gradient: linear-gradient(145deg, var(--primary-color), var(--chart-color4));
+}
+[class="theme-blue"] {
+  --primary-color: #0061A8;
+  --secondary-color: #ffc464;
+
+  --chart-color1:	 	#0061A8;
+	--chart-color2: 	#ffc464;
+	--chart-color3: 	#ff80ad;
+	--chart-color4: 	#FF8364;
+	--chart-color5: 	#4E709D;
+
+	--primary-gradient: linear-gradient(145deg, var(--primary-color), var(--chart-color4));
+}
+[class="theme-cyan"] {
+  --primary-color: #2eacb3;
+  --secondary-color: #FED049;
+
+  --chart-color1:	 	#2eacb3;
+	--chart-color2: 	#FED049;
+	--chart-color3: 	#2D6187;
+	--chart-color4: 	#89BEB3;
+	--chart-color5: 	#FF9A76;
+
+	--primary-gradient: linear-gradient(145deg, var(--primary-color), var(--chart-color4));
+}
+[class="theme-green"] {
+  --primary-color: #28a745;
+  --secondary-color: #A1C45A;
+
+  --chart-color1:	 	#28a745;
+	--chart-color2: 	#A1C45A;
+	--chart-color3: 	#F1C550;
+	--chart-color4: 	#EA4C4C;
+	--chart-color5: 	#ACC6AA;
+
+	--primary-gradient: linear-gradient(145deg, var(--primary-color), var(--chart-color4));
+}
+[class="theme-orange"] {
+  --primary-color: #f68c1f;
+  --secondary-color: #583D72;
+
+	--chart-color1:	 	#f68c1f;
+	--chart-color2: 	#583D72;
+	--chart-color3: 	#ded5c4;
+	--chart-color4: 	#f59292;
+	--chart-color5: 	#90a4ae;
+
+	--primary-gradient: linear-gradient(145deg, var(--primary-color), var(--chart-color4));
+}
+[class="theme-blush"] {
+  --primary-color: #FF5C58;
+  --secondary-color: #097ab5;
+
+  --chart-color1:	 	#FF5C58;
+	--chart-color2: 	#097ab5;
+	--chart-color3: 	#25acbd;
+	--chart-color4: 	#FF8882;
+	--chart-color5: 	#5AA897;
+
+	--primary-gradient: linear-gradient(145deg, var(--primary-color), var(--chart-color4));
+}

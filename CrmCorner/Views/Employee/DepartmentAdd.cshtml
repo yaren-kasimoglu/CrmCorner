@@ -1,0 +1,26 @@
+﻿@model CrmCorner.Models.Department
+@{
+    ViewData["Title"] = "DepartmentAdd";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<form asp-action="DepartmentAdd" method="post">
+    <div class="form-group">
+        <label asp-for="DepartmentName" class="control-label"></label>
+        <input asp-for="DepartmentName" class="form-control" />
+        <span asp-validation-for="DepartmentName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DepartmentDescription" class="control-label"></label>
+        <input asp-for="DepartmentDescription" class="form-control" />
+        <span asp-validation-for="DepartmentDescription" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="form-group">
+        <input type="submit" value="Add Department" class="btn btn-primary" />
+    </div>
+</form>
+
+
+

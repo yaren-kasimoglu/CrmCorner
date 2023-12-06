@@ -1,0 +1,134 @@
+.chat_app {
+    overflow: hidden;
+}
+.people_list {
+    @include transition(all 0.3s);
+    background-color: var(--card-color);
+    border-right: 1px solid var(--primary-color);
+    width: 280px;
+
+    @include media-breakpoint-down(md) {
+        display: none;
+        &.open {
+            left: 0;
+        }
+    }
+
+    .chat-list {
+        @include c_overflow(scroll);
+        li {
+            border-right: 4px solid;
+            border-color: transparent;
+
+            &.active,
+            &:hover {
+                border-color: var(--primary-color);
+                background: var(--border-color);
+            }
+        }
+    }
+}
+.chat {
+    width: calc(100% - 280px);
+
+    @include media-breakpoint-down(md) {
+        width: 100%;
+    }
+    .chat-header {
+        @include media-breakpoint-down(md) {
+            width: 100%;
+            border-radius: 0.55rem 0.55rem 0 0;
+        }
+    }
+    .chat-history {
+        @include c_overflow(scroll);
+        height: 460px;
+
+        @include media-breakpoint-down(md) {
+            height: calc(100vh - 330px);
+            overflow-x: auto;
+        }
+        .message {
+            @include border-radius(7px);
+            position: relative;
+            color: var(--color-600);
+            padding: 12px 16px;
+            line-height: 26px;
+
+            &:after {
+                border-bottom-color: var(--card-color);
+                border: solid transparent;
+                content: " ";
+                position: absolute;
+                pointer-events: none;
+                bottom: 100%;
+                left: 7%;
+                height: 0;
+                width: 0;
+                border-width: 10px;
+                margin-left: -10px;
+            }
+        }
+        .my-message {
+            background-color: var(--primary-color);
+            color: $white;
+
+            &:after {
+                border-bottom-color: var(--primary-color) !important;
+                border: solid transparent;
+                content: " ";
+                position: absolute;
+                pointer-events: none;
+                border-width: 10px;
+                margin-left: -10px;
+                bottom: 100%;
+                left: 30px;
+                height: 0;
+                width: 0;
+            }
+        }
+        .other-message {
+            background: var(--body-color);
+            &:after {
+                border-bottom-color: var(--body-color);
+                left: 93%;
+            }
+        }
+    }
+    .chat-message {
+        padding: 20px;
+    }
+
+    li{
+        margin-bottom: 30px;
+        &:last-child{
+            margin-bottom: 0;
+        }
+    }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 992px) {
+    .chat_app {
+        .chat-list {
+            height: 650px;
+            overflow-x: auto;
+        }
+        .chat-history {
+            height: 600px;
+            overflow-x: auto;
+        }
+    }
+}
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 1) {
+  .chat_app {
+        .chat-list {
+            height: calc(100vh - 360px);
+            overflow-x: auto;
+        }
+        .chat-history {
+            height: calc(100vh - 350px);
+            overflow-x: auto;
+        }
+    }
+}

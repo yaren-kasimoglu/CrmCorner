@@ -1,0 +1,61 @@
+﻿.timeline-item {
+    position: relative;
+    border-left: 1px solid;
+    padding: 3em 2em 2em;
+
+    &:after {
+        background: $col-white;
+        content:'';
+        position: absolute;
+        border: 2px solid;
+        width: 10px;
+        height: 15px;
+        top: 1em;
+        left: -6px;
+        border-radius: 10px;
+    }
+
+    &.green {
+        border-color: $col-green;
+        &:after,
+        .date {
+            color: $col-green;
+        }
+    }
+    &.blue {
+        border-color: $col-blue;
+        &:after,
+        .date {
+            color: $col-blue;
+        }
+    }
+    &.warning {
+        border-color: $col-orange;
+        &:after,
+        .date {
+            color: $col-orange;
+        }
+    }
+    &.danger {
+        border-color: $col-red;
+        &:after,
+        .date {
+            color: $col-red;
+        }
+    }
+    &.dark {
+        border-color: $col-dark;
+        &:after,
+        .date {
+            color: $col-dark;
+        }
+    }
+    .date {
+        display: block;
+        margin-top: -30px;
+        margin-bottom: 10px;
+    }
+    .msg {
+        margin: 15px 0;
+    }
+}

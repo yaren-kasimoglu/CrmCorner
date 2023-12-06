@@ -1,0 +1,18 @@
+﻿@model CrmCorner.Models.Position
+@{
+    ViewData["Title"] = "PositionAdd";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+<form asp-action="PositionAdd" method="post">
+    <div class="form-group">
+        <label asp-for="PositionName" class="control-label"></label>
+        <input asp-for="PositionName" class="form-control" />
+        <span asp-validation-for="PositionName" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="form-group">
+        <input type="submit" value="Add Position" class="btn btn-primary" />
+    </div>
+</form>
+
+

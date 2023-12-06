@@ -1,0 +1,74 @@
+﻿@model List<Customer>
+@{
+    ViewData["Title"] = "CustomerList";
+}
+@{
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+<a href="/Customer/CustomerAdd" target="_blank">
+    <input type="button" class="btn btn-success" value="Add Customer">
+</a>
+<div>&nbsp;</div>
+<table class="table table-bordered" id="customer">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Surname</th>
+            <th scope="col">Email</th>
+            <th scope="col">Status</th>
+            <th scope="col">Responsible</th>
+            <th scope="col">Operations</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>@item.Name</td>
+                <td>@item.Surname</td>
+                <td>@item.Email</td>
+                <td>@item.Status</td>
+                <td>
+                    @if (item.IdEmployeeNavigation != null)
+                    {
+                        @item.IdEmployeeNavigation.EmployeeName  @item.IdEmployeeNavigation.EmployeeSurname
+                     }
+                    else
+                    {
+                        <span class="text-danger">No Employee</span>
+                    }
+                </td>
+                <td>
+                    <a href="/Customer/CustomerEdit/@item.Id" target="_blank">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+
+<script>
+    function confirmDelete(button) {
+        // Kullanıcıya silme işlemini onaylamasını sor
+        if (confirm('Are you sure you want to dele te this customer?')) {
+            var customerId = button.getAttribute('data-customerid');
+            var form = document.createElement('form');
+            form.action = '/Customer/CustomerDelete/' + customerId;
+            form.method = 'post';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
