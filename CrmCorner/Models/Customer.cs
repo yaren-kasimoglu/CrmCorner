@@ -13,9 +13,11 @@ public partial class Customer
 
     public string Email { get; set; } = null!;
 
-    public string Status { get; set; } = null!;
+    public int? CompanyId { get; set; }
 
-    public int? IdEmployee { get; set; }
+    public string PhoneNumber { get; set; } = null!;
 
-    public virtual Employee? IdEmployeeNavigation { get; set; }
+    public virtual Company? Company { get; set; }
+
+    public virtual ICollection<TaskComp> TaskComps { get; set; } = new List<TaskComp>();
 }

@@ -15,8 +15,8 @@
             <th scope="col">Name</th>
             <th scope="col">Surname</th>
             <th scope="col">Email</th>
-            <th scope="col">Status</th>
-            <th scope="col">Responsible</th>
+            <th scope="col">Phone Number</th>
+            <th scope="col">Company</th>
             <th scope="col">Operations</th>
         </tr>
     </thead>
@@ -28,15 +28,15 @@
                 <td>@item.Name</td>
                 <td>@item.Surname</td>
                 <td>@item.Email</td>
-                <td>@item.Status</td>
+                <td>@item.PhoneNumber</td>
                 <td>
-                    @if (item.IdEmployeeNavigation != null)
+                    @if (item.Company != null)
                     {
-                        @item.IdEmployeeNavigation.EmployeeName  @item.IdEmployeeNavigation.EmployeeSurname
+                        @item.Company.CompanyName
                      }
                     else
                     {
-                        <span class="text-danger">No Employee</span>
+                        <span class="text-danger">No Company</span>
                     }
                 </td>
                 <td>

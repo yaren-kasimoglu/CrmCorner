@@ -14,7 +14,7 @@ namespace CrmCorner.Controllers
         }
         public IActionResult CustomerList()
         {
-            var customers = _context.Customers.Include(e => e.IdEmployeeNavigation)
+            var customers = _context.Customers.Include(e => e.Company)
                                 .ToList();
             return View(customers);
         }
@@ -22,17 +22,16 @@ namespace CrmCorner.Controllers
         [HttpGet]
         public IActionResult CustomerAdd()
         {
-            var employees = _context.Employees.ToList();
+            var company = _context.Companies.ToList();
 
-            List<SelectListItem> employeeItems = employees
+            List<SelectListItem> companyItems = company
           .Select(d => new SelectListItem
           {
-              Text = d.EmployeeName,
-              Value = d.IdEmployee.ToString()
+              Text = d.CompanyName,
+              Value = d.Id.ToString()
           }).ToList();
 
-            ViewBag.StatusList = GetStatusList(); // StatusList, dropdown'ı dolduracak veri
-            ViewBag.Employees = employeeItems;
+            ViewBag.CompanyList = companyItems;
             return View();
         }
         [HttpPost]
@@ -40,14 +39,25 @@ namespace CrmCorner.Controllers
         {
             if (ModelState.IsValid)
             {
-                var customers = _context.Customers.Include(e => e.IdEmployeeNavigation).ToList();
+                var customers = _context.Customers.Include(e => e.Company).ToList();
 
                 _context.Customers.Add(customer);
                 _context.SaveChanges();
 
                 return RedirectToAction("CustomerList");
             }
-            ViewBag.StatusList = GetStatusList();
+
+            var company = _context.Companies.ToList();
+
+            List<SelectListItem> companyItems = company
+          .Select(d => new SelectListItem
+          {
+              Text = d.CompanyName,
+              Value = d.Id.ToString()
+          }).ToList();
+
+            ViewBag.CompanyList = companyItems;
+
             return View(customer);
         }
 
@@ -55,15 +65,16 @@ namespace CrmCorner.Controllers
         [HttpGet]
         public IActionResult CustomerEdit(int id)
         {
-            var employees = _context.Employees.ToList();
-            List<SelectListItem> employeeItems = employees
-.Select(d => new SelectListItem
-{
-    Text = d.EmployeeName,
-    Value = d.IdEmployee.ToString()
-}).ToList();
+            var company = _context.Companies.ToList();
 
-            ViewBag.Employees = employeeItems;
+            List<SelectListItem> companyItems = company
+          .Select(d => new SelectListItem
+          {
+              Text = d.CompanyName,
+              Value = d.Id.ToString()
+          }).ToList();
+
+            ViewBag.CompanyList = companyItems;
             // id parametresini kullanarak düzenlenecek müşteriyi veritabanından al
             Customer customer = _context.Customers.Find(id);
 
@@ -72,8 +83,6 @@ namespace CrmCorner.Controllers
             {
                 return NotFound(); // 404 Not Found dönülebilir
             }
-            // StatusList'i doldur
-            ViewBag.StatusList = GetStatusList();
 
             // Müşteriyi düzenleme sayfasına gönder
             return View(customer);

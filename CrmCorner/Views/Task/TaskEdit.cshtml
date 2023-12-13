@@ -1,0 +1,55 @@
+﻿@model CrmCorner.Models.TaskComp
+@{
+    ViewData["Title"] = "TaskEdit";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+
+<form asp-action="TaskEdit" asp-controller="Task" method="post">
+    <input type="hidden" asp-for="TaskId" />
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label asp-for="ValueOrOffer" class="control-label"></label>
+                    <input asp-for="ValueOrOffer" class="form-control" />
+                    <span asp-validation-for="ValueOrOffer" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description" class="control-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="5" cols="30" required></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">Customer</label>
+            <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select select2" aria-label="Default select example"></select>
+            <span asp-validation-for="CustomerId" class="text-danger"></span>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">Responsible</label>
+            <select asp-for="EmployeeId" asp-items="ViewBag.Employee" class="form-select select2" aria-label="Default select example"></select>
+            <span asp-validation-for="EmployeeId" class="text-danger"></span>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">Status</label>
+            <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example"></select>
+            <span asp-validation-for="StatusId" class="text-danger"></span>
+        </div>
+    </div>
+    </br>
+    <div class="form-group">
+        <input type="submit" value="Update" class="btn btn-primary" />
+    </div>
+</form>
+

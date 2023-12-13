@@ -1,0 +1,31 @@
+﻿@model CrmCorner.Models.Company
+@{
+    ViewData["Title"] = "CompanyEdit";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+<form asp-action="CompanyEdit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="CompanyName" class="control-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CompanyEmail" class="control-label"></label>
+        <input asp-for="CompanyEmail" class="form-control" />
+        <span asp-validation-for="CompanyEmail" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="StatusId" class="control-label">Status</label>
+        @Html.DropDownListFor(m=>m.StatusId,(List<SelectListItem>) ViewBag.Status,"Seçiniz",new {@class="form-select", aria_label="StatusId",@id="StatusId", @required="required"})
+        <span asp-validation-for="StatusId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="IdEmployee" class="control-label">Responsible</label>
+        @Html.DropDownListFor(m=>m.IdEmployee,(List<SelectListItem>) ViewBag.Employees,"Seçiniz",new {@class="form-select", aria_label="IdEmployee",@id="IdEmployee", @required="required"})
+        <span asp-validation-for="IdEmployee" class="text-danger"></span>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>

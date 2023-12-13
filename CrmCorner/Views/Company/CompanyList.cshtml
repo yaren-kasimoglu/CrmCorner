@@ -1,0 +1,81 @@
+﻿@model List<Company>
+@{
+    ViewData["Title"] = "CompanyList";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<a href="/Company/CompanyAdd" target="_blank">
+    <input type="button" class="btn btn-success" value="Add Company">
+</a>
+<div>&nbsp;</div>
+<table class="table table-bordered" id="company">
+    <thead>
+        <tr>
+            <th scope="col">Company Name</th>
+            <th scope="col">Company Email</th>
+            <th scope="col">Status</th>
+            <th scope="col">Responsible</th>
+            <th scope="col">Operations</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>@item.CompanyName</td>
+                <td>@item.CompanyEmail</td>
+                <td>
+                    @if (item.Status != null)
+                    {
+                        @item.Status.StatusName
+                    }
+                    else
+                    {
+                        <span class="text-danger">No Status</span>
+                    }
+                </td>
+                <td>
+                    @if (item.IdEmployeeNavigation != null)
+                    {
+                        @item.IdEmployeeNavigation.EmployeeName  @item.IdEmployeeNavigation.EmployeeSurname
+                    }
+                    else
+                    {
+                        <span class="text-danger">No Employee</span>
+                    }
+                </td>
+                <td>
+                    <a href="/Company/CompanyEdit/@item.Id" target="_blank">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-companyid="@item.Id" onclick="confirmDelete(this)">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+
+<script>
+    function confirmDelete(button) {
+        // Kullanıcıya silme işlemini onaylamasını sor
+        if (confirm('Are you sure you want to dele te this company?')) {
+            var companyid = button.getAttribute('data-companyid');
+            var form = document.createElement('form');
+            form.action = '/Company/CompanyDelete/' + companyid;
+            form.method = 'post';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+

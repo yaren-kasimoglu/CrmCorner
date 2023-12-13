@@ -1,42 +1,56 @@
 .taskboard {
-  .dd-handle {
-    background-color: var(--border-color);
-    border-color: var(--border-color);
-    position: relative;
-    &:hover {
-      background-color: var(--border-color);
-    }
-    &::after {
-      content: "";
-      width: 40px;
-      height: 3px;
-      position: absolute;
-      top: -1px;
-      right: 15px;
-    }
-    p {
-      margin-bottom: 0;
-    }
-  }
-  .planned_task {
     .dd-handle {
-      &::after {
-        background: $blue;
-      }
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        position: relative;
+
+        &:hover {
+            background-color: var(--border-color);
+        }
+
+        &::after {
+            content: "";
+            width: 40px;
+            height: 3px;
+            position: absolute;
+            top: -1px;
+            right: 15px;
+        }
+
+        p {
+            margin-bottom: 0;
+        }
     }
-  }
-  .progress_task {
-    .dd-handle {
-      &::after {
-        background: $orange;
-      }
+
+    .planned_task {
+        .dd-handle {
+            &::after {
+                background: $blue;
+            }
+        }
     }
-  }
-  .completed_task {
-    .dd-handle {
-      &::after {
-        background: $green;
-      }
+
+    .progress_task {
+        .dd-handle {
+            &::after {
+                background: $orange;
+            }
+        }
     }
-  }
+
+    .completed_task {
+        .dd-handle {
+            &::after {
+                background: $green;
+            }
+        }
+    }
+
+    .demo_task {
+        .dd-handle {
+            &::after {
+                background: $orange;
+            }
+        }
+    }
 }

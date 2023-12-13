@@ -15,6 +15,10 @@ public partial class CrmcornerContext : DbContext
     {
     }
 
+    public virtual DbSet<Calendar> Calendars { get; set; }
+
+    public virtual DbSet<Company> Companies { get; set; }
+
     public virtual DbSet<Customer> Customers { get; set; }
 
     public virtual DbSet<Department> Departments { get; set; }
@@ -22,6 +26,10 @@ public partial class CrmcornerContext : DbContext
     public virtual DbSet<Employee> Employees { get; set; }
 
     public virtual DbSet<Position> Positions { get; set; }
+
+    public virtual DbSet<Status> Statuses { get; set; }
+
+    public virtual DbSet<TaskComp> TaskComps { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -33,38 +41,70 @@ public partial class CrmcornerContext : DbContext
             .UseCollation("latin1_swedish_ci")
             .HasCharSet("latin1");
 
+        modelBuilder.Entity<Calendar>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("Calendar");
+
+            entity.Property(e => e.Date).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(300);
+            entity.Property(e => e.Id).HasColumnType("int(11)");
+            entity.Property(e => e.Title).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<Company>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("Company");
+
+            entity.HasIndex(e => e.IdEmployee, "IdEmployee");
+
+            entity.HasIndex(e => e.StatusId, "StatusId");
+
+            entity.Property(e => e.Id).HasColumnType("int(11)");
+            entity.Property(e => e.CompanyEmail).HasMaxLength(255);
+            entity.Property(e => e.CompanyName).HasMaxLength(255);
+            entity.Property(e => e.IdEmployee).HasColumnType("int(11)");
+            entity.Property(e => e.StatusId).HasColumnType("int(11)");
+
+            entity.HasOne(d => d.IdEmployeeNavigation).WithMany(p => p.Companies)
+                .HasForeignKey(d => d.IdEmployee)
+                .HasConstraintName("Company_ibfk_2");
+
+            entity.HasOne(d => d.Status).WithMany(p => p.Companies)
+                .HasForeignKey(d => d.StatusId)
+                .HasConstraintName("Company_ibfk_1");
+        });
+
         modelBuilder.Entity<Customer>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.ToTable("Customer");
 
-            entity.HasIndex(e => e.IdEmployee, "FK_Customer_Employee");
+            entity.HasIndex(e => e.CompanyId, "FK_Customer_Company");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
+            entity.Property(e => e.CompanyId).HasColumnType("int(11)");
             entity.Property(e => e.Email)
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
-            entity.Property(e => e.IdEmployee)
-                .HasColumnType("int(11)")
-                .HasColumnName("idEmployee");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
-            entity.Property(e => e.Status)
-                .HasMaxLength(45)
-                .UseCollation("utf8mb3_general_ci")
-                .HasCharSet("utf8mb3");
+            entity.Property(e => e.PhoneNumber).HasMaxLength(45);
             entity.Property(e => e.Surname)
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
 
-            entity.HasOne(d => d.IdEmployeeNavigation).WithMany(p => p.Customers)
-                .HasForeignKey(d => d.IdEmployee)
-                .HasConstraintName("FK_Customer_Employee");
+            entity.HasOne(d => d.Company).WithMany(p => p.Customers)
+                .HasForeignKey(d => d.CompanyId)
+                .HasConstraintName("FK_Customer_Company");
         });
 
         modelBuilder.Entity<Department>(entity =>
@@ -137,6 +177,67 @@ public partial class CrmcornerContext : DbContext
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
+        });
+
+        modelBuilder.Entity<Status>(entity =>
+        {
+            entity.HasKey(e => e.StatusId).HasName("PRIMARY");
+
+            entity
+                .ToTable("Status")
+                .HasCharSet("utf8mb4")
+                .UseCollation("utf8mb4_unicode_ci");
+
+            entity.Property(e => e.StatusId)
+                .HasColumnType("int(11)")
+                .HasColumnName("statusId");
+            entity.Property(e => e.StatusName)
+                .HasMaxLength(255)
+                .HasColumnName("statusName");
+        });
+
+        modelBuilder.Entity<TaskComp>(entity =>
+        {
+            entity.HasKey(e => e.TaskId).HasName("PRIMARY");
+
+            entity
+                .ToTable("TaskComp")
+                .HasCharSet("utf8mb4")
+                .UseCollation("utf8mb4_unicode_ci");
+
+            entity.HasIndex(e => e.CustomerId, "FK_Customer");
+
+            entity.HasIndex(e => e.EmployeeId, "FK_Employee");
+
+            entity.HasIndex(e => e.StatusId, "statusId");
+
+            entity.Property(e => e.TaskId)
+                .HasColumnType("int(11)")
+                .HasColumnName("TaskID");
+            entity.Property(e => e.CustomerId)
+                .HasColumnType("int(11)")
+                .HasColumnName("customerId");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.EmployeeId)
+                .HasColumnType("int(11)")
+                .HasColumnName("employeeId");
+            entity.Property(e => e.StatusId)
+                .HasColumnType("int(11)")
+                .HasColumnName("statusId");
+            entity.Property(e => e.Title).HasMaxLength(255);
+            entity.Property(e => e.ValueOrOffer).HasPrecision(10, 2);
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.TaskComps)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("FK_Customer");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.TaskComps)
+                .HasForeignKey(d => d.EmployeeId)
+                .HasConstraintName("FK_Employee");
+
+            entity.HasOne(d => d.Status).WithMany(p => p.TaskComps)
+                .HasForeignKey(d => d.StatusId)
+                .HasConstraintName("TaskComp_ibfk_1");
         });
 
         OnModelCreatingPartial(modelBuilder);

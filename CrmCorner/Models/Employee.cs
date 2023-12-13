@@ -19,9 +19,11 @@ public partial class Employee
 
     public int? IdPositions { get; set; }
 
-    public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
+    public virtual ICollection<Company> Companies { get; set; } = new List<Company>();
 
     public virtual Department? IdDepartmentNavigation { get; set; }
 
     public virtual Position? IdPositionsNavigation { get; set; }
+
+    public virtual ICollection<TaskComp> TaskComps { get; set; } = new List<TaskComp>();
 }
