@@ -1,0 +1,238 @@
+﻿@model CrmCorner.Models.Calendar
+@{
+    ViewData["Title"] = "Calendar";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+    var events = ViewBag.Calendar;
+    // var eventsfilter = ViewBag.;
+    var length = events.Count;
+
+
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- VENDOR CSS -->
+    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/fullcalendar.min.css">
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css">
+</head>
+<body>
+    <table id="todoTable">
+        @foreach (var item in events)
+            {
+            <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Title</td>
+                    <td>@item.Date</td>
+             </tr>
+            }
+    </table>
+    <div id="layout" class="theme-cyan">
+
+        <div id="wrapper">
+
+            <div id="main-content" class="page-calendar">
+                <div class="container-fluid">
+
+                    <div class="block-header py-lg-4 py-3">
+                        <div class="row g-3">
+                            <div class="col-md-6 col-sm-12">
+                                <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> Events</h2>
+                                <ul class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="index.html">SasCorner</a></li>
+                                    <li class="breadcrumb-item active">Events</li>
+                                </ul>
+                            </div>
+                            @*<div class="col-md-6 col-sm-12 text-md-end">
+                                    <div class="d-inline-flex text-start">
+                                        <div class="me-2">
+                                            <h6 class="mb-0"><i class="fa fa-user"></i> 1,784</h6>
+                                            <small>Visitors</small>
+                                        </div>
+                                        <span id="bh_visitors"></span>
+                                    </div>
+                                    <div class="d-inline-flex text-start ms-lg-3 me-lg-3 ms-1 me-1">
+                                        <div class="me-2">
+                                            <h6 class="mb-0"><i class="fa fa-globe"></i> 325</h6>
+                                            <small>Visits</small>
+                                        </div>
+                                        <span id="bh_visits"></span>
+                                    </div>
+                                    <div class="d-inline-flex text-start">
+                                        <div class="me-2">
+                                            <h6 class="mb-0"><i class="fa fa-comments"></i> 13</h6>
+                                            <small>Chats</small>
+                                        </div>
+                                        <span id="bh_chats"></span>
+                                    </div>
+                                </div>*@
+                        </div>
+                    </div>
+
+                    <div class="row g-3 clearfix">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-body" id='my_calendar'></div>
+                                <script>let eventsArr = loadData();
+
+                                    function loadData() {
+                                        let eventsArr = [];
+
+                                        let todoTable = document.getElementById("todoTable");
+                                        let trElem = todoTable.getElementsByTagName("tr");
+                                        console.log(trElem);
+                                        for (let tr of trElem) {
+                                            console.log(tr);
+                                            let tdElems = tr.getElementsByTagName("td");
+                                            let eventObj = {
+                                                id: tdElems[0].innerText,
+                                                title: tdElems[1].innerText,
+                                                start: tdElems[2].innerText,
+                                            }
+
+                                            eventsArr.push(eventObj);
+                                        }
+
+                                        return eventsArr;
+                                    }
+
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        var calendarEl = document.getElementById('my_calendar');
+
+                                        var calendar = new FullCalendar.Calendar(calendarEl, {
+                                            timeZone: 'UTC',
+                                            initialView: 'dayGridMonth',
+                                            events: eventsArr,
+                                            editable: true,
+                                            selectable: true
+                                        });
+
+                                        calendar.render();
+                                    });</script>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                            data-bs-target="#exampleModal">
+                                        Yeni takvim ekle
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="event-name row g-2">
+                                        <div class="col-2 text-center">
+                                            <h6>11<span class="d-block">Dec</span><span class="d-block">2021</span></h6>
+                                        </div>
+                                        <div class="col-10">
+                                            <h6 class="mb-0">Conference</h6>
+                                            <p class="mb-0">Mobile World Congress 2021</p>
+                                            <address>
+                                                <i class="fa fa-map-marker"></i> 4 Goldfield Rd. Honolulu, HI 96815
+                                            </address>
+                                        </div>
+                                    </div>
+                                    <div class="event-name row g-2">
+                                        <div class="col-2 text-center">
+                                            <h6>13<span class="d-block">Dec</span><span class="d-block">2021</span></h6>
+                                        </div>
+                                        <div class="col-10">
+                                            <h6 class="mb-0">Birthday</h6>
+                                            <p class="mb-0">Today, guests are getting in on the action</p>
+                                            <address>
+                                                <i class="fa fa-map-marker"></i> 4 Goldfield Rd. Honolulu, HI 96815
+                                            </address>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="event-name row g-2">
+                                        <div class="col-2 text-center">
+                                            <h6>09<span class="d-block">Dec</span><span class="d-block">2021</span></h6>
+                                        </div>
+                                        <div class="col-10">
+                                            <h6 class="mb-0">Repeating Event</h6>
+                                            <p class="mb-0">Before there were tech conferences, there was Disrupt.</p>
+                                            <address>
+                                                <i class="fa fa-map-marker"></i> 44 Shirley Ave. West Chicago, IL
+                                                60185
+                                            </address>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="event-name row g-2">
+                                        <div class="col-2 text-center">
+                                            <h6>16<span class="d-block">Dec</span><span class="d-block">2021</span></h6>
+                                        </div>
+                                        <div class="col-10">
+                                            <h6 class="mb-0">Repeating Event</h6>
+                                            <p class="mb-0">
+                                                It is a long established fact that a reader will be
+                                                distracted
+                                            </p>
+                                            <address>
+                                                <i class="fa fa-map-marker"></i> 123 6th St. Melbourne, FL 32904
+                                            </address>
+                                        </div>
+                                    </div>
+                                    <div class="event-name row g-2">
+                                        <div class="col-2 text-center">
+                                            <h6>28<span class="d-block">Dec</span><span class="d-block">2021</span></h6>
+                                        </div>
+                                        <div class="col-10">
+                                            <h6 class="mb-0">Google</h6>
+                                            <p class="mb-0">Google Hardware and Pixel 2 Launch</p>
+                                            <address>
+                                                <i class="fa fa-map-marker"></i> 514 S. Magnolia St. Orlando, FL
+                                                32806
+                                            </address>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Default Size -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="defaultModalLabel">Add Event</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <input type="number" class="form-control" placeholder="Event Date">
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Event Title">
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control no-resize" rows="4" placeholder="Event Description..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/fullcalendar.bundle.js"></script>
+
+    <!-- page js file -->
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+</body>
+</html>
+
