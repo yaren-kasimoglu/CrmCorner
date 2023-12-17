@@ -26,9 +26,28 @@ namespace CrmCorner.Controllers
                     Id=c.Id,
                     Title=c.Title
                }).ToList();
-            
+            List<Calendar> calendarItemsFilter = calendars
+         .Select(c => new Calendar
+         {
+             Date = c.Date,
+             Id = c.Id,
+             Title = c.Title,
+             Description=c.Description
+         }).ToList();
             ViewBag.Calendar = calendars;
+            ViewBag.CalendarFilter = calendarItemsFilter.Take(5);
             return View();
+        }
+        [HttpPost]
+        public IActionResult CalendarAdd(Calendar Calendar)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Calendars.Add(Calendar);
+                _context.SaveChanges();
+                return RedirectToAction("Calendar");
+            }
+            return View(Calendar);
         }
     }
 }

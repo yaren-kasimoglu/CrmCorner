@@ -5,7 +5,8 @@ namespace CrmCorner.Models;
 
 public partial class Calendar
 {
-    public int? Id { get; set; }
+
+    public int Id { get; set; }
 
     public string Title { get; set; } = null!;
 
