@@ -43,10 +43,8 @@ public partial class CrmcornerContext : DbContext
 
         modelBuilder.Entity<Calendar>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("Calendar");
-
+            entity.HasKey(e => e.Id).HasName("PRIMARY"); ;
+            entity.ToTable("Calendar");
             entity.Property(e => e.Date).HasMaxLength(50);
             entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.Id).HasColumnType("int(11)");
