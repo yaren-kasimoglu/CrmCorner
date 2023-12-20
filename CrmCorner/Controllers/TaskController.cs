@@ -21,7 +21,6 @@ namespace CrmCorner.Controllers
                                 .ToList();
             return View(tasks);
         }
-
         [HttpGet]
         public IActionResult TaskAdd()
         {
@@ -105,8 +104,9 @@ namespace CrmCorner.Controllers
         public IActionResult TaskEdit(int id)
         {
             var employee = _context.Employees.ToList();
-            var customer = _context.Customers.ToList();
+            var customer = _context.Customers.Include(c => c.Company).ToList();
             var status = _context.Statuses.ToList();
+
 
             List<SelectListItem> employeeItems = employee
             .Select(d => new SelectListItem
@@ -118,7 +118,7 @@ namespace CrmCorner.Controllers
             List<SelectListItem> customerItems = customer
             .Select(d => new SelectListItem
             {
-                Text = d.Name + " " + d.Surname,
+                Text = d.Name + " " + d.Surname + " / " + d.Company?.CompanyName,
                 Value = d.Id.ToString()
             }).ToList();
 
@@ -158,6 +158,86 @@ namespace CrmCorner.Controllers
             }
         }
 
+        public IActionResult TaskDetail(int id)
+        {
+            var employee = _context.Employees.ToList();
+            var customer = _context.Customers.Include(c => c.Company).ToList();
+            var status = _context.Statuses.ToList();
+
+
+            List<SelectListItem> employeeItems = employee
+            .Select(d => new SelectListItem
+            {
+                Text = d.EmployeeName + " " + d.EmployeeSurname,
+                Value = d.IdEmployee.ToString()
+            }).ToList();
+
+            List<SelectListItem> customerItems = customer
+            .Select(d => new SelectListItem
+            {
+                Text = d.Name + " " + d.Surname + " / " + d.Company?.CompanyName,
+                Value = d.Id.ToString()
+            }).ToList();
+
+            List<SelectListItem> statusItems = status
+        .Select(d => new SelectListItem
+        {
+            Text = d.StatusName,
+            Value = d.StatusId.ToString()
+        }).ToList();
+
+            // ViewBag'de SelectListItem'ları sakla
+            ViewBag.Employee = employeeItems;
+            ViewBag.Customer = customerItems;
+            ViewBag.Status = statusItems;
+
+            TaskComp task = _context.TaskComps.Find(id);
+            if (task == null)
+            {
+                return NotFound();
+            }
+            return View("TaskDetail", task);
+        }
+
+        [HttpPost]
+        public IActionResult UploadFile(IFormFile uploadedFile)
+        {
+            if (uploadedFile != null && uploadedFile.Length > 0)
+            {
+                string klasorYolu = Path.Combine(Directory.GetCurrentDirectory(), "dosya_klasoru");
+
+                if (!Directory.Exists(klasorYolu))
+                {
+                    Directory.CreateDirectory(klasorYolu);
+                }
+
+                var path = Path.Combine(klasorYolu, uploadedFile.FileName);
+
+                try
+                {
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        uploadedFile.CopyTo(stream);
+                    }
+
+                    ViewBag.Message = "Dosya başarıyla yüklendi!";
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.Message = "Dosya yüklenirken bir hata oluştu: " + ex.Message;
+                }
+            }
+            else
+            {
+                ViewBag.Message = "Dosya yüklenirken bir hata oluştu!";
+            }
+
+            return View("Index");
+        }
+
+
+
+
         public IActionResult TaskDelete(int id)
         {
             TaskComp task = _context.TaskComps.Find(id);
@@ -171,5 +251,7 @@ namespace CrmCorner.Controllers
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
+
+  
     }
 }

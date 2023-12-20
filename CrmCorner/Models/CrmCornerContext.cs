@@ -43,11 +43,15 @@ public partial class CrmcornerContext : DbContext
 
         modelBuilder.Entity<Calendar>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY"); ;
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
             entity.ToTable("Calendar");
+
+            entity.HasIndex(e => e.Id, "Id");
+
+            entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.Date).HasMaxLength(50);
             entity.Property(e => e.Description).HasMaxLength(300);
-            entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.Title).HasMaxLength(200);
         });
 
@@ -64,7 +68,14 @@ public partial class CrmcornerContext : DbContext
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.CompanyEmail).HasMaxLength(255);
             entity.Property(e => e.CompanyName).HasMaxLength(255);
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.IdEmployee).HasColumnType("int(11)");
+            entity.Property(e => e.ModifiedDate)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.StatusId).HasColumnType("int(11)");
 
             entity.HasOne(d => d.IdEmployeeNavigation).WithMany(p => p.Companies)
@@ -86,10 +97,17 @@ public partial class CrmcornerContext : DbContext
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.CompanyId).HasColumnType("int(11)");
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.Email)
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
+            entity.Property(e => e.ModifiedDate)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .UseCollation("utf8mb3_general_ci")
@@ -114,6 +132,9 @@ public partial class CrmcornerContext : DbContext
             entity.Property(e => e.IdDepartment)
                 .HasColumnType("int(11)")
                 .HasColumnName("idDepartment");
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.DepartmentDescription)
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
@@ -122,6 +143,10 @@ public partial class CrmcornerContext : DbContext
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
+            entity.Property(e => e.ModifiedDate)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Employee>(entity =>
@@ -137,6 +162,9 @@ public partial class CrmcornerContext : DbContext
             entity.Property(e => e.IdEmployee)
                 .HasColumnType("int(11)")
                 .HasColumnName("idEmployee");
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.EmployeeEmail)
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
@@ -154,6 +182,10 @@ public partial class CrmcornerContext : DbContext
             entity.Property(e => e.IdPositions)
                 .HasColumnType("int(11)")
                 .HasColumnName("idPositions");
+            entity.Property(e => e.ModifiedDate)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
 
             entity.HasOne(d => d.IdDepartmentNavigation).WithMany(p => p.Employees)
                 .HasForeignKey(d => d.IdDepartment)
@@ -171,6 +203,13 @@ public partial class CrmcornerContext : DbContext
             entity.Property(e => e.IdPositions)
                 .HasColumnType("int(11)")
                 .HasColumnName("idPositions");
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ModifiedDate)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.PositionName)
                 .HasMaxLength(45)
                 .UseCollation("utf8mb3_general_ci")
@@ -212,6 +251,9 @@ public partial class CrmcornerContext : DbContext
             entity.Property(e => e.TaskId)
                 .HasColumnType("int(11)")
                 .HasColumnName("TaskID");
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.CustomerId)
                 .HasColumnType("int(11)")
                 .HasColumnName("customerId");
@@ -219,9 +261,14 @@ public partial class CrmcornerContext : DbContext
             entity.Property(e => e.EmployeeId)
                 .HasColumnType("int(11)")
                 .HasColumnName("employeeId");
+            entity.Property(e => e.ModifiedDate)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("datetime");
             entity.Property(e => e.StatusId)
                 .HasColumnType("int(11)")
                 .HasColumnName("statusId");
+            entity.Property(e => e.TaskCompcol).HasMaxLength(45);
             entity.Property(e => e.Title).HasMaxLength(255);
             entity.Property(e => e.ValueOrOffer).HasPrecision(10, 2);
 

@@ -14,7 +14,9 @@ namespace CrmCorner.Controllers
         }
         public IActionResult CompanyList()
         {
-            var Companys = _context.Companies.Include(e => e.IdEmployeeNavigation)
+            var Companys = _context.Companies
+                .Include(e => e.IdEmployeeNavigation)
+                .Include(e => e.Status)
                                 .ToList();
             return View(Companys);
         }

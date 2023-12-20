@@ -15,6 +15,10 @@ public partial class Company
 
     public int? IdEmployee { get; set; }
 
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
     public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
 
     public virtual Employee? IdEmployeeNavigation { get; set; }

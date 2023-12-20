@@ -19,6 +19,10 @@ public partial class Employee
 
     public int? IdPositions { get; set; }
 
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
     public virtual ICollection<Company> Companies { get; set; } = new List<Company>();
 
     public virtual Department? IdDepartmentNavigation { get; set; }
