@@ -1,6 +1,4 @@
 ﻿@model List<TaskComp>
-
-
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
@@ -22,184 +20,122 @@
 
     <!-- MAIN CSS -->
     <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css">
-    <style>
-        .icons-list div {
-            line-height: 40px;
-            white-space: nowrap;
-            cursor: default;
-            position: relative;
-            z-index: 1;
-        }
 
-            .icons-list div i {
-                display: inline-block;
-                width: 40px;
-                margin: 0;
-                text-align: center;
-                vertical-align: middle;
-                -webkit-transition: font-size 0.2s;
-                -moz-transition: font-size 0.2s;
-                transition: font-size 0.2s;
-            }
-
-            .icons-list div:hover i {
-                font-size: 26px;
-            }
-    </style>
 </head>
 <body>
-    <div id="wrapper">
-        <div id="main-content" class="taskboard">
-            <div class="container-fluid">
 
-                <div class="block-header py-lg-4 py-3">
-                    <div class="row g-3">
-                        <div class="col-md-6 col-sm-12">
-                            <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> TaskBoard</h2>
-                            <ul class="breadcrumb mb-0">
-                                <li class="breadcrumb-item"><a href="index.html">Lucid</a></li>
-                                <li class="breadcrumb-item">Apps</li>
-                                <li class="breadcrumb-item active">TaskBoard</li>
-                            </ul>
+    <div class="block-header py-lg-4 py-3">
+        <div class="row g-3">
+            <div class="col-md-6 col-sm-12">
+                <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> TaskBoard</h2>
+                <ul class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="index.html">Lucid</a></li>
+                    <li class="breadcrumb-item">Apps</li>
+                    <li class="breadcrumb-item active">TaskBoard</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    @{
+        var statusGroups = Model.GroupBy(task => task.Status.StatusName);
+    }
+
+    <div class="row g-3">
+        @foreach (var statusGroup in statusGroups)
+        {
+            <div class="col-lg-4 col-md-12">
+                @{
+                    string statusClass = "";
+                    switch (statusGroup.Key)
+                    {
+                        case "Değerlendirilen":
+                            statusClass = "planned_task";
+                            break;
+                        case "İletişim":
+                            statusClass = "progress_task";
+                            break;
+                        case "Teklif":
+                            statusClass = "completed_task";
+                            break;
+                        case "Demo":
+                            statusClass = "planned_task";
+                            break;
+                        case "Görüşmeler":
+                            statusClass = "progress_task";
+                            break;
+                        default:
+                            statusClass = "";
+                            break;
+                    }
+                }
+                <div class="card mb-4 @statusClass">
+                    <div class="card-header">
+                        <h6 class="card-title">@statusGroup.Key</h6>
+                        <ul class="header-dropdown">
+                            <li>
+                                @if (statusGroup.Key == "Değerlendirilen") //sadece değerlendirilen kısmında ekleme butonu var. diğerlerinde yok. Timeline ı görebilmek için
+                                {
+                                    <a href="/Task/TaskAdd"><i class="fa fa-plus-circle"></i></a>
+                                }
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="dd" data-plugin="nestable">
+                            <ol class="dd-list">
+                                @foreach (var task in statusGroup)
+                                {
+                                    <li class="dd-item" data-id="@task.TaskId">
+                                        <div class="dd-handle">
+                                            <h6>@task.Title</h6>
+                                            <p>
+                                                @if (task.CustomerId != null)
+                                                {
+                                                    <span>@task.Customer.Name @task.Customer.Surname</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger">No Customer</span>
+                                                }
+                                            </p>
+                                            <p>
+                                                @if (task.EmployeeId != null)
+                                                {
+                                                    <span>@task.Employee.EmployeeName @task.Employee.EmployeeSurname</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger">No Employee</span>
+                                                }
+                                            </p>
+                                            <a href="/Task/TaskEdit/@task.TaskId" target="_blank">
+                                                <button type="button" class="btn btn-sm btn-outline">
+                                                    <div class="col-md-3 col-sm-4"><i class="fa fa-file-text-o"></i></div>
+                                                </button>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline" data-taskId="@task.TaskId" onclick="confirmDelete(this)">
+                                                <div class="col-md-3 col-sm-4"> <i class="fa fa-trash-o"></i></div>
+                                            </button>
+                                            <a href="/Task/TaskDetail/@task.TaskId" target="_blank">
+                                                <button type="button" class="btn btn-sm btn-outline">
+                                                    <div class="col-md-3 col-sm-4"> <i class="fa fa-align-left"></i></div>
+                                                </button>
+                                            </a>
+                                        </div>
+                                    </li>
+                                }
+                            </ol>
                         </div>
                     </div>
                 </div>
-
-
-                @{
-                    var statusGroups = Model.GroupBy(task => task.Status.StatusName);
-                }
-
-                <div class="row g-3">
-                    @foreach (var statusGroup in statusGroups)
-                    {
-                        <div class="col-lg-4 col-md-12">
-                            @{
-                                string statusClass = "";
-                                switch (statusGroup.Key)
-                                {
-                                    case "Değerlendirilen":
-                                        statusClass = "planned_task";
-                                        break;
-                                    case "İletişim":
-                                        statusClass = "progress_task";
-                                        break;
-                                    case "Teklif":
-                                        statusClass = "completed_task";
-                                        break;
-                                    case "Demo":
-                                        statusClass = "planned_task";
-                                        break;
-                                    case "Görüşmeler":
-                                        statusClass = "progress_task";
-                                        break;
-                                    default:
-                                        statusClass = ""; 
-                                        break;
-                                }
-                            }
-                            <div class="card mb-4 @statusClass">
-                                <div class="card-header">
-                                    <h6 class="card-title">@statusGroup.Key</h6>
-                                    <ul class="header-dropdown">
-                                        <li><a href="/Task/TaskAdd"><i class="fa fa-plus-circle"></i></a></li>
-                                    </ul>
-                                </div>
-                                <div class="card-body">
-                                    <div class="dd" data-plugin="nestable">
-                                        <ol class="dd-list">
-                                            @foreach (var task in statusGroup)
-                                            {
-                                                <li class="dd-item" data-id="@task.TaskId">
-                                                    <div class="dd-handle">
-                                                        <h6>@task.Title</h6>
-                                                        <p>
-                                                            @if (task.CustomerId != null)
-                                                            {
-                                                                <span>@task.Customer.Name @task.Customer.Surname</span>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span class="text-danger">No Customer</span>
-                                                            }
-                                                        </p>
-                                                        <p>
-                                                            @if (task.EmployeeId != null)
-                                                            {
-                                                                <span>@task.Employee.EmployeeName @task.Employee.EmployeeSurname</span>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span class="text-danger">No Employee</span>
-                                                            }
-                                                        </p>
-                                                        <a href="/Task/TaskEdit/@task.TaskId" target="_blank">
-                                                            <button type="button" class="btn btn-sm btn-outline">
-                                                                <i class="fa fa-align-center"></i>
-                                                            </button>
-                                                        </a>
-                                                        <button type="button" class="btn btn-sm btn-outline" data-taskId="@task.TaskId" onclick="confirmDelete(this)">
-                                                            <i class="fa fa-trash-o"></i>
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                            }
-                                        </ol>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
             </div>
-        </div>
+        }
     </div>
 
-   @* <!-- Add New Task -->
-    <div class="modal fade" id="addcontact" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                 <form id="taskForm" asp-action="TaskAdd" asp-controller="YourController" method="post">
-                <div class="modal-header">
-                    <h6 class="title" id="defaultModalLabel">Add New Task</h6>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-2">
-                            <div class="col-12">
-                                <input asp-for="Title" class="form-control" placeholder="Title">
-                            </div>
-                            <div class="col-12">
-                                <input asp-for="ValueOrOffer" class="form-control" placeholder="Value or Offer">
-                            </div>
-                            <div class="col-12">
-                                <textarea asp-for="Description" class="form-control" placeholder="Description"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <select asp-for="EmployeeId" asp-items="ViewBag.Employee" class="form-select" aria-label="Default select example">
-                                    <option value="">Select Team</option>
-                                </select>
-                            </div>
 
-                            <div class="col-12">
-                                <label class="form-label">Range</label>
-                                <div class="input-daterange input-group" data-provide="datepicker">
-                                    <input asp-for="StartDate" class="form-control" name="StartDate">
-                                    <span class="px-3">to</span>
-                                    <input asp-for="EndDate" class="form-control" name="EndDate">
-                                </div>
-                            </div>
-                        </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary">Add</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CLOSE</button>
-                </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- core js file -->*@
+    <!-- core js file -->
     <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
     <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/plugin/nestable/jquery.nestable.min.js"></script>
 
@@ -236,15 +172,3 @@
 
 </body>
 </html>
-@*<script>
-    $(function () {
-        $('.dd').nestable();
-
-        $('.dd').on('change', function () {
-            var $this = $(this);
-            var serializedData = window.JSON.stringify($($this).nestable('serialize'));
-
-            $this.parents('div.body').find('textarea').val(serializedData);
-        });
-    });
-</script>*@

@@ -1,0 +1,211 @@
+﻿@model CrmCorner.Models.TaskComp
+@{
+    ViewData["Title"] = "TaskDetail";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>:: Lucid HR BS5 :: Timeline</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="icon" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/horizontal/favicon.ico" type="image/x-icon">
+    <!-- VENDOR CSS -->
+    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/dropify/css/dropify.min.css">
+
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css">
+    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/color_skins.css">
+</head>
+
+<body>
+
+    <div class="block-header py-lg-4 py-3">
+        <div class="row g-3">
+            <div class="col-md-6 col-sm-12">
+                <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> Timeline</h2>
+                <ul class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/index.html">Lucid</a></li>
+                    <li class="breadcrumb-item">Pages</li>
+                    <li class="breadcrumb-item active">Timeline</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title">Summary</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="table-light text-dark" scope="col"><i class="fa fa-money"></i></th>
+                                    <th class="table-light text-dark" scope="col"><i class="fa fa-user"></i></th>
+                                    <th class="table-light text-dark" scope="col">  <i class="fa fa-users"></i></th>
+                                    <th class="table-light text-dark" scope="col"><i class="fa fa-calendar"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <input type="hidden" id="taskId" name="taskId" value="@Model.TaskId" />
+                                <tr>
+                                    <td>@Model.ValueOrOffer</td>
+                                    <td>@Model.Employee.EmployeeName</td>
+                                    <td>@Model.Customer.Name</td>
+                                    <td>x</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 col-md-12 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title">Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="table-light text-dark" scope="col"><i class="fa fa-folder"></i></th>
+                                    <th class="table-light text-dark" scope="col"><i class="fa fa-send"></i></th>
+                                    <th class="table-light text-dark" scope="col"><i class="fa fa-calendar"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <form method="post" enctype="multipart/form-data" asp-controller="Task" asp-action="UploadFile">
+                                            <input type="hidden" name="taskId" value="@Model.TaskId" />
+                                            <div class="col-lg-6 col-md-12">
+                                                <div class="card">
+                                                    <div class="header">
+                                                        <h2>Dosya Yükle</h2>
+                                                    </div>
+                                                    <div class="body">
+                                                        <input type="file" name="uploadedFile" class="dropify" data-allowed-file-extensions="pdf png">
+                                                        <button type="submit" class="btn btn-primary">Yükle</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td>@Model.Employee.EmployeeName</td>
+                                    <td>@Model.Customer.Name</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="timeline-item faster green">
+                        <span class="date">20-04-2021 - Today</span>
+                        <h5>Hello, 'Im a single div responsive timeline without media Queries!</h5>
+                        <span><a href="javascript:void(0);">Elisse Joson</a> San Francisco, CA</span>
+                        <div class="msg">
+                            <p>
+                                I'm speaking with myself, number one, because I have a very good brain
+                                and I've said a lot of things. I write the best placeholder text, and
+                                I'm the biggest developer on the web card she has is the Lorem card.
+                            </p>
+                            <a href="javascript:void(0);" class="me-3"><i class="icon-heart"></i> Like</a>
+                            <a role="button" data-bs-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i class="fa fa-comments"></i> Comment</a>
+                            <div class="collapse " id="collapseExample">
+                                <form class="well">
+                                    <div class="mb-3">
+                                        <textarea rows="2" class="form-control no-resize" placeholder="Enter here for tweet..."></textarea>
+                                    </div>
+                                    <button class="btn btn-primary">Submit</button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="timeline-item blue">
+                        <span class="date">19-04-2021 - Yesterday</span>
+                        <h5>Oeehhh, that's awesome.. Me too!</h5>
+                        <span><a href="javascript:void(0);" title="">Katherine Lumaad</a> Oakland, CA</span>
+                        <div class="msg">
+                            <p>
+                                I'm speaking with myself, number one, because I have a very good brain
+                                and I've said a lot of things. on the web by far... While that's
+                                mock-ups and this is politics, are they really so different? I think the
+                                only card she has is the Lorem card.
+                            </p>
+                            <div class="timeline_img mb-3">
+                                <img class="avatar sm" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/blog/blog-page-4.jpg" alt="Awesome Image">
+                                <img class="avatar sm" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/blog/blog-page-2.jpg" alt="Awesome Image">
+                            </div>
+                            <a href="javascript:void(0);" class="me-3"><i class="icon-heart"></i> Like</a>
+                            <a role="button" data-bs-toggle="collapse" href="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1"><i class="fa fa-comments"></i> Comment</a>
+                            <div class="collapse " id="collapseExample1">
+                                <form class="well">
+                                    <div class="mb-3">
+                                        <textarea rows="2" class="form-control no-resize" placeholder="Enter here for tweet..."></textarea>
+                                    </div>
+                                    <button class="btn btn-primary">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item warning">
+                        <span class="date">21-02-2021</span>
+                        <h5>An Engineer Explains Why You Should Always Order the Larger Pizza</h5>
+                        <span><a href="javascript:void(0);" title="">Gary Camara</a> San Francisco, CA</span>
+                        <div class="msg">
+                            <p>
+                                I'm speaking with myself, number one, because I have a very good brain
+                                and I've said a lot of things. I write the best placeholder text, and
+                                I'm the biggest developer on the web by far... While that's mock-ups and
+                                this is politics, is the Lorem card.
+                            </p>
+                            <a href="javascript:void(0);" class="me-3"><i class="icon-heart"></i> Like</a>
+                            <a role="button" data-bs-toggle="collapse" href="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2"><i class="fa fa-comments"></i> Comment</a>
+                            <div class="collapse " id="collapseExample2">
+                                <form class="well">
+                                    <div class="mb-3">
+                                        <textarea rows="2" class="form-control no-resize" placeholder="Enter here for tweet..."></textarea>
+                                    </div>
+                                    <button class="btn btn-primary">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- core js file -->
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+    <!-- page js file -->
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/vendorscripts.bundle.js"></script>
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/dropify/js/dropify.min.js"></script>
+    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/js/pages/forms/dropify.js"></script>
+
+</body>
+</html>

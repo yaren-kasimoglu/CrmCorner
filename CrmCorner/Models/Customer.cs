@@ -17,6 +17,10 @@ public partial class Customer
 
     public string PhoneNumber { get; set; } = null!;
 
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
     public virtual Company? Company { get; set; }
 
     public virtual ICollection<TaskComp> TaskComps { get; set; } = new List<TaskComp>();

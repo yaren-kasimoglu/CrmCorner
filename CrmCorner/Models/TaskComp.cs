@@ -19,6 +19,12 @@ public partial class TaskComp
 
     public string? Description { get; set; }
 
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
+    public string? TaskCompcol { get; set; }
+
     public virtual Customer? Customer { get; set; }
 
     public virtual Employee? Employee { get; set; }
