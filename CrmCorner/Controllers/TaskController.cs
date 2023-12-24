@@ -160,8 +160,6 @@ namespace CrmCorner.Controllers
 
         public IActionResult TaskDetail(int id)
         {
-
-
             var employee = _context.Employees.ToList();
             var customer = _context.Customers.Include(c => c.Company).ToList();
             var status = _context.Statuses.ToList();
@@ -236,10 +234,6 @@ namespace CrmCorner.Controllers
 
             return View("Index");
         }
-
-
-
-
         public IActionResult TaskDelete(int id)
         {
             TaskComp task = _context.TaskComps.Find(id);
