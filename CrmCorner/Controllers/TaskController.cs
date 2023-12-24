@@ -160,6 +160,8 @@ namespace CrmCorner.Controllers
 
         public IActionResult TaskDetail(int id)
         {
+
+
             var employee = _context.Employees.ToList();
             var customer = _context.Customers.Include(c => c.Company).ToList();
             var status = _context.Statuses.ToList();
