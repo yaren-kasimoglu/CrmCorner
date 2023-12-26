@@ -91,7 +91,7 @@
                                 <tr>
                                     <td>
                                         <form method="post" enctype="multipart/form-data" asp-controller="Task" asp-action="UploadFile">
-                                            <input type="hidden" name="taskId" value="@Model.TaskId" />
+                                            <input type="hidden" name="taskId" value="@(Model.TaskId)" />
                                             <div class="col-lg-6 col-md-12">
                                                 <div class="card">
                                                     <div class="header">
@@ -104,6 +104,19 @@
                                                 </div>
                                             </div>
                                         </form>
+                                        <div>
+                                            <h4>Yüklenen Dosyalar</h4>
+                                            <ul>
+                                                @if (Model.UploadedFile != null && Model.UploadedFile.Length > 0)
+                                                {
+                                                    <li>
+                                                        @Model.UploadedFileName
+                                                        <a href="@Url.Action("DownloadFile", "Task", new { taskId = Model.TaskId })">İndir</a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+
                                     </td>
                                     <td>@Model.Employee.EmployeeName</td>
                                     <td>@Model.Customer.Name</td>

@@ -29,5 +29,7 @@ public partial class Employee
 
     public virtual Position? IdPositionsNavigation { get; set; }
 
+    public virtual ICollection<TaskCompLog> TaskCompLogs { get; set; } = new List<TaskCompLog>();
+
     public virtual ICollection<TaskComp> TaskComps { get; set; } = new List<TaskComp>();
 }

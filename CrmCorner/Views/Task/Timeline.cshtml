@@ -1,0 +1,34 @@
+﻿@model List<TaskCompLog>
+@{
+    ViewData["Title"] = "Timeline";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Timeline</h2>
+            <ul class="timeline">
+                @foreach (var log in Model)
+                {
+                    <li>
+                        <div class="timeline-badge primary"><i class="glyphicon glyphicon-record" rel="tooltip"></i></div>
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4 class="timeline-title">Field: @log.UpdatedField</h4>
+                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>
+                            </div>
+                            <div class="timeline-body">
+                                <p>Task ID: @log.TaskId</p>
+                                <p>Old Value: @log.OldValue</p>
+                                <p>New Value: @log.NewValue</p>
+                                <p>Updated By: @log.UpdatedByNavigation?.EmployeeName</p>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+

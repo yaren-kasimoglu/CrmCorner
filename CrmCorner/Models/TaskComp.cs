@@ -25,9 +25,15 @@ public partial class TaskComp
 
     public string? TaskCompcol { get; set; }
 
+    public byte[]? UploadedFile { get; set; }
+
+    public string? UploadedFileName { get; set; }
+
     public virtual Customer? Customer { get; set; }
 
     public virtual Employee? Employee { get; set; }
 
     public virtual Status? Status { get; set; }
+
+    public virtual ICollection<TaskCompLog> TaskCompLogs { get; set; } = new List<TaskCompLog>();
 }

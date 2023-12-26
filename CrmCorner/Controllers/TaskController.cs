@@ -61,6 +61,7 @@ namespace CrmCorner.Controllers
         {
             if (ModelState.IsValid)
             {
+                task.CreatedDate = DateTime.Now;
                 if (task.EmployeeId != 0 || task.CustomerId != 0 || task.StatusId != 0)
                 {
                     // (Eager Loading) kullanarak Department'ı yükle
@@ -146,6 +147,13 @@ namespace CrmCorner.Controllers
         {
             if (ModelState.IsValid)
             {
+                editedTask.ModifiedDate = DateTime.Now;
+
+                var originalTask = _context.TaskComps.AsNoTracking().FirstOrDefault(t => t.TaskId == editedTask.TaskId);
+
+                // Değişiklikleri kontrol et ve log tablosuna kaydet
+                LogChanges(originalTask, editedTask);
+
                 // Çalışanı güncelle
                 _context.TaskComps.Update(editedTask);
                 _context.SaveChanges();
@@ -157,6 +165,64 @@ namespace CrmCorner.Controllers
                 return View("ErrorView", editedTask);
             }
         }
+
+        private void LogChanges(TaskComp originalTask, TaskComp editedTask)
+        {
+            foreach (var property in typeof(TaskComp).GetProperties())
+            {
+                var originalValue = property.GetValue(originalTask);
+                var editedValue = property.GetValue(editedTask);
+
+                if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
+                {
+                    TaskCompLog log = new TaskCompLog
+                    {
+                        TaskId = editedTask.TaskId,
+                        UpdatedField = property.Name,
+                        OldValue = originalValue.ToString(),
+                        NewValue = editedValue.ToString(),
+                        UpdatedBy = editedTask.Employee?.IdEmployee, // ? işaretini kullandım, böylece null check yapılır.
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    _context.TaskCompLogs.Add(log);
+                }
+            }
+            _context.SaveChanges();
+        }
+
+        public IActionResult TaskCompLog()
+        {
+            var logs = _context.TaskCompLogs.ToList();
+            return View(logs);
+        }
+
+        public IActionResult Timeline()
+        {
+            var taskCompLogs = _context.TaskCompLogs
+                .Include(t => t.Task)
+                .Include(e => e.UpdatedByNavigation)
+                .ToList();
+
+            return View(taskCompLogs);
+        }
+
+        //public IActionResult TaskEdit(TaskComp editedTask)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        editedTask.ModifiedDate = DateTime.Now;
+        //        // Çalışanı güncelle
+        //        _context.TaskComps.Update(editedTask);
+        //        _context.SaveChanges();
+
+        //        return RedirectToAction("Index");
+        //    }
+        //    else
+        //    {
+        //        return View("ErrorView", editedTask);
+        //    }
+        //}
 
         public IActionResult TaskDetail(int id)
         {
@@ -200,27 +266,31 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public IActionResult UploadFile(IFormFile uploadedFile)
+        public async Task<IActionResult> UploadFile(int taskId, IFormFile uploadedFile)
         {
             if (uploadedFile != null && uploadedFile.Length > 0)
             {
-                string klasorYolu = Path.Combine(Directory.GetCurrentDirectory(), "dosya_klasoru");
-
-                if (!Directory.Exists(klasorYolu))
-                {
-                    Directory.CreateDirectory(klasorYolu);
-                }
-
-                var path = Path.Combine(klasorYolu, uploadedFile.FileName);
-
                 try
                 {
-                    using (var stream = new FileStream(path, FileMode.Create))
+                    using (MemoryStream memoryStream = new MemoryStream())
                     {
-                        uploadedFile.CopyTo(stream);
-                    }
+                        await uploadedFile.CopyToAsync(memoryStream);
+                        byte[] fileBytes = memoryStream.ToArray();
 
-                    ViewBag.Message = "Dosya başarıyla yüklendi!";
+                        TaskComp task = await _context.TaskComps.FindAsync(taskId);
+
+                        if (task != null)
+                        {
+                           task.UploadedFileName = uploadedFile.FileName;
+                            task.UploadedFile = fileBytes;
+                            await _context.SaveChangesAsync();
+                            ViewBag.Message = "Dosya başarıyla yüklendi ve kaydedildi!";
+                        }
+                        else
+                        {
+                            ViewBag.Message = "Belirtilen görev bulunamadı!";
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -229,11 +299,29 @@ namespace CrmCorner.Controllers
             }
             else
             {
-                ViewBag.Message = "Dosya yüklenirken bir hata oluştu!";
+                ViewBag.Message = "Dosya yüklenemedi veya dosya boş!";
             }
 
-            return View("Index");
+            // İlgili view'i döndürürken ViewBag.Message'i kullanabilirsiniz
+            return RedirectToAction("TaskDetail", new { id = taskId });
         }
+
+        public IActionResult DownloadFile(int taskId)
+        {
+            var task = _context.TaskComps.FirstOrDefault(t => t.TaskId == taskId);
+
+            if (task != null && task.UploadedFile != null)
+            {
+                // Örneğin, bir dosya adı belirtmek için dosyanın MIME türünü kullanabilirsiniz.
+                var contentType = "application/octet-stream";
+                var fileName = task.UploadedFileName;
+
+                return File(task.UploadedFile, contentType, fileName);
+            }
+
+            return NotFound(); // Dosya bulunamazsa NotFound döndür
+        }
+
         public IActionResult TaskDelete(int id)
         {
             TaskComp task = _context.TaskComps.Find(id);
@@ -248,6 +336,6 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Index");
         }
 
-  
+
     }
 }
