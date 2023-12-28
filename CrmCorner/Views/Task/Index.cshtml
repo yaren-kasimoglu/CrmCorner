@@ -36,11 +36,20 @@
             </div>
         </div>
     </div>
-
-
     @{
-        var statusGroups = Model.GroupBy(task => task.Status.StatusName);
+        // Null olmayan ve istenen alanda null olmayan verileri filtreleme
+        var validTasks = Model.Where(task => task.Status != null && task.Status.StatusName != null);
+
+        // GroupBy işlemi için verilerin kontrol edilmiş hali
+        var statusGroups = validTasks.GroupBy(task => task.Status.StatusName);
     }
+
+    @*@{
+       // var statusGroups = Model.GroupBy(task => task.Status.StatusName);
+
+        var tasksWithNonNullStatus = Model.Where(task => task.Status != null && !string.IsNullOrEmpty(task.Status.StatusName));
+        var statusGroups = tasksWithNonNullStatus.GroupBy(task => task.Status.StatusName);
+    }*@
 
     <div class="row g-3">
         @foreach (var statusGroup in statusGroups)
