@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace CrmCorner.Controllers
 {
@@ -151,6 +152,8 @@ namespace CrmCorner.Controllers
 
                 var originalTask = _context.TaskComps.AsNoTracking().FirstOrDefault(t => t.TaskId == editedTask.TaskId);
 
+                editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
+
                 // Değişiklikleri kontrol et ve log tablosuna kaydet
                 LogChanges(originalTask, editedTask);
 
@@ -199,30 +202,28 @@ namespace CrmCorner.Controllers
 
         public IActionResult Timeline()
         {
-            var taskCompLogs = _context.TaskCompLogs
-                .Include(t => t.Task)
-                .Include(e => e.UpdatedByNavigation)
+            var tasks = _context.TaskComps
+                .Include(t => t.TaskCompLogs)
                 .ToList();
 
-            return View(taskCompLogs);
+            return View(tasks);
         }
 
-        //public IActionResult TaskEdit(TaskComp editedTask)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        editedTask.ModifiedDate = DateTime.Now;
-        //        // Çalışanı güncelle
-        //        _context.TaskComps.Update(editedTask);
-        //        _context.SaveChanges();
 
-        //        return RedirectToAction("Index");
-        //    }
-        //    else
-        //    {
-        //        return View("ErrorView", editedTask);
-        //    }
-        //}
+        public IActionResult GetTaskTimeline(int taskId)
+        {
+            // TaskComps tablosundan taskId'ye göre ilgili görevi çek
+            var task = _context.TaskComps
+                            .Include(t => t.TaskCompLogs)
+                            .FirstOrDefault(t => t.TaskId == taskId);
+
+            if (task != null)
+            {
+                return Json(task.TaskCompLogs);
+            }
+
+            return Json(null);
+        }
 
         public IActionResult TaskDetail(int id)
         {
@@ -257,7 +258,9 @@ namespace CrmCorner.Controllers
             ViewBag.Customer = customerItems;
             ViewBag.Status = statusItems;
 
-            TaskComp task = _context.TaskComps.Find(id);
+            TaskComp task = _context.TaskComps
+                .Include(t => t.TaskCompLogs) // TaskCompLogs verilerini yükle
+                .FirstOrDefault(t => t.TaskId == id);
             if (task == null)
             {
                 return NotFound();
@@ -281,8 +284,30 @@ namespace CrmCorner.Controllers
 
                         if (task != null)
                         {
-                           task.UploadedFileName = uploadedFile.FileName;
-                            task.UploadedFile = fileBytes;
+                            // Mevcut dosyaları al
+                            string existingFileNames = task.UploadedFileName ?? "";
+                            byte[] existingFiles = task.UploadedFile;
+
+                            // Yeni dosya adını ve içeriğini alınan dosyalara ekle
+                            existingFileNames += (string.IsNullOrEmpty(existingFileNames) ? "" : ",") + uploadedFile.FileName;
+
+                            if (existingFiles == null)
+                            {
+                                // İlk dosya yükleniyorsa yeni bir byte[] oluştur
+                                task.UploadedFile = fileBytes;
+                            }
+                            else
+                            {
+                                // Varolan byte[]'ın sonuna yeni dosya içeriğini ekleyin
+                                byte[] combinedFiles = new byte[existingFiles.Length + fileBytes.Length];
+                                Array.Copy(existingFiles, combinedFiles, existingFiles.Length);
+                                Array.Copy(fileBytes, 0, combinedFiles, existingFiles.Length, fileBytes.Length);
+                                task.UploadedFile = combinedFiles;
+                            }
+
+                            // Yeni değerleri kaydet
+                            task.UploadedFileName = existingFileNames;
+
                             await _context.SaveChangesAsync();
                             ViewBag.Message = "Dosya başarıyla yüklendi ve kaydedildi!";
                         }
@@ -306,21 +331,92 @@ namespace CrmCorner.Controllers
             return RedirectToAction("TaskDetail", new { id = taskId });
         }
 
-        public IActionResult DownloadFile(int taskId)
+
+        public async Task<IActionResult> DownloadFile(int taskId, string fileName)
         {
-            var task = _context.TaskComps.FirstOrDefault(t => t.TaskId == taskId);
+            TaskComp task = await _context.TaskComps.FindAsync(taskId);
 
-            if (task != null && task.UploadedFile != null)
+            if (task != null && !string.IsNullOrEmpty(fileName))
             {
-                // Örneğin, bir dosya adı belirtmek için dosyanın MIME türünü kullanabilirsiniz.
-                var contentType = "application/octet-stream";
-                var fileName = task.UploadedFileName;
+                string[] fileNames = task.UploadedFileName?.Split(',');
+                byte[] files = task.UploadedFile;
 
-                return File(task.UploadedFile, contentType, fileName);
+                if (fileNames != null && files != null)
+                {
+                    int index = Array.IndexOf(fileNames, fileName);
+
+                    if (index >= 0 && index < fileNames.Length)
+                    {
+                        byte[] fileContent = files; // Tüm dosya içeriğini almak için böyle bir yaklaşım kullanabilirsiniz
+
+                        return File(fileContent, "application/octet-stream", fileName);
+                    }
+                }
             }
 
-            return NotFound(); // Dosya bulunamazsa NotFound döndür
+            return NotFound(); // Dosya bulunamadıysa 404 Not Found döndür
         }
+
+        private byte[] GetFileContentAtIndex1(byte[] files, int index)
+        {
+            if (files != null && index >= 0 && index < files.Length)
+            {
+                // İlgili indeksteki dosya içeriğini döndür
+                byte[] fileContent = new byte[files.Length - index];
+                Array.Copy(files, index, fileContent, 0, files.Length - index);
+                return fileContent;
+            }
+
+            return null;
+        }
+
+        public async Task<IActionResult> DeleteFile(int taskId, string fileName)
+        {
+            TaskComp task = await _context.TaskComps.FindAsync(taskId);
+
+            if (task != null && !string.IsNullOrEmpty(fileName))
+            {
+                string[] fileNames = task.UploadedFileName?.Split(',');
+                byte[] files = task.UploadedFile;
+
+                if (fileNames != null && files != null)
+                {
+                    int index = Array.IndexOf(fileNames, fileName);
+
+                    if (index >= 0 && index < fileNames.Length)
+                    {
+                        // İlgili dosyanın adını listeden çıkar
+                        List<string> fileList = new List<string>(fileNames);
+                        fileList.RemoveAt(index);
+                        fileNames = fileList.ToArray();
+
+                        // Dosya listesinden çıkarılan dosyanın indeksine karşılık gelen blobu da kaldır
+                        List<byte> fileBlob = new List<byte>(files);
+                        fileBlob.RemoveRange(index * sizeof(byte), sizeof(byte));
+                        files = fileBlob.ToArray();
+
+                        // Veritabanına güncellenmiş dosya listesi ve blob'u kaydet
+                        task.UploadedFileName = string.Join(",", fileNames);
+                        task.UploadedFile = files;
+
+                        await _context.SaveChangesAsync();
+
+                        ViewBag.Message = "Dosya başarıyla silindi!";
+                    }
+                    else
+                    {
+                        ViewBag.Message = "Dosya bulunamadı!";
+                    }
+                }
+            }
+            else
+            {
+                ViewBag.Message = "Belirtilen görev veya dosya bulunamadı!";
+            }
+
+            return RedirectToAction("TaskDetail", new { id = taskId });
+        }
+
 
         public IActionResult TaskDelete(int id)
         {

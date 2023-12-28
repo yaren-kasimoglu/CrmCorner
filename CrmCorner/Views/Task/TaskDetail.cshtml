@@ -83,6 +83,7 @@
                             <thead>
                                 <tr>
                                     <th class="table-light text-dark" scope="col"><i class="fa fa-folder"></i></th>
+                                    <th class="table-light text-dark" scope="col"><i class="fa fa-folder"></i></th>
                                     <th class="table-light text-dark" scope="col"><i class="fa fa-send"></i></th>
                                     <th class="table-light text-dark" scope="col"><i class="fa fa-calendar"></i></th>
                                 </tr>
@@ -95,31 +96,55 @@
                                             <div class="col-lg-6 col-md-12">
                                                 <div class="card">
                                                     <div class="header">
-                                                        <h2>Dosya Yükle</h2>
+                                                        <h6>Dosya Yükle</h6>
                                                     </div>
                                                     <div class="body">
                                                         <input type="file" name="uploadedFile" class="dropify" data-allowed-file-extensions="pdf png">
+                                                    </div>
+                                                    <br />
+                                                    <div class="body">
                                                         <button type="submit" class="btn btn-primary">Yükle</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </form>
-                                        <div>
-                                            <h4>Yüklenen Dosyalar</h4>
+
+                                    </td>
+                                    <td>
+                                        <div class="card">
+                                            <h6>Yüklenen Dosyalar</h6>
                                             <ul>
-                                                @if (Model.UploadedFile != null && Model.UploadedFile.Length > 0)
+                                                @if (!string.IsNullOrEmpty(Model.UploadedFileName))
                                                 {
-                                                    <li>
-                                                        @Model.UploadedFileName
-                                                        <a href="@Url.Action("DownloadFile", "Task", new { taskId = Model.TaskId })">İndir</a>
-                                                    </li>
+                                                    string[] fileNames = Model.UploadedFileName.Split(',');
+
+                                                    for (int i = 0; i < fileNames.Length; i++)
+                                                    {
+                                                        string fileName = fileNames[i];
+                                                        <li>
+                                                            @fileName
+                                                            <div class="row g-3">
+                                                                <br />
+                                                                <div class="col-lg-6">
+                                                                    <a href="@Url.Action("DownloadFile", "Task", new { taskId = Model.TaskId, fileName = fileName })" class="btn btn-primary">İndir</a>
+                                                                </div>
+                                                                <div class="col-lg-6">
+                                                                    <form method="post" asp-controller="Task" asp-action="DeleteFile">
+                                                                        <input type="hidden" name="taskId" value="@Model.TaskId" />
+                                                                        <input type="hidden" name="fileName" value="@fileName" />
+                                                                        <button type="submit" class="btn btn-danger">Sil</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    }
                                                 }
                                             </ul>
                                         </div>
 
                                     </td>
-                                    <td>@Model.Employee.EmployeeName</td>
-                                    <td>@Model.Customer.Name</td>
+                                    <td>@Model.Employee.EmployeeName--send email butonu</td>
+                                    <td>@Model.Customer.Name -- takvim göm???</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -128,88 +153,65 @@
             </div>
         </div>
     </div>
+
+
     <div class="row clearfix">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
-                    <div class="timeline-item faster green">
-                        <span class="date">20-04-2021 - Today</span>
-                        <h5>Hello, 'Im a single div responsive timeline without media Queries!</h5>
-                        <span><a href="javascript:void(0);">Elisse Joson</a> San Francisco, CA</span>
-                        <div class="msg">
-                            <p>
-                                I'm speaking with myself, number one, because I have a very good brain
-                                and I've said a lot of things. I write the best placeholder text, and
-                                I'm the biggest developer on the web card she has is the Lorem card.
-                            </p>
-                            <a href="javascript:void(0);" class="me-3"><i class="icon-heart"></i> Like</a>
-                            <a role="button" data-bs-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i class="fa fa-comments"></i> Comment</a>
-                            <div class="collapse " id="collapseExample">
-                                <form class="well">
-                                    <div class="mb-3">
-                                        <textarea rows="2" class="form-control no-resize" placeholder="Enter here for tweet..."></textarea>
-                                    </div>
-                                    <button class="btn btn-primary">Submit</button>
-                                </form>
-                            </div>
 
-                        </div>
-                    </div>
-                    <div class="timeline-item blue">
-                        <span class="date">19-04-2021 - Yesterday</span>
-                        <h5>Oeehhh, that's awesome.. Me too!</h5>
-                        <span><a href="javascript:void(0);" title="">Katherine Lumaad</a> Oakland, CA</span>
-                        <div class="msg">
-                            <p>
-                                I'm speaking with myself, number one, because I have a very good brain
-                                and I've said a lot of things. on the web by far... While that's
-                                mock-ups and this is politics, are they really so different? I think the
-                                only card she has is the Lorem card.
-                            </p>
-                            <div class="timeline_img mb-3">
-                                <img class="avatar sm" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/blog/blog-page-4.jpg" alt="Awesome Image">
-                                <img class="avatar sm" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/blog/blog-page-2.jpg" alt="Awesome Image">
-                            </div>
-                            <a href="javascript:void(0);" class="me-3"><i class="icon-heart"></i> Like</a>
-                            <a role="button" data-bs-toggle="collapse" href="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1"><i class="fa fa-comments"></i> Comment</a>
-                            <div class="collapse " id="collapseExample1">
-                                <form class="well">
-                                    <div class="mb-3">
-                                        <textarea rows="2" class="form-control no-resize" placeholder="Enter here for tweet..."></textarea>
+                    @if (Model.TaskCompLogs != null && Model.TaskCompLogs.Any())
+                    {
+                        
+                    @foreach (var log in Model.TaskCompLogs)
+                    {
+                            var count = Model.TaskCompLogs.Count();
+                            var remainder = log.LogId % 3;
+                            var timelineClass = "";
+
+                            switch (remainder)
+                            {
+                                case 0:
+                                    timelineClass = "timeline-item warning";
+                                    break;
+                                case 1:
+                                    timelineClass = "timeline-item faster green";
+                                    break;
+                                case 2:
+                                    timelineClass = "timeline-item blue";
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                        if (log.UpdatedField != "TaskCompLogs" && log.UpdatedField != "ModifiedDate")
+                        {
+                                <div class="@timelineClass">
+                                <div class="timeline-badge primary"><i class="glyphicon glyphicon-record" rel="tooltip"></i></div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                            <h5>
+                                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>
+                                            </h5>
+                                        <h6 class="timeline-title">@log.UpdatedField</h6>    
                                     </div>
-                                    <button class="btn btn-primary">Submit</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timeline-item warning">
-                        <span class="date">21-02-2021</span>
-                        <h5>An Engineer Explains Why You Should Always Order the Larger Pizza</h5>
-                        <span><a href="javascript:void(0);" title="">Gary Camara</a> San Francisco, CA</span>
-                        <div class="msg">
-                            <p>
-                                I'm speaking with myself, number one, because I have a very good brain
-                                and I've said a lot of things. I write the best placeholder text, and
-                                I'm the biggest developer on the web by far... While that's mock-ups and
-                                this is politics, is the Lorem card.
-                            </p>
-                            <a href="javascript:void(0);" class="me-3"><i class="icon-heart"></i> Like</a>
-                            <a role="button" data-bs-toggle="collapse" href="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2"><i class="fa fa-comments"></i> Comment</a>
-                            <div class="collapse " id="collapseExample2">
-                                <form class="well">
-                                    <div class="mb-3">
-                                        <textarea rows="2" class="form-control no-resize" placeholder="Enter here for tweet..."></textarea>
+                                    <div class="timeline-body">
+                                        <p>@log.OldValue <i class="fa fa-long-arrow-right"></i> @log.NewValue</p>
+                                        <p>Edited By: @log.UpdatedByNavigation?.EmployeeName</p>
                                     </div>
-                                    <button class="btn btn-primary">Submit</button>
-                                </form>
                             </div>
-                        </div>
-                    </div>
+                            </div>
+                        }
+                    }
+                    }
+                    else
+                    {
+                        <p>TaskCompLogs içinde veri bulunamadı veya döngüye giriş yapılmadı.</p>
+                    }
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- core js file -->
     <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>

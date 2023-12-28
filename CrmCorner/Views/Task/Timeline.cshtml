@@ -1,34 +1,115 @@
-﻿@model List<TaskCompLog>
+﻿@*@model List<CrmCorner.Models.TaskComp>
+
 @{
     ViewData["Title"] = "Timeline";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h2>Timeline</h2>
-            <ul class="timeline">
-                @foreach (var log in Model)
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                @foreach (var task in Model)
                 {
-                    <li>
-                        <div class="timeline-badge primary"><i class="glyphicon glyphicon-record" rel="tooltip"></i></div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4 class="timeline-title">Field: @log.UpdatedField</h4>
-                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>
-                            </div>
-                            <div class="timeline-body">
-                                <p>Task ID: @log.TaskId</p>
-                                <p>Old Value: @log.OldValue</p>
-                                <p>New Value: @log.NewValue</p>
-                                <p>Updated By: @log.UpdatedByNavigation?.EmployeeName</p>
-                            </div>
-                        </div>
-                    </li>
+                    var remainder = task.TaskId % 3;
+                    var timelineClass = "";
+
+                    switch (remainder)
+                    {
+                        case 0:
+                            timelineClass = "timeline-item warning";
+                            break;
+                        case 1:
+                            timelineClass = "timeline-item faster green";
+                            break;
+                        case 2:
+                            timelineClass = "timeline-item blue";
+                            break;
+                        default:
+                            break;
+                    }
+                    <div class="@timelineClass">
+                        <h2>Task: @task.Title</h2>
+                        <ul class="timeline">
+                            @foreach (var log in task.TaskCompLogs)
+                            {
+                                if (log.UpdatedField != "TaskCompLogs" && log.UpdatedField != "ModifiedDate")
+                                {
+
+                                    <li>
+                                        <div class="timeline-badge primary"><i class="glyphicon glyphicon-record" rel="tooltip"></i></div>
+                                        <div class="timeline-panel">
+                                            <div class="timeline-heading">
+                                                <h6 class="timeline-title">@log.UpdatedField</h6>
+                                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>
+                                            </div>
+                                            <div class="timeline-body">
+                                                <p>@log.OldValue  <i class="fa fa-long-arrow-right"></i>  @log.NewValue</p>
+                                                <p>Edited By: @log.UpdatedByNavigation?.EmployeeName</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
                 }
-            </ul>
+            </div>
+        </div>
+    </div>
+</div>*@
+@model List<CrmCorner.Models.TaskComp>
+
+@{
+    ViewData["Title"] = "Timeline";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                @foreach (var task in Model)
+                {
+                            <!-- Her bir görevin başlık bilgisini yalnızca bir kez göstermek için döngü dışında yer alan başlık bilgisi -->
+                            <h2>Task: @task.Title</h2>
+
+                    var logCount = task.TaskCompLogs.Count;
+                    var logIndex = 0;
+
+                    foreach (var log in task.TaskCompLogs)
+                    {
+                        // Gerekli koşulların kontrolü
+                        if (log.UpdatedField != "TaskCompLogs" && log.UpdatedField != "ModifiedDate")
+                        {
+                            // Timeline renklerinin tanımlanması
+                            var colors = new[] { "timeline-item warning", "timeline-item faster green", "timeline-item blue" };
+                            var logClass = colors[logIndex % colors.Length];
+
+                                                    <!-- Her bir log için timeline öğesi -->
+                                                    <div class="@logClass">
+                                                        <ul class="timeline">
+                                                            <li>
+                                                                <div class="timeline-badge primary"><i class="glyphicon glyphicon-record" rel="tooltip"></i></div>
+                                                                <div class="timeline-panel">
+                                                                    <div class="timeline-heading">
+                                                                        <h6 class="timeline-title">@log.UpdatedField</h6>
+                                                                        <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>
+                                                                    </div>
+                                                                    <div class="timeline-body">
+                                                                        <p>@log.OldValue  <i class="fa fa-long-arrow-right"></i>  @log.NewValue</p>
+                                                                        <p>Edited By: @log.UpdatedByNavigation?.EmployeeName</p>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+
+                            logIndex++;
+                        }
+                    }
+                }
+            </div>
         </div>
     </div>
 </div>
-

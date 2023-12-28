@@ -30,26 +30,28 @@
         <textarea asp-for="Description" class="form-control" rows="5" cols="30" required></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
+
     <div class="row g-3">
-        <div class="col-lg-3 col-md-6">
+  
+        <div class="col-lg-4  col-md-6">
             <label class="form-label">Customer</label>
             <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select select2" aria-label="Default select example"></select>
             <span asp-validation-for="CustomerId" class="text-danger"></span>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
             <label class="form-label">Responsible</label>
             <select asp-for="EmployeeId" asp-items="ViewBag.Employee" class="form-select select2" aria-label="Default select example"></select>
             <span asp-validation-for="EmployeeId" class="text-danger"></span>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
             <label class="form-label">Status</label>
             <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example"></select>
             <span asp-validation-for="StatusId" class="text-danger"></span>
         </div>
+
     </div>
-    </br>
+    <br />
     <div class="form-group">
         <input type="submit" value="Update" class="btn btn-primary" />
     </div>
 </form>
-
