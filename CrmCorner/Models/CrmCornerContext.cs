@@ -31,6 +31,8 @@ public partial class CrmcornerContext : DbContext
 
     public virtual DbSet<TaskComp> TaskComps { get; set; }
 
+    //public virtual DbSet<ChatHistory> ChatHistories { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
@@ -284,8 +286,25 @@ public partial class CrmcornerContext : DbContext
                 .HasForeignKey(d => d.StatusId)
                 .HasConstraintName("TaskComp_ibfk_1");
         });
+        //modelBuilder.Entity<ChatHistory>(entity =>
+        //{
+        //    entity.HasKey(e => e.Id).HasName("PRIMARY");
 
+        //    entity.ToTable("ChatHistory");
+
+        //    entity.HasIndex(e => e.Id, "Id");
+
+        //    entity.Property(e => e.Id).HasColumnType("int(11)");
+        //    //entity.Property(e => e.Date).HasMaxLength(50);
+        //    //entity.Property(e => e.Description).HasMaxLength(300);
+        //    //entity.Property(e => e.Title).HasMaxLength(200);
+        //});
         OnModelCreatingPartial(modelBuilder);
+    }
+
+    public Task InsertOneAsync(ChatHistory chatHistory)
+    {
+        throw new NotImplementedException();
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
