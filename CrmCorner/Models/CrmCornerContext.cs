@@ -31,11 +31,29 @@ public partial class CrmcornerContext : DbContext
 
     public virtual DbSet<TaskComp> TaskComps { get; set; }
 
-    //public virtual DbSet<ChatHistory> ChatHistories { get; set; }
+    public virtual DbSet<TaskCompLog> TaskCompLogs { get; set; }
+
+    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+    //        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var connectionString = configuration.GetConnectionString("CrmConnection");
+
+            optionsBuilder.UseMySql(connectionString,
+                Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
+        }
+    }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -272,6 +290,8 @@ public partial class CrmcornerContext : DbContext
                 .HasColumnName("statusId");
             entity.Property(e => e.TaskCompcol).HasMaxLength(45);
             entity.Property(e => e.Title).HasMaxLength(255);
+            entity.Property(e => e.UploadedFile).HasColumnType("blob");
+            entity.Property(e => e.UploadedFileName).HasMaxLength(255);
             entity.Property(e => e.ValueOrOffer).HasPrecision(10, 2);
 
             entity.HasOne(d => d.Customer).WithMany(p => p.TaskComps)
@@ -294,11 +314,50 @@ public partial class CrmcornerContext : DbContext
 
         //    entity.HasIndex(e => e.Id, "Id");
 
+
         //    entity.Property(e => e.Id).HasColumnType("int(11)");
         //    //entity.Property(e => e.Date).HasMaxLength(50);
         //    //entity.Property(e => e.Description).HasMaxLength(300);
         //    //entity.Property(e => e.Title).HasMaxLength(200);
         //});
+
+        modelBuilder.Entity<TaskCompLog>(entity =>
+        {
+            entity.HasKey(e => e.LogId).HasName("PRIMARY");
+
+            entity.ToTable("TaskCompLog");
+
+            entity.HasIndex(e => e.TaskId, "TaskId");
+
+            entity.HasIndex(e => e.UpdatedBy, "UpdatedBy");
+
+            entity.Property(e => e.LogId).HasColumnType("int(11)");
+            entity.Property(e => e.NewValue)
+                .HasMaxLength(250)
+                .UseCollation("utf8mb3_general_ci")
+                .HasCharSet("utf8mb3");
+            entity.Property(e => e.OldValue)
+                .HasMaxLength(250)
+                .UseCollation("utf8mb3_general_ci")
+                .HasCharSet("utf8mb3");
+            entity.Property(e => e.TaskId).HasColumnType("int(11)");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedBy).HasColumnType("int(11)");
+            entity.Property(e => e.UpdatedField)
+                .HasMaxLength(50)
+                .UseCollation("utf8mb3_general_ci")
+                .HasCharSet("utf8mb3");
+
+            entity.HasOne(d => d.Task).WithMany(p => p.TaskCompLogs)
+                .HasForeignKey(d => d.TaskId)
+                .HasConstraintName("TaskCompLog_ibfk_1");
+
+            entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.TaskCompLogs)
+                .HasForeignKey(d => d.UpdatedBy)
+                .HasConstraintName("TaskCompLog_ibfk_2");
+        });
+
+
         OnModelCreatingPartial(modelBuilder);
     }
 

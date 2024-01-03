@@ -8,8 +8,12 @@ using static Microsoft.EntityFrameworkCore.ServerVersion;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
 
 // MySQL veritabanı bağlantı dizesini alın
 var connectionString = builder.Configuration.GetConnectionString("CrmConnection");

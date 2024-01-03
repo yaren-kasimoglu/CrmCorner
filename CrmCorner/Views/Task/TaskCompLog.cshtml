@@ -1,0 +1,33 @@
+﻿@model List<TaskCompLog>
+@{
+    ViewData["Title"] = "TaskCompLog";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Log ID</th>
+            <th>Task ID</th>
+            <th>Updated Field</th>
+            <th>Old Value</th>
+            <th>New Value</th>
+            <th>Updated By</th>
+            <th>Updated At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.LogId</td>
+                <td>@log.TaskId</td>
+                <td>@log.UpdatedField</td>
+                <td>@log.OldValue</td>
+                <td>@log.NewValue</td>
+                <td>@log.UpdatedBy</td>
+                <td>@log.UpdatedAt</td>
+            </tr>
+        }
+    </tbody>
+</table>
