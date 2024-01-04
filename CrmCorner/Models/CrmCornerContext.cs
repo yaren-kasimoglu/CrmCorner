@@ -33,26 +33,11 @@ public partial class CrmcornerContext : DbContext
 
     public virtual DbSet<TaskCompLog> TaskCompLogs { get; set; }
 
-    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-    //        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
+    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var connectionString = configuration.GetConnectionString("CrmConnection");
-
-            optionsBuilder.UseMySql(connectionString,
-                Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
-        }
-    }
-
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -340,6 +325,34 @@ public partial class CrmcornerContext : DbContext
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.TaskCompLogs)
                 .HasForeignKey(d => d.UpdatedBy)
                 .HasConstraintName("TaskCompLog_ibfk_2");
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PRIMARY");
+
+            entity.HasIndex(e => e.Email, "Email").IsUnique();
+
+            entity.HasIndex(e => e.Username, "Username").IsUnique();
+
+            entity.Property(e => e.UserId)
+                .HasColumnType("int(11)")
+                .HasColumnName("UserID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("timestamp");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FirstName).HasMaxLength(50);
+            entity.Property(e => e.LastName).HasMaxLength(50);
+            entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.PasswordSalt).HasMaxLength(255);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+            entity.Property(e => e.UpdatedAt)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("timestamp");
+            entity.Property(e => e.UserImage).HasMaxLength(255);
+            entity.Property(e => e.Username).HasMaxLength(50);
         });
 
         OnModelCreatingPartial(modelBuilder);

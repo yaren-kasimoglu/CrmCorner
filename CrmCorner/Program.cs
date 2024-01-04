@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.ServerVersion;
 

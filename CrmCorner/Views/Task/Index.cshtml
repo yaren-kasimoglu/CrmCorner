@@ -13,6 +13,8 @@
     <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
     <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/4.4.2/dragula.min.js"></script>
+
 
     <link rel="icon" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/horizontal/favicon.ico" type="image/x-icon">
     <!-- VENDOR CSS -->
@@ -24,18 +26,6 @@
 </head>
 <body>
 
-    <div class="block-header py-lg-4 py-3">
-        <div class="row g-3">
-            <div class="col-md-6 col-sm-12">
-                <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> TaskBoard</h2>
-                <ul class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="index.html">Lucid</a></li>
-                    <li class="breadcrumb-item">Apps</li>
-                    <li class="breadcrumb-item active">TaskBoard</li>
-                </ul>
-            </div>
-        </div>
-    </div>
     @{
         // Null olmayan ve istenen alanda null olmayan verileri filtreleme
         var validTasks = Model.Where(task => task.Status != null && task.Status.StatusName != null);
@@ -143,18 +133,48 @@
         }
     </div>
 
+    <div id="drag-container">
+        <div id="item-1" class="item">Item 1</div>
+        <div id="item-2" class="item">Item 2</div>
+        <div id="item-3" class="item">Item 3</div>
+    </div>
 
-    <!-- core js file -->
+
+
+   <!-- core js file -->
     <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
     <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/plugin/nestable/jquery.nestable.min.js"></script>
 
     <!-- page js file -->
     <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
+
+
     <script>
+
+
+        var container = document.querySelector('.container');
+        dragula([container], {
+            moves: function (el, container, handle) {
+                return handle.classList('item');
+            }
+        });
+
+
+        $(function () {
+            $('.dd').nestable();
+
+            $('.dd').on('change', function () {
+                var $this = $(this);
+                var serializedData = window.JSON.stringify($($this).nestable('serialize'));
+
+                $this.parents('div.body').find('textarea').val(serializedData);
+            });
+        });
+
         function confirmDelete(button) {
             // Kullanıcıya silme işlemini onaylamasını sor
-            if (confirm('Are you sure you want to dele te this Task?')) {
+            if (confirm('Are you sure you want to delete this Task?')) {
                 var taskId = button.getAttribute('data-taskId');
                 var form = document.createElement('form');
                 form.action = '/Task/TaskDelete/' + taskId;
@@ -163,21 +183,10 @@
                 form.submit();
             }
         }
+
+
     </script>
 
-
-    <script>
-        $(function () {
-            $('.dd').nestable();
-
-            $('.dd').on('change', function () {
-                var $this = $(this);
-                var serializedData = window.JSON.stringify($this.nestable('serialize'));
-
-                $this.parents('.body').find('textarea').val(serializedData);
-            });
-        });
-    </script>
 
 </body>
 </html>

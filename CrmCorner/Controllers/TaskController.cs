@@ -208,8 +208,6 @@ namespace CrmCorner.Controllers
 
             return View(tasks);
         }
-
-
         public IActionResult GetTaskTimeline(int taskId)
         {
             // TaskComps tablosundan taskId'ye göre ilgili görevi çek
@@ -298,7 +296,7 @@ namespace CrmCorner.Controllers
                             }
                             else
                             {
-                                // Varolan byte[]'ın sonuna yeni dosya içeriğini ekleyin
+                                // Varolan byte[]'ın sonuna yeni dosya içeriğini eklenir
                                 byte[] combinedFiles = new byte[existingFiles.Length + fileBytes.Length];
                                 Array.Copy(existingFiles, combinedFiles, existingFiles.Length);
                                 Array.Copy(fileBytes, 0, combinedFiles, existingFiles.Length, fileBytes.Length);
@@ -327,7 +325,7 @@ namespace CrmCorner.Controllers
                 ViewBag.Message = "Dosya yüklenemedi veya dosya boş!";
             }
 
-            // İlgili view'i döndürürken ViewBag.Message'i kullanabilirsiniz
+            // İlgili view'i döndürürken ViewBag.Message'i kullan
             return RedirectToAction("TaskDetail", new { id = taskId });
         }
 
@@ -347,7 +345,7 @@ namespace CrmCorner.Controllers
 
                     if (index >= 0 && index < fileNames.Length)
                     {
-                        byte[] fileContent = files; // Tüm dosya içeriğini almak için böyle bir yaklaşım kullanabilirsiniz
+                        byte[] fileContent = files; 
 
                         return File(fileContent, "application/octet-stream", fileName);
                     }
