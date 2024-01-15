@@ -28,6 +28,7 @@
     $(document).ready(function () {
         var employeeId = @Model.IdEmployee;
 
+
         $.ajax({
             type: "GET",
             url: "/Employee/EmployeeTaskStatusChart?employeeId=" + employeeId,
