@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿
+
+<!DOCTYPE html>
 
 <html>
 <div id="layout" class="theme-cyan">
@@ -42,7 +44,7 @@
                             <button type="button" class="btn-toggle-offcanvas"><i class="fa fa-bars"></i></button>
                         </div>
 
-                        <div class="navbar-brand ps-2">
+              @*          <div class="navbar-brand ps-2">
                             <a href="index.html" class="d-flex">
                                 <svg width="85px" viewBox="0 0 85 25">
                                     <path class="fill-primary" d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
@@ -56,9 +58,9 @@
                                 </svg>
                             </a>
                         </div>
-
+*@
                         <div class="d-flex flex-grow-1 align-items-center">
-                            <div class="d-flex">
+                     @*       <div class="d-flex">
                                 <ul class="nav nav-pills me-4 ms-2 d-none d-lg-block">
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Menu Version</a>
@@ -70,15 +72,19 @@
                                         </ul>
                                     </li>
                                 </ul>
-                                <form id="navbar-search" class="navbar-form search-form position-relative d-none d-md-block">
+                 @*               <form id="navbar-search" class="navbar-form search-form position-relative d-none d-md-block">
                                     <input value="" class="form-control" placeholder="Search here..." type="text">
                                     <button type="button" class="btn btn-secondary"><i class="fa fa-search"></i></button>
                                 </form>
-                            </div>
+                            </div>*@
 
                             <div class="flex-grow-1">
                                 <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
-                                    <li class="d-none d-sm-block"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-events.html" class="icon-menu"><i class="fa fa-calendar"></i></a></li>
+
+                                    @*<li class="d-none d-sm-block"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-events.html" class="icon-menu"><i class="fa fa-calendar"></i></a></li>
+                                    <li class="d-none d-sm-block"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-chat.html" class="icon-menu"><i class="fa fa-comments"></i></a></li>
+                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a></li>*@
+                               @* <li class="dropdown">                                    <li class="d-none d-sm-block"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-events.html" class="icon-menu"><i class="fa fa-calendar"></i></a></li>
                                     <li class="d-none d-sm-block"><a href="" class="icon-menu"><i class="fa fa-comments"></i></a></li>
                                     <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a></li>
                                     <li class="dropdown">
@@ -125,9 +131,9 @@
                                                 </li>
                                             </ul>
                                         </div>
-                                    </li>
+                                    </li>*@
                                     <!-- more link -->
-                                    <li class="dropdown">
+                           @*         <li class="dropdown">
                                         <a class="dropdown-toggle icon-menu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-sliders"></i></a>
                                         <ul class="dropdown-menu dropdown-menu-end p-2 shadow">
                                             <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-pencil-square-o"></i> <span>Basic</span></a></li>
@@ -139,8 +145,8 @@
                                             <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-print"></i> <span>Invoices</span></a></li>
                                             <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-refresh"></i> <span>Renewals</span></a></li>
                                         </ul>
-                                    </li>
-                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/page-login.html" class="icon-menu"><i class="fa fa-sign-out"></i></a></li>
+                                    </li>*@
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Login" asp-action="Login"><i class="fa fa-sign-out"></i></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -150,21 +156,23 @@
                 <!-- Sidbar menu -->
                 <div id="left-sidebar" class="sidebar">
                     <div class="user-account p-3 mb-3">
-                        <div class="d-flex mb-3 pb-3 border-bottom align-items-center">
+                       @* <div class="d-flex mb-3 pb-3 border-bottom align-items-center">
                             <img src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/user.png" class="avatar lg rounded me-3" alt="User Profile Picture">
                             <div class="dropdown flex-grow-1">
                                 <span>Welcome,</span>
                                 <a href="#" class="dropdown-toggle user-name" data-bs-toggle="dropdown"><strong>Berkay Yalçın</strong></a>
                                 <ul class="dropdown-menu p-2 shadow-sm">
-                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/page-profile2.html"><i class="fa fa-user me-2"></i>My Profile</a></li>
-                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-inbox.html"><i class="fa fa-envelope-open me-2"></i>Messages</a></li>
-                                    <li><a href="javascript:void(0);"><i class="fa fa-cog me-2"></i>Settings</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/page-login.html"><i class="fa fa-power-off me-2"></i>Logout</a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="MyProfile"><i class="fa fa-user me-2"></i>My Profile</a></li>
+                                    <li><a href="/Task/TaskDetail/"><i class="fa fa-user me-2"></i>My Profile</a></li>*@
+
+                       @*             <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-inbox.html"><i class="fa fa-envelope-open me-2"></i>Messages</a></li>*@
+                                    @*<li><a href="javascript:void(0);"><i class="fa fa-cog me-2"></i>Settings</a></li>*@
+                         @*           <li class="divider"></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Login" asp-action="Login"><i class="fa fa-power-off me-2"></i>Logout</a></li>
                                 </ul>
                             </div>
-                        </div>
-                        <div class="row g-3">
+                        </div>*@
+                    @*    <div class="row g-3">
                             <div class="col">
                                 <h6 class="mb-0">5+</h6>
                                 <small class="text-muted">Experience</small>
@@ -177,7 +185,7 @@
                                 <h6 class="mb-0">80+</h6>
                                 <small class="text-muted">Clients</small>
                             </div>
-                        </div>
+                        </div>*@
                     </div>
                     <!-- nav tab: menu list -->
                     <ul class="nav nav-tabs text-center mb-2" role="tablist">
@@ -191,7 +199,7 @@
                         <div class="tab-pane fade show active" id="hr_menu" role="tabpanel">
                             <nav class="sidebar-nav">
                                 <ul class="metismenu list-unstyled">
-                                    <li class="active"><a href="index.html"><i class="fa fa-tachometer"></i><span>HR Dashboard</span></a></li>
+                                   @* <li class="active"><a href="index.html"><i class="fa fa-tachometer"></i><span>HR Dashboard</span></a></li>*@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i>Customer</a>
                                     </li>
@@ -206,12 +214,12 @@
                                             <li> <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="PositionList">Positions</a></li>
                                         </ul>
                                     </li>
-
-                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-holidays.html"><i class="fa fa-list-ul"></i><span>Holidays</span></a></li>
+@*
+                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-holidays.html"><i class="fa fa-list-ul"></i><span>Holidays</span></a></li>*@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-users"></i>Calendar</a>
                                     </li>
-                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-activities.html"><i class="fa fa-file-text-o"></i><span>Activities</span></a></li>
+                                   @* <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-activities.html"><i class="fa fa-file-text-o"></i><span>Activities</span></a></li>
                                     <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-social.html"><i class="fa fa-globe"></i><span>HR Social</span></a></li>
 
                                     <li>
@@ -249,17 +257,24 @@
                                             <li><a href="page-500.html">Page 500</a></li>
                                             <li><a href="page-503.html">Page 503</a></li>
                                         </ul>
-                                    </li>
+                                    </li>*@
                                 </ul>
                             </nav>
                         </div>
                         <div class="tab-pane fade" id="project_menu" role="tabpanel">
                             <nav class="sidebar-nav">
                                 <ul class="metismenu list-unstyled">
+
+                                    @*<li><a href="index2.html"><i class="fa fa-tachometer"></i><span>Dashboard</span></a></li>
+                                    <li><a href="app-inbox.html"><i class="fa fa-envelope-o"></i><span>Inbox App</span></a></li>*@
+                                    <li><a href="app-chat.html"><i class="fa fa-comments"></i><span>Chat App</span></a></li>
+                                    @*<li>
+
                                     <li><a href="index2.html"><i class="fa fa-tachometer"></i><span>Dashboard</span></a></li>
                                     <li><a href="app-inbox.html"><i class="fa fa-envelope-o"></i><span>Inbox App</span></a></li>
                                     <li><a class="nav-link text-dark" asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Chat App</span></a>
                                     <li>
+
                                         <a href="#Projects" class="has-arrow"><i class="fa fa-list-ul"></i><span>Projects</span></a>
                                         <ul class="list-unstyled">
                                             <li><a href="project-add.html">Add Projects</a></li>
@@ -276,13 +291,13 @@
                                             <li><a href="client-detail.html">Clients Detail</a></li>
                                         </ul>
                                     </li>
-                                    <li><a href="project-team.html"><i class="fa fa-users"></i><span>Team</span></a></li>
+                                    <li><a href="project-team.html"><i class="fa fa-users"></i><span>Team</span></a></li>*@
                                     <li>  <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-users"></i>TaskBoard</a></li>
-                                    <li><a href="app-tickets.html"><i class="fa fa-ticket"></i><span>Tickets</span></a></li>
+                                 @*   <li><a href="app-tickets.html"><i class="fa fa-ticket"></i><span>Tickets</span></a></li>*@
                                 </ul>
                             </nav>
                         </div>
-                        <div class="tab-pane fade" id="sub_menu" role="tabpanel">
+@*                        <div class="tab-pane fade" id="sub_menu" role="tabpanel">
                             <nav class="sidebar-nav">
                                 <ul class="metismenu list-unstyled">
                                     <li>
@@ -475,7 +490,7 @@
                                     </li>
                                 </ul>
                             </div>
-                        </div>
+                        </div>*@
                     </div>
                 </div>
 
