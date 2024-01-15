@@ -1,0 +1,59 @@
+﻿@model CrmCorner.Models.Employee
+@{
+    ViewData["Title"] = "EmployeeDetail";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div class="container mt-3">
+
+    <dl class="row">
+        <dt class="col-sm-2">Name Surname: </dt>
+        <dd class="col-sm-10">@Model.EmployeeName @Model.EmployeeSurname</dd>
+    </dl>
+
+    <div class="col-6">
+        <canvas id="employeeTaskStatusChart" width="200" height="100"></canvas>
+    </div>
+</div>
+
+<!-- core js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var employeeId = @Model.IdEmployee;
+
+        $.ajax({
+            type: "GET",
+            url: "/Employee/EmployeeTaskStatusChart?employeeId=" + employeeId,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var ctx = document.getElementById('employeeTaskStatusChart').getContext('2d');
+                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76'];
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+        
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    });
+</script>
+
+

@@ -10,8 +10,8 @@ namespace CrmCorner.Controllers
 {
     public class LoginController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public LoginController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+        public LoginController(CrmCornerContext context)
         {
             _context = context;
         }
@@ -102,7 +102,7 @@ namespace CrmCorner.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View(); 
+            return View();
         }
         public IActionResult Login(User userCard)
         {
@@ -112,9 +112,9 @@ namespace CrmCorner.Controllers
 
             if (user != null && VerifyPassword(user, password))
             {
-                return RedirectToAction("WelcomePage", "Home"); 
+                return RedirectToAction("WelcomePage", "Home");
             }
-            ViewBag.ErrorMessage = "Invalid username or password"; 
+            ViewBag.ErrorMessage = "Invalid username or password";
             return View();
 
         }

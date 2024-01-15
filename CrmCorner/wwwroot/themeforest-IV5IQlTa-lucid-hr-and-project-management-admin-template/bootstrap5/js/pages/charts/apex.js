@@ -1597,7 +1597,7 @@ $(document).ready(function() {
   chart.render();
 });
 
-// SIMPLE DONUT
+ //SIMPLE DONUT
 $(document).ready(function() {
   var options = {
       chart: {

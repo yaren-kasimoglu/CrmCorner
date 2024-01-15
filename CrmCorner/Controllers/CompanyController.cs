@@ -7,8 +7,8 @@ namespace CrmCorner.Controllers
 {
     public class CompanyController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public CompanyController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+        public CompanyController(CrmCornerContext context)
         {
             _context = context;
         }

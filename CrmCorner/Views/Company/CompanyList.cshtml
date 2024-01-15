@@ -8,12 +8,12 @@
     <input type="button" class="btn btn-success" value="Add Company">
 </a>
 <div>&nbsp;</div>
-<table class="table table-bordered" id="company">
+<table class="table table-hover" id="company_List">
     <thead>
         <tr>
             <th scope="col">Company Name</th>
             <th scope="col">Company Email</th>
-            <th scope="col">Status</th>
+         @*   <th scope="col">Status</th>*@
             <th scope="col">Responsible</th>
             <th scope="col">Operations</th>
         </tr>
@@ -25,7 +25,7 @@
 
                 <td>@item.CompanyName</td>
                 <td>@item.CompanyEmail</td>
-                <td>
+                @*<td>
                     @if (item.Status != null)
                     {
                         @item.Status.StatusName
@@ -34,7 +34,7 @@
                     {
                         <span class="text-danger">No Status</span>
                     }
-                </td>
+                </td>*@
                 <td>
                     @if (item.IdEmployeeNavigation != null)
                     {
@@ -51,9 +51,9 @@
                             <i class="fa fa-edit"></i>
                         </button>
                     </a>
-                    <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-companyid="@item.Id" onclick="confirmDelete(this)">
+                 @*   <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-companyid="@item.Id" onclick="confirmDelete(this)">
                         <i class="fa fa-trash-o"></i>
-                    </button>
+                    </button>*@
                 </td>
 
             </tr>
@@ -62,8 +62,14 @@
 </table>
 
 
+<!-- core js file -->
+  <script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
 
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
 
 <script>
     function confirmDelete(button) {
@@ -79,3 +85,17 @@
     }
 </script>
 
+<script>
+    $(document).ready(function () {
+        $('#company_List')
+            .dataTable({
+                responsive: true,
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: [0]
+                    }
+                ]
+            });
+    });
+</script>

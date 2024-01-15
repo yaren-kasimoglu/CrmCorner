@@ -2,13 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace CrmCorner.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public EmployeeController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+        public EmployeeController(CrmCornerContext context)
         {
             _context = context;
         }
@@ -29,12 +31,12 @@ namespace CrmCorner.Controllers
             var departments = _context.Departments.ToList();
             var positions = _context.Positions.ToList();
 
-                List<SelectListItem> departmentItems = departments
-                .Select(d => new SelectListItem
-                {
-                    Text = d.DepartmentName,
-                    Value = d.IdDepartment.ToString()
-                }).ToList();
+            List<SelectListItem> departmentItems = departments
+            .Select(d => new SelectListItem
+            {
+                Text = d.DepartmentName,
+                Value = d.IdDepartment.ToString()
+            }).ToList();
             List<SelectListItem> positionItems = positions
             .Select(d => new SelectListItem
             {
@@ -46,7 +48,7 @@ namespace CrmCorner.Controllers
             ViewBag.Departments = departmentItems;
             ViewBag.Positions = positionItems;
             return View();
-         }
+        }
         [HttpPost]
         public IActionResult EmployeeAdd(Employee employee)
         {
@@ -130,6 +132,79 @@ namespace CrmCorner.Controllers
             {
                 return View("ErrorView", editedEmployee);
             }
+        }
+
+        public IActionResult EmployeeDetail(int id)
+        {
+            var departments = _context.Departments.ToList();
+            var positions = _context.Positions.ToList();
+
+            List<SelectListItem> departmentItems = departments
+                .Select(d => new SelectListItem
+                {
+                    Text = d.DepartmentName,
+                    Value = d.IdDepartment.ToString()
+                }).ToList();
+            List<SelectListItem> positionItems = positions
+           .Select(d => new SelectListItem
+           {
+               Text = d.PositionName,
+               Value = d.IdPositions.ToString()
+           }).ToList();
+
+            ViewBag.Positions = positionItems;
+            ViewBag.Departments = departmentItems;
+
+            Employee employee = _context.Employees.Find(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return View("EmployeeDetail", employee);
+        }
+
+        public IActionResult EmployeeTaskStatusChart(int employeeId)
+        {
+            var employee = _context.Employees
+                .Include(e => e.TaskComps)
+                .ThenInclude(tc => tc.Status)
+                .FirstOrDefault(e => e.IdEmployee == employeeId);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            var chartData = new
+            {
+                labels = employee.TaskComps.Select(tc => tc.Status.StatusName).Distinct(),
+                data = employee.TaskComps.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
+            };
+
+            return Json(chartData);
+        }
+        public IActionResult EmployeeChart(int employeeId)
+        {
+            var employee = _context.Employees.FirstOrDefault(e => e.IdEmployee == employeeId);
+
+            if (employee == null)
+            {
+                return NotFound(); // Employee bulunamadıysa hata döndür
+            }
+
+            var taskComps = _context.TaskComps
+                .Where(tc => tc.EmployeeId == employeeId)
+                .GroupBy(tc => tc.StatusId)
+                .Select(group => new
+                {
+                    StatusId = group.Key,
+                    StatusName = group.FirstOrDefault().Status != null ? group.FirstOrDefault().Status.StatusName : null,
+                    Count = group.Count() // Duruma göre görev sayısını say
+                })
+                .ToList();
+
+            // JSON formatına çevirerek geri döndür
+            return Content(JsonConvert.SerializeObject(taskComps), "application/json");
         }
 
         public IActionResult EmployeeDelete(int id)
