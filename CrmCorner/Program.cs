@@ -1,14 +1,22 @@
 using CrmCorner.Models;
 using Microsoft.AspNetCore.Identity;
+using CrmCorner.Hubs;
+using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
+using static CrmCorner.Hubs.Hubs;
 using static Microsoft.EntityFrameworkCore.ServerVersion;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
+
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 //builder.Services.AddDbContext<CrmCornerContext>(x=>x.UseSqlServer(builder.Configuration.GetConnectionString("CrmConnection")));
+
 // MySQL veritabanı bağlantı dizesini alın
 var connectionString = builder.Configuration.GetConnectionString("CrmConnection");
 
@@ -52,5 +60,5 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.MapHub<ChatHub>("/chatHub");
 app.Run();

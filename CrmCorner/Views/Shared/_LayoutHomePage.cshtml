@@ -79,9 +79,57 @@
 
                             <div class="flex-grow-1">
                                 <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
+
                                     @*<li class="d-none d-sm-block"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-events.html" class="icon-menu"><i class="fa fa-calendar"></i></a></li>
                                     <li class="d-none d-sm-block"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-chat.html" class="icon-menu"><i class="fa fa-comments"></i></a></li>
                                     <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a></li>*@
+                               @* <li class="dropdown">                                    <li class="d-none d-sm-block"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-events.html" class="icon-menu"><i class="fa fa-calendar"></i></a></li>
+                                    <li class="d-none d-sm-block"><a href="" class="icon-menu"><i class="fa fa-comments"></i></a></li>
+                                    <li><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a></li>
+                                    <li class="dropdown">
+                                        <a class="dropdown-toggle icon-menu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-bell"></i>
+                                            <span class="notification-dot"></span>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end p-0 shadow notification">
+                                            <ul class="list-unstyled feeds_widget">
+                                                <li class="d-flex">
+                                                    <div class="feeds-left"><i class="fa fa-thumbs-o-up"></i></div>
+                                                    <div class="feeds-body flex-grow-1">
+                                                        <h6 class="mb-1">7 New Feedback <small class="float-end text-muted small">Today</small></h6>
+                                                        <span class="text-muted">It will give a smart finishing to your site</span>
+                                                    </div>
+                                                </li>
+                                                <li class="d-flex">
+                                                    <div class="feeds-left"><i class="fa fa-user"></i></div>
+                                                    <div class="feeds-body flex-grow-1">
+                                                        <h6 class="mb-1">New User <small class="float-end text-muted small">10:45</small></h6>
+                                                        <span class="text-muted">I feel great! Thanks team</span>
+                                                    </div>
+                                                </li>
+                                                <li class="d-flex">
+                                                    <div class="feeds-left"><i class="fa fa-question-circle"></i></div>
+                                                    <div class="feeds-body flex-grow-1">
+                                                        <h6 class="mb-1 text-warning">Server Warning <small class="float-end text-muted small">10:50</small></h6>
+                                                        <span class="text-muted">Your connection is not private</span>
+                                                    </div>
+                                                </li>
+                                                <li class="d-flex">
+                                                    <div class="feeds-left"><i class="fa fa-check"></i></div>
+                                                    <div class="feeds-body flex-grow-1">
+                                                        <h6 class="mb-1 text-danger">Issue Fixed <small class="float-end text-muted small">11:05</small></h6>
+                                                        <span class="text-muted">WE have fix all Design bug with Responsive</span>
+                                                    </div>
+                                                </li>
+                                                <li class="d-flex">
+                                                    <div class="feeds-left"><i class="fa fa-shopping-basket"></i></div>
+                                                    <div class="feeds-body flex-grow-1">
+                                                        <h6 class="mb-1">7 New Orders <small class="float-end text-muted small">11:35</small></h6>
+                                                        <span class="text-muted">You received a new oder from Tina.</span>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     @* <li class="dropdown">
                                     <a class="dropdown-toggle icon-menu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa fa-bell"></i>
@@ -259,10 +307,24 @@
                         <div class="tab-pane fade" id="project_menu" role="tabpanel">
                             <nav class="sidebar-nav">
                                 <ul class="metismenu list-unstyled">
+
                                     @*<li><a href="index2.html"><i class="fa fa-tachometer"></i><span>Dashboard</span></a></li>
                                     <li><a href="app-inbox.html"><i class="fa fa-envelope-o"></i><span>Inbox App</span></a></li>*@
                                     <li><a href="app-chat.html"><i class="fa fa-comments"></i><span>Chat App</span></a></li>
                                     @*<li>
+
+                                    <li><a href="index2.html"><i class="fa fa-tachometer"></i><span>Dashboard</span></a></li>
+                                    <li><a href="app-inbox.html"><i class="fa fa-envelope-o"></i><span>Inbox App</span></a></li>
+                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Chat App</span></a>
+                                    <li>
+
+                                        <a href="#Projects" class="has-arrow"><i class="fa fa-list-ul"></i><span>Projects</span></a>
+                                        <ul class="list-unstyled">
+                                            <li><a href="project-add.html">Add Projects</a></li>
+                                            <li><a href="project-list.html">Projects List</a></li>
+                                            <li><a href="project-grid.html">Projects Grid</a></li>
+                                            <li><a href="project-detail.html">Projects Detail</a></li>
+                                        </ul>
                                     <a href="#Projects" class="has-arrow"><i class="fa fa-list-ul"></i><span>Projects</span></a>
                                     <ul class="list-unstyled">
                                     <li><a href="project-add.html">Add Projects</a></li>
