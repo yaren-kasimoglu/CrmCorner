@@ -9,7 +9,7 @@
     <input type="button" class="btn btn-success" value="Add Customer">
 </a>
 <div>&nbsp;</div>
-<table class="table table-bordered" id="customer">
+<table class="table table-bordered" id="customer_List">
     <thead>
         <tr>
             <th scope="col">Name</th>
@@ -56,8 +56,13 @@
 </table>
 
 
+<!-- core js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
+<!-- page js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
 
 <script>
     function confirmDelete(button) {
@@ -71,4 +76,18 @@
             form.submit();
         }
     }
+</script>
+<script>
+    $(document).ready(function () {
+        $('#customer_List')
+            .dataTable({
+                responsive: true,
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: [0]
+                    }
+                ]
+            });
+    });
 </script>

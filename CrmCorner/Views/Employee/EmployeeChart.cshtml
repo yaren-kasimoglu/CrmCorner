@@ -1,0 +1,92 @@
+﻿@model CrmCorner.Models.Employee
+@{
+    ViewData["Title"] = "EmployeeChart";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div class="row">
+    <input type="hidden" id="IdEmployee" name="IdEmployee" value="@Model.IdEmployee" />
+    <div class="col-6">
+        <h3>Chart Deneme</h3>
+        <canvas id="barChart" width="200" height="110" style="width:197px;height:110px;"></canvas>
+    </div>
+    <div class="col-6">
+        <h3>Chart Deneme</h3>
+        <canvas id="doughnutChart" width="200" height="110" style="width:197px;height:110px;"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- core js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var employeeId = @Model.IdEmployee;
+        $.ajax({
+            type: "POST",
+            url: "/Employee/EmployeeChart/" + employeeId,
+            data: "",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: OnSuccess,
+        });
+
+        function OnSuccess(data) {
+            const barChart = document.getElementById('barChart');
+            const doughnutChart = document.getElementById('doughnutChart');
+
+            var statusNames = [];
+            var statusCounts = [];
+            // Veri işleme
+            for (var i = 0; i < data.length; i++) {
+                statusNames.push(data[i].StatusName); // Her bir görev durumu adını listeye ekle
+                statusCounts.push(data[i].Count); // Her bir görev durumu sayısını listeye ekle
+            }
+
+            var colors = ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800'];
+
+            var barChartConfig = {
+                type: 'bar',
+                data: {
+                    labels: statusNames,
+                    datasets: [{
+                        label: 'Task Status Counts',
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        data: statusCounts
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+
+            var doughnutChartConfig = {
+                type: 'doughnut',
+                data: {
+                    labels: statusNames,
+                    datasets: [{
+                        label: 'Task Status Counts',
+                        backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+                        borderWidth: 1,
+                        data: statusCounts
+                    }]
+                }
+            };
+
+            new Chart(barChart, barChartConfig);
+            new Chart(doughnutChart, doughnutChartConfig);
+        }
+    });
+</script>

@@ -1,0 +1,3 @@
+﻿Mysql de bir tabloda TÜRKÇE KARAKTER sorununu çözmek için;
+
+ALTER TABLE tablo_ismi CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

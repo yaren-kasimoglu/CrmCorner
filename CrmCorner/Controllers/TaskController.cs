@@ -1,19 +1,31 @@
-﻿using CrmCorner.Models;
+﻿
+using CrmCorner.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Text;
 
 namespace CrmCorner.Controllers
 {
     public class TaskController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public TaskController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+
+        public TaskController(CrmCornerContext context)
         {
             _context = context;
         }
         public IActionResult Index()
+        {
+            var tasks = _context.TaskComps
+                                .Include(e => e.Customer)
+                                .Include(e => e.Employee)
+                                .Include(e => e.Status)
+                                .ToList();
+            return View(tasks);
+        }
+        public IActionResult Index1()
         {
             var tasks = _context.TaskComps
                                 .Include(e => e.Customer)
@@ -345,7 +357,7 @@ namespace CrmCorner.Controllers
 
                     if (index >= 0 && index < fileNames.Length)
                     {
-                        byte[] fileContent = files; 
+                        byte[] fileContent = files;
 
                         return File(fileContent, "application/octet-stream", fileName);
                     }
@@ -415,6 +427,27 @@ namespace CrmCorner.Controllers
             return RedirectToAction("TaskDetail", new { id = taskId });
         }
 
+        [HttpPost]
+        public IActionResult UpdateStatus(int taskId, int newStatusId)
+        {
+            // taskId parametresine göre ilgili görevi veritabanından bul
+            var taskToUpdate = _context.TaskComps.FirstOrDefault(t => t.TaskId == taskId);
+
+            if (taskToUpdate != null)
+            {
+                taskToUpdate.StatusId = newStatusId; // Yeni durumu atama
+                _context.SaveChanges();
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false, errorMessage = "Görev bulunamadı." });
+        }
+
+        public IActionResult Chart()
+        {
+            return View();
+        }
 
         public IActionResult TaskDelete(int id)
         {
@@ -432,4 +465,5 @@ namespace CrmCorner.Controllers
 
 
     }
+
 }

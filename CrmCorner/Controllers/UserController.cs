@@ -6,8 +6,8 @@ namespace CrmCorner.Controllers
 {
     public class UserController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public UserController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+        public UserController(CrmCornerContext context)
         {
             _context = context;
         }

@@ -8,7 +8,7 @@
     <input type="button" class="btn btn-success" value="Add Department">
 </a>
 <div>&nbsp;</div>
-<table class="table table-bordered" id="department">
+<table class="table table-bordered" id="department_List">
     <thead>
         <tr>
             <th scope="col">Name</th>
@@ -40,7 +40,13 @@
     </tbody>
 </table>
 
+<!-- core js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
+<!-- page js file -->
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
 
 <script>
     function confirmDelete(button) {
@@ -56,3 +62,17 @@
     }
 </script>
 
+<script>
+    $(document).ready(function () {
+        $('#department_List')
+            .dataTable({
+                responsive: true,
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: [0]
+                    }
+                ]
+            });
+    });
+</script>

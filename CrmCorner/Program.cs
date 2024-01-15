@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using static CrmCorner.Hubs.Hubs;
 using static Microsoft.EntityFrameworkCore.ServerVersion;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,15 +15,30 @@ builder.Services.AddSignalR();
 
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
+//builder.Services.AddDbContext<CrmCornerContext>(x=>x.UseSqlServer(builder.Configuration.GetConnectionString("CrmConnection")));
 
 // MySQL veritabanı bağlantı dizesini alın
 var connectionString = builder.Configuration.GetConnectionString("CrmConnection");
 
 // Veritabanı bağlantısını ekleyin
-builder.Services.AddDbContext<CrmcornerContext>(options =>
+builder.Services.AddDbContext<CrmCornerContext>(options =>
 {
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)));
 });
+
+builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CrmCornerContext>();
+
+//builder.Services.AddIdentity<AppUser, AppRole>(x =>
+//{
+//    x.Password.RequireDigit = false;
+//    x.Password.RequireUppercase = false;
+//    x.Password.RequireNonAlphanumeric = false;
+//    x.Password.RequiredLength = 4;
+//    x.Password.RequiredUniqueChars = 0;
+//}).AddEntityFrameworkStores<CrmCornerContext>();
+
+
+
 
 var app = builder.Build();
 
@@ -37,7 +51,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(); //wwwroot klasörünün kullanımını aktifleştirir.
 
 app.UseRouting();
 

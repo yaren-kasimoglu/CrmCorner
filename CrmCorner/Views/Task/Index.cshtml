@@ -3,6 +3,27 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+@functions {
+
+    int GetStatusOrder(string status)
+    {
+        switch (status)
+        {
+            case "Değerlendirilen":
+                return 1;
+            case "İletişim":
+                return 2;
+            case "Teklif":
+                return 3;
+            case "Demo":
+                return 4;
+            case "Görüşmeler":
+                return 5;
+            default:
+                return 6;
+        }
+    }
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,165 +34,222 @@
     <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
     <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/4.4.2/dragula.min.js"></script>
-
-
-    <link rel="icon" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/horizontal/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- VENDOR CSS -->
-    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/plugin/nestable/jquery-nestable.css">
+    <link href="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/plugin/nestable/jquery-nestable.css" rel="stylesheet" />
 
     <!-- MAIN CSS -->
-    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css">
+    <link href="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
 
 </head>
 <body>
 
-    @{
-        // Null olmayan ve istenen alanda null olmayan verileri filtreleme
-        var validTasks = Model.Where(task => task.Status != null && task.Status.StatusName != null);
+    <div id="layout" class="theme-cyan">
+        @{
+            // Null olmayan ve istenen alanda null olmayan verileri filtreleme
+            var validTasks = Model.Where(task => task.Status != null && task.Status.StatusName != null);
 
-        // GroupBy işlemi için verilerin kontrol edilmiş hali
-        var statusGroups = validTasks.GroupBy(task => task.Status.StatusName);
-    }
+            // GroupBy işlemi için verilerin kontrol edilmiş hali
+            var statusGroups = validTasks.GroupBy(task => task.Status.StatusName)
+            .OrderBy(group => GetStatusOrder(group.Key))
+            .ToArray();
+        }
 
-    @*@{
-       // var statusGroups = Model.GroupBy(task => task.Status.StatusName);
+        @*@{
+        // var statusGroups = Model.GroupBy(task => task.Status.StatusName);
 
         var tasksWithNonNullStatus = Model.Where(task => task.Status != null && !string.IsNullOrEmpty(task.Status.StatusName));
         var statusGroups = tasksWithNonNullStatus.GroupBy(task => task.Status.StatusName);
-    }*@
+        }*@
 
-    <div class="row g-3">
-        @foreach (var statusGroup in statusGroups)
-        {
-            <div class="col-lg-4 col-md-12">
-                @{
-                    string statusClass = "";
-                    switch (statusGroup.Key)
-                    {
-                        case "Değerlendirilen":
-                            statusClass = "planned_task";
-                            break;
-                        case "İletişim":
-                            statusClass = "progress_task";
-                            break;
-                        case "Teklif":
-                            statusClass = "completed_task";
-                            break;
-                        case "Demo":
-                            statusClass = "planned_task";
-                            break;
-                        case "Görüşmeler":
-                            statusClass = "progress_task";
-                            break;
-                        default:
-                            statusClass = "";
-                            break;
+        <div class="row g-3">
+            @foreach (var statusGroup in statusGroups)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6"@* style="width:500px"*@>
+                    @{
+                        string statusClass = "";
+                        switch (statusGroup.Key)
+                        {
+                            case "Değerlendirilen":
+                                statusClass = "planned_task";
+                                break;
+                            case "İletişim":
+                                statusClass = "progress_task";
+                                break;
+                            case "Teklif":
+                                statusClass = "completed_task";
+                                break;
+                            case "Demo":
+                                statusClass = "planned_task";
+                                break;
+                            case "Görüşmeler":
+                                statusClass = "progress_task";
+                                break;
+                            default:
+                                statusClass = "";
+                                break;
+                        }
                     }
-                }
-                <div class="card mb-4 @statusClass">
-                    <div class="card-header">
-                        <h6 class="card-title">@statusGroup.Key</h6>
-                        <ul class="header-dropdown">
-                            <li>
-                                @if (statusGroup.Key == "Değerlendirilen") //sadece değerlendirilen kısmında ekleme butonu var. diğerlerinde yok. Timeline ı görebilmek için
-                                {
-                                    <a href="/Task/TaskAdd"><i class="fa fa-plus-circle"></i></a>
-                                }
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="dd" data-plugin="nestable">
-                            <ol class="dd-list">
-                                @foreach (var task in statusGroup)
-                                {
-                                    <li class="dd-item" data-id="@task.TaskId">
-                                        <div class="dd-handle">
-                                            <h6>@task.Title</h6>
-                                            <p>
-                                                @if (task.CustomerId != null)
-                                                {
-                                                    <span>@task.Customer.Name @task.Customer.Surname</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-danger">No Customer</span>
-                                                }
-                                            </p>
-                                            <p>
-                                                @if (task.EmployeeId != null)
-                                                {
-                                                    <span>@task.Employee.EmployeeName @task.Employee.EmployeeSurname</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-danger">No Employee</span>
-                                                }
-                                            </p>
-                                            <a href="/Task/TaskEdit/@task.TaskId" target="_blank">
-                                                <button type="button" class="btn btn-sm btn-outline">
-                                                    <div class="col-md-3 col-sm-4"><i class="fa fa-file-text-o"></i></div>
+                    <div class="card mb-4 @statusClass">
+                        <div class="card-header">
+                            <h6 class="card-title">@statusGroup.Key</h6>
+                            <ul class="header-dropdown">
+                                <li>
+                                    @if (statusGroup.Key == "Değerlendirilen")
+                                    {
+                                        <a href="/Task/TaskAdd"><i class="fa fa-plus-circle"></i></a>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="dd" data-plugin="nestable">
+                                <ol class="dd-list">
+                                    @foreach (var task in statusGroup)
+                                    {
+                                        <li class="dd-item" data-taskid="@task.TaskId" data-newstatusid="@task.StatusId">
+                                            <div class="dd-handle">
+                                                <h6>@task.Title</h6>
+                                                <p>
+                                                    @if (task.CustomerId != null)
+                                                    {
+                                                        <span>@task.Customer.Name @task.Customer.Surname</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-danger">No Customer</span>
+                                                    }
+                                                </p>
+                                                <p>
+                                                    @if (task.EmployeeId != null)
+                                                    {
+                                                        <span>@task.Employee.EmployeeName @task.Employee.EmployeeSurname</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-danger">No Employee</span>
+                                                    }
+                                                </p>
+                                                <a href="/Task/TaskEdit/@task.TaskId" target="_blank">
+                                                    <button type="button" class="btn btn-sm btn-outline">
+                                                        <div class="col-md-3 col-sm-4"><i class="fa fa-file-text-o"></i></div>
+                                                    </button>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline" data-taskId="@task.TaskId" onclick="confirmDelete(this)">
+                                                    <div class="col-md-3 col-sm-4"> <i class="fa fa-trash-o"></i></div>
                                                 </button>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-outline" data-taskId="@task.TaskId" onclick="confirmDelete(this)">
-                                                <div class="col-md-3 col-sm-4"> <i class="fa fa-trash-o"></i></div>
-                                            </button>
-                                            <a href="/Task/TaskDetail/@task.TaskId" target="_blank">
-                                                <button type="button" class="btn btn-sm btn-outline">
-                                                    <div class="col-md-3 col-sm-4"> <i class="fa fa-align-left"></i></div>
-                                                </button>
-                                            </a>
-                                        </div>
-                                    </li>
-                                }
-                            </ol>
+                                                <a href="/Task/TaskDetail/@task.TaskId" target="_blank">
+                                                    <button type="button" class="btn btn-sm btn-outline">
+                                                        <div class="col-md-3 col-sm-4"> <i class="fa fa-align-left"></i></div>
+                                                    </button>
+                                                </a>
+                                            </div>
+                                        </li>
+                                    }
+                                </ol>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
-
-    <div id="drag-container">
-        <div id="item-1" class="item">Item 1</div>
-        <div id="item-2" class="item">Item 2</div>
-        <div id="item-3" class="item">Item 3</div>
+            }
+        </div>
     </div>
 
 
+    <!-- core js file -->
+    <script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
-   <!-- core js file -->
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/plugin/nestable/jquery.nestable.min.js"></script>
+    <script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/plugin/nestable/jquery.nestable.min.js"></script>
 
     <!-- page js file -->
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+    <script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
 
 
     <script>
 
 
-        var container = document.querySelector('.container');
-        dragula([container], {
-            moves: function (el, container, handle) {
-                return handle.classList('item');
-            }
-        });
+
+        //$(function () {
+        //    $('.dd').nestable({
+        //        maxDepth: 1 // Sadece tek seviye derinlikte sürükleme izni verir--parent child ilişkisini kapattı
+        //    }).on('change', function () {
+        //        var $this = $(this);
+        //        var serializedData = window.JSON.stringify($($this).nestable('serialize'));
+
+        //        $this.parents('div.body').find('textarea').val(serializedData);
+
+        //        $this.find('.dd-item').each(function () {
+        //            var $item = $(this);
+        //            var taskId = $item.data('taskid');
+        //            var newStatusId = $item.data('newstatusid');
+
+        //            // Kartın data- attribute'larından status değişikliklerini kontrol etme
+        //            var originalStatusId = $item.parents('.dd-list').data('statusid');
+        //            if (newStatusId !== originalStatusId) {
+        //                // Kartın yeni status değişikliği varsa, AJAX isteği gönderme
+        //                $.ajax({
+        //                    url: '/Task/UpdateStatus',
+        //                    method: 'POST',
+        //                    data: { taskId: taskId, newStatusId: newStatusId },
+        //                    success: function (response) {
+        //                        console.log('Görev durumu başarıyla güncellendi.');
+        //                    },
+        //                    error: function (xhr, status, error) {
+        //                        console.error('Görev durumu güncellenirken bir hata oluştu: ' + error);
+        //                    }
+        //                });
+        //            }
 
 
-        $(function () {
-            $('.dd').nestable();
+        //        });
+        //    });
+        //});
 
-            $('.dd').on('change', function () {
-                var $this = $(this);
-                var serializedData = window.JSON.stringify($($this).nestable('serialize'));
 
-                $this.parents('div.body').find('textarea').val(serializedData);
-            });
-        });
+        //$(function () {
+        //    $('.dd').nestable();
 
+        //    $('.dd').on('change', function () {
+        //        var $this = $(this);
+        //        var serializedData = window.JSON.stringify($this.nestable('serialize'));
+        //        $this.parents('div.body').find('textarea').val(serializedData);
+
+        //        // AJAX isteği ile görev durumu değişikliğini sunucuya gönderme
+        //        $this.find('.dd-item').each(function () {
+        //            var taskId = $(this).data('taskid');
+        //            var newStatusId = $(this).data('newstatusid');
+
+        //            $.ajax({
+        //                url: '/Task/UpdateStatus',
+        //                method: 'POST',
+        //                data: { taskId: taskId, newStatusId: newStatusId },
+        //                success: function (response) {
+        //                    console.log('Görev durumu başarıyla güncellendi.');
+        //                },
+        //                error: function (xhr, status, error) {
+        //                    console.error('Görev durumu güncellenirken bir hata oluştu: ' + error);
+        //                }
+        //            });
+        //        });
+        //    });
+        //});
+
+
+        //$(function () {
+        //    $('.dd').nestable();
+
+        //    $('.dd').on('change', function () {
+        //        var $this = $(this);
+        //        var serializedData = window.JSON.stringify($($this).nestable('serialize'));
+
+        //        $this.parents('div.body').find('textarea').val(serializedData);
+        //    });
+        //});
+   </script>
+
+    <script>
         function confirmDelete(button) {
             // Kullanıcıya silme işlemini onaylamasını sor
             if (confirm('Are you sure you want to delete this Task?')) {
@@ -186,7 +264,25 @@
 
 
     </script>
-
+    <script>
+        // Durum sırasını belirlemek için fonksiyon
+        function GetStatusOrder(status) {
+            switch (status) {
+                case "Değerlendirilen":
+                    return 1;
+                case "İletişim":
+                    return 2;
+                case "Teklif":
+                    return 3;
+                case "Demo":
+                    return 4;
+                case "Görüşmeler":
+                    return 5;
+                default:
+                    return 6;
+            }
+        }
+    </script>
 
 </body>
 </html>

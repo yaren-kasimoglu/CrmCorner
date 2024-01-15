@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Models;
 
-public partial class CrmcornerContext : DbContext
+public partial class CrmCornerContext : DbContext
 {
-    public CrmcornerContext()
+    public CrmCornerContext()
     {
     }
 
-    public CrmcornerContext(DbContextOptions<CrmcornerContext> options)
+    public CrmCornerContext(DbContextOptions<CrmCornerContext> options)
         : base(options)
     {
     }
@@ -38,13 +38,13 @@ public partial class CrmcornerContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
+        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.16-mariadb"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .UseCollation("latin1_swedish_ci")
-            .HasCharSet("latin1");
+            .UseCollation("utf8mb4_unicode_ci")
+            .HasCharSet("utf8mb4");
 
         modelBuilder.Entity<Calendar>(entity =>
         {
@@ -64,7 +64,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("Company");
+            entity
+                .ToTable("Company")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.HasIndex(e => e.IdEmployee, "IdEmployee");
 
@@ -96,7 +99,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("Customer");
+            entity
+                .ToTable("Customer")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.HasIndex(e => e.CompanyId, "FK_Customer_Company");
 
@@ -132,7 +138,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.IdDepartment).HasName("PRIMARY");
 
-            entity.ToTable("Department");
+            entity
+                .ToTable("Department")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.Property(e => e.IdDepartment)
                 .HasColumnType("int(11)")
@@ -158,7 +167,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.IdEmployee).HasName("PRIMARY");
 
-            entity.ToTable("Employee");
+            entity
+                .ToTable("Employee")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.HasIndex(e => e.IdPositions, "FK_Employee_Position");
 
@@ -205,6 +217,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.IdPositions).HasName("PRIMARY");
 
+            entity
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
+
             entity.Property(e => e.IdPositions)
                 .HasColumnType("int(11)")
                 .HasColumnName("idPositions");
@@ -225,10 +241,7 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.StatusId).HasName("PRIMARY");
 
-            entity
-                .ToTable("Status")
-                .HasCharSet("utf8mb4")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("Status");
 
             entity.Property(e => e.StatusId)
                 .HasColumnType("int(11)")
@@ -242,10 +255,7 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.TaskId).HasName("PRIMARY");
 
-            entity
-                .ToTable("TaskComp")
-                .HasCharSet("utf8mb4")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("TaskComp");
 
             entity.HasIndex(e => e.CustomerId, "FK_Customer");
 
@@ -310,9 +320,12 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.LogId).HasName("PRIMARY");
 
-            entity.ToTable("TaskCompLog");
+            entity
+                .ToTable("TaskCompLog")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
-            entity.HasIndex(e => e.TaskId, "TaskId");
+            entity.HasIndex(e => e.TaskId, "FK_TaskCompLog_TaskComp");
 
             entity.HasIndex(e => e.UpdatedBy, "UpdatedBy");
 
@@ -335,7 +348,8 @@ public partial class CrmcornerContext : DbContext
 
             entity.HasOne(d => d.Task).WithMany(p => p.TaskCompLogs)
                 .HasForeignKey(d => d.TaskId)
-                .HasConstraintName("TaskCompLog_ibfk_1");
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_TaskCompLog_TaskComp");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.TaskCompLogs)
                 .HasForeignKey(d => d.UpdatedBy)

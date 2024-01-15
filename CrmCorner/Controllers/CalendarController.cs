@@ -7,12 +7,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 
+
 namespace CrmCorner.Controllers
 {
     public class CalendarController:Controller
     {
-        private readonly CrmcornerContext _context;
-        public CalendarController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+        public CalendarController(CrmCornerContext context)
         {
             _context = context;
         }
@@ -22,9 +23,9 @@ namespace CrmCorner.Controllers
             List<Calendar> calendarItems = calendars
                .Select(c => new Calendar
                {
-                    Date=c.Date,
-                    Id=c.Id,
-                    Title=c.Title
+                   Date = c.Date,
+                   Id = c.Id,
+                   Title = c.Title
                }).ToList();
             List<Calendar> calendarItemsFilter = calendars
          .Select(c => new Calendar
@@ -32,7 +33,7 @@ namespace CrmCorner.Controllers
              Date = c.Date,
              Id = c.Id,
              Title = c.Title,
-             Description=c.Description
+             Description = c.Description
          }).ToList();
             ViewBag.Calendar = calendars;
             ViewBag.CalendarFilter = calendarItemsFilter.Take(5);
