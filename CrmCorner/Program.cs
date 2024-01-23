@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
+
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 //builder.Services.AddDbContext<CrmCornerContext>(x=>x.UseSqlServer(builder.Configuration.GetConnectionString("CrmConnection")));
