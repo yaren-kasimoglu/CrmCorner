@@ -4,17 +4,24 @@
     ViewData["Title"] = "ChatApp";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
-<div id="main-content">
-    <div class="container-fluid">
-        <div class="row clearfix">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="chat_app d-flex">
-                        <div class="people_list">
-                            @using (Html.BeginForm("ChatApp", "ChatApp", FormMethod.Get))
+<div class="container-fluid">
+    <div class="row clearfix">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="chat_app d-flex">
+                    <div class="people_list">
+                        @using (Html.BeginForm("ChatApp", "ChatApp", FormMethod.Get))
                             {
-                                @Html.TextBox("search") <input type="submit" value=" Search" />
+                            <div class="input-group p-3">
+
+                                <form id="navbar-search" class="navbar-form search-form position-relative d-none d-md-block">
+                                    @Html.TextBox("search", null, new { @class = "form-control", @placeholder = "Search here." })
+                                    <button class="btn btn-secondary" type="submit"><i class="fa fa-search"></i></button>
+                                </form>
+                                
+                            </div>
                             }
+
                             <ul class="list-unstyled chat-list mb-0">
                                 @foreach (var item in Model)
                                 {
@@ -22,52 +29,51 @@
                                         <img class="avatar rounded" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/user.png" alt="avatar" />
                                         <div id="deneme" class="about ps-3">
                                             <div class="fs-6">@item.EmployeeName</div>
-                                            @*<div class="small text-muted"><i class="fa fa-circle me-2"></i>left 7 mins ago</div>*@
+                                            <div class="small text-muted"><i class="fa fa-circle text-primary me-2"></i>online</div>
                                         </div>
                                     </li>
                                 }
                             </ul>
                         </div>
-                        <div class="chat">
-                            <div class="chat-header d-flex justify-content-between align-items-center p-3 border-bottom">
-                                <div class="left d-flex">
-                                    <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                        <img class="avatar rounded" src="../dist/assets/images/xs/avatar2.jpg" alt="avatar" />
-                                    </button>
-                                    <div class="chat-about ps-2">
-                                        <h6 class="mb-0" id="selectedUser"></h6>
-                                        @*<small class="text-muted">Last seen: 2 hours ago</small>*@
-                                    </div>
-                                </div>
-                                <div class="right d-md-block d-none text-end">
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-camera"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-video-camera"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-cog"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-question"></i></a>
+                    <div class="chat">
+                        <div class="chat-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                            <div class="left d-flex">
+                                <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                    <img id="showOrHiddenpng" style="visibility:collapse" class="avatar rounded" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/user.png" alt="avatar" />
+                                </button>
+                                <div class="chat-about ps-2">
+                                    <h6 class="mb-0" id="selectedUser"></h6>
+                                    @*<small class="text-muted">Last seen: 2 hours ago</small>*@
                                 </div>
                             </div>
-                            <div id="showOrHidden" style="visibility:collapse" >
-                                <div class="chat-history p-3">
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="clearfix">
-                                            <div class="message-data text-end mb-3 me-3">
-                                                <img class="avatar sm rounded-circle" src="../dist/assets/images/xs/avatar7.jpg" alt="avatar">
-                                            </div>
-                                            @*<span class="mb-0" id="sendDate"></span>*@
-                                            <div class="message other-message d-inline-block float-end" id="messagesList"> </div>
-                                        </li>
+                            <div class="right d-md-block d-none text-end">
+                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-camera"></i></a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-video-camera"></i></a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-cog"></i></a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-question"></i></a>
+                            </div>
+                        </div>
+                        <div id="showOrHidden" style="visibility:collapse">
+                            <div class="chat-history p-3">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="clearfix">
+                                        @*<div class="message-data text-end mb-3 me-3">
+                                            <img class="avatar sm rounded-circle" src="../dist/assets/images/xs/avatar7.jpg" alt="avatar">
+                                        </div>*@
+                                        <span class="mb-0" id="sendDate"></span>
+                                        <div class="message other-message d-inline-block float-end" id="messagesList"> </div>
+                                    </li>
 
-                                    </ul>
-                                </div>
-                                <div class="chat-message p-3 border-top">
-                                    <div class="input-group">
-                                        <span id="sendButton" class="input-group-text"><i class="fa fa-paper-plane"></i></span>
-                                        <input id="messageInput" type="text" class="form-control" placeholder="Enter text here..." aria-label="Enter text here...">
+                                </ul>
+                            </div>
+                            <div class="chat-message p-3 border-top">
+                                <div class="input-group">
+                                    <span id="sendButton" class="input-group-text"><i class="fa fa-paper-plane"></i></span>
+                                    <input id="messageInput" type="text" class="form-control" placeholder="Enter text here..." aria-label="Enter text here...">
 
-                                        @*<div class="col-6">
-                        <input type="button" id="sendButton" value="Send Message" />
-                    </div>*@
-                                    </div>
+                                    @*<div class="col-6">
+                                            <input type="button" id="sendButton" value="Send Message" />
+                                        </div>*@
                                 </div>
                             </div>
                         </div>
@@ -75,13 +81,13 @@
                 </div>
             </div>
         </div>
-
     </div>
+
 </div>
 
 
 
-<!-- Modal -->
+    <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModal" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -113,18 +119,19 @@
         </div>
     </div>
 </div>
-<!-- core js file -->
-<script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-<!-- page js file -->
-<script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-<script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/chat.js"></script>
-<script>function getPaging(str) {
-    document.getElementById("selectedUser").innerHTML = str;
-    document.getElementById("showOrHidden").style.visibility = "visible";
-}
 
-</script>
+        <script src="~/js/signalr/dist/browser/signalr.js"></script>
+        <script src="~/js/chat.js"></script>
+        @*core js file *@
+        <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+        @*page js file*@
+        <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+        <script>function getPaging(str) {
+                document.getElementById("selectedUser").innerHTML = str;
+                document.getElementById("showOrHidden").style.visibility = "visible"; 
+                document.getElementById("showOrHiddenpng").style.visibility = "visible"; 
+            }</script>
 
 
 
