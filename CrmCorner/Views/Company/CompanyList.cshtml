@@ -13,7 +13,7 @@
         <tr>
             <th scope="col">Company Name</th>
             <th scope="col">Company Email</th>
-         @*   <th scope="col">Status</th>*@
+            @*   <th scope="col">Status</th>*@
             <th scope="col">Responsible</th>
             <th scope="col">Operations</th>
         </tr>
@@ -26,15 +26,15 @@
                 <td>@item.CompanyName</td>
                 <td>@item.CompanyEmail</td>
                 @*<td>
-                    @if (item.Status != null)
-                    {
-                        @item.Status.StatusName
-                    }
-                    else
-                    {
-                        <span class="text-danger">No Status</span>
-                    }
-                </td>*@
+            @if (item.Status != null)
+            {
+            @item.Status.StatusName
+            }
+            else
+            {
+            <span class="text-danger">No Status</span>
+            }
+            </td>*@
                 <td>
                     @if (item.IdEmployeeNavigation != null)
                     {
@@ -51,9 +51,9 @@
                             <i class="fa fa-edit"></i>
                         </button>
                     </a>
-                 @*   <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-companyid="@item.Id" onclick="confirmDelete(this)">
-                        <i class="fa fa-trash-o"></i>
-                    </button>*@
+                    @*   <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-companyid="@item.Id" onclick="confirmDelete(this)">
+                <i class="fa fa-trash-o"></i>
+                </button>*@
                 </td>
 
             </tr>
@@ -63,13 +63,13 @@
 
 
 <!-- core js file -->
-  <script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="~/CCThema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
 <!-- page js file -->
-<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+<script src="~/CCThema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
 
-<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
+<script src="~/CCThema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
 
 <script>
     function confirmDelete(button) {

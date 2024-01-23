@@ -463,7 +463,37 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public IActionResult UpdateTaskStatus([FromBody] Dictionary<string, int> taskData)
+        {
+            try
+            {
+                if (taskData != null && taskData.ContainsKey("taskId") && taskData.ContainsKey("newStatusId"))
+                {
+                    int taskId = taskData["taskId"];
+                    int newStatusId = taskData["newStatusId"];
 
+                    var taskToUpdate = _context.TaskComps.FirstOrDefault(t => t.TaskId == taskId);
+
+                    if (taskToUpdate != null)
+                    {
+                        taskToUpdate.StatusId = newStatusId;
+                        _context.SaveChanges();
+
+                        return Json(new { success = true });
+                    }
+
+                    return Json(new { success = false, errorMessage = "Görev bulunamadı." });
+                }
+
+                return Json(new { success = false, errorMessage = "Geçersiz istek formatı." });
+            }
+            catch (Exception ex)
+            {
+                // Loglama veya hata mesajını inceleme amaçlı
+                return Json(new { success = false, errorMessage = "Bir hata oluştu. Hata detayı: " + ex.Message });
+            }
+        }
     }
 
 }

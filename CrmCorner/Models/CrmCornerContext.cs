@@ -38,7 +38,7 @@ public partial class CrmCornerContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.16-mariadb"));
+        => optionsBuilder.UseMySql("server=94.73.148.165;database=u1613932_db877;user=u1613932_user877;password=@TOSf4:8c8@Wb6n:", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.16-mariadb"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -145,7 +145,8 @@ public partial class CrmCornerContext : DbContext
 
             entity.Property(e => e.IdDepartment)
                 .HasColumnType("int(11)")
-                .HasColumnName("idDepartment");
+                .HasColumnName("idDepartment")
+                 .IsRequired();
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("current_timestamp()")
                 .HasColumnType("datetime");

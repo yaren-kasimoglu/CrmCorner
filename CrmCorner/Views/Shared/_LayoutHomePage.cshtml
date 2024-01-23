@@ -11,15 +11,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="CRMCorner HR & Project Admin Dashboard Template with Bootstrap 5x">
         <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
-        <link rel="icon" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/CCThema/favicon.ico" type="image/x-icon">
         <!-- MAIN CSS -->
-        <link href="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
+        <link href="~/CCThema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
     </head>
     <body>
         <div id="layout" class="theme-cyan">
             <div id="wrapper">
                 <!-- Page Loader -->
-                <div class="page-loader-wrapper text-center">
+@*                <div class="page-loader-wrapper text-center">
                     <div class="loader">
                         <svg class="p-3 bg-light rounded" width="120px" viewBox="0 0 85 25">
                             <path d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
@@ -31,10 +31,10 @@
                 V4.5h4.3c2.2,0,3.9,0.6,5.1,1.8S82.5,9.2,82.5,11.3z M80.8,11.4c0-1.8-0.5-3.2-1.4-4.1s-2.3-1.4-4.1-1.4h-2.4v11.2h2
                 c1.9,0,3.4-0.5,4.4-1.4S80.8,13.3,80.8,11.4z" />
                         </svg>
-                        <div class="h5 fw-light mt-3">Please wait</div>
-                    </div>
+                    @*    <div class="h5 fw-light mt-3">Please wait</div>*@
+                 @*   </div>
                 </div>
-
+*@
                 <!-- top navbar -->
                 <nav class="navbar navbar-fixed-top">
                     <div class="container-fluid">
@@ -55,10 +55,13 @@
                         c1.9,0,3.4-0.5,4.4-1.4S80.8,13.3,80.8,11.4z" />
                         </svg>
                         </a>*@
-                            <img src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/saas1logo.png" width="100px" />
+                 
+                            <img src="~/CCThemae/bootstrap5/dist/assets/images/saas1logo.png" width="80px" />
+                         
                         </div>
-                        
+                    
                         <div class="d-flex flex-grow-1 align-items-center">
+                           
                             @*       <div class="d-flex">
                             <ul class="nav nav-pills me-4 ms-2 d-none d-lg-block">
                             <li class="nav-item dropdown">
@@ -310,7 +313,7 @@
 
                                     @*<li><a href="index2.html"><i class="fa fa-tachometer"></i><span>Dashboard</span></a></li>
                                     <li><a href="app-inbox.html"><i class="fa fa-envelope-o"></i><span>Inbox App</span></a></li>*@
-                                    <li><a href="app-chat.html"><i class="fa fa-comments"></i><span>Chat App</span></a></li>
+                                    <li><a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Chat App</span></a></li>
                                     @*<li>
 
                                     <li><a href="index2.html"><i class="fa fa-tachometer"></i><span>Dashboard</span></a></li>
@@ -555,10 +558,10 @@
         </div>
     </body>
     <!-- core js file -->
-@*   <script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>*@
+@*   <script src="~/CCThema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>*@
 
     <!-- page js file -->
-    @*<script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>*@
- <script src="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/js/pages/index.js"></script>
+    @*<script src="~/CCThema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>*@
+    <script src="~/CCThema/bootstrap5/js/pages/index.js"></script>
 </div>
 </html>
