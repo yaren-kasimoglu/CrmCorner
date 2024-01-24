@@ -36,15 +36,16 @@
 
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- VENDOR CSS -->
-    <link href="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/plugin/nestable/jquery-nestable.css" rel="stylesheet" />
+    <link href="~/CCThema/bootstrap5/dist/assets/plugin/nestable/jquery-nestable.css" rel="stylesheet" />
 
     <!-- MAIN CSS -->
-    <link href="~/themeforest-iv5iqlta-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
+    <link href="~/CCThema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
 
 </head>
 <body>
 
     <div id="layout" class="theme-cyan">
+
         @{
             // Null olmayan ve istenen alanda null olmayan verileri filtreleme
             var validTasks = Model.Where(task => task.Status != null && task.Status.StatusName != null);
@@ -54,7 +55,6 @@
             .OrderBy(group => GetStatusOrder(group.Key))
             .ToArray();
         }
-
         @*@{
         // var statusGroups = Model.GroupBy(task => task.Status.StatusName);
 
@@ -65,32 +65,38 @@
         <div class="row g-3">
             @foreach (var statusGroup in statusGroups)
             {
-                <div class="col-lg-3 col-md-4 col-sm-6"@* style="width:500px"*@>
+                <div class="col-lg-3 col-md-4 col-sm-6" @* style="width:500px"*@>
                     @{
                         string statusClass = "";
+                        string borderColor = "";
                         switch (statusGroup.Key)
                         {
                             case "Değerlendirilen":
                                 statusClass = "planned_task";
+                                borderColor = "#fd7e14";
                                 break;
                             case "İletişim":
                                 statusClass = "progress_task";
+                                borderColor = "#198754";
                                 break;
                             case "Teklif":
                                 statusClass = "completed_task";
+                                borderColor = "#0d6efd";
                                 break;
                             case "Demo":
                                 statusClass = "planned_task";
+                                borderColor = "#FED049";
                                 break;
                             case "Görüşmeler":
                                 statusClass = "progress_task";
+                                borderColor = "#2D6187";
                                 break;
                             default:
                                 statusClass = "";
                                 break;
                         }
                     }
-                    <div class="card mb-4 @statusClass">
+                    <div class="card mb-4 @statusClass" @*style="border-color:@borderColor"*@>
                         <div class="card-header">
                             <h6 class="card-title">@statusGroup.Key</h6>
                             <ul class="header-dropdown">
@@ -108,7 +114,7 @@
                                     @foreach (var task in statusGroup)
                                     {
                                         <li class="dd-item" data-taskid="@task.TaskId" data-newstatusid="@task.StatusId">
-                                            <div class="dd-handle">
+                                            <div class="dd-handle" style="border-color:@borderColor">
                                                 <h6>@task.Title</h6>
                                                 <p>
                                                     @if (task.CustomerId != null)
@@ -154,6 +160,7 @@
             }
         </div>
     </div>
+
 
 
     <!-- core js file -->
