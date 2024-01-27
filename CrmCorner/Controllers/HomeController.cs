@@ -1,4 +1,6 @@
 ﻿using CrmCorner.Models;
+using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -13,15 +15,47 @@ namespace CrmCorner.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly UserManager<AppUser> _userManager;
+
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager)
         {
             _logger = logger;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
         {
+            return View();
+        }
+
+        public IActionResult SignUp()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SignUp(SignUpViewModel request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+            var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, Email = request.Email, PhoneNumber = request.Phone }, request.Password);
+
+      
+
+            if (identityResult.Succeeded)
+            {
+                TempData["SucceesMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
+                return View();                 
+            }
+            foreach (IdentityError item in identityResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, item.Description);
+            }
+
             return View();
         }
 

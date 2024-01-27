@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Models;
 
-public partial class CrmCornerContext : DbContext
+public partial class CrmCornerContext : IdentityDbContext<AppUser,AppRole,string>
 {
     public CrmCornerContext()
     {
@@ -33,7 +35,7 @@ public partial class CrmCornerContext : DbContext
 
     public virtual DbSet<TaskCompLog> TaskCompLogs { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<User> User { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -42,9 +44,15 @@ public partial class CrmCornerContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<IdentityUserLogin<string>>().HasNoKey();
+        modelBuilder.Entity<IdentityUserRole<string>>().HasNoKey();
+        modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
         modelBuilder
             .UseCollation("utf8mb4_unicode_ci")
             .HasCharSet("utf8mb4");
+
+
+       
 
         modelBuilder.Entity<Calendar>(entity =>
         {

@@ -1,0 +1,654 @@
+﻿import {
+    UserAuthListComponent
+}
+
+from './../../../setting-management/pages/user-auth-list/user-auth-list.component';
+import {
+    THIS_EXPR
+}
+
+from '@angular/compiler/src/output/output_ast';
+import {
+    Component, Input, OnChanges, OnDestroy, OnInit
+}
+
+from '@angular/core';
+import {
+    log
+}
+
+from 'console';
+import {
+    confirm
+}
+
+from 'devextreme/ui/dialog';
+import notify from 'devextreme/ui/notify';
+import {
+    Subscription
+}
+
+from 'rxjs';
+import {
+    CurrencyService
+}
+
+from '../../../policy-management/services/currency.service';
+import {
+    ColumnDto
+}
+
+from '../../models/ColumnDto';
+import {
+    DeclarationSelection
+}
+
+from '../../models/declaration-selection.model';
+import {
+    InsuranceDeclarationDto
+}
+
+from '../../models/InsuranceDeclarationDto';
+import {
+    InsuranceDeclarationPeriodExchangeRateDTO
+}
+
+from '../../models/InsuranceDeclarationPeriodExchangeRateDTO';
+import {
+    ProjectDto
+}
+
+from '../../models/ProjectDto';
+import {
+    SubBranchDTO
+}
+
+from '../../models/SubBranchDTO';
+import {
+    TbBedelDonemleri
+}
+
+from '../../models/TbBedelDonemleri';
+import {
+    DeclarationService
+}
+
+from '../../services/declaration.service';
+import {
+    AuthService
+}
+
+from '../../../../@core/services/auth.service';
+import {
+    environment
+}
+
+from '../../../../../environments/environment';
+import {
+    InsuranceDeclarationDocumentDTO
+}
+
+from '../../models/InsuranceDeclarationDocumentDTO';
+import {
+    InsuranceDeclarationDocumentSaveDTO
+}
+
+from '../../models/InsuranceDeclarationDocumentSaveDTO';
+import {
+    TbBedelEvraklari
+}
+
+from '../../models/TbBedelEvraklari';
+import {
+    InsuranceDeclaraitonDocument
+}
+
+from '../../models/InsuranceDeclaraitonDocument';
+
+
+@Component({
+  selector: 'ngx-declaration-details',
+  templateUrl: './declaration-details.component.html',
+  styleUrls: ['./declaration-details.component.scss']
+})
+export class DeclarationDetailsComponent implements OnInit, OnDestroy {
+    @Input() readonly: boolean;
+    env = environment;
+    private _subBranchId: number;
+
+    @Input() get subBranchId() {
+        return this._subBranchId;
+    }
+
+    set subBranchId(value)
+
+{
+    this ._subBranchId = value;
+    this .getDescription();
+    this .getDynamicColumns();
+}
+
+private _organizationId: number;
+@Input()
+get organizationId() {
+    return this._organizationId;
+}
+
+set organizationId(value) {
+    this ._organizationId = value;
+    this .getDescription();
+}
+
+@Input() subBranch: SubBranchDTO = new SubBranchDTO();
+
+description: string = '';
+dynamicColumns: ColumnDto[] = [];
+dynamicCalculatedColumns: ColumnDto[] = [];
+
+
+documentName:string=null;
+isEditable : boolean =false;
+_isAdmin: boolean= false;
+periodId:number;
+base64:any;
+
+periods: TbBedelDonemleri[] = [];
+periodsRates: InsuranceDeclarationPeriodExchangeRateDTO[] = [];
+periodsRatesNew: InsuranceDeclarationPeriodExchangeRateDTO[] = [];
+
+insuranceDocumentList: InsuranceDeclaraitonDocument[]=[]
+insuranceDocumentListSave: InsuranceDeclarationDocumentDTO[]=[]
+declarationSaveDto= new InsuranceDeclarationDocumentSaveDTO();
+declarationList: InsuranceDeclarationDto[] = [];
+flattenColumns: ColumnDto[] = [];
+
+project: ProjectDto = new ProjectDto();
+
+currencyDataSource = [];
+loadingVisible = true;
+newProject = false;
+
+
+pattern = /[/\\?%*:|"<>]/g;
+documentForbiddenPattern = /[#$%&* ~ ]/g;
+
+uploadedFiles = [];
+uploadedFilesTemp = [];
+deletedDocumentNo=[];
+
+
+constructor( private service: DeclarationService, private currencyService: CurrencyService, private authService: AuthService, ) {
+}
+
+ngOnInit(): void {
+    this .authService.getLoginUser().subscribe(res => {
+      this._isAdmin = res['data'].roles.indexOf(1) > -1;
+    }) this.getLastPeriods();
+    this .getLastPeriodCurrencies();
+    this .getList();
+    this .currencyService.getMappedList().subscribe(res => {
+      this.currencyDataSource = res;
+    })
+}
+
+ngOnDestroy() {
+}
+
+
+filterDeletedFiles(file: InsuranceDeclarationDocumentDTO) {
+    return !file.isDeleted;
+}
+
+recalculate() {
+    this .flattenColumns = [];
+    this .declarationList.forEach(element => {
+      element.columns.forEach(item => {
+        if (item.columnTypeId == 2 || item.columnTypeId == 3) {
+          item.value = Number(item.value)
+        }
+
+        item.periodId = element.insuranceDeclarationPeriodId;
+        item['currencyId'] = element.currencyId;
+        this.flattenColumns.push(item);
+      });
+    });
+}
+
+getInsuranceDocuments(peroidId) {
+    return this.insuranceDocumentList.filter(x=>x.bedelDonemiId == peroidId);
+}
+
+deleteFile(documentId) {
+    confirm('Kaydı silmek istediğinizden emin misiniz ?', 'Silme Onayı').then(res => {
+      if (res) {
+        var upladDoc = this.insuranceDocumentList.find(x => x.documentID == documentId);
+        const documents = this.insuranceDocumentList.filter(x=>x.documentID == documentId);
+
+        documents.forEach(element => {
+          const tmpIndex = this.insuranceDocumentList.indexOf(element);
+          this.insuranceDocumentList[tmpIndex].base64 = null;
+          this.insuranceDocumentList[tmpIndex].documentName = '';
+          this.insuranceDocumentList[tmpIndex].documentID = 0;
+          this.insuranceDocumentList[tmpIndex].createdDate = null;
+          this.insuranceDocumentList[tmpIndex].userName = null;
+          this.insuranceDocumentList[tmpIndex].isChecked = false;
+        });
+        this.uploadedFilesTemp.splice(this.uploadedFilesTemp.indexOf(x => x.documentId == upladDoc.documentID), 1);
+        this.uploadedFiles = [];
+      }
+    });
+}
+
+
+getDescription() {
+    if (this.subBranchId && this.organizationId)
+
+{
+    this .service.getSubBrancDescription(this.subBranchId, this.organizationId).subscribe(res => {
+        this.description = res.data;
+      })
+}
+
+else {
+    this .description = '';
+}
+
+}
+
+getDynamicColumns() {
+    this .service.getSubBrancDynamicColumns(this.subBranchId).subscribe(res => {
+      this.dynamicColumns = res.data;
+
+    })
+}
+
+getList() {
+    this .loadingVisible = true;
+    this .service.getInsuranceDeclarations(this.subBranchId, 2, this.organizationId, 2).subscribe(res => {
+      this.declarationList = res.data;
+      this.flattenColumns = [];
+      this.declarationList.forEach(element => {
+        element.columns.forEach(item => {
+          if (item.columnTypeId == 2 || item.columnTypeId == 3) {
+            item.value = Number(item.value)
+          }
+
+          item.periodId = element.insuranceDeclarationPeriodId;
+          item['currencyId'] = element.currencyId;
+          this.flattenColumns.push(item);
+        });
+      });
+      setTimeout(() => {
+        this.loadingVisible = false;
+      }, 2500);
+    }) this.getDocuments();
+}
+
+
+
+getDocuments() {
+    // this.periodId=this.declarationList.find(x=>x.organizationId==this.organizationId && x.subBranchId==this.subBranchId).insuranceDeclarationPeriodId;
+    this .service.getDocuments(this.organizationId, this.subBranchId).subscribe(res=> {
+        this.insuranceDocumentList=res.data;
+      });
+}
+
+getLastPeriods() {
+    this .service.getLastPeriods(2).subscribe(res => {
+      this.periods = res.data;
+      for(let period of this.periods){
+        if(!this.isEditable){
+        this.isEditable = new Date(period.bitisTarihi) > new Date();
+        }
+        this.service.GetPeriodRatesBy(period.id).subscribe(result => {
+          for(let rate of result.data){
+            this.periodsRatesNew.push({
+              currencyId: rate.currencyId,
+              rate: rate.rate,
+              periodId: period.id,
+              currencyCode: rate.currencyCode
+            });
+          }
+
+          if (!this.periodsRatesNew.find(x => x.currencyId == 1)) {
+            this.periodsRatesNew.push({
+              currencyId: 1,
+              rate: 1,
+              periodId: period.id,
+              currencyCode: 'TRY'
+            });
+          }
+        })
+      }
+    })
+}
+
+getLastPeriodCurrencies() {
+    this .service.getLastPeriodRates().subscribe(res => {
+      this.periodsRates = res.data;
+      if (!this.periodsRates.find(x => x.currencyId == 1)) {
+        this.periodsRates.push({
+          currencyId: 1,
+          rate: 1,
+          periodId: 0,
+          currencyCode: 'TRY'
+        });
+      }
+
+    })
+}
+
+getTotal(column: ColumnDto, period: TbBedelDonemleri) {
+    let total = 0;
+    const elems = document.querySelectorAll(`[column="${column.columnId}"][period="${period.id}"][subBranchId="${this.subBranchId}"]`);
+    elems .forEach(element => {
+      var newValue=Number(element.getAttribute('aria-valuenow'));
+      if (!Number.isNaN(newValue))
+      {
+        total = total + newValue;
+      }
+    });
+    total = Math.round(total *100)/100 let nf = new Intl.NumberFormat('tr-TR');
+    var list = new Array();
+    list =total.toString().split('.');
+    list [0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    if(list[1] == null)
+
+{
+    return nf.format(list[0]);
+}
+
+else {
+    return nf.format(total);
+}
+
+// if (this.flattenColumns.length == 0) {
+    // return 0;
+    //
+}
+
+// const filtered = this.flattenColumns.filter(x => x.columnId == column.column1Id // && x.periodId == period.id);
+
+// if (filtered.length == 0) {
+    // return 0;
+    //
+}
+
+// return filtered.map(x => Number(x.value) * this.getRate(x['currencyId']))
+// .reduce((a, x) => a + x) / this.getRate(this.subBranch.currencyID);
+}
+
+filterSummary(column: ColumnDto) {
+    return column.isSummary
+}
+
+filterComputeType(column: ColumnDto) {
+    return column.columnTypeId;
+}
+
+trackByFn(index, item) {
+    return index
+}
+
+getColumnValue(item: InsuranceDeclarationDto, columnId, dto: ColumnDto, i) {
+    // edit edilen kolonlar // Beklenen columnlar örneğin 4 adet olduğunda dinamik olarak value bind için column index bulmak gerekiyor fakat birçok column eksik olduğundan eğer index yoksa ekliyoruz. let colVal = item.columns.findIndex(x => x.columnId == columnId);
+    if (colVal == -1)
+
+{
+    const a = new ColumnDto();
+    a .value = 0;
+    a .id = columnId;
+    a .columnId = columnId;
+    a .computeTypeId = dto.computeTypeId;
+    item .columns.push(a) colVal = item.columns.length - 1;
+}
+
+return colVal;
+}
+
+// toplama ve çıkartma yapılan dinakik kolonlar hesaplanıyor
+calculateValue(column: ColumnDto, item: InsuranceDeclarationDto, calculateLowerId = false) {
+    //const ownIndex = item.columns.findIndex(x => x.id == column.id);
+    try
+
+{
+    if (calculateLowerId)
+
+{
+    var filteredColumn= item?.columns.filter(x => x.columnId < column.columnId && x.columnTypeId==3);
+    if(filteredColumn!=null && filteredColumn.length > 0)
+
+{
+    return filteredColumn.map(x => Number(x.value)).reduce((a, x) => a + x);
+}
+
+return 0;
+}
+
+var columnList = item.columns.filter(x=> !Number.isNaN(x.columnTypeId) && x.columnTypeId==2 && !Number.isNaN(x.value) && x.columnId == column.column1Id);
+if(columnList.length == 0) {
+    columnList = item.columns.filter(x=> !Number.isNaN(x.columnTypeId) && x.columnTypeId==2 && !Number.isNaN(x.value));
+}
+
+let total = columnList.length == 0 ? 0 :columnList.map(x => Number(x.value)).reduce((a, x) => a + x);
+let col1: ColumnDto = item.columns.find(x => x.columnId == column.column1Id)
+let col2: ColumnDto = item.columns.find(x => x.columnId == column.column2Id)
+let subCol: ColumnDto = item.columns.find(x => x.columnId == item.subBranchId)
+
+if (col1 === undefined) {
+    col1 = this.dynamicColumns.find(x => x.columnId == column.column1Id);
+    if (col1)
+
+{
+    col1 .value = '' + this.calculateValue(col1, item) + '';
+}
+
+}
+
+if (!col2) {
+    col2 = new ColumnDto();
+    col2 .columnId = column.columnId;
+}
+
+let value = 0;
+switch (column.computeTypeId) {
+    case 1: // Toplama value = col1 === undefined && this.getNumber(col2?.value) ? total : this.getNumber(col2?.value) + (this.getNumber(col1?.value) ? this.getNumber(col1?.value) : col1 === undefined? total: 0);
+    break;
+    case 2: // Çıkarma value = col1 === undefined && this.getNumber(col2?.value) ? total : this.getNumber(col2?.value) - (this.getNumber(col1?.value) ? this.getNumber(col1?.value) : 0);
+    break;
+    case 3: // Çarpma value = col1 === undefined && this.getNumber(col2?.value) ? total : this.getNumber(col2?.value) * (this.getNumber(col1?.value) ? this.getNumber(col1?.value) : 0);
+    break;
+    case 4: if (!item.currencyId)
+
+{
+    value = 0;
+}
+
+value = ((!Number.isNaN(total)?total:0) * this.getRate(item?.currencyId,item.insuranceDeclarationPeriodId)) / this.getRate(this.subBranch.currencyID,item.insuranceDeclarationPeriodId);
+break;
+default:
+value = 0;
+break;
+}
+
+
+// let currentIndex = this.dynamicColumns.findIndex(x => x.columnId == column.columnId);
+// this.dynamicColumns[currentIndex].value = '' + value + '';
+// column.value = '' + value + '';
+// if (column.columnId == 47) {
+    //
+}
+
+if(Number.isNaN(value)) {
+    return 0;
+}
+
+return value;
+}
+
+catch(e) {
+    return 0;
+}
+
+}
+
+getNumber(val: any): number {
+    if (Number(val))
+
+{
+    return Number(val);
+}
+
+return 0;
+}
+
+getRate(currencyId,periodId) {
+    try
+
+{
+    const currency = this.periodsRatesNew.find(x => x.currencyId == currencyId && x.periodId==periodId);
+    if (currency)
+
+{
+    return currency.rate;
+}
+
+}
+
+catch {
+}
+
+var currencyLast = this.periodsRates.find(x => x.currencyId == currencyId);
+if (currencyLast) {
+    return currencyLast.rate;
+}
+
+return 0;
+}
+
+
+cancel() {
+    confirm('Vazgeçerseniz yaptığınız değişiklikler iptal olacaktır, yine de vazgeçmek istiyor musunuz ?', 'İşlem Onay').then(res => {
+      if (res) {
+        this.getList();
+        this.readonly = true;
+      }
+    })
+}
+
+delete(id, index) {
+    confirm('Kaydı silmek istediğinizden emin misiniz ?', 'Silme Onayı').then(res => {
+      this.loadingVisible = true;
+      if (res) {
+        this.service.deleteDeclaration(id).subscribe(res => {
+          var indexOfItem = this.declarationList.indexOf(this.declarationList.find(x=>x.id==id))
+          this.declarationList.splice(indexOfItem, 1);
+          setTimeout(() => {
+            this.loadingVisible = false;
+          }, 1500);
+        });
+      }
+    })
+}
+
+onFilesUploaded(e: any) {
+    const response = JSON.parse(e.request.response);
+    if (this.documentForbiddenPattern.test(e.file.name))
+
+{
+    notify('Poliçe dosyasında # $ % & * ~ özel karakterleri kullanılamaz!', 'error', 6000);
+    this .uploadedFiles.pop();
+}
+
+else {
+    if (response.data)
+
+{
+    var evraklar = new TbBedelEvraklari();
+    evraklar .altBransId =this.subBranchId;
+    evraklar .organizasyonId = this.organizationId;
+    evraklar .bedelDonemiId = this.periodId;
+    evraklar .dokuman.base64 = response.data;
+    evraklar .dokuman.fileName = e.file.name;
+    evraklar .dokuman.dokumanAdi = e.file.name;
+    this .insuranceDocumentListSave=[];
+    var insuranceDeclarationDocumentDTO =new InsuranceDeclarationDocumentDTO ();
+    insuranceDeclarationDocumentDTO .insuranceDeclarationDocuments =evraklar;
+    this .insuranceDocumentListSave.push(insuranceDeclarationDocumentDTO);
+    this .service.saveDocument(this.insuranceDocumentListSave).subscribe(res => {
+          if (res.data) {
+            this.readonly = true;
+            this.uploadedFilesTemp=[];
+            this.uploadedFiles=[];
+            this.getDocuments();
+            notify('Kaydetme işlemi başarıyla tamamlandı', 'success', 5000);
+          }
+
+        });
+}
+
+}
+}
+
+save() {
+    this .loadingVisible = true this.declarationSaveDto.insuranceDeclarationList = this.declarationList;
+    this .service.save(this.declarationSaveDto).subscribe(res => {
+      if (res.data) {
+        this.readonly = true;
+        this.uploadedFilesTemp=[];
+        this.uploadedFiles=[];
+
+        this.getDocuments();
+        notify('Kaydetme işlemi başarıyla tamamlandı', 'success', 5000);
+      }
+      this.loadingVisible = false;
+    }) //
+}
+
+//
+}
+)
+}
+
+deleteDocument(documentId) {
+    confirm('Kaydı silmek istediğinizden emin misiniz ?', 'Silme Onayı').then(res => {
+      this.loadingVisible = true;
+     if (res) {
+
+        this.service.deleteDocument(documentId).subscribe(res => {
+          var indexOfItem = this.insuranceDocumentList.indexOf(this.insuranceDocumentList.find(x=>x.documentID==documentId))
+             this.insuranceDocumentList.splice(indexOfItem, 1);
+          //this.getDocuments();
+          });
+          this.getList()
+      }
+      else{
+        this.getList();
+        this.getDocuments();
+      }
+     })
+}
+
+addProject() {
+    this .newProject = true;
+    this .service.getProject(this.subBranchId).subscribe(res => {
+      this.project = res.data;
+    })
+}
+
+closeProject() {
+    this .newProject = false;
+    this .readonly = true;
+}
+
+saveProject() {
+    this .newProject = false;
+    this .readonly = true;
+    this .project.organizationId = this.organizationId;
+    this .project.subBranchID = this.subBranchId;
+    this .service.saveProject(this.project).subscribe(res => {
+      this.project = new ProjectDto();
+      this.getList();
+    })
+}
+}

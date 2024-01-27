@@ -85,7 +85,7 @@ namespace CrmCorner.Controllers
 
 
 
-                _context.Users.Add(userCard);
+                _context.User.Add(userCard);
                 _context.SaveChanges();
             }
             else
@@ -108,7 +108,7 @@ namespace CrmCorner.Controllers
         {
             var username = userCard.Username;
             var password = HttpContext.Request.Form["Password"];
-            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            var user = _context.User.FirstOrDefault(u => u.Username == username);
 
             if (user != null && VerifyPassword(user, password))
             {
