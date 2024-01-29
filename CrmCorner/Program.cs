@@ -5,6 +5,7 @@ using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using static CrmCorner.Hubs.Hubs;
 using static Microsoft.EntityFrameworkCore.ServerVersion;
+using CrmCorner.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,18 +27,11 @@ builder.Services.AddDbContext<CrmCornerContext>(options =>
 {
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)));
 });
-builder.Services.AddIdentity<AppUser,AppRole>().AddEntityFrameworkStores<CrmCornerContext>().AddDefaultTokenProviders();
+
+builder.Services.AddIdentityWithExt();
+
+
 //builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CrmCornerContext>();
-
-//builder.Services.AddIdentity<AppUser, AppRole>(x =>
-//{
-//    x.Password.RequireDigit = false;
-//    x.Password.RequireUppercase = false;
-//    x.Password.RequireNonAlphanumeric = false;
-//    x.Password.RequiredLength = 4;
-//    x.Password.RequiredUniqueChars = 0;
-//}).AddEntityFrameworkStores<CrmCornerContext>();
-
 
 
 var app = builder.Build();

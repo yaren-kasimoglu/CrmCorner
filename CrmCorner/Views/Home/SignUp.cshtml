@@ -3,6 +3,12 @@
     ViewData["Title"] = "SignUp";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@section Scripts
+    {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+
+}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +20,7 @@
     <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
     <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
 
-    <link rel="icon" href="/CCTema/bootstrap5/dist/horizontal/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/CCTema/bootstrap5/favicon.ico" type="image/x-icon">
     <!-- VENDOR CSS -->
     <!-- MAIN CSS -->
     <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/css/main.css">
@@ -30,7 +36,6 @@
                     <div class="card shadow p-lg-4">
 
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
-
                         </div>
 
                         <div class="card-header">

@@ -1,33 +1,13 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <style>
-        html, body {
-            height: 10%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #363636;
-            background-size: cover;
-            background-repeat: no-repeat;
-        }
+<a href="/Login/Login" target="_self">
 
-        h3 {
-            font-family: Arial, sans-serif;
-        }
-    </style>
-</head>
-<body>
-    <a href="/Login/Login" target="_self">
-        <button type="button" class="btn btn-warning">Login Page</button>
-    </a>
-  
-</body>
-</html>
+    <a class="btn btn-warning" asp-controller="Customer" asp-action="CustomerAdd">Firma Kayıt</a>
+    <a class="btn btn-outline-warning" asp-controller="Home" asp-action="SignUp">Kullanıcı Kayıt</a>
+    <a class="btn btn-outline-success" @*asp-controller="Customer" asp-action="CustomerAdd"*@>Firma Giriş</a>
+    <a class="btn btn-success" @*asp-controller="Customer" asp-action="CustomerAdd"*@>Kullanıcı Giriş</a>
+
+</a>
