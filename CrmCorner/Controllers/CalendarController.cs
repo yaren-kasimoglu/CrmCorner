@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using System.Xml.Serialization;
+using System.Data.Common;
 
 
 namespace CrmCorner.Controllers
@@ -24,9 +25,16 @@ namespace CrmCorner.Controllers
             List<Calendar> calendarItems = calendars
                .Select(c => new Calendar
                {
+
+                    Date=c.Date,
+                    Id=c.Id,
+                    Title=c.Title,
+                    Description=c.Description
+
                    Date = c.Date,
                    Id = c.Id,
                    Title = c.Title
+
                }).ToList();
             List<Calendar> calendarItemsFilter = calendars
          .Select(c => new Calendar
@@ -52,17 +60,18 @@ namespace CrmCorner.Controllers
             return View(Calendar);
         }
         [HttpPost]
-        public IActionResult CalendarUpdate(Calendar Calendar,int id)
+        public IActionResult CalendarUpdate(int? ID,string title,string date)
         {
             var htmlAttributes = ViewBag.Id;
+            Calendar calendar = new Calendar { Id = ID.Value, Title = title ,Date=date};
             if (ModelState.IsValid)
             {
-                _context.Calendars.Update(Calendar);
+                _context.Calendars.Update(calendar);
                 _context.SaveChanges();
 
-                return RedirectToAction("Calendar");
+               return Json(new { Message = "success"});
             }
-            return View(Calendar);
+            return View("Calendar");
         }
 
         [HttpPost]
@@ -77,8 +86,21 @@ namespace CrmCorner.Controllers
             }
             _context.Calendars.Remove(calendar);
             _context.SaveChanges();
+           return Json(new { Message = "success" });
 
-            return View(Calendar);
+        }
+        [HttpPost]
+        public IActionResult GetDescription(int? ID)
+        {
+            Calendar calendar = _context.Calendars.Find(ID);
+
+
+            if (calendar == null)
+            {
+                return Json(new { Message = "error"});
+            }
+            return Json(new { Message = calendar.Description });
+
         }
 
     }
