@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using System.Xml.Serialization;
 using System.Data.Common;
-
+using System.Net.Mail;
 
 namespace CrmCorner.Controllers
 {
@@ -30,11 +30,6 @@ namespace CrmCorner.Controllers
                     Id=c.Id,
                     Title=c.Title,
                     Description=c.Description
-
-                   Date = c.Date,
-                   Id = c.Id,
-                   Title = c.Title
-
                }).ToList();
             List<Calendar> calendarItemsFilter = calendars
          .Select(c => new Calendar
@@ -101,6 +96,23 @@ namespace CrmCorner.Controllers
             }
             return Json(new { Message = calendar.Description });
 
+        }
+        [HttpPost]
+        public IActionResult sendEmail(int? ID)
+        {
+            MailMessage mail = new MailMessage();
+            mail.From = new MailAddress("oznurr03@hotmail.com");
+            mail.To.Add("oznurr03@gmail.com");//user
+            mail.Subject = "DENEME CALENDAR";
+            mail.Body = "TEST CALENDAR";
+            mail.IsBodyHtml = true;
+            SmtpClient smtp = new SmtpClient();
+            smtp.Credentials = new System.Net.NetworkCredential("oznurr03@hotmail.com","testdeneme123");
+            smtp.Port = 587;
+            smtp.Host = "smtp-mail.outlook.com";
+            smtp.EnableSsl = true;
+            smtp.Send(mail);
+            return View();
         }
 
     }
