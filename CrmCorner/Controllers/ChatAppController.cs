@@ -7,8 +7,8 @@ namespace CrmCorner.Controllers
 {
 	public class ChatAppController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public ChatAppController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+        public ChatAppController(CrmCornerContext context)
         {
             _context = context;
         }

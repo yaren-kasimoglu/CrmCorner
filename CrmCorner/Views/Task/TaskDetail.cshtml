@@ -14,32 +14,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="icon" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/horizontal/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/CCTema/bootstrap5/dist/horizontal/favicon.ico" type="image/x-icon">
     <!-- VENDOR CSS -->
-    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/dropify/css/dropify.min.css">
+    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/vendor/dropify/css/dropify.min.css">
 
 
     <!-- MAIN CSS -->
-    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/main.css">
-    <link rel="stylesheet" href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/css/color_skins.css">
+    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/css/main.css">
+    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/css/color_skins.css">
 </head>
 
 <body>
-
+@*
     <div class="block-header py-lg-4 py-3">
         <div class="row g-3">
             <div class="col-md-6 col-sm-12">
                 <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> Timeline</h2>
                 <ul class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/index.html">Lucid</a></li>
+                    <li class="breadcrumb-item"><a href="/CCTema/bootstrap5/dist/index.html">Lucid</a></li>
                     <li class="breadcrumb-item">Pages</li>
                     <li class="breadcrumb-item active">Timeline</li>
                 </ul>
             </div>
         </div>
-    </div>
+    </div>*@
 
     <div class="row g-3">
         <div class="col-lg-3 col-md-12 col-sm-12">
@@ -55,7 +55,7 @@
                                     <th class="table-light text-dark" scope="col"><i class="fa fa-money"></i></th>
                                     <th class="table-light text-dark" scope="col"><i class="fa fa-user"></i></th>
                                     <th class="table-light text-dark" scope="col">  <i class="fa fa-users"></i></th>
-                                    <th class="table-light text-dark" scope="col"><i class="fa fa-calendar"></i></th>
+                               @*     <th class="table-light text-dark" scope="col"><i class="fa fa-calendar"></i></th>*@
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,7 +64,10 @@
                                     <td>@Model.ValueOrOffer</td>
                                     <td>@Model.Employee.EmployeeName</td>
                                     <td>@Model.Customer.Name</td>
-                                    <td>x</td>
+                             @*       <td>x</td>*@
+                                </tr>
+                                <tr>
+                                    <td>Task Name: @Model.Title</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -143,8 +146,8 @@
                                         </div>
 
                                     </td>
-                                    <td>@Model.Employee.EmployeeName--send email butonu</td>
-                                    <td>@Model.Customer.Name -- takvim göm???</td>
+                                    <td>@Model.Employee.EmployeeName--send email butonu EKLENECEK</td>
+                                    <td>@Model.Customer.Name -- takvim EKLENECEK</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -191,7 +194,7 @@
                                 <div class="timeline-panel">
                                     <div class="timeline-heading">
                                             <h5>
-                                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>
+                                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>@* Renk kontrolü eklenebilir KONTROL*@
                                             </h5>
                                         <h6 class="timeline-title">@log.UpdatedField</h6>    
                                     </div>
@@ -214,13 +217,13 @@
     </div>
 
     <!-- core js file -->
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+    <script src="/CCTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
     <!-- page js file -->
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/vendorscripts.bundle.js"></script>
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/vendor/dropify/js/dropify.min.js"></script>
-    <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/js/pages/forms/dropify.js"></script>
+    <script src="/CCTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+    <script src="/CCTema/bootstrap5/dist/assets/bundles/vendorscripts.bundle.js"></script>
+    <script src="/CCTema/bootstrap5/dist/assets/vendor/dropify/js/dropify.min.js"></script>
+    <script src="/CCTema/bootstrap5/dist/assets/js/pages/forms/dropify.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width" />
+        <title>@ViewBag.Title</title>
+        <meta charset="utf-8">
+        <title>CRM CORNER</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="CRMCorner HR & Project Admin Dashboard Template with Bootstrap 5x">
+        <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
+        <link rel="icon" href="~/CCTema/favicon.ico" type="image/x-icon">
+
+        <style>
+        .logo-container {
+            max-width: 100px; /* Maksimum genişlik */
+            max-height: 50px; /* Maksimum yükseklik */
+            display: flex;
+            justify-content: center; /* Merkeze hizalama */
+            align-items: center; /* Dikey hizalama */
+        }
+
+            .logo-container img {
+                width: 100%;
+                height: auto;
+                object-fit: contain; /* Oranı koruma */
+            }
+
+
+    </style>
+        <!-- MAIN CSS -->
+        <link href="~/CCTema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
+        @RenderSection("Styles", required: false)
+
+    </head>
+    <body>
+    <div id="layout" class="theme-blue"  data-theme="high-contrast">
+            <div id="wrapper">
+                <!-- Page Loader -->
+                            <div class="page-loader-wrapper text-center">
+                <div class="loader">
+              <div class="h5 fw-light mt-3">Lütfen Bekleyin</div>
+                   </div>
+                </div>
+               
+                <!-- top navbar -->
+                <nav class="navbar navbar-fixed-top">
+                    <div class="container-fluid">
+                    <div class="logo-container">
+                        <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index"><img src="~/CCtema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo"></a>
+                    </div>             
+                    </div>
+                </nav>
+
+                <!-- Sidbar menu -->
+                <div id="left-sidebar" class="sidebar">
+                    <div class="user-account p-3 mb-3">
+                      
+                    </div>
+                    <!-- nav tab: menu list -->
+                    <ul class="nav nav-tabs text-center mb-2" role="tablist">
+                        <li class="nav-item flex-fill"><a class="nav-link active" id="hr_menu_nav_link" data-bs-toggle="tab" href="#hr_menu" role="tab">XX</a></li>
+                        <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#project_menu" role="tab">YY</a></li>
+                        <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#sub_menu" role="tab"><i class="fa fa-th-large"></i></a></li>
+                        <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#setting_menu" role="tab"><i class="fa fa-cog"></i></a></li>
+                    </ul>
+                    <!-- nav tab: content -->
+                    <div class="tab-content px-0">
+                        <div class="tab-pane fade show active" id="hr_menu" role="tabpanel">
+                            <nav class="sidebar-nav">
+                                <ul class="metismenu list-unstyled">
+                              
+                                    <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-briefcase"></i>Müşteri</a>
+                                    </li>
+                                    <li class="nav-item">
+                                    <a class="nav-link text" asp-area="" asp-controller="Company" asp-action="CompanyList"><i class="fa fa-briefcase"></i>Firma/Şirket</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#Employees" class="has-arrow"><i class="fa fa-users"></i><span>Çalışanlar</span></a>
+                                        <ul class="list-unstyled">
+                                            <a class="nav-link" asp-area="" asp-controller="Employee" asp-action="EmployeeList">Tüm Çalışanlar</a>
+                                            <li><a class="nav-linkk" asp-area="" asp-controller="Employee" asp-action="DepartmentList">Departman</a></li>
+                                            <li> <a class="nav-link " asp-area="" asp-controller="Employee" asp-action="PositionList">Pozisyon</a></li>
+                                        </ul>
+                                    </li>
+                                 
+                                
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
+                                    </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="UserList"><i class="fa fa-user"></i>Kullanıcı Listesi</a>
+                                </li>       
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="WelcomePage"><i class="fa fa-globe"></i>Kullanıcı Ana Sayfa Dön</a>
+                                </li>
+                             
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="tab-pane fade" id="project_menu" role="tabpanel">
+                            <nav class="sidebar-nav">
+                                <ul class="metismenu list-unstyled">
+                                <li><a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-envelope-o"></i><span>Mesaj</span></a></li>
+                                <li><a class="nav-link" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevler</a></li>
+                     
+                                </ul>
+                            </nav>
+                        </div>
+                      
+                    </div>
+                </div>
+
+
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+                <div id="main-content">
+                    @RenderBody()
+                </div>
+
+
+
+            </div>
+        </div>
+        @RenderSection("Scripts", required: false)
+
+
+    <script src="~/CCtema/bootstrap5/js/pages/index.js"></script>
+
+    </body>
+  @*      <!-- core js file -->
+    <script src="~/CCTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+    <!-- page js file -->
+    <script src="~/CCTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>*@
+</html>

@@ -5,11 +5,13 @@
 @{
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+
+
 <a href="/Customer/CustomerAdd" target="_blank">
     <input type="button" class="btn btn-success" value="Add Customer">
 </a>
 <div>&nbsp;</div>
-<table class="table table-bordered" id="customer">
+<table class="table table-bordered" id="customer_List">
     <thead>
         <tr>
             <th scope="col">Name</th>
@@ -45,9 +47,9 @@
                             <i class="fa fa-edit"></i>
                         </button>
                     </a>
-                    <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
+            @*        <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
                         <i class="fa fa-trash-o"></i>
-                    </button>
+                    </button>*@
                 </td>
 
             </tr>
@@ -56,8 +58,13 @@
 </table>
 
 
+<!-- core js file -->
+<script src="~/CCTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
+<!-- page js file -->
+<script src="~/CCTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
+<script src="~/CCTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
 
 <script>
     function confirmDelete(button) {
@@ -71,4 +78,18 @@
             form.submit();
         }
     }
+</script>
+<script>
+    $(document).ready(function () {
+        $('#customer_List')
+            .dataTable({
+                responsive: true,
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: [0]
+                    }
+                ]
+            });
+    });
 </script>

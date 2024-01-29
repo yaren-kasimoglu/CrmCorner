@@ -1,4 +1,5 @@
-﻿using CrmCorner.Models;
+﻿
+using CrmCorner.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +8,8 @@ namespace CrmCorner.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public CustomerController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+        public CustomerController(CrmCornerContext context)
         {
             _context = context;
         }

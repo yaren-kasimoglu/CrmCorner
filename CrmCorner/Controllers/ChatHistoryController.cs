@@ -4,17 +4,17 @@ namespace CrmCorner.Models
 {
     public class ChatHistoryController
     {
-        private readonly CrmcornerContext _context;
+        private readonly CrmCornerContext _context;
 
-        public ChatHistoryController(CrmcornerContext context)
+        public ChatHistoryController(CrmCornerContext context)
         {
             _context = context;
         }
 
-        public async Task AddAsync(ChatHistory chatHistory)
-        {
-            await _context.InsertOneAsync(chatHistory);
-        }
+        //public async Task AddAsync(ChatHistory chatHistory)
+        //{
+        //    await _context.InsertOneAsync(chatHistory);
+        //} //GERİ AL 23.011.2024
 
         //public async Task<IList<ChatHistory>> GetListAsync()
         //{

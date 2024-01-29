@@ -1,19 +1,31 @@
-﻿using CrmCorner.Models;
+﻿
+using CrmCorner.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Text;
 
 namespace CrmCorner.Controllers
 {
     public class TaskController : Controller
     {
-        private readonly CrmcornerContext _context;
-        public TaskController(CrmcornerContext context)
+        private readonly CrmCornerContext _context;
+
+        public TaskController(CrmCornerContext context)
         {
             _context = context;
         }
         public IActionResult Index()
+        {
+            var tasks = _context.TaskComps
+                                .Include(e => e.Customer)
+                                .Include(e => e.Employee)
+                                .Include(e => e.Status)
+                                .ToList();
+            return View(tasks);
+        }
+        public IActionResult Index1()
         {
             var tasks = _context.TaskComps
                                 .Include(e => e.Customer)
@@ -169,6 +181,27 @@ namespace CrmCorner.Controllers
             }
         }
 
+        #region GetNamesForDetailPage
+        private string GetCustomerNameById(int? customerId)
+        {
+            if (customerId == null) return null;
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == customerId);
+            return customer != null ? $"{customer.Name} {customer.Surname}" : "Unknown";
+        }
+        private string GetStatusNameById(int? statusId)
+        {
+            if (statusId == null) return null;
+            var status = _context.Statuses.FirstOrDefault(c => c.StatusId == statusId);
+            return status != null ? $"{status.StatusName}" : "Unknown";
+        }
+        private string GetEmployeeNameById(int? employeeId)
+        {
+            if (employeeId == null) return null;
+            var employee = _context.Employees.FirstOrDefault(c => c.IdEmployee == employeeId);
+            return employee != null ? $"{employee.EmployeeName} {employee.EmployeeSurname}" : "Unknown";
+        }
+        #endregion
+
         private void LogChanges(TaskComp originalTask, TaskComp editedTask)
         {
             foreach (var property in typeof(TaskComp).GetProperties())
@@ -178,13 +211,37 @@ namespace CrmCorner.Controllers
 
                 if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
                 {
+                    string oldValueString = originalValue.ToString();
+                    string newValueString = editedValue.ToString();
+                    string fieldName = property.Name;
+
+                    // CustomerId için özel bir işlem yap
+                    if (property.Name == "CustomerId")
+                    {
+                        oldValueString = GetCustomerNameById((int?)originalValue);
+                        newValueString = GetCustomerNameById((int?)editedValue);
+                        fieldName = "Müşteri Bilgisi";
+                    }
+                    if (property.Name == "EmployeeId")
+                    {
+                        oldValueString = GetEmployeeNameById((int?)originalValue);
+                        newValueString = GetEmployeeNameById((int?)editedValue);
+                        fieldName = "Sorumlu Çalışan Bilgisi";
+                    }
+                    if (property.Name == "StatusId")
+                    {
+                        oldValueString = GetStatusNameById((int?)originalValue);
+                        newValueString = GetStatusNameById((int?)editedValue);
+                        fieldName = "Güncel Durum Bilgisi";
+                    }
+
                     TaskCompLog log = new TaskCompLog
                     {
                         TaskId = editedTask.TaskId,
-                        UpdatedField = property.Name,
-                        OldValue = originalValue.ToString(),
-                        NewValue = editedValue.ToString(),
-                        UpdatedBy = editedTask.Employee?.IdEmployee, // ? işaretini kullandım, böylece null check yapılır.
+                        UpdatedField = fieldName,
+                        OldValue = oldValueString,
+                        NewValue = newValueString,
+                        UpdatedBy = editedTask.Employee?.IdEmployee,
                         UpdatedAt = DateTime.Now
                     };
 
@@ -208,8 +265,6 @@ namespace CrmCorner.Controllers
 
             return View(tasks);
         }
-
-
         public IActionResult GetTaskTimeline(int taskId)
         {
             // TaskComps tablosundan taskId'ye göre ilgili görevi çek
@@ -259,8 +314,10 @@ namespace CrmCorner.Controllers
             ViewBag.Status = statusItems;
 
             TaskComp task = _context.TaskComps
-                .Include(t => t.TaskCompLogs) // TaskCompLogs verilerini yükle
-                .FirstOrDefault(t => t.TaskId == id);
+           .Include(t => t.TaskCompLogs)
+           .Include(t => t.Customer) // TaskComp nesnesinin Customer ilişkisini yükle
+           .ThenInclude(c => c.Company) // Customer nesnesinin Company ilişkisini yükle
+           .FirstOrDefault(t => t.TaskId == id);
             if (task == null)
             {
                 return NotFound();
@@ -298,7 +355,7 @@ namespace CrmCorner.Controllers
                             }
                             else
                             {
-                                // Varolan byte[]'ın sonuna yeni dosya içeriğini ekleyin
+                                // Varolan byte[]'ın sonuna yeni dosya içeriğini eklenir
                                 byte[] combinedFiles = new byte[existingFiles.Length + fileBytes.Length];
                                 Array.Copy(existingFiles, combinedFiles, existingFiles.Length);
                                 Array.Copy(fileBytes, 0, combinedFiles, existingFiles.Length, fileBytes.Length);
@@ -327,7 +384,7 @@ namespace CrmCorner.Controllers
                 ViewBag.Message = "Dosya yüklenemedi veya dosya boş!";
             }
 
-            // İlgili view'i döndürürken ViewBag.Message'i kullanabilirsiniz
+            // İlgili view'i döndürürken ViewBag.Message'i kullan
             return RedirectToAction("TaskDetail", new { id = taskId });
         }
 
@@ -347,7 +404,7 @@ namespace CrmCorner.Controllers
 
                     if (index >= 0 && index < fileNames.Length)
                     {
-                        byte[] fileContent = files; // Tüm dosya içeriğini almak için böyle bir yaklaşım kullanabilirsiniz
+                        byte[] fileContent = files;
 
                         return File(fileContent, "application/octet-stream", fileName);
                     }
@@ -418,6 +475,11 @@ namespace CrmCorner.Controllers
         }
 
 
+        //public IActionResult Chart()
+        //{
+        //    return View();
+        //}
+
         public IActionResult TaskDelete(int id)
         {
             TaskComp task = _context.TaskComps.Find(id);
@@ -431,7 +493,6 @@ namespace CrmCorner.Controllers
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
-
-
     }
+
 }

@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Models;
 
-public partial class CrmcornerContext : DbContext
+public partial class CrmCornerContext : IdentityDbContext<AppUser,AppRole,string>
 {
-    public CrmcornerContext()
+    public CrmCornerContext()
     {
     }
 
-    public CrmcornerContext(DbContextOptions<CrmcornerContext> options)
+    public CrmCornerContext(DbContextOptions<CrmCornerContext> options)
         : base(options)
     {
     }
@@ -33,33 +35,24 @@ public partial class CrmcornerContext : DbContext
 
     public virtual DbSet<TaskCompLog> TaskCompLogs { get; set; }
 
-    //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-    //        => optionsBuilder.UseMySql("server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
+    public virtual DbSet<User> User { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var connectionString = configuration.GetConnectionString("CrmConnection");
-
-            optionsBuilder.UseMySql(connectionString,
-                Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.14-mariadb"));
-        }
-    }
-
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseMySql("server=94.73.148.165;database=u1613932_db877;user=u1613932_user877;password=@TOSf4:8c8@Wb6n:", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.16-mariadb"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<IdentityUserLogin<string>>().HasNoKey();
+        modelBuilder.Entity<IdentityUserRole<string>>().HasNoKey();
+        modelBuilder.Entity<IdentityUserToken<string>>().HasNoKey();
         modelBuilder
-            .UseCollation("latin1_swedish_ci")
-            .HasCharSet("latin1");
+            .UseCollation("utf8mb4_unicode_ci")
+            .HasCharSet("utf8mb4");
+
+
+       
 
         modelBuilder.Entity<Calendar>(entity =>
         {
@@ -79,7 +72,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("Company");
+            entity
+                .ToTable("Company")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.HasIndex(e => e.IdEmployee, "IdEmployee");
 
@@ -111,7 +107,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("Customer");
+            entity
+                .ToTable("Customer")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.HasIndex(e => e.CompanyId, "FK_Customer_Company");
 
@@ -147,11 +146,15 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.IdDepartment).HasName("PRIMARY");
 
-            entity.ToTable("Department");
+            entity
+                .ToTable("Department")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.Property(e => e.IdDepartment)
                 .HasColumnType("int(11)")
-                .HasColumnName("idDepartment");
+                .HasColumnName("idDepartment")
+                 .IsRequired();
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("current_timestamp()")
                 .HasColumnType("datetime");
@@ -173,7 +176,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.IdEmployee).HasName("PRIMARY");
 
-            entity.ToTable("Employee");
+            entity
+                .ToTable("Employee")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
             entity.HasIndex(e => e.IdPositions, "FK_Employee_Position");
 
@@ -220,6 +226,10 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.IdPositions).HasName("PRIMARY");
 
+            entity
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
+
             entity.Property(e => e.IdPositions)
                 .HasColumnType("int(11)")
                 .HasColumnName("idPositions");
@@ -240,10 +250,7 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.StatusId).HasName("PRIMARY");
 
-            entity
-                .ToTable("Status")
-                .HasCharSet("utf8mb4")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("Status");
 
             entity.Property(e => e.StatusId)
                 .HasColumnType("int(11)")
@@ -257,10 +264,7 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.TaskId).HasName("PRIMARY");
 
-            entity
-                .ToTable("TaskComp")
-                .HasCharSet("utf8mb4")
-                .UseCollation("utf8mb4_unicode_ci");
+            entity.ToTable("TaskComp");
 
             entity.HasIndex(e => e.CustomerId, "FK_Customer");
 
@@ -325,9 +329,12 @@ public partial class CrmcornerContext : DbContext
         {
             entity.HasKey(e => e.LogId).HasName("PRIMARY");
 
-            entity.ToTable("TaskCompLog");
+            entity
+                .ToTable("TaskCompLog")
+                .HasCharSet("latin1")
+                .UseCollation("latin1_swedish_ci");
 
-            entity.HasIndex(e => e.TaskId, "TaskId");
+            entity.HasIndex(e => e.TaskId, "FK_TaskCompLog_TaskComp");
 
             entity.HasIndex(e => e.UpdatedBy, "UpdatedBy");
 
@@ -350,11 +357,41 @@ public partial class CrmcornerContext : DbContext
 
             entity.HasOne(d => d.Task).WithMany(p => p.TaskCompLogs)
                 .HasForeignKey(d => d.TaskId)
-                .HasConstraintName("TaskCompLog_ibfk_1");
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_TaskCompLog_TaskComp");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.TaskCompLogs)
                 .HasForeignKey(d => d.UpdatedBy)
                 .HasConstraintName("TaskCompLog_ibfk_2");
+        });
+
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PRIMARY");
+
+            entity.HasIndex(e => e.Email, "Email").IsUnique();
+
+            entity.HasIndex(e => e.Username, "Username").IsUnique();
+
+            entity.Property(e => e.UserId)
+                .HasColumnType("int(11)")
+                .HasColumnName("UserID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("timestamp");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FirstName).HasMaxLength(50);
+            entity.Property(e => e.LastName).HasMaxLength(50);
+            entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.PasswordSalt).HasMaxLength(255);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+            entity.Property(e => e.UpdatedAt)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("current_timestamp()")
+                .HasColumnType("timestamp");
+            entity.Property(e => e.UserImage).HasMaxLength(255);
+            entity.Property(e => e.Username).HasMaxLength(50);
         });
 
 

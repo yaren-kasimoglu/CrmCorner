@@ -1,5 +1,4 @@
-﻿
-@model List<Employee>
+﻿@model List<Employee>
 @{
     ViewData["Title"] = "ChatApp";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
@@ -26,7 +25,7 @@
                                 @foreach (var item in Model)
                                 {
                                     <li onclick="getPaging(this.id)" id="@item.EmployeeName" class="d-flex align-items-center py-2 px-3">
-                                        <img class="avatar rounded" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/user.png" alt="avatar" />
+                                        <img class="avatar rounded" src="/CCTema/bootstrap5/dist/assets/images/user.png" alt="avatar" />
                                         <div id="deneme" class="about ps-3">
                                             <div class="fs-6">@item.EmployeeName</div>
                                             <div class="small text-muted"><i class="fa fa-circle text-primary me-2"></i>online</div>
@@ -35,34 +34,34 @@
                                 }
                             </ul>
                         </div>
-                    <div class="chat">
-                        <div class="chat-header d-flex justify-content-between align-items-center p-3 border-bottom">
-                            <div class="left d-flex">
-                                <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                    <img id="showOrHiddenpng" style="visibility:collapse" class="avatar rounded" src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/images/user.png" alt="avatar" />
-                                </button>
-                                <div class="chat-about ps-2">
-                                    <h6 class="mb-0" id="selectedUser"></h6>
-                                    @*<small class="text-muted">Last seen: 2 hours ago</small>*@
+                        <div class="chat">
+                            <div class="chat-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                                <div class="left d-flex">
+                                    <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                        <img class="avatar rounded" src="../dist/assets/images/xs/avatar2.jpg" alt="avatar" />
+                                    </button>
+                                    <div class="chat-about ps-2">
+                                        <h6 class="mb-0" id="selectedUser"></h6>
+                                        @*<small class="text-muted">Last seen: 2 hours ago</small>*@
+                                    </div>
+                                </div>
+                                <div class="right d-md-block d-none text-end">
+                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-camera"></i></a>
+                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-video-camera"></i></a>
+                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-cog"></i></a>
+                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-question"></i></a>
                                 </div>
                             </div>
-                            <div class="right d-md-block d-none text-end">
-                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-camera"></i></a>
-                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-video-camera"></i></a>
-                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-cog"></i></a>
-                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-question"></i></a>
-                            </div>
-                        </div>
-                        <div id="showOrHidden" style="visibility:collapse">
-                            <div class="chat-history p-3">
-                                <ul class="list-unstyled mb-0">
-                                    <li class="clearfix">
-                                        @*<div class="message-data text-end mb-3 me-3">
-                                            <img class="avatar sm rounded-circle" src="../dist/assets/images/xs/avatar7.jpg" alt="avatar">
-                                        </div>*@
-                                        <span class="mb-0" id="sendDate"></span>
-                                        <div class="message other-message d-inline-block float-end" id="messagesList"> </div>
-                                    </li>
+                            <div id="showOrHidden" style="visibility:collapse" >
+                                <div class="chat-history p-3">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="clearfix">
+                                            <div class="message-data text-end mb-3 me-3">
+                                                <img class="avatar sm rounded-circle" src="../dist/assets/images/xs/avatar7.jpg" alt="avatar">
+                                            </div>
+                                            @*<span class="mb-0" id="sendDate"></span>*@
+                                            <div class="message other-message d-inline-block float-end" id="messagesList"> </div>
+                                        </li>
 
                                 </ul>
                             </div>
@@ -71,9 +70,10 @@
                                     <span id="sendButton" class="input-group-text"><i class="fa fa-paper-plane"></i></span>
                                     <input id="messageInput" type="text" class="form-control" placeholder="Enter text here..." aria-label="Enter text here...">
 
-                                    @*<div class="col-6">
-                                            <input type="button" id="sendButton" value="Send Message" />
-                                        </div>*@
+                                        @*<div class="col-6">
+                        <input type="button" id="sendButton" value="Send Message" />
+                    </div>*@
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -81,7 +81,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
 </div>
 
@@ -119,19 +118,18 @@
         </div>
     </div>
 </div>
+<!-- core js file -->
+<script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<!-- page js file -->
+<script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/chat.js"></script>
+<script>function getPaging(str) {
+    document.getElementById("selectedUser").innerHTML = str;
+    document.getElementById("showOrHidden").style.visibility = "visible";
+}
 
-        <script src="~/js/signalr/dist/browser/signalr.js"></script>
-        <script src="~/js/chat.js"></script>
-        @*core js file *@
-        <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-        @*page js file*@
-        <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-
-        <script>function getPaging(str) {
-                document.getElementById("selectedUser").innerHTML = str;
-                document.getElementById("showOrHidden").style.visibility = "visible"; 
-                document.getElementById("showOrHiddenpng").style.visibility = "visible"; 
-            }</script>
+</script>
 
 
 
