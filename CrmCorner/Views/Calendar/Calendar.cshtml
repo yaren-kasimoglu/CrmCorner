@@ -758,7 +758,7 @@
             var event = document.getElementById("Id").innerHTML;
             $.ajax({
                 type: 'POST',
-                url: "/Calendar/CalendarDelete/",
+                url: "/Calendar/sendEmail/",
                 encode: true,
                 data: { ID: event },
                 dataType: "json",
