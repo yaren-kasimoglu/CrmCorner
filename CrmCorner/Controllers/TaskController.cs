@@ -181,6 +181,27 @@ namespace CrmCorner.Controllers
             }
         }
 
+        #region GetNamesForDetailPage
+        private string GetCustomerNameById(int? customerId)
+        {
+            if (customerId == null) return null;
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == customerId);
+            return customer != null ? $"{customer.Name} {customer.Surname}" : "Unknown";
+        }
+        private string GetStatusNameById(int? statusId)
+        {
+            if (statusId == null) return null;
+            var status = _context.Statuses.FirstOrDefault(c => c.StatusId == statusId);
+            return status != null ? $"{status.StatusName}" : "Unknown";
+        }
+        private string GetEmployeeNameById(int? employeeId)
+        {
+            if (employeeId == null) return null;
+            var employee = _context.Employees.FirstOrDefault(c => c.IdEmployee == employeeId);
+            return employee != null ? $"{employee.EmployeeName} {employee.EmployeeSurname}" : "Unknown";
+        }
+        #endregion
+
         private void LogChanges(TaskComp originalTask, TaskComp editedTask)
         {
             foreach (var property in typeof(TaskComp).GetProperties())
@@ -190,13 +211,37 @@ namespace CrmCorner.Controllers
 
                 if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
                 {
+                    string oldValueString = originalValue.ToString();
+                    string newValueString = editedValue.ToString();
+                    string fieldName = property.Name;
+
+                    // CustomerId için özel bir işlem yap
+                    if (property.Name == "CustomerId")
+                    {
+                        oldValueString = GetCustomerNameById((int?)originalValue);
+                        newValueString = GetCustomerNameById((int?)editedValue);
+                        fieldName = "Müşteri Bilgisi";
+                    }
+                    if (property.Name == "EmployeeId")
+                    {
+                        oldValueString = GetEmployeeNameById((int?)originalValue);
+                        newValueString = GetEmployeeNameById((int?)editedValue);
+                        fieldName = "Sorumlu Çalışan Bilgisi";
+                    }
+                    if (property.Name == "StatusId")
+                    {
+                        oldValueString = GetStatusNameById((int?)originalValue);
+                        newValueString = GetStatusNameById((int?)editedValue);
+                        fieldName = "Güncel Durum Bilgisi";
+                    }
+
                     TaskCompLog log = new TaskCompLog
                     {
                         TaskId = editedTask.TaskId,
-                        UpdatedField = property.Name,
-                        OldValue = originalValue.ToString(),
-                        NewValue = editedValue.ToString(),
-                        UpdatedBy = editedTask.Employee?.IdEmployee, // ? işaretini kullandım, böylece null check yapılır.
+                        UpdatedField = fieldName,
+                        OldValue = oldValueString,
+                        NewValue = newValueString,
+                        UpdatedBy = editedTask.Employee?.IdEmployee,
                         UpdatedAt = DateTime.Now
                     };
 
@@ -269,8 +314,10 @@ namespace CrmCorner.Controllers
             ViewBag.Status = statusItems;
 
             TaskComp task = _context.TaskComps
-                .Include(t => t.TaskCompLogs) // TaskCompLogs verilerini yükle
-                .FirstOrDefault(t => t.TaskId == id);
+           .Include(t => t.TaskCompLogs)
+           .Include(t => t.Customer) // TaskComp nesnesinin Customer ilişkisini yükle
+           .ThenInclude(c => c.Company) // Customer nesnesinin Company ilişkisini yükle
+           .FirstOrDefault(t => t.TaskId == id);
             if (task == null)
             {
                 return NotFound();
@@ -427,27 +474,11 @@ namespace CrmCorner.Controllers
             return RedirectToAction("TaskDetail", new { id = taskId });
         }
 
-        [HttpPost]
-        public IActionResult UpdateStatus(int taskId, int newStatusId)
-        {
-            // taskId parametresine göre ilgili görevi veritabanından bul
-            var taskToUpdate = _context.TaskComps.FirstOrDefault(t => t.TaskId == taskId);
 
-            if (taskToUpdate != null)
-            {
-                taskToUpdate.StatusId = newStatusId; // Yeni durumu atama
-                _context.SaveChanges();
-
-                return Json(new { success = true });
-            }
-
-            return Json(new { success = false, errorMessage = "Görev bulunamadı." });
-        }
-
-        public IActionResult Chart()
-        {
-            return View();
-        }
+        //public IActionResult Chart()
+        //{
+        //    return View();
+        //}
 
         public IActionResult TaskDelete(int id)
         {
@@ -461,38 +492,6 @@ namespace CrmCorner.Controllers
             _context.TaskComps.Remove(task);
             _context.SaveChanges();
             return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public IActionResult UpdateTaskStatus([FromBody] Dictionary<string, int> taskData)
-        {
-            try
-            {
-                if (taskData != null && taskData.ContainsKey("taskId") && taskData.ContainsKey("newStatusId"))
-                {
-                    int taskId = taskData["taskId"];
-                    int newStatusId = taskData["newStatusId"];
-
-                    var taskToUpdate = _context.TaskComps.FirstOrDefault(t => t.TaskId == taskId);
-
-                    if (taskToUpdate != null)
-                    {
-                        taskToUpdate.StatusId = newStatusId;
-                        _context.SaveChanges();
-
-                        return Json(new { success = true });
-                    }
-
-                    return Json(new { success = false, errorMessage = "Görev bulunamadı." });
-                }
-
-                return Json(new { success = false, errorMessage = "Geçersiz istek formatı." });
-            }
-            catch (Exception ex)
-            {
-                // Loglama veya hata mesajını inceleme amaçlı
-                return Json(new { success = false, errorMessage = "Bir hata oluştu. Hata detayı: " + ex.Message });
-            }
         }
     }
 

@@ -18,7 +18,7 @@ namespace CrmCorner.Controllers
 
         public IActionResult MyProfile(int id)
         {
-            User user = _context.Users.FirstOrDefault(t => t.UserId == id);
+            User user = _context.User.FirstOrDefault(t => t.UserId == id);
 
             if (user == null)
             {

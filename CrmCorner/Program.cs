@@ -26,8 +26,8 @@ builder.Services.AddDbContext<CrmCornerContext>(options =>
 {
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)));
 });
-
-builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CrmCornerContext>();
+builder.Services.AddIdentity<AppUser,AppRole>().AddEntityFrameworkStores<CrmCornerContext>().AddDefaultTokenProviders();
+//builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CrmCornerContext>();
 
 //builder.Services.AddIdentity<AppUser, AppRole>(x =>
 //{
@@ -37,7 +37,6 @@ builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.Req
 //    x.Password.RequiredLength = 4;
 //    x.Password.RequiredUniqueChars = 0;
 //}).AddEntityFrameworkStores<CrmCornerContext>();
-
 
 
 
@@ -59,7 +58,30 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
 app.MapHub<ChatHub>("/chatHub");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.Run();
