@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "SignIn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model SignInViewModel
+@section Scripts
+    {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Sign Up</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
+    <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
+
+    <link rel="icon" href="/CCTema/bootstrap5/favicon.ico" type="image/x-icon">
+    <!-- VENDOR CSS -->
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/css/main.css">
+</head>
+
+<body>
+
+    <div id="layout" class="theme-cyan">
+        <!-- WRAPPER -->
+        <div id="wrapper">
+            <div class="d-flex h100vh align-items-center auth-main w-100">
+                <div class="auth-box">
+                    <div class="card shadow p-lg-4">
+                        <div class="card-header">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
+                            </div>
+                            <p class="fs-5 mb-0">Giriş yap</p>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="SignIn" asp-controller="Home" asp-route-returnUrl="@Context.Request.Query["returnUrl"]" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                <div class="form-floating">
+                                    <label asp-for="Email"></label>
+                                    <input asp-for="Email" class="form-control">
+                                    <span class="text-danger" asp-validation-for="Email"></span>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="Password" asp-for="Password"></label>
+                                    <input type="password" asp-for="Password" class="form-control">
+                                    <span class="text-danger" asp-validation-for="Password"></span>
+                                </div>
+                                </br>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3 form-check">
+                                            <input class="form-check-input" asp-for="RememberMe">
+                                            <label class="form-check-label" asp-for="RememberMe" for="RememberMe">Beni Hatırla</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a class="btn btn-outline-secondary btn-sm float-end" asp-action="ForgetPassword" asp-controller="Home">Şifremi unuttum</a>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 px-3 py-2">GİRİŞ</button>
+
+
+                            </form>
+                            <div class="mt-2 pt-2 border-top">
+                                @*  <p class="mb-1"><a href="page-forgot-password.html"><i class="fa fa-lock me-2"></i>Forgot password?</a></p>*@
+                                <span>Hesabınız yok mu? <a asp-action="SignUp" asp-controller="Home">Kayıt Ol</a></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END WRAPPER -->
+    </div>
+</body>
+</html>
+
+

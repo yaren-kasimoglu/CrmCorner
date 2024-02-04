@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using static CrmCorner.Hubs.Hubs;
 using static Microsoft.EntityFrameworkCore.ServerVersion;
 using CrmCorner.Extensions;
+using CrmCorner.OptionsModels;
+using CrmCorner.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,10 +30,28 @@ builder.Services.AddDbContext<CrmCornerContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)));
 });
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
 builder.Services.AddIdentityWithExt();
+builder.Services.AddScoped<IEmailServices, EmailServices>();
 
 
 //builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CrmCornerContext>();
+
+
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    var cookieBuilder=new CookieBuilder();
+    cookieBuilder.Name = "CrmAppCookie";
+
+    opt.LoginPath = new PathString("/Home/SignIn");
+    opt.LogoutPath = new PathString("/Member/Logout");
+    opt.Cookie=cookieBuilder;
+    opt.ExpireTimeSpan=TimeSpan.FromDays(60); //cookie ömrü
+    opt.SlidingExpiration = true;//true yapmazsak 60 gün sonra bir daha giremez. true yaptığımızda 60 gün sonra girdiğinde tekrar 60 günlük bir ömrü olur cookienin
+});
+
+
 
 
 var app = builder.Build();
@@ -49,7 +69,9 @@ app.UseStaticFiles(); //wwwroot klasörünün kullanımını aktifleştirir.
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();//kimlik yetkilendirme
+app.UseAuthorization();//kimlik doğrulama
+
 
 app.MapControllerRoute(
     name: "areas",

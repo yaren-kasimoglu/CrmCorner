@@ -10,12 +10,12 @@ namespace CrmCorner.CustomValidation
             var errors = new List<IdentityError>();
             if (password!.ToLower().Contains(user.UserName!.ToLower()))
             {
-                errors.Add(new() { Code = "PasswordNotContainUserName", Description = "Şifre alanı kullanıcı adı içeremez." });
+                errors.Add(new() { Code = "PasswordContainUserName", Description = "Şifre alanı kullanıcı adı içeremez." });
             }
 
             if (password!.ToLower().StartsWith("1234"))
             {
-                errors.Add(new() { Code = "PasswordNotContainNumericValue", Description = "Şifre alanı ardışık sayı içeremez." });
+                errors.Add(new() { Code = "PasswordContainNumericValue", Description = "Şifre alanı ardışık sayı içeremez." });
             }
 
             if (errors.Any())
