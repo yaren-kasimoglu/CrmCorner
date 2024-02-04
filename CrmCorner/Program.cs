@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using static CrmCorner.Hubs.Hubs;
 using static Microsoft.EntityFrameworkCore.ServerVersion;
 using CrmCorner.Extensions;
+using CrmCorner.OptionsModels;
+using CrmCorner.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +30,10 @@ builder.Services.AddDbContext<CrmCornerContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)));
 });
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
 builder.Services.AddIdentityWithExt();
+builder.Services.AddScoped<IEmailServices, EmailServices>();
 
 
 //builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CrmCornerContext>();

@@ -41,6 +41,13 @@
                         <div class="card-header">
                             <p class="fs-5 mb-0">Hesap Oluştur</p>
                         </div>
+                        @if (TempData["SuccessMessage"]!=null)
+                        {
+                            <div class="alert alert-info" role="alert">
+                                @TempData["SuccessMessage"]
+                                </div>
+                            
+                        }
                         <div class="card-body">
                             <form asp-controller="Home" asp-action="SignUp" method="post">
                                 <div class="form-floating mb-1">

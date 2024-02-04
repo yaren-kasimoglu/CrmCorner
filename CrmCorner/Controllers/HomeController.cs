@@ -1,5 +1,6 @@
 ﻿using CrmCorner.Extensions;
 using CrmCorner.Models;
+using CrmCorner.Services;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,15 +19,16 @@ namespace CrmCorner.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailServices _emailServices;
 
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
-
+            _emailServices = emailServices;
         }
 
         public IActionResult Index()
@@ -34,6 +36,7 @@ namespace CrmCorner.Controllers
             return View();
         }
 
+        #region Giriş
         public IActionResult SignIn()
         {
             return View();
@@ -74,6 +77,7 @@ namespace CrmCorner.Controllers
 
             return View();
         }
+        #endregion
 
         #region Kayıt
         public IActionResult SignUp()
@@ -101,6 +105,48 @@ namespace CrmCorner.Controllers
             return View();
         }
         #endregion
+
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
+        {
+            try
+            {
+                var hasUser = await _userManager.FindByEmailAsync(request.Email);
+                if (hasUser == null)
+                {
+                    ModelState.AddModelError(String.Empty, "Bu email adresine sahip kullanıcı bulunamamıştır.");
+                    return View();
+                }
+
+                string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
+
+                var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
+
+
+
+                //https://localhost:7145
+
+                await _emailServices.SendResetPasswordEmail(passwordResetLink, hasUser.Email);
+
+
+                TempData["SuccessMessage"] = "Şifre yenileme linki, e posta adresinize gönderilmiştir.";
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return RedirectToAction(nameof(ForgetPassword));
+
+        }
+
+      
 
         public IActionResult WelcomePage()
         {

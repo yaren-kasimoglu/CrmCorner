@@ -9,6 +9,13 @@ namespace CrmCorner.Extensions
     {
         public static void AddIdentityWithExt(this IServiceCollection services)
         {
+
+
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(1); // şifre sıfırlama için gönderilen token ın 1 saatlik ömrü  verildi.
+            });
+
             //Kullanıcı Kaydı yapılırken kullanıcı adı  ve şifre kuralları
             services.AddIdentity<AppUser, AppRole>(options =>
             {
@@ -21,7 +28,7 @@ namespace CrmCorner.Extensions
                 options.Password.RequireUppercase = false;
                 options.Password.RequireDigit = false;
 
-                options.Lockout.DefaultLockoutTimeSpan= TimeSpan.FromMinutes(2); //yanlış girişte 2 dk boyunca kitlensin
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2); //yanlış girişte 2 dk boyunca kitlensin
                 options.Lockout.MaxFailedAccessAttempts = 3;//3 yanlış girişten sonra kitlensin
 
 
@@ -29,7 +36,11 @@ namespace CrmCorner.Extensions
 
 
 
-            }).AddPasswordValidator<PasswordValidator>().AddUserValidator<UserValidator>().AddErrorDescriber<LocalizationIdentityErrorDescriber>().AddEntityFrameworkStores<CrmCornerContext>().AddDefaultTokenProviders();
+            }).AddPasswordValidator<PasswordValidator>()
+            .AddUserValidator<UserValidator>()
+            .AddErrorDescriber<LocalizationIdentityErrorDescriber>()
+            .AddEntityFrameworkStores<CrmCornerContext>()
+            .AddDefaultTokenProviders();
         }
     }
 }
