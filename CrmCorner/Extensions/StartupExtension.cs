@@ -1,4 +1,5 @@
 ﻿using CrmCorner.CustomValidation;
+using CrmCorner.Localizations;
 using CrmCorner.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -20,7 +21,15 @@ namespace CrmCorner.Extensions
                 options.Password.RequireUppercase = false;
                 options.Password.RequireDigit = false;
 
-            }).AddPasswordValidator<PasswordValidator>().AddEntityFrameworkStores<CrmCornerContext>().AddDefaultTokenProviders();
+                options.Lockout.DefaultLockoutTimeSpan= TimeSpan.FromMinutes(2); //yanlış girişte 2 dk boyunca kitlensin
+                options.Lockout.MaxFailedAccessAttempts = 3;//3 yanlış girişten sonra kitlensin
+
+
+
+
+
+
+            }).AddPasswordValidator<PasswordValidator>().AddUserValidator<UserValidator>().AddErrorDescriber<LocalizationIdentityErrorDescriber>().AddEntityFrameworkStores<CrmCornerContext>().AddDefaultTokenProviders();
         }
     }
 }

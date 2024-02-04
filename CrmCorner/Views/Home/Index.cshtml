@@ -3,11 +3,29 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-<a href="/Login/Login" target="_self">
+<div id="wrapper">
+    <div class="d-flex h100vh justify-content-center align-items-center">
+        <div class="text-center">
+            <article>
+                <h1>Yakında yüklenecektir.!</h1>
+                <div>
+                    <p>
+                       Üzgünüz, platformumuz henüz kullanıma hazır değildir. Eğer kullanıcı iseniz;
+                    </p>
+                    <p>&mdash; Crm Cormer</p>
+                </div>
+            </article>
+            <div class="margin-top-30">
+            @*    <a href="javascript:history.go(-1)" class="btn btn-secondary">
+                    <i class="fa fa-arrow-left"></i>
+                    <span>Go Back</span>
+                </a>*@
+                <a asp-action="SignIn" asp-controller="Home" class="btn btn-info"><i class="fa fa-home"></i> <span>Giriş Yapınız</span></a>
+            </div>
+        </div>
+    </div>
 
-    <a class="btn btn-warning" asp-controller="Customer" asp-action="CustomerAdd">Firma Kayıt</a>
-    <a class="btn btn-outline-warning" asp-controller="Home" asp-action="SignUp">Kullanıcı Kayıt</a>
-    <a class="btn btn-outline-success" @*asp-controller="Customer" asp-action="CustomerAdd"*@>Firma Giriş</a>
-    <a class="btn btn-success" @*asp-controller="Customer" asp-action="CustomerAdd"*@>Kullanıcı Giriş</a>
+</div>
 
-</a>
+ 
+

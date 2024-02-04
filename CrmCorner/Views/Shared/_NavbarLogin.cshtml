@@ -1,0 +1,26 @@
+﻿
+@if (User.Identity!.IsAuthenticated)
+{
+    <div class="user-account p-3 mb-3">
+        <div class="d-flex mb-3 pb-3 border-bottom align-items-center">
+            <img src="~/cctema/bootstrap5/dist/assets/images/sm/avatar1.jpg" class="avatar lg rounded me-3" />
+            <div class="dropdown flex-grow-1">
+                <span>Welcome,</span>
+                <a href="#" class="dropdown-toggle user-name" data-bs-toggle="dropdown"><strong>@User.Identity.Name</strong></a>
+                <ul class="dropdown-menu p-2 shadow-sm">
+                    <li><a href="page-profile2.html"><i class="fa fa-user me-2"></i>My Profile</a></li>
+                    <li class="divider"></li>
+                    <li><a asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout"><i class="fa fa-power-off me-2"></i>Çıkış Yap</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+  @*  <a class="btn btn-warning" asp-controller="Customer" asp-action="CustomerAdd">Firma Kayıt</a>
+    <a class="btn btn-outline-warning" asp-controller="Home" asp-action="SignUp">Kullanıcı Kayıt</a>*@
+@*    <a class="btn btn-outline-success" @*asp-controller="Customer" asp-action="CustomerAdd">Firma Giriş</a>*@
+@*    <a class="btn btn-success" asp-controller="Home" asp-action="SignIn">Kullanıcı Giriş</a>
+*@
+}

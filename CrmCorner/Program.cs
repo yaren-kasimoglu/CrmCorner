@@ -34,6 +34,21 @@ builder.Services.AddIdentityWithExt();
 //builder.Services.AddDefaultIdentity<CrmCornerUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CrmCornerContext>();
 
 
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    var cookieBuilder=new CookieBuilder();
+    cookieBuilder.Name = "CrmAppCookie";
+
+    opt.LoginPath = new PathString("/Home/SignIn");
+    opt.LogoutPath = new PathString("/Member/Logout");
+    opt.Cookie=cookieBuilder;
+    opt.ExpireTimeSpan=TimeSpan.FromDays(60); //cookie ömrü
+    opt.SlidingExpiration = true;//true yapmazsak 60 gün sonra bir daha giremez. true yaptığımızda 60 gün sonra girdiğinde tekrar 60 günlük bir ömrü olur cookienin
+});
+
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -49,7 +64,9 @@ app.UseStaticFiles(); //wwwroot klasörünün kullanımını aktifleştirir.
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();//kimlik yetkilendirme
+app.UseAuthorization();//kimlik doğrulama
+
 
 app.MapControllerRoute(
     name: "areas",

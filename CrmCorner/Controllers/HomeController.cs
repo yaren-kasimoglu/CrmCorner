@@ -1,4 +1,5 @@
-﻿using CrmCorner.Models;
+﻿using CrmCorner.Extensions;
+using CrmCorner.Models;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +17,16 @@ namespace CrmCorner.Controllers
     public class HomeController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _logger = logger;
             _userManager = userManager;
+            _signInManager = signInManager;
+
         }
 
         public IActionResult Index()
@@ -30,6 +34,48 @@ namespace CrmCorner.Controllers
             return View();
         }
 
+        public IActionResult SignIn()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl=null)
+        {
+           
+
+            returnUrl = returnUrl ?? Url.Action("WelcomePage", "Home");
+
+            var hasUser=await _userManager.FindByEmailAsync(model.Email);
+            if (hasUser==null)
+            {
+                ModelState.AddModelError(string.Empty, "Email veya şifre yanlış");
+                return View();
+            }
+
+            var signInresult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
+
+
+            if (signInresult.Succeeded)
+            {
+                return Redirect(returnUrl);
+            }
+
+
+            if (signInresult.IsLockedOut)
+            {
+                ModelState.AddModelErrorList(new List<string>() { "3 dakika boyunca giriş yapamazsınız." });
+                return View();
+            }
+
+         
+
+            ModelState.AddModelErrorList(new List<string>() { $"Email veya şifre hatalı.", $"(Başarısız giriş sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)})" });
+
+            return View();
+        }
+
+        #region Kayıt
         public IActionResult SignUp()
         {
             return View();
@@ -51,13 +97,10 @@ namespace CrmCorner.Controllers
                 TempData["SucceesMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
                 return View();                 
             }
-            foreach (IdentityError item in identityResult.Errors)
-            {
-                ModelState.AddModelError(string.Empty, item.Description);
-            }
-
+            ModelState.AddModelErrorList(identityResult.Errors.Select(x=>x.Description).ToList());
             return View();
         }
+        #endregion
 
         public IActionResult WelcomePage()
         {
@@ -74,5 +117,9 @@ namespace CrmCorner.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+
+
     }
 }

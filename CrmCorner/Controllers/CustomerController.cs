@@ -1,11 +1,13 @@
 ﻿
 using CrmCorner.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize]
     public class CustomerController : Controller
     {
         private readonly CrmCornerContext _context;
