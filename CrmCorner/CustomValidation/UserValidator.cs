@@ -8,7 +8,7 @@ namespace CrmCorner.CustomValidation
         public Task<IdentityResult> ValidateAsync(UserManager<AppUser> manager, AppUser user)
         {
             var errors= new List<IdentityError>();
-            var isDigit = int.TryParse(user.UserName[0]!.ToString(), out _);
+            var isDigit = int.TryParse(user.UserName![0].ToString(), out _);
 
             if (isDigit)
             {

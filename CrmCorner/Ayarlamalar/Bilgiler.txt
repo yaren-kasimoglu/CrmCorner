@@ -1,0 +1,13 @@
+﻿SECURITY STAMP NEDİR? (Identity ile gelen bir özellik. Identity den gelen methodları kullanarak bu özelliği aktifleştirip kullanabiliriz.)
+
+kullanıcının otomatik çıkış yapabilmesini sağlar.
+dbdeki security stamp ile cookidekini 30 dk da bir karşılaştırıp aynı olmadığı anda otomatik çıkış yapılır.  Güvenlik sebebi ile yapılır.
+Kullanıcı kritik bilgilerinden birini değiştirdiğinde eğer birden fazla farklı yerde oturumu varsa otomatik çıkış yapılacak
+
+
+CONCURRENCY STAMP NEDİR?
+
+eş zamanlı kullanıcı bilgilerini korumak gibi düşünebiliriz.
+birden fazla oturum kullanılırken bi yerde yaptığımız değişikliğin anında db ye ve ardından diğer oturuma yansıması.
+aynı anda iki farklı yerden güncelleme yapılırsa kullanıcıya uyarı-hata dönüyoruz. 
+opsiyona bağlı ya uyarı veririz ya da ez ve devam et diye ayarlıyoruz.

@@ -20,7 +20,7 @@ namespace CrmCorner.Extensions
             services.AddIdentity<AppUser, AppRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnoprstuvyzxw0123456789_@-";
+                options.User.AllowedUserNameCharacters = "ABCDEFGHIJKLMNOPRSTUVYZXabcdefghijklmnoprstuvyzxw0123456789_@-.";
 
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;

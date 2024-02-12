@@ -8,6 +8,11 @@ public partial class Company
     public int Id { get; set; }
 
     public string CompanyName { get; set; } = null!;
+    //public string ResponsibleNameSurname { get; set; }
+    //public int EmployeeCount { get; set; }
+    //public string Phone { get; set; }
+    //public string Sector { get; set; }
+    //public string PositionName { get; set; }
 
     public string? CompanyEmail { get; set; }
 
