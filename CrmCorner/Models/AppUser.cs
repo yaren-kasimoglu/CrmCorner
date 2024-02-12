@@ -1,8 +1,20 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CrmCorner.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace CrmCorner.Models
 {
     public class AppUser:IdentityUser
     {
+        public string? City { get; set; }
+        public string? Picture { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public Gender? Gender { get; set; }
+
+        public string NameSurname { get; set; }
+        public string CompanyName { get; set; } = null!;
+        public int EmployeeCount { get; set; }
+        public string Sector { get; set; }
+        public string PositionName { get; set; }
+
     }
 }

@@ -2,9 +2,12 @@
 using CrmCorner.Models;
 using CrmCorner.Services;
 using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
 using System.Diagnostics;
 //Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password='yagmuryaren123';" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
 //Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123;" Pomelo.EntityFrameworkCore.MySql --context CrmCorner.Areas.Identity.Data.CrmcornerContext -o Models
@@ -31,7 +34,13 @@ namespace CrmCorner.Controllers
             _emailServices = emailServices;
         }
 
+        [Authorize]
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Giris()
         {
             return View();
         }
@@ -43,14 +52,17 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl=null)
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
         {
-           
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
 
-            returnUrl = returnUrl ?? Url.Action("WelcomePage", "Home");
+            returnUrl ??= Url.Action("WelcomePage", "Home"); //null olma durumuna karşılık bu değerin atanması . Basit bir kullanım yöntemi
 
-            var hasUser=await _userManager.FindByEmailAsync(model.Email);
-            if (hasUser==null)
+            var hasUser = await _userManager.FindByEmailAsync(model.Email);
+            if (hasUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Email veya şifre yanlış");
                 return View();
@@ -71,7 +83,7 @@ namespace CrmCorner.Controllers
                 return View();
             }
 
-         
+
 
             ModelState.AddModelErrorList(new List<string>() { $"Email veya şifre hatalı.", $"(Başarısız giriş sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)})" });
 
@@ -92,16 +104,17 @@ namespace CrmCorner.Controllers
             {
                 return View();
             }
-            var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, Email = request.Email, PhoneNumber = request.Phone }, request.Password);
+            var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, Email = request.Email, PhoneNumber = request.Phone,NameSurname=request.NameSurname,PositionName=request.PositionName,CompanyName=request.CompanyName,EmployeeCount=request.EmployeeCount,Sector=request.Sector }, request.Password);
 
-      
+
 
             if (identityResult.Succeeded)
             {
                 TempData["SucceesMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
-                return View();                 
+                return RedirectToAction("SignIn", "Home");
+          
             }
-            ModelState.AddModelErrorList(identityResult.Errors.Select(x=>x.Description).ToList());
+            ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
             return View();
         }
         #endregion
@@ -131,7 +144,7 @@ namespace CrmCorner.Controllers
 
                 //https://localhost:7145
 
-                await _emailServices.SendResetPasswordEmail(passwordResetLink, hasUser.Email);
+                await _emailServices.SendResetPasswordEmail(passwordResetLink!, hasUser.Email!);
 
 
                 TempData["SuccessMessage"] = "Şifre yenileme linki, e posta adresinize gönderilmiştir.";
@@ -146,7 +159,48 @@ namespace CrmCorner.Controllers
 
         }
 
-      
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            TempData["userId"] = userId;
+            TempData["token"] = token;
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
+        {
+            var userId = TempData["userId"];
+            var token = TempData["token"];
+            if (userId==null || token==null)
+            {
+                throw new Exception("Bir hata meydana geldi.");
+
+            }
+
+
+            var hasUser = await _userManager.FindByIdAsync(userId.ToString()!);
+
+            if (hasUser == null)
+            {
+                ModelState.AddModelError(String.Empty, "Kullanıcı bulunamamıştır.");
+                return View();
+            }
+
+            IdentityResult result = await _userManager.ResetPasswordAsync(hasUser, token.ToString()!, request.Password);
+
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Şifreniz başarıyla yenilenmiştir.";
+            }
+            else
+            {
+                ModelState.AddModelErrorList(result.Errors.Select(x => x.Description).ToList());
+           
+            }
+
+            return RedirectToAction("SignIn","Home");
+        }
 
         public IActionResult WelcomePage()
         {

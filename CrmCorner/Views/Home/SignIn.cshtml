@@ -21,10 +21,10 @@
     <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
     <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
 
-    <link rel="icon" href="/CCTema/bootstrap5/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/CRMTema/bootstrap5/favicon.ico" type="image/x-icon">
     <!-- VENDOR CSS -->
     <!-- MAIN CSS -->
-    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/css/main.css">
+    <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/css/main.css">
 </head>
 
 <body>
@@ -43,13 +43,13 @@
                         <div class="card-body">
                             <form asp-action="SignIn" asp-controller="Home" asp-route-returnUrl="@Context.Request.Query["returnUrl"]" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                                 <div class="form-floating">
-                                    <label asp-for="Email"></label>
                                     <input asp-for="Email" class="form-control">
+                                    <label asp-for="Email"></label>
                                     <span class="text-danger" asp-validation-for="Email"></span>
                                 </div>
                                 <div class="form-floating">
-                                    <label for="Password" asp-for="Password"></label>
                                     <input type="password" asp-for="Password" class="form-control">
+                                    <label for="Password" asp-for="Password"></label>
                                     <span class="text-danger" asp-validation-for="Password"></span>
                                 </div>
                                 </br>
@@ -76,6 +76,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
         <!-- END WRAPPER -->

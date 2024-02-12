@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CrmCorner.Models
+namespace CrmCorner.ViewModels
 {
     public class ForgetPasswordViewModel
     {
