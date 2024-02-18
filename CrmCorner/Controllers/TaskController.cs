@@ -249,50 +249,62 @@ namespace CrmCorner.Controllers
 
 
         [HttpPost]
-
         public async Task<IActionResult> UploadFile(int taskId, IFormFile uploadedFile)
         {
-            if (uploadedFile == null || uploadedFile.Length == 0)
+            if (uploadedFile != null || uploadedFile.Length > 0)
             {
-                return BadRequest("Dosya yüklenemedi veya dosya boş!");
+                try
+                {
+                    var task = await _context.TaskComps.FindAsync(taskId);
+                    if (task == null)
+                    {
+                        return NotFound($"Task with Id {taskId} not found.");
+                    }
+
+                    var uploadsFolderPath = Path.Combine(_environment.WebRootPath, "uploads");
+                    if (!Directory.Exists(uploadsFolderPath))
+                    {
+                        Directory.CreateDirectory(uploadsFolderPath);
+                    }
+
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + uploadedFile.FileName;
+                    var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await uploadedFile.CopyToAsync(stream);
+                    }
+
+                    // Dosya meta verilerini veritabanına kaydet
+                    var fileAttachment = new FileAttachment
+                    {
+                        FileName = uniqueFileName,
+                        FilePath = filePath,
+                        FileSize = uploadedFile.Length,
+                        FileType = uploadedFile.ContentType,
+                        UploadedDate = DateTime.UtcNow,
+                        TaskId = taskId
+                    };
+
+                    _context.FileAttachments.Add(fileAttachment);
+                    await _context.SaveChangesAsync();
+                    // Başarılı yükleme mesajı gönder
+                    return Ok(new { message = "Dosya başarıyla yüklendi!", fileName = uniqueFileName });
+                }
+
+                catch (Exception ex)
+                {
+                    ViewBag.Message = "Dosya yüklenirken bir hata oluştu: " + ex.Message;
+                }
+            }
+        
+            else
+            {
+                ViewBag.Message = "Dosya yüklenemedi veya dosya boş!";
             }
 
-            var task = await _context.TaskComps.FindAsync(taskId);
-            if (task == null)
-            {
-                return NotFound($"Task with Id {taskId} not found.");
-            }
+            return RedirectToAction("TaskDetail", new { id = taskId });
 
-            var uploadsFolderPath = Path.Combine(_environment.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolderPath))
-            {
-                Directory.CreateDirectory(uploadsFolderPath);
-            }
-
-            var uniqueFileName = Guid.NewGuid().ToString() + "_" + uploadedFile.FileName;
-            var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await uploadedFile.CopyToAsync(stream);
-            }
-
-            // Dosya meta verilerini veritabanına kaydet
-            var fileAttachment = new FileAttachment
-            {
-                FileName = uniqueFileName,
-                FilePath = filePath,
-                FileSize = uploadedFile.Length,
-                FileType = uploadedFile.ContentType,
-                UploadedDate = DateTime.UtcNow,
-                TaskId = taskId
-            };
-
-            _context.FileAttachments.Add(fileAttachment);
-            await _context.SaveChangesAsync();
-
-            // Başarılı yükleme mesajı gönder
-            return Ok(new { message = "Dosya başarıyla yüklendi!", fileName = uniqueFileName });
         }
 
 

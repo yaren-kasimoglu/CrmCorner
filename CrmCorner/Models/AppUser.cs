@@ -20,6 +20,7 @@ namespace CrmCorner.Models
 
         public virtual ICollection<CustomerN> Customers { get; set; }
         public virtual ICollection<TaskComp> TaskComps { get; set; }
+        public virtual ICollection<Calendar> Calendars { get; set; }
 
     }
 }
