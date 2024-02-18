@@ -22,6 +22,8 @@ public  class Calendar
     [NotMapped]
     public EmailProperty Email { get; set; }
 
+
+
 }
 public class EmailProperty
 {
