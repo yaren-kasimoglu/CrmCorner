@@ -6,8 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using static CrmCorner.Hubs.Hubs;
 using static Microsoft.EntityFrameworkCore.ServerVersion;
 using CrmCorner.Extensions;
+using static CrmCorner.Models.IGoogleCalendarService;
 
 var builder = WebApplication.CreateBuilder(args);
+//builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
+builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
 // Add services to the container.
 
