@@ -1,4 +1,4 @@
-﻿@model CrmCorner.Models.Customer
+﻿@model CrmCorner.Models.CustomerN
 @{
     ViewData["Title"] = "CustomerAdd";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
@@ -19,9 +19,9 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+        <label asp-for="CustomerEmail" class="control-label"></label>
+        <input asp-for="CustomerEmail" class="form-control" />
+        <span asp-validation-for="CustomerEmail" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="PhoneNumber" class="control-label"></label>
@@ -30,9 +30,19 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Company" class="control-label"></label>
-        <select asp-for="Company" asp-items="ViewBag.CompanyList" class="form-control"></select>
-        <span asp-validation-for="Company" class="text-danger"></span>
+        <label asp-for="CompanyName" class="control-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CompanyEmail" class="control-label"></label>
+        <input asp-for="CompanyEmail" class="form-control" />
+        <span asp-validation-for="CompanyEmail" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="AppUserId" class="control-label">Responsible</label>
+        @Html.DropDownListFor(m=>m.AppUserId,(List<SelectListItem>)  ViewBag.AppUsers,"Seçiniz",new {@class="form-select", aria_label="AppUserId",@id="AppUserId", @required="required"})
+        <span asp-validation-for="AppUserId" class="text-danger"></span>
     </div>
 
     <br />

@@ -21,5 +21,5 @@ public partial class TaskCompLog
 
     public virtual TaskComp? Task { get; set; }
 
-    public virtual Employee? UpdatedByNavigation { get; set; }
+    //public virtual Employee? UpdatedByNavigation { get; set; }
 }

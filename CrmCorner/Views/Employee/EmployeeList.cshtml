@@ -1,108 +1,33 @@
-﻿@model List<Employee>
+﻿@model List<UserViewModel>
 @{
     ViewData["Title"] = "EmployeeList";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
 
-<div class="row clearfix">
-    <div class="col-lg-12">
-        <div class="card mb-4">
-            <div class="card-header">
-                <ul class="header-dropdown">
-                    <li>
-                        <div>&nbsp;</div>
-                        <div>&nbsp;</div>
-                        @*<button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEmployee">Add New</button>*@
-                        <a href="/Employee/EmployeeAdd" target="_blank">
-                            <input type="button" class="btn btn-success" value="Add New">
-                        </a>
-                        <div>&nbsp;</div>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body">
-                <table id="employee_List" class="table table-hover">
-                    <thead class="thead-dark">
-                        <tr>
-                            @* <th>
-                            <div class="form-check d-inline-flex mt-1">
-                            <input class="form-check-input select-all" type="checkbox">
-                            </div>
-                            </th>*@
-                            @*         <th></th>*@
-                            @* <th>Employee ID</th>*@
-                            <th>Name</th>
-                            <th>Phone</th>
-                            @*                 <th>Join Date</th>*@
-                            <th>Role</th>
-                            <th scope="col">Department</th>
-                            <th scope="col">Operations</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                @*     <td>
-                            <div class="form-check d-inline-flex mt-1">
-                            <input class="form-check-input" type="checkbox">
-                            </div>
-                            </td>*@
-                                @* <td>
-                            <img src="../dist/assets/images/xs/avatar1.jpg" class="rounded-circle avatar" alt="">
-                            </td>*@
-                                @*<td><span>@item.IdEmployee</span></td>*@
-                                <td>
-                                    <h6 class="mb-0">@item.EmployeeName @item.EmployeeSurname</h6>
-                                    <span>@item.EmployeeEmail</span>
-                                </td>
-                                <td><span>@item.EmployeePhone</span></td>
-                                @* <td>24 Jun, 2015</td> *@
-                                <td>
-                                    @if (item.IdPositionsNavigation != null)
-                                    {
-                                        @item.IdPositionsNavigation.PositionName
-                                    }
-                                    else
-                                    {
-                                        <span class="text-danger">No Position</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (item.IdDepartmentNavigation != null)
-                                    {
-                                        @item.IdDepartmentNavigation.DepartmentName
-                                    }
-                                    else
-                                    {
-                                        <span class="text-danger">No Department</span>
-                                    }
-                                </td>
-                                <td>
-                                    <a href="/Employee/EmployeeEdit/@item.IdEmployee" target="_blank">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fa fa-edit"></i>
-                                        </button>
-                                    </a>
+<table id="user_List" class="table center-aligned-table">
+    <thead>
+        <tr>
+            <th>Kullanıcı Adı</th>
+            <th>Email</th>
+            <th>Firma</th>
+        </tr>
 
-                                    <a href="/Employee/EmployeeDetail/@item.IdEmployee" target="_blank">
-                                        <button type="button" class="btn btn-sm btn-outline">
-                                            <div class="col-md-3 col-sm-4"> <i class="fa fa-align-left"></i></div>
-                                        </button>
-                                    </a>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.UserName</td>
+                <td>@item.Email</td>
+                <td>@item.CompanyName</td>
+         
+            </tr>
+        }
 
-                                    <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-employeeid="@item.IdEmployee" onclick="confirmDelete(this)"><i class="fa fa-trash-o"></i></button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
+    </tbody>
 
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+</table>
 
 @section Scripts {
     <!-- core js file -->
@@ -125,7 +50,7 @@
         }
     }
        $(document).ready(function () {
-        $('#employee_List')
+            $('#user_List')
             .dataTable({
                 responsive: true,
                 columnDefs: [

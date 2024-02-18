@@ -43,15 +43,6 @@ namespace CrmCorner.ViewModels
         [Display(Name = "Firma Adı")]
         public string CompanyName { get; set; } = null!;
 
-        [Required(ErrorMessage = "Çalışan Sayısı alanı boş bırakılamaz.")]
-        [Display(Name = "Çalışan Sayısı")]
-        public int EmployeeCount { get; set; }
-
-        [Required(ErrorMessage = "Sektör alanı boş bırakılamaz.")]
-        [Display(Name = "Sektör")]
-        public string Sector { get; set; }
-
-
         [DataType(DataType.Password)]
         [Required(ErrorMessage = "Şifre alanı boş bırakılamaz.")]
         [MinLength(6, ErrorMessage = "Şifreniz en az 6 karakter olmalıdır.")]

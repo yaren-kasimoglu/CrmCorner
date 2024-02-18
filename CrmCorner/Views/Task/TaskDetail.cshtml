@@ -3,227 +3,269 @@
     ViewData["Title"] = "TaskDetail";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+@section Styles{
+    <style>
+        .highlight {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+            .highlight pre code {
+                font-size: inherit;
+                color: #212529;
+            }
+
+        .nt {
+            color: #2f6f9f;
+        }
+
+        .na {
+            color: #4f9fcf;
+        }
+
+        .s {
+            color: #d44950;
+        }
+
+        pre.prettyprint {
+            background-color: #eee;
+            border: 0px;
+            margin: 0;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .atv,
+        .str {
+            color: #05AE0E;
+        }
+
+        .tag,
+        .pln,
+        .kwd {
+            color: #3472F7;
+        }
+
+        .atn {
+            color: #2C93FF;
+        }
+
+        .pln {
+            color: #333;
+        }
+
+        .com {
+            color: #999;
+        }
+    </style>
+
+    }
+                <div class="container-fluid">
+                    <div class="row g-2">
+                        <div class="col-lg-4 col-md-12">
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-4">Detaylar/Notlar</h6>
+                                    <p>@Model.Description</p>
+                                    <div class="progress-container progress-info">
+                             @*           <div class="progress">
+                                            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 78%;">
+                                                <span class="progress-value">78%</span>
+                                            </div>
+                                        </div>*@
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <ul class="list-unstyled basic-list mb-0">
+                                        <li class="d-flex justify-content-between mb-3">Sorumlu:<span class="badge bg-primary">@Model.AppUser.NameSurname</span></li>
+                                        <li class="d-flex justify-content-between mb-3">Görev Oluşturma Tarihi:<span class="bg-success badge">@Model.CreatedDate</span></li>
+                        <li class="d-flex justify-content-between mb-3">Güncel Durum:<span class="bg-info badge">@Model.Status.StatusName</span></li>
+                                        <li class="d-flex justify-content-between mb-3">Planlanan Kapatma Tarihi:<span class="bg-danger badge">22 Aug, 2021</span></li>
+                                        <li class="d-flex justify-content-between mb-3">Değer Teklifi:<span class="bg-warning badge">@Model.ValueOrOffer</span></li>
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card mb-2">
+                                <div class="card-header">
+                                    <h6 class="card-title">Müşteri-Firma Bilgileri</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="w_user d-flex align-items-start">
+ <img class="rounded-circle" src="~/userprofilepicture/defaultpp.png" width="72" alt="" />
+                                        <div class="wid-u-info ms-3">
+                                            <h5 class="mb-0">@Model.Customer.CompanyName</h5>
+                                            <span>@Model.Customer.CompanyEmail</span>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <ul class="right_chat list-unstyled mb-0">
+                                        <li class="offline">
+                                            <a class="d-flex mb-3" href="javascript:void(0);">
+                                <img class="rounded-circle" src="~/userprofilepicture/defaultpp.png" width="45" height="45" alt="" />
+                                                <div class="ms-3 w-100 text-muted">
+                                                    <span class="name d-block">@Model.Customer.Name</span>
+                                                    <span class="message">@Model.Customer.CustomerEmail</span>
+                                                    <span class="message">@Model.Customer.PhoneNumber</span>
+                                                    <span class="status"></span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
 
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <title>:: Lucid HR BS5 :: Timeline</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <link rel="icon" href="/CRMTema/bootstrap5/dist/horizontal/favicon.ico" type="image/x-icon">
-    <!-- VENDOR CSS -->
-    <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/vendor/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/vendor/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/vendor/dropify/css/dropify.min.css">
-
-
-    <!-- MAIN CSS -->
-    <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/css/main.css">
-    <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/css/color_skins.css">
-</head>
-
-<body>
-@*
-    <div class="block-header py-lg-4 py-3">
-        <div class="row g-3">
-            <div class="col-md-6 col-sm-12">
-                <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> Timeline</h2>
-                <ul class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="/CRMTema/bootstrap5/dist/index.html">Lucid</a></li>
-                    <li class="breadcrumb-item">Pages</li>
-                    <li class="breadcrumb-item active">Timeline</li>
-                </ul>
-            </div>
-        </div>
-    </div>*@
-
-    <div class="row g-3">
-        <div class="col-lg-3 col-md-12 col-sm-12">
-            <div class="card">
+            <div class="card mb-2">
                 <div class="card-header">
-                    <h6 class="card-title">Summary</h6>
+                    <h6 class="card-title">Dosyalar & Belgeler</h6>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th class="table-light text-dark" scope="col"><i class="fa fa-money"></i></th>
-                                    <th class="table-light text-dark" scope="col"><i class="fa fa-user"></i></th>
-                                    <th class="table-light text-dark" scope="col">  <i class="fa fa-users"></i></th>
-                               @*     <th class="table-light text-dark" scope="col"><i class="fa fa-calendar"></i></th>*@
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <input type="hidden" id="taskId" name="taskId" value="@Model.TaskId" />
-                                <tr>
-                                    <td>@Model.ValueOrOffer</td>
-                                    <td>@Model.Employee.EmployeeName</td>
-                                    <td>@Model.Customer.Name</td>
-                             @*       <td>x</td>*@
-                                </tr>
-                                <tr>
-                                    <td>Task Name: @Model.Title</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="w_user d-flex align-items-start">
+                        <div class="wid-u-info ms-3">
+                            <h5 class="mb-0">@Model.Customer.CompanyName</h5>
+                            <span>@Model.Customer.CompanyEmail</span>
+                        </div>
                     </div>
+                    <hr>
+                    <ul class="right_chat list-unstyled mb-0">
+                        <li class="offline">
+                            <a class="d-flex mb-3" href="javascript:void(0);">
+                                <img class="rounded-circle" src="~/userprofilepicture/defaultpp.png" width="45" height="45" alt="" />
+                                <div class="ms-3 w-100 text-muted">
+                                    <span class="name d-block">@Model.Customer.Name</span>
+                                    <span class="message">@Model.Customer.CustomerEmail</span>
+                                    <span class="message">@Model.Customer.PhoneNumber</span>
+                                    <span class="status"></span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-9 col-md-12 col-sm-12">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="card-title">Actions</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th class="table-light text-dark" scope="col"><i class="fa fa-folder"></i></th>
-                                    <th class="table-light text-dark" scope="col"><i class="fa fa-folder"></i></th>
-                                    <th class="table-light text-dark" scope="col"><i class="fa fa-send"></i></th>
-                                    <th class="table-light text-dark" scope="col"><i class="fa fa-calendar"></i></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <form method="post" enctype="multipart/form-data" asp-controller="Task" asp-action="UploadFile">
-                                            <input type="hidden" name="taskId" value="@(Model.TaskId)" />
-                                            <div class="col-lg-6 col-md-12">
-                                                <div class="card">
-                                                    <div class="header">
-                                                        <h6>Dosya Yükle</h6>
-                                                    </div>
-                                                    <div class="body">
-                                                        <input type="file" name="uploadedFile" class="dropify" data-allowed-file-extensions="pdf png">
-                                                    </div>
-                                                    <br />
-                                                    <div class="body">
-                                                        <button type="submit" class="btn btn-primary">Yükle</button>
-                                                    </div>
+
+                            <div class="card mb-2">
+                                <div class="card-header">
+                                    <h6 class="card-title">Kullanıcı Bilgisi</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="profile-image mb-3"> <img src="~/userprofilepicture/defaultpp.png" width="65" height="65"  class="rounded-circle" alt=""> </div>
+                                    <div>
+                                        <h4><strong>@Model.AppUser.NameSurname</strong></h4>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a asp-action="MyProfile" asp-controller="Member">
+                                        <button class="btn btn-primary">Profilim</button>
+                        </a>
+                        <a asp-action="ChatApp" asp-controller="ChatApp">
+                                        <button class="btn btn-outline-secondary">Message</button>
+                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-12">
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <div class="timeline-item green">
+                                        <span class="date">Just now</span>
+                                        <h6>iNext - One Page Responsive Template</h6>
+                                        <span>Project Lead: <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
+                                    </div>
+                                    <div class="timeline-item warning">
+                                        <span class="date">02 Jun 2021</span>
+                                        <h6>Add Team Members</h6>
+                                        <span>By: <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
+                                        <div class="msg">
+                                            <p>web by far While that's mock-ups and this is politics, are they really so different? I think the only card she has is the Lorem card.</p>
+                                            <ul class="list-unstyled team-info d-flex">
+                                <li><img src="~/CRMTema/bootstrap5/dist/assets/images/xs/avatar4.jpg" data-toggle="tooltip" data-placement="top" title="Chris Fox" alt="Avatar"></li>
+                                                <li><img src="~/CRMTema/bootstrap5/dist/assets/images/xs/avatar5.jpg" data-toggle="tooltip" data-placement="top" title="Joge Lucky" alt="Avatar"></li>
+                                                <li><img src="~/CRMTema/bootstrap5/dist/assets/images/xs/avatar2.jpg" data-toggle="tooltip" data-placement="top" title="Folisise Chosielie" alt="Avatar"></li>
+                                                <li><img src="~/CRMTema/bootstrap5/dist/assets/images/xs/avatar1.jpg" data-toggle="tooltip" data-placement="top" title="Joge Lucky" alt="Avatar"></li>
+                                            </ul>
+                                            <div class="top_counter d-flex">
+                                                <div class="icon text-center"><i class="fa fa-file-word-o"></i> </div>
+                                                <div class="content ms-3">
+                                                    <p class="mb-1">iNext project documentation.doc</p>
+                                                    <span>Size: 2.3Mb</span>
                                                 </div>
                                             </div>
-                                        </form>
-
-                                    </td>
-                                    <td>
-                                        <div class="card">
-                                            <h6>Yüklenen Dosyalar</h6>
-                                            <ul>
-                                                @if (!string.IsNullOrEmpty(Model.UploadedFileName))
-                                                {
-                                                    string[] fileNames = Model.UploadedFileName.Split(',');
-
-                                                    for (int i = 0; i < fileNames.Length; i++)
-                                                    {
-                                                        string fileName = fileNames[i];
-                                                        <li>
-                                                            @fileName
-                                                            <div class="row g-3">
-                                                                <br />
-                                                                <div class="col-lg-6">
-                                                                    <a href="@Url.Action("DownloadFile", "Task", new { taskId = Model.TaskId, fileName = fileName })" class="btn btn-primary">İndir</a>
-                                                                </div>
-                                                                <div class="col-lg-6">
-                                                                    <form method="post" asp-controller="Task" asp-action="DeleteFile">
-                                                                        <input type="hidden" name="taskId" value="@Model.TaskId" />
-                                                                        <input type="hidden" name="fileName" value="@fileName" />
-                                                                        <button type="submit" class="btn btn-danger">Sil</button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                }
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item warning">
+                                        <span class="date">02 Jun 2021</span>
+                                        <h6>Task Assigned</h6>
+                                        <span>By: <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
+                                        <div class="msg">
+                                            <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal</p>
+                                            <div class="d-flex mb-3">
+                                <img class="media-object rounded width40 mr-3" src="~/CRMTema/bootstrap5/dist/assets/images/xs/avatar1.jpg" alt="" />
+                                                <div class="media-body ms-2">
+                                                    <h6 class="mb-0">Folisise Chosielie</h6>
+                                                    <p class="mb-0"><strong>Detail:</strong> Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex">
+                                <img class="media-object rounded width40 mr-3" src="~/CRMTema/bootstrap5/dist/assets/images/xs/avatar5.jpg" alt="" />
+                                                <div class="media-body ms-2">
+                                                    <h6 class="mb-0">Joge Lucky</h6>
+                                                    <p class="mb-0"><strong>Detail:</strong> Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item warning">
+                                        <span class="date">02 Jun 2021</span>
+                                    
+                                    <div class="timeline-item danger">
+                                        <span class="date">04 Jun 2021</span>
+                                        <h6>Project Reports</h6>
+                                        <span>By: <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
+                                        <div class="msg">
+                                            <ul class="list-unstyled">
+                                                <li class="mb-3">
+                                                    <span>Design Bug</span>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="17" aria-valuemin="0" aria-valuemax="100" style="width: 17%;"></div>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-3">
+                                                    <span>UI UX Design Task</span>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar" role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" style="width: 83%;"> </div>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-3">
+                                                    <span>Developer Task</span>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" aria-valuenow="49" aria-valuemin="0" aria-valuemax="100" style="width: 49%;"></div>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <span>QA (Quality Assurance)</span>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar bg-warning" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width: 33%;"></div>
+                                                    </div>
+                                                </li>
                                             </ul>
                                         </div>
-
-                                    </td>
-                                    <td>@Model.Employee.EmployeeName--send email butonu EKLENECEK</td>
-                                    <td>@Model.Customer.Name -- takvim EKLENECEK</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </div>
+                                    <div class="timeline-item dark">
+                                        <span class="date">05 Jun 2021</span>
+                                        <h6>Project on Goinng</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
-            </div>
-        </div>
-    </div>
 
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
-    <div class="row clearfix">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-body">
-
-                    @if (Model.TaskCompLogs != null && Model.TaskCompLogs.Any())
-                    {
-                        
-                    @foreach (var log in Model.TaskCompLogs)
-                    {
-                            var count = Model.TaskCompLogs.Count();
-                            var remainder = log.LogId % 3;
-                            var timelineClass = "";
-
-                            switch (remainder)
-                            {
-                                case 0:
-                                    timelineClass = "timeline-item warning";
-                                    break;
-                                case 1:
-                                    timelineClass = "timeline-item faster green";
-                                    break;
-                                case 2:
-                                    timelineClass = "timeline-item blue";
-                                    break;
-                                default:
-                                    break;
-                            }
-
-                        if (log.UpdatedField != "TaskCompLogs" && log.UpdatedField != "ModifiedDate")
-                        {
-                                <div class="@timelineClass">
-                                <div class="timeline-badge primary"><i class="glyphicon glyphicon-record" rel="tooltip"></i></div>
-                                <div class="timeline-panel">
-                                    <div class="timeline-heading">
-                                            <h5>
-                                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>@* Renk kontrolü eklenebilir KONTROL*@
-                                            </h5>
-                                        <h6 class="timeline-title">@log.UpdatedField</h6>    
-                                    </div>
-                                    <div class="timeline-body">
-                                        <p>@log.OldValue <i class="fa fa-long-arrow-right"></i> @log.NewValue</p>
-                                        <p>Edited By: @log.UpdatedByNavigation?.EmployeeName</p>
-                                    </div>
-                            </div>
-                            </div>
-                        }
-                    }
-                    }
-                    else
-                    {
-                        <p>TaskCompLogs içinde veri bulunamadı veya döngüye giriş yapılmadı.</p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- core js file -->
-    <script src="/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-    <!-- page js file -->
-    <script src="/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-    <script src="/CRMTema/bootstrap5/dist/assets/bundles/vendorscripts.bundle.js"></script>
-    <script src="/CRMTema/bootstrap5/dist/assets/vendor/dropify/js/dropify.min.js"></script>
-    <script src="/CRMTema/bootstrap5/dist/assets/js/pages/forms/dropify.js"></script>
-
-</body>
-</html>
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>

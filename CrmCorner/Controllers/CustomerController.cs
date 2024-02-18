@@ -1,6 +1,7 @@
 ﻿
 using CrmCorner.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,75 +12,111 @@ namespace CrmCorner.Controllers
     public class CustomerController : Controller
     {
         private readonly CrmCornerContext _context;
-        public CustomerController(CrmCornerContext context)
+        private readonly UserManager<AppUser> _userManager;
+        public CustomerController(CrmCornerContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
-        public IActionResult CustomerList()
+        public async Task<IActionResult> CustomerList()
         {
-            var customers = _context.Customers.Include(e => e.Company)
-                                .ToList();
-            return View(customers);
+            var currentUser=await _userManager.GetUserAsync(User);
+
+            if (currentUser != null)
+            {
+                var customers = _context.CustomerNs
+                    .Include(c => c.AppUser)
+                    .Where(c => c.AppUserId == currentUser.Id) // Mevcut kullanıcının Id'sine göre filtrele
+                    .ToList();
+
+                return View(customers);
+            }
+            else
+            {
+                ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
+                return View();
+            }
+
         }
 
         [HttpGet]
-        public IActionResult CustomerAdd()
+        public async Task<IActionResult> CustomerAdd()
         {
-            var company = _context.Companies.ToList();
+            var currentUser = await _userManager.GetUserAsync(User);
 
-            List<SelectListItem> companyItems = company
-          .Select(d => new SelectListItem
-          {
-              Text = d.CompanyName,
-              Value = d.Id.ToString()
-          }).ToList();
+            if (currentUser == null)
+            {
+                return View("SignIn","Home"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+            }
+            var companyId = currentUser.CompanyId;
 
-            ViewBag.CompanyList = companyItems;
+            var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
+
+            var appUserItems = appUsers
+         .Select(u => new SelectListItem
+         {
+             Text = u.UserName,
+             Value = u.Id
+         })
+         .ToList();
+
+            ViewBag.AppUsers = appUserItems;
             return View();
         }
         [HttpPost]
-        public IActionResult CustomerAdd(Customer customer)
+        public IActionResult CustomerAdd(CustomerN customer)
         {
             if (ModelState.IsValid)
             {
-                var customers = _context.Customers.Include(e => e.Company).ToList();
+                customer.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
 
-                _context.Customers.Add(customer);
+                var customers = _context.CustomerNs./*Include(e => e.IdEmployeeNavigation)*/ToList();
+
+                _context.CustomerNs.Add(customer);
                 _context.SaveChanges();
 
                 return RedirectToAction("CustomerList");
             }
 
-            var company = _context.Companies.ToList();
+            var appUsers = _userManager.Users.ToList();
+            var appUserItems = appUsers
+         .Select(u => new SelectListItem
+         {
+             Text = u.UserName,
+             Value = u.Id
+         })
+         .ToList();
 
-            List<SelectListItem> companyItems = company
-          .Select(d => new SelectListItem
-          {
-              Text = d.CompanyName,
-              Value = d.Id.ToString()
-          }).ToList();
-
-            ViewBag.CompanyList = companyItems;
+            ViewBag.AppUsers = appUserItems;
 
             return View(customer);
         }
 
 
         [HttpGet]
-        public IActionResult CustomerEdit(int id)
+        public async Task<IActionResult> CustomerEdit(int id)
         {
-            var company = _context.Companies.ToList();
+            var currentUser = await _userManager.GetUserAsync(User);
 
-            List<SelectListItem> companyItems = company
-          .Select(d => new SelectListItem
-          {
-              Text = d.CompanyName,
-              Value = d.Id.ToString()
-          }).ToList();
+            if (currentUser == null)
+            {
+                return Challenge(); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+            }
+            var companyId = currentUser.CompanyId;
 
-            ViewBag.CompanyList = companyItems;
+            var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
+
+            var appUserItems = appUsers
+         .Select(u => new SelectListItem
+         {
+             Text = u.UserName,
+             Value = u.Id
+         })
+         .ToList();
+
+            ViewBag.AppUsers = appUserItems;
             // id parametresini kullanarak düzenlenecek müşteriyi veritabanından al
-            Customer customer = _context.Customers.Find(id);
+            CustomerN customer = _context.CustomerNs.Find(id);
 
             // Eğer müşteri bulunamazsa
             if (customer == null)
@@ -92,7 +129,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public IActionResult CustomerEdit(Customer editedCustomer)
+        public IActionResult CustomerEdit(CustomerN editedCustomer)
         {
             if (ModelState.IsValid)
             {
@@ -104,26 +141,23 @@ namespace CrmCorner.Controllers
             //ModelState.IsValid false ise
             return View(editedCustomer);
         }
+
+
         [HttpPost]
         public IActionResult CustomerDelete(int id)
         {
-            Customer customer = _context.Customers.Find(id);
+            CustomerN customer = _context.CustomerNs.Find(id);
 
             // Eğer müşteri bulunamazsa
             if (customer == null)
             {
                 return NotFound();
             }
-            _context.Customers.Remove(customer);
+            _context.CustomerNs.Remove(customer);
             _context.SaveChanges();
 
             return RedirectToAction("CustomerList");
         }
 
-        private List<string> GetStatusList()
-        {
-            // Dropdown'ı dolduracak veriler burada alınır
-            return new List<string> { "Active", "Inactive", "Pending" };
-        }
     }
 }

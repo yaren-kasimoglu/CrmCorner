@@ -1,4 +1,4 @@
-﻿@model List<Customer>
+﻿@model List<CustomerN>
 @{
     ViewData["Title"] = "CustomerList";
 }
@@ -6,19 +6,27 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-
 <a href="/Customer/CustomerAdd" target="_blank">
     <input type="button" class="btn btn-success" value="Add Customer">
 </a>
 <div>&nbsp;</div>
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewBag.ErrorMessage
+    </div>
+}
 <table class="table table-bordered" id="customer_List">
     <thead>
         <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Surname</th>
-            <th scope="col">Email</th>
-            <th scope="col">Phone Number</th>
-            <th scope="col">Company</th>
+            <th scope="col">Adı</th>
+            <th scope="col">Soyadı</th>
+            <th scope="col">Müşteri Email</th>
+            <th scope="col">Telefon Numarası</th>
+            <th scope="col">Firma Adı</th>
+            <th scope="col">Firme Email</th>
+           <th scope="col">Sorumlu Kişi</th>
             <th scope="col">Operations</th>
         </tr>
     </thead>
@@ -29,28 +37,32 @@
 
                 <td>@item.Name</td>
                 <td>@item.Surname</td>
-                <td>@item.Email</td>
+                <td>@item.CustomerEmail</td>
                 <td>@item.PhoneNumber</td>
+                <td>@item.CompanyName</td>
+                <td>@item.CompanyEmail</td>
                 <td>
-                    @if (item.Company != null)
+                    @if (item.AppUserId!=null)
                     {
-                        @item.Company.CompanyName
-                     }
+                        @item.AppUser!.UserName
+                    }
                     else
                     {
-                        <span class="text-danger">No Company</span>
+                        <span class="text-danger">Sorumlu bilgisi eklenmemiştir.</span>
                     }
+
                 </td>
+
                 <td>
                     <a href="/Customer/CustomerEdit/@item.Id" target="_self">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
                             <i class="fa fa-edit"></i>
                         </button>
                     </a>
-            @*        <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
+                  <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
                         <i class="fa fa-trash-o"></i>
-                    </button>*@
-                </td>
+                    </button>
+               </td>
 
             </tr>
         }
