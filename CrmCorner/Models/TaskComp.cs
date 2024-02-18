@@ -30,6 +30,10 @@ public partial class TaskComp
 
     public virtual CustomerN? Customer { get; set; }
 
+    // Dosya ekleri için koleksiyon
+    public virtual ICollection<FileAttachment> FileAttachments { get; set; } = new List<FileAttachment>();
+
+
     //public string? TaskCompcol { get; set; }
 
     //public byte[]? UploadedFile { get; set; }

@@ -23,6 +23,7 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     public DbSet<Company> Companies { get; set; }
     public DbSet<Status> Statuses { get; set; }
     public DbSet<TaskComp> TaskComps { get; set; }
+    public DbSet<FileAttachment> FileAttachments { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
