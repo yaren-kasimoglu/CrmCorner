@@ -95,7 +95,7 @@
                 </div>
                 <div class="card-body">
                     <div class="w_user d-flex align-items-start">
-                        <img class="rounded-circle" src="~/userprofilepicture/defaultpp.png" width="72" alt="" />
+                        <img class="rounded-circle" src="~/userprofilepicture/firm.png" width="72" alt="" />
                         <div class="wid-u-info ms-3">
                             <h5 class="mb-0">@Model.Customer.CompanyName</h5>
                             <span>@Model.Customer.CompanyEmail</span>
@@ -105,12 +105,11 @@
                     <ul class="right_chat list-unstyled mb-0">
                         <li class="offline">
                             <a class="d-flex mb-3" href="javascript:void(0);">
-                                <img class="rounded-circle" src="~/userprofilepicture/defaultpp.png" width="45" height="45" alt="" />
+                                <img class="rounded-circle" src="~/userprofilepicture/defaultpp.png" width="35" height="35" alt="" />
                                 <div class="ms-3 w-100 text-muted">
                                     <span class="name d-block">@Model.Customer.Name</span>
                                     <span class="message">@Model.Customer.CustomerEmail</span>
                                     <span class="message">@Model.Customer.PhoneNumber</span>
-                                    <span class="status"></span>
                                 </div>
                             </a>
                         </li>
@@ -120,24 +119,8 @@
 
 
 
-            <div class="card mb-2">
-                <div class="card-header">
 
-                    <form method="post" enctype="multipart/form-data" asp-controller="Task" asp-action="UploadFile">
-                        <input type="number" name="taskId" value="@Model.TaskId" />
-                        <input type="file" name="uploadedFile" />
-                        <button type="submit">Yükle</button>
-                    </form>
-
-
-
-                </div>
-            </div>
-
-
-
-
-            <div class="card mb-2">
+     @*       <div class="card mb-2">
                 <div class="card-header">
                     <h6 class="card-title">Dosyalar & Belgeler</h6>
                 </div>
@@ -163,7 +146,7 @@
                         </li>
                     </ul>
                 </div>
-            </div>
+            </div>*@
 
             <div class="card mb-2">
                 <div class="card-header">
@@ -185,7 +168,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-8 col-md-12">
+@*        <div class="col-lg-8 col-md-12">
             <div class="card mb-2">
                 <div class="card-body">
                     <div class="timeline-item green">
@@ -279,10 +262,76 @@
                     </div>
                 </div>
             </div>
+        </div>*@
+
+        <div class="col-lg-8 col-md-12">
+            <div class="card mb-2">
+                    <div class="card-body">
+
+                        @if (Model.TaskCompLogs != null && Model.TaskCompLogs.Any())
+                        {
+
+                        foreach (var log in ViewBag.TaskCompLogs as List<CrmCorner.Models.TaskCompLog>)
+                        {
+                            
+                                var count = Model.TaskCompLogs.Count();
+                                var remainder = log.LogId % 5;
+                                var timelineClass = "";
+
+                                switch (remainder)
+                                {
+                                    case 0:
+                                        timelineClass = "timeline-item warning";
+                                        break;
+                                    case 1:
+                                        timelineClass = "timeline-item faster green";
+                                        break;
+                                    case 2:
+                                        timelineClass = "timeline-item blue";
+                                        break;
+                                    case 3:
+                                        timelineClass = "timeline-item danger";
+                                        break;
+                                    case 4:
+                                        timelineClass = "timeline-item dark";
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                if (log.UpdatedField != "TaskCompLogs" && log.UpdatedField != "ModifiedDate")
+                                {
+                                    <div class="@timelineClass">
+                                        <div class="timeline-badge primary"><i class="glyphicon glyphicon-record" rel="tooltip"></i></div>
+                                        <div class="timeline-panel">
+                                            <div class="timeline-heading">
+                                                <h5>
+                                                    <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> @log.UpdatedAt?.ToString("dd-MM-yyyy HH:mm:ss")</small></p>
+                                                    @* Renk kontrolü eklenebilir KONTROL*@
+                                                </h5>
+                                                <h6 class="timeline-title">@log.UpdatedField</h6>
+                                            </div>
+                                            <div class="timeline-body">
+                                                <p>@log.OldValue <i class="fa fa-long-arrow-right"></i> @log.NewValue</p>
+                                                <p>Edited By: @log.UpdatedBy?.NameSurname</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <p>TaskCompLogs içinde veri bulunamadı veya döngüye giriş yapılmadı.</p>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
 
+
     </div>
-</div>
+
 
 <!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>

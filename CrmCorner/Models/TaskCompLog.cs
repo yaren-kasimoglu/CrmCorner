@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CrmCorner.Models;
 
@@ -15,11 +16,13 @@ public partial class TaskCompLog
 
     public string? NewValue { get; set; }
 
-    public int? UpdatedBy { get; set; }
+    public string? UpdatedById { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
+    [ForeignKey("TaskId")]
     public virtual TaskComp? Task { get; set; }
 
-    //public virtual Employee? UpdatedByNavigation { get; set; }
+    [ForeignKey("UpdatedById")]
+    public virtual AppUser? UpdatedBy { get; set; }
 }

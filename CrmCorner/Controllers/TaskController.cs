@@ -167,7 +167,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public IActionResult TaskEdit(TaskComp editedTask)
+        public async Task<IActionResult> TaskEdit(TaskComp editedTask)
         {
             if (ModelState.IsValid)
             {
@@ -178,7 +178,7 @@ namespace CrmCorner.Controllers
                 editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
 
                 // Değişiklikleri kontrol et ve log tablosuna kaydet
-                //  LogChanges(originalTask, editedTask);
+                  await LogChanges(originalTask, editedTask);
 
                 // task güncelle
                 _context.TaskComps.Update(editedTask);
@@ -244,167 +244,91 @@ namespace CrmCorner.Controllers
             {
                 return NotFound();
             }
+
+            var taskCompLogs = await _context.TaskCompLogs
+                                    .Where(log => log.TaskId == id)
+                                    .OrderByDescending(log => log.UpdatedAt)
+                                    .ToListAsync();
+
+            ViewBag.TaskCompLogs = taskCompLogs;
+
             return View("TaskDetail", task);
         }
 
-
-        [HttpPost]
-        public async Task<IActionResult> UploadFile(int taskId, IFormFile uploadedFile)
+        private string GetCustomerNameById(int? customerId)
         {
-            if (uploadedFile != null || uploadedFile.Length > 0)
+            if (customerId == null) return null;
+            var customer = _context.CustomerNs.FirstOrDefault(c => c.Id == customerId);
+            return customer != null ? $"{customer.Name} {customer.Surname}" : "Unknown";
+        }
+        private string GetStatusNameById(int? statusId)
+        {
+            if (statusId == null) return null;
+            var status = _context.Statuses.FirstOrDefault(c => c.StatusId == statusId);
+            return status != null ? $"{status.StatusName}" : "Unknown";
+        }
+        private string GetUserNameById(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return "Unknown";
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            return user != null ? user.NameSurname : "Unknown";
+        }
+
+        public async Task LogChanges(TaskComp originalTask, TaskComp editedTask)
+        {
+            foreach (var property in typeof(TaskComp).GetProperties())
             {
-                try
+                var originalValue = property.GetValue(originalTask);
+                var editedValue = property.GetValue(editedTask);
+
+                if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
                 {
-                    var task = await _context.TaskComps.FindAsync(taskId);
-                    if (task == null)
+                    string oldValueString = originalValue.ToString();
+                    string newValueString = editedValue.ToString();
+                    string fieldName = property.Name;
+
+                    // CustomerId için özel bir işlem yap
+                    if (property.Name == "CustomerId")
                     {
-                        return NotFound($"Task with Id {taskId} not found.");
+                        oldValueString = GetCustomerNameById((int?)originalValue);
+                        newValueString = GetCustomerNameById((int?)editedValue);
+                        fieldName = "Müşteri Bilgisi";
                     }
 
-                    var uploadsFolderPath = Path.Combine(_environment.WebRootPath, "uploads");
-                    if (!Directory.Exists(uploadsFolderPath))
+                    if (property.Name == "UserId")
                     {
-                        Directory.CreateDirectory(uploadsFolderPath);
+                        var oldUser = await _userManager.FindByIdAsync(originalValue.ToString());
+                        var newUser = await _userManager.FindByIdAsync(editedValue.ToString());
+                        oldValueString = oldUser != null ? oldUser.NameSurname : "Unknown";
+                        newValueString = newUser != null ? newUser.NameSurname : "Unknown";
+                        fieldName = "Sorumlu Kullanıcı";
                     }
 
-                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + uploadedFile.FileName;
-                    var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    if (property.Name == "StatusId")
                     {
-                        await uploadedFile.CopyToAsync(stream);
+                        oldValueString = GetStatusNameById((int?)originalValue);
+                        newValueString = GetStatusNameById((int?)editedValue);
+                        fieldName = "Güncel Durum Bilgisi";
                     }
 
-                    // Dosya meta verilerini veritabanına kaydet
-                    var fileAttachment = new FileAttachment
+                    TaskCompLog log = new TaskCompLog
                     {
-                        FileName = uniqueFileName,
-                        FilePath = filePath,
-                        FileSize = uploadedFile.Length,
-                        FileType = uploadedFile.ContentType,
-                        UploadedDate = DateTime.UtcNow,
-                        TaskId = taskId
+                        TaskId = editedTask.TaskId,
+                        UpdatedField = fieldName,
+                        OldValue = oldValueString,
+                        NewValue = newValueString,
+                        UpdatedById = _userManager.GetUserId(User),
+                        UpdatedAt = DateTime.Now
                     };
 
-                    _context.FileAttachments.Add(fileAttachment);
-                    await _context.SaveChangesAsync();
-                    // Başarılı yükleme mesajı gönder
-                    return Ok(new { message = "Dosya başarıyla yüklendi!", fileName = uniqueFileName });
-                }
-
-                catch (Exception ex)
-                {
-                    ViewBag.Message = "Dosya yüklenirken bir hata oluştu: " + ex.Message;
+                    _context.TaskCompLogs.Add(log);
                 }
             }
-        
-            else
-            {
-                ViewBag.Message = "Dosya yüklenemedi veya dosya boş!";
-            }
-
-            return RedirectToAction("TaskDetail", new { id = taskId });
-
+            await _context.SaveChangesAsync();
         }
 
 
-        //private string GetCustomerNameById(int? customerId)
-        //{
-        //    if (customerId == null) return null;
-        //    var customer = _context.Customers.FirstOrDefault(c => c.Id == customerId);
-        //    return customer != null ? $"{customer.Name} {customer.Surname}" : "Unknown";
-        //}
-        //private string GetStatusNameById(int? statusId)
-        //{
-        //    if (statusId == null) return null;
-        //    var status = _context.Statuses.FirstOrDefault(c => c.StatusId == statusId);
-        //    return status != null ? $"{status.StatusName}" : "Unknown";
-        //}
-        //private string GetEmployeeNameById(int? employeeId)
-        //{
-        //    if (employeeId == null) return null;
-        //    var employee = _context.Employees.FirstOrDefault(c => c.IdEmployee == employeeId);
-        //    return employee != null ? $"{employee.EmployeeName} {employee.EmployeeSurname}" : "Unknown";
-        //}
 
-
-        //private void LogChanges(TaskComp originalTask, TaskComp editedTask)
-        //{
-        //    foreach (var property in typeof(TaskComp).GetProperties())
-        //    {
-        //        var originalValue = property.GetValue(originalTask);
-        //        var editedValue = property.GetValue(editedTask);
-
-        //        if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
-        //        {
-        //            string oldValueString = originalValue.ToString();
-        //            string newValueString = editedValue.ToString();
-        //            string fieldName = property.Name;
-
-        //            //// CustomerId için özel bir işlem yap
-        //            //if (property.Name == "CustomerId")
-        //            //{
-        //            //    oldValueString = GetCustomerNameById((int?)originalValue);
-        //            //    newValueString = GetCustomerNameById((int?)editedValue);
-        //            //    fieldName = "Müşteri Bilgisi";
-        //            //}
-        //            if (property.Name == "EmployeeId")
-        //            {
-        //                oldValueString = GetEmployeeNameById((int?)originalValue);
-        //                newValueString = GetEmployeeNameById((int?)editedValue);
-        //                fieldName = "Sorumlu Çalışan Bilgisi";
-        //            }
-        //            if (property.Name == "StatusId")
-        //            {
-        //                oldValueString = GetStatusNameById((int?)originalValue);
-        //                newValueString = GetStatusNameById((int?)editedValue);
-        //                fieldName = "Güncel Durum Bilgisi";
-        //            }
-
-        //            TaskCompLog log = new TaskCompLog
-        //            {
-        //                TaskId = editedTask.TaskId,
-        //                UpdatedField = fieldName,
-        //                OldValue = oldValueString,
-        //                NewValue = newValueString,
-        //                UpdatedBy = editedTask.Employee?.IdEmployee,
-        //                UpdatedAt = DateTime.Now
-        //            };
-
-        //            _context.TaskCompLogs.Add(log);
-        //        }
-        //    }
-        //    _context.SaveChanges();
-        //}
-
-        //public IActionResult TaskCompLog()
-        //{
-        //    var logs = _context.TaskCompLogs.ToList();
-        //    return View(logs);
-        //}
-
-        //public IActionResult Timeline()
-        //{
-        //    var tasks = _context.TaskComps
-        //        .Include(t => t.TaskCompLogs)
-        //        .ToList();
-
-        //    return View(tasks);
-        //}
-        //public IActionResult GetTaskTimeline(int taskId)
-        //{
-        //    // TaskComps tablosundan taskId'ye göre ilgili görevi çek
-        //    var task = _context.TaskComps
-        //                    .Include(t => t.TaskCompLogs)
-        //                    .FirstOrDefault(t => t.TaskId == taskId);
-
-        //    if (task != null)
-        //    {
-        //        return Json(task.TaskCompLogs);
-        //    }
-
-        //    return Json(null);
-        //}
 
         //[HttpPost]
         //public async Task<IActionResult> UploadFile(int taskId, IFormFile uploadedFile)
