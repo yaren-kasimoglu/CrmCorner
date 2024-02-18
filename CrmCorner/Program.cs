@@ -12,7 +12,7 @@ using static CrmCorner.Models.IGoogleCalendarService;
 using CrmCorner.OptionsModels;
 using CrmCorner.Services;
 using Microsoft.Extensions.FileProviders;
-
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
@@ -30,6 +30,11 @@ builder.Services.AddSingleton<IFileProvider>(
     new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
 );
 
+builder.Services.Configure<FormOptions>(x => {
+    x.ValueLengthLimit = int.MaxValue;
+    x.MultipartBodyLengthLimit = int.MaxValue; // Ayarlamak istediğiniz limit değeri
+    x.MultipartHeadersLengthLimit = int.MaxValue;
+});
 
 //builder.Services.AddDbContext<CrmCornerContext>(x=>x.UseSqlServer(builder.Configuration.GetConnectionString("CrmConnection")));
 

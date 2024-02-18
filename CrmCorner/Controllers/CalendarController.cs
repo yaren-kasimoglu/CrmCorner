@@ -64,7 +64,7 @@ namespace CrmCorner.Controllers
              Title = c.Title,
              Description = c.Description
          }).ToList();
-            
+
             ViewBag.Calendar = calendars;
             ViewBag.CalendarFilter = calendarItemsFilter.Take(5);
             return View();
@@ -101,8 +101,8 @@ namespace CrmCorner.Controllers
 
         [HttpPost]
         public IActionResult CalendarDelete(int? ID)
-       {
-           Calendar calendar = _context.Calendars.Find(ID);
+        {
+            Calendar calendar = _context.Calendars.Find(ID);
 
             if (calendar == null)
             {
@@ -121,13 +121,13 @@ namespace CrmCorner.Controllers
 
             if (calendar == null)
             {
-                return Json(new { Message = "error"});
-           }
+                return Json(new { Message = "error" });
+            }
             return Json(new { Message = calendar.Description });
 
         }
 
-        
+
 
         public async Task<IActionResult> sendEmailAsync(Calendar calendar)
         {
@@ -197,18 +197,19 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public IActionResult CalendarSearch(string email)
         {
-            var employess = _context.Employees.Select(m=>m.EmployeeEmail).ToList();
-            var filteremployes=employess.Where(word => word.Contains(email)).ToList();
-            ViewBag.Filteremployes = filteremployes;
-            if (filteremployes == null)
-            {
-                return NotFound();
-            }
-            return Json(new { Message = filteremployes });
-
+            //var employess = _context.Employees.Select(m => m.EmployeeEmail).ToList();
+            //var filteremployes = employess.Where(word => word.Contains(email)).ToList();
+            //ViewBag.Filteremployes = filteremployes;
+            //if (filteremployes == null)
+            //{
+            //    return NotFound();
+            //}
+            //return Json(new { Message = filteremployes });
+            return View();
         }
     }
-    
-    
+
+
 }
+
 
