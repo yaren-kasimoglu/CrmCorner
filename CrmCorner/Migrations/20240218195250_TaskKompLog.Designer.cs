@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20240218195250_TaskKompLog")]
+    partial class TaskKompLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -349,7 +352,6 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.TaskCompLog", b =>
                 {
                     b.Property<int>("LogId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<string>("NewValue")
@@ -364,17 +366,13 @@ namespace CrmCorner.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("varchar(255)");
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdatedField")
                         .HasColumnType("longtext");
 
-                    b.HasKey("LogId");
-
                     b.HasIndex("TaskId");
-
-                    b.HasIndex("UpdatedById");
 
                     b.ToTable("TaskCompLogs");
                 });
@@ -521,16 +519,10 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.TaskCompLog", b =>
                 {
                     b.HasOne("CrmCorner.Models.TaskComp", "Task")
-                        .WithMany("TaskCompLogs")
+                        .WithMany()
                         .HasForeignKey("TaskId");
 
-                    b.HasOne("CrmCorner.Models.AppUser", "UpdatedBy")
-                        .WithMany("TaskCompLogs")
-                        .HasForeignKey("UpdatedById");
-
                     b.Navigation("Task");
-
-                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.AppUser", b =>
@@ -538,8 +530,6 @@ namespace CrmCorner.Migrations
                     b.Navigation("Calendars");
 
                     b.Navigation("Customers");
-
-                    b.Navigation("TaskCompLogs");
 
                     b.Navigation("TaskComps");
                 });
@@ -552,8 +542,6 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.Navigation("FileAttachments");
-
-                    b.Navigation("TaskCompLogs");
                 });
 #pragma warning restore 612, 618
         }

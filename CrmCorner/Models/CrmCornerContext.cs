@@ -24,6 +24,7 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     public DbSet<Status> Statuses { get; set; }
     public DbSet<TaskComp> TaskComps { get; set; }
     public DbSet<FileAttachment> FileAttachments { get; set; }
+    public DbSet<TaskCompLog> TaskCompLogs { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -56,13 +57,10 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
             .WithMany(u => u.TaskComps) // Bir AppUser, birçok TaskComp ile ilişkilendirilebilir.
             .HasForeignKey(t => t.UserId); // UserId yabancı anahtar olarak kullanılır.
 
+        modelBuilder.Entity<TaskCompLog>().HasKey(t=>t.LogId);
 
-//        modelBuilder.Entity<TaskComp>()
-//.HasOne(t => t.Customer) // TaskComp, bir Customer ile ilişkilidir.
-//.WithMany(c => c.TaskComps) // Bir Customer, birçok TaskComp ile ilişkilendirilebilir.
-//.HasForeignKey(t => t.CustomerId);
+        modelBuilder.Entity<EmailProperty>().HasNoKey();
 
-modelBuilder.Entity<EmailProperty>().HasNoKey();
 
 modelBuilder.Entity<Calendar>(entity =>
         {
