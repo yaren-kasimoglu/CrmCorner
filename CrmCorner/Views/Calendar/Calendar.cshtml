@@ -16,280 +16,266 @@
         </tr>
     }
 </table>
-           <div class="row g-3 clearfix">
-                        <div class="col-lg-8">
-                            <div class="card">
-                                <div class="card-body" id='my_calendar'></div>
-                        </div>
-                    </div >
-                   
-                    <div class="col-lg-4">
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
-                                        data-bs-target="#exampleModal">
-                                    Yeni takvim ekle
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-body">
-
-                                @foreach (var item in eventsfilter)
-                                {
-                                    <div class="event-name row g-2">
-                                        <div class="col-2 text-center">
-                                            <h6>@item.Date</h6>
-                                        </div>
-                                        <div class="col-10">
-                                            <h6 class="mb-0">@item.Title</h6>
-                                            <p class="mb-0">@item.Description</p>
-
-                                        </div>
-                                    </div>
-                                }
-
-                                <hr>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        
-    @using (Html.BeginForm("CalendarAdd", "Calendar", FormMethod.Post))
-        {
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="defaultModalLabel">Add Event</h5>
-                    </div>
-
-                    <div class="modal-body">
-                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Date, htmlAttributes: new { @class = "control-label col-md-2" })
-                            <div class="col-md-10">
-                                @Html.EditorFor(model => model.Date, "Date", new { htmlAttributes = new { @class = "form-control" } })
-                                @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
-                            <div class="col-md-10">
-                                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
-                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <input type="hidden" id="selectedItemId" name="selectedItemId" />
-
-                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
-                            <div class="col-md-10">
-                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
-                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
-                            <div class="col-md-10">
-                                @Html.TextBoxFor(m => m.Email, new { id = "searchInput", placeholder = "Select an item", @class = "form-control" })
-                                <input type="hidden" id="selectedItemId" name="selectedItemId" />
-                                @if (ViewBag.Filteremployes != null)
-                                    {
-                                <datalist id="itemList">
-                                    @foreach (var item in ViewBag.Filteremployes)
-                                        {
-                                        <option value="@item.Value">@item.Text</option>
-                                        }
-                                </datalist>
-                                    }
-                                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-                        @*@Html.DropDownList("searchResultsCombo", new SelectList(new List<string>(), "Value", "Text"), "Sonuçlar", new { id = "searchResultsCombo" })*@
-
-                        <div class="form-group">
-                            <div class="col-md-offset-2 col-md-10">
-                                <input type="submit" value="Add" id="Submit" class="btn btn-default" onclick="location.href='@Url.Action("CalendarAdd", "Calendar")'" />
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-
-            </div>
-        </div>
-
-    }
-
-
-
-    <div id="calendarModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 id="Id" style="display:none"></h5>
-                    EVENT EDİT
-                    <h4 id="modalTitle" class="modal-title"></h4>
-                </div>
-                Title:
-                <input type="text" class="form-control" name="modalTitle2" id="modalTitle2" />
-                Description:
-                <input type="text" class="form-control" id="modalDescription" name="modalDescription" />
-                Start Date:
-                <input type="date" id="modalStart" class="form-control" />
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-rounded btn-success" onclick="UpdateItem();"><i class="fas fa-check-square"></i>EDİT</button>
-                    <button type="submit" class="btn btn-rounded btn-danger" onclick="DeleteItem();"><i class="fas fa-check-square"></i> DELETE </button>
-                </div>
-            </div>
+<input type="checkbox" id="myCheckbox" name="myCheckbox" value="true">Sadece benimkileri göster
+<div class="row g-3 clearfix">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body" id='my_calendar'></div>
         </div>
     </div>
 
-    <script>let eventsArr = loadData();
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                        data-bs-target="#exampleModal">
+                    Yeni takvim ekle
+                </button>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-body">
 
-        function loadData() {
+                @foreach (var item in eventsfilter)
+                {
+                    <div class="event-name row g-2">
+                        <div class="col-2 text-center">
+                            <h6>@item.Date</h6>
+                        </div>
+                        <div class="col-10">
+                            <h6 class="mb-0">@item.Title</h6>
+                            <p class="mb-0">@item.Description</p>
 
-            let eventsArr = [];
-
-            let todoTable = document.getElementById("todoTable");
-            let trElem = todoTable.getElementsByTagName("tr");
-            for (let tr of trElem) {
-                let tdElems = tr.getElementsByTagName("td");
-                let eventObj = {
-                    id: tdElems[0].innerText,
-                    title: tdElems[1].innerText,
-                    start: tdElems[2].innerText,
-                    description: tdElems[3].innerText,
+                        </div>
+                    </div>
                 }
-                eventsArr.push(eventObj);
+
+                <hr>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("CalendarAdd", "Calendar", FormMethod.Post))
+{
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="defaultModalLabel">Add Event</h5>
+                </div>
+
+                <div class="modal-body">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Date, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Date, "Date", new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="hidden" id="selectedItemId" name="selectedItemId" />
+
+                        @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @id = "searchInput", @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Add" id="Submit" class="btn btn-default" onclick="location.href='@Url.Action("CalendarAdd", "Calendar")'" />
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+}
+
+
+
+<div id="calendarModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="Id" style="display:none"></h5>
+                EVENT EDİT
+                <h4 id="modalTitle" class="modal-title"></h4>
+            </div>
+            Title:
+            <input type="text" class="form-control" name="modalTitle2" id="modalTitle2" />
+            Description:
+            <input type="text" class="form-control" id="modalDescription" name="modalDescription" />
+            Start Date:
+            <input type="date" id="modalStart" class="form-control" />
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-rounded btn-success" onclick="UpdateItem();"><i class="fas fa-check-square"></i>EDİT</button>
+                <button type="submit" class="btn btn-rounded btn-danger" onclick="DeleteItem();"><i class="fas fa-check-square"></i> DELETE </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>let eventsArr = loadData();
+
+    function loadData() {
+
+        let eventsArr = [];
+
+        let todoTable = document.getElementById("todoTable");
+        let trElem = todoTable.getElementsByTagName("tr");
+        for (let tr of trElem) {
+            let tdElems = tr.getElementsByTagName("td");
+            let eventObj = {
+                id: tdElems[0].innerText,
+                title: tdElems[1].innerText,
+                start: tdElems[2].innerText,
+                description: tdElems[3].innerText,
             }
-            return eventsArr;
+            eventsArr.push(eventObj);
         }
+        return eventsArr;
+    }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('my_calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                timeZone: 'UTC',
-                initialView: 'dayGridMonth',
-                events: eventsArr,
-                editable: true,
-                selectable: true,
-                eventClick: function (info) {
-                    $.ajax({
-                        type: 'POST',
-                        url: "/Calendar/GetDescription/",
-                        encode: true,
-                        data: { ID: info.event.id },
-                        dataType: "json",
-                        success: function (data) {
-                            someFunction(data);
-                        }
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('my_calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            timeZone: 'UTC',
+            initialView: 'dayGridMonth',
+            events: eventsArr,
+            editable: true,
+            selectable: true,
+            eventClick: function (info) {
+                $.ajax({
+                    type: 'POST',
+                    url: "/Calendar/GetDescription/",
+                    encode: true,
+                    data: { ID: info.event.id },
+                    dataType: "json",
+                    success: function (data) {
+                        someFunction(data);
+                    }
+                });
+                document.getElementById("modalTitle").innerHTML = info.event.title;
+                document.getElementById("modalTitle2").value = info.event.title;
+                document.getElementById("modalStart").value = info.event.start.toJSON().slice(0, 10);
+                document.getElementById("Id").innerHTML = info.event.id;
+                $('#calendarModal').modal('show');
+            },
+        });
+        calendar.render();
+    });
+    function someFunction(data) {
+        console.log(data.message);
+        document.getElementById("modalDescription").value = data.message;
+        document.getElementById("modalDescription").innerHTML = data.message;
+    }
+    function DeleteItem() {
+        var event = document.getElementById("Id").innerHTML;
+        $.ajax({
+            type: 'POST',
+            url: "/Calendar/sendEmail/",
+            encode: true,
+            data: { ID: event },
+            dataType: "json",
+            success: function () {
+                $("#calendarModal").modal('hide');
+                location.reload();
+            }
+        });
+
+    }
+
+    function UpdateItem() {
+        var eventId = document.getElementById("Id").innerHTML;
+        var eventtitle = document.getElementById('modalTitle2').value;
+        var eventdate = document.getElementById("modalStart").value;
+        $.ajax({
+            type: 'POST',
+            url: "/Calendar/CalendarUpdate/",
+            encode: true,
+            data: { ID: eventId, title: eventtitle, date: eventdate },
+            dataType: "json",
+            success: function () {
+                $("#calendarModal").modal('hide');
+                location.reload();
+            }
+        });
+
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function (event) {
+        // Eğer tuş Enter (keyCode 13) ise veya input boş değilse aramayı gerçekleştir
+        console.log("aslında girdi");
+        var email = $('#searchInput').val();
+        if (email !== '') {
+            $.ajax({
+                url: "/Calendar/CalendarSearch/",
+                type: 'POST',
+                data: { email: email },
+                dataType: "json",
+                success: function (data) {
+                    $.each(data.message, function (index, item) {
+                        $('#searchInput').val(item);
                     });
-                    document.getElementById("modalTitle").innerHTML = info.event.title;
-                    document.getElementById("modalTitle2").value = info.event.title;
-                    document.getElementById("modalStart").value = info.event.start.toJSON().slice(0, 10);
-                    document.getElementById("Id").innerHTML = info.event.id;
-                    $('#calendarModal').modal('show');
                 },
-            });
-            calendar.render();
-        });
-        function someFunction(data) {
-            console.log(data.message);
-            document.getElementById("modalDescription").value = data.message;
-            document.getElementById("modalDescription").innerHTML = data.message;
-        }
-        function DeleteItem() {
-            var event = document.getElementById("Id").innerHTML;
-            $.ajax({
-                type: 'POST',
-                url: "/Calendar/sendEmail/",
-                encode: true,
-                data: { ID: event },
-                dataType: "json",
-                success: function () {
-                    $("#calendarModal").modal('hide');
-                    location.reload();
+                error: function () {
+                    $('#result').html('An error occurred while searching.');
                 }
             });
-
         }
+    });
 
-        function UpdateItem() {
-            var eventId = document.getElementById("Id").innerHTML;
-            var eventtitle = document.getElementById('modalTitle2').value;
-            var eventdate = document.getElementById("modalStart").value;
+    document.getElementById('myCheckbox').addEventListener('change', function (event) {
+        // Eğer tuş Enter (keyCode 13) ise veya input boş değilse aramayı gerçekleştir
+        console.log("aslında girdi3");
+        var isChecked = document.getElementById("myCheckbox").checked;
             $.ajax({
+                url: "/Calendar/GetFilterCalendar/",
                 type: 'POST',
-                url: "/Calendar/CalendarUpdate/",
-                encode: true,
-                data: { ID: eventId, title: eventtitle, date: eventdate },
+                data: { ischecked: isChecked },
                 dataType: "json",
-                success: function () {
-                    $("#calendarModal").modal('hide');
-                    location.reload();
-                }
-            });
-
-        }
-
-        document.getElementById('searchInput').addEventListener('keyup', function (event) {
-            // Eğer tuş Enter (keyCode 13) ise veya input boş değilse aramayı gerçekleştir
-            console.log("aslında girdi");
-            var email = $('#searchInput').val();
-                if (email !== '') {
-                    $.ajax({
-                        url: "/Calendar/CalendarSearch/",
-                        type: 'POST',
-                        data: { email: email },
-                        dataType: "json",
-                        success: function (data) {
-                            $.each(data.message, function (index, item) {
-                                $('#searchResultsCombo').append($('<option>').val(item).text(item));
-                            });
-                        },
-                        error: function () {
-                            $('#result').html('An error occurred while searching.');
-                        }
+                success: function (data) {
+                    $.each(data.message, function (index, item) {
                     });
+                },
+                error: function () {
                 }
-        });
+            });
+        
+    });
 
-        //// Arama işlemini gerçekleştir
-        //function performSearch(email) {
-        //    // Placeholder fonksiyon: Gerçek uygulamada burada gerçek arama yapılır
-        //    var result = searchUserByEmail(email);
+   </script>
+<script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/fullcalendar.bundle.js"></script>
 
-        //    // Sonucu göster
-        //    var resultElement = document.getElementById('result');
-        //    if (result) {
-        //        resultElement.textContent = 'User found with email: ' + result;
-        //    } else {
-        //        resultElement.textContent = 'No user found with email: ' + email;
-        //    }
-        //}
 
-        //// Placeholder fonksiyon: E-posta adresini arar
-        //function searchUserByEmail(email) {
-        //    // Gerçek uygulamada burada gerçek arama yapılır
-        //    // Şu an için sadece örnek amaçlı sabit bir sonuç döndürüyoruz
-        //    if (email === 'user@example.com') {
-        //        return email;
-        //    } else {
-        //        return null;
-        //    }
-        //}</script>
-         <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-         <script src="/themeforest-IV5IQlTa-lucid-hr-and-project-management-admin-template/bootstrap5/dist/assets/bundles/fullcalendar.bundle.js"></script>
-
-                           
-         <!-- core js file -->
-          <script src="/CCTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-          <script src="~/CCTema/bootstrap5/dist/assets/bundles/fullcalendar.bundle.js"></script>
-          <script src="~/CCTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+<!-- core js file -->
+<script src="/CCTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="~/CCTema/bootstrap5/dist/assets/bundles/fullcalendar.bundle.js"></script>
+<script src="~/CCTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
