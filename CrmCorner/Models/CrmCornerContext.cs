@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -60,6 +60,22 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 //.HasOne(t => t.Customer) // TaskComp, bir Customer ile ilişkilidir.
 //.WithMany(c => c.TaskComps) // Bir Customer, birçok TaskComp ile ilişkilendirilebilir.
 //.HasForeignKey(t => t.CustomerId);
+
+modelBuilder.Entity<EmailProperty>().HasNoKey();
+
+modelBuilder.Entity<Calendar>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("Calendar");
+
+            entity.HasIndex(e => e.Id, "Id");
+
+            entity.Property(e => e.Id).HasColumnType("int(11)");
+            entity.Property(e => e.Date).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(300);
+            entity.Property(e => e.Title).HasMaxLength(200);
+        });
 
 
         OnModelCreatingPartial(modelBuilder);
