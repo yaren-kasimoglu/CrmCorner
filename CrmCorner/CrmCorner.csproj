@@ -46,6 +46,11 @@
     <PackageReference Include="MySql.EntityFrameworkCore" Version="7.0.10" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
     <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
+    <PackageReference Include="Google.Apis.Gmail.v1" Version="1.66.0.3287" />
+    <PackageReference Include="AE.Net.Mail" Version="1.7.10" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.66.0.3297" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.66.0" />
+    <PackageReference Include="Google.Apis" Version="1.66.0" />
   </ItemGroup>
 
   <ItemGroup>

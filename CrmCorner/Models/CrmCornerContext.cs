@@ -50,9 +50,10 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser,AppRole,string
         modelBuilder
             .UseCollation("utf8mb4_unicode_ci")
             .HasCharSet("utf8mb4");
+        modelBuilder.Entity<EmailProperty>().HasNoKey();
+  
 
 
-       
 
         modelBuilder.Entity<Calendar>(entity =>
         {
