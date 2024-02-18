@@ -140,13 +140,20 @@
         </div>
 
 
-@section Scripts {
-    @* Burada Index sayfasına özgü JavaScript dosyalarınız ve scriptler yer alacak *@
-    <script src="~/CCTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-    <script src="~/CCTema/bootstrap5/dist/assets/plugin/nestable/jquery.nestable.min.js"></script>
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+    <link href="~/CRMTema/bootstrap5/dist/assets/plugin/nestable/jquery-nestable.css" rel="stylesheet" />
+    <link href="~/jquery/jquery-ui/dist/themes/base/jquery-ui.min.css" rel="stylesheet" />
+
+
+    @* Burada Index sayfasına özgü JavaScript dosyaları ve scriptler yer alacak *@
+    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+    <script src="~/CRMTema/bootstrap5/dist/assets/plugin/nestable/jquery.nestable.min.js"></script>
     <script src="~/jquery/jquery-ui/dist/jquery-ui.min.js"></script>
- 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
     <script>
         $(document).ready(function () {
             $(".choose-skin li").on("click", function () {
@@ -201,14 +208,8 @@
 
 
     </script>
-}
 
-@section Styles {
 
-    <link href="~/CCTema/bootstrap5/dist/assets/plugin/nestable/jquery-nestable.css" rel="stylesheet" />
-    <link href="~/jquery/jquery-ui/dist/themes/base/jquery-ui.min.css" rel="stylesheet" />
-}
-  
 
 
    @* <script>

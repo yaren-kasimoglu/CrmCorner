@@ -1,10 +1,12 @@
 ﻿using CrmCorner.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+  
     public class CompanyController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -12,6 +14,7 @@ namespace CrmCorner.Controllers
         {
             _context = context;
         }
+        [Authorize]
         public IActionResult CompanyList()
         {
             var Companys = _context.Companies
@@ -21,6 +24,7 @@ namespace CrmCorner.Controllers
             return View(Companys);
         }
 
+    
         [HttpGet]
         public IActionResult CompanyAdd()
         {
@@ -46,6 +50,8 @@ namespace CrmCorner.Controllers
             ViewBag.Status = statusItems;
             return View();
         }
+
+     
         [HttpPost]
         public IActionResult CompanyAdd(Company Company)
         {
@@ -61,7 +67,7 @@ namespace CrmCorner.Controllers
             return View(Company);
         }
 
-
+        [Authorize]
         [HttpGet]
         public IActionResult CompanyEdit(int id)
         {
@@ -96,7 +102,7 @@ namespace CrmCorner.Controllers
             // Müşteriyi düzenleme sayfasına gönder
             return View(company);
         }
-
+        [Authorize]
         [HttpPost]
         public IActionResult CompanyEdit(Company editedCompany)
         {
@@ -110,6 +116,7 @@ namespace CrmCorner.Controllers
             //ModelState.IsValid false ise
             return View(editedCompany);
         }
+        [Authorize]
         [HttpPost]
         public IActionResult CompanyDelete(int id)
         {

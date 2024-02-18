@@ -32,16 +32,5 @@ namespace CrmCorner.Areas.Admin.Controllers
             }).ToList();
             return View(userViewModelList);
         }
-        public async Task<IActionResult> UserList1()
-        {
-            var userList = await _userManager.Users.ToListAsync();
-            var userViewModelList = userList.Select(x => new UserViewModel()
-            {
-                Id = x.Id,
-                Name = x.UserName,
-                Email = x.Email
-            }).ToList();
-            return View(userViewModelList);
-        }
     }
 }

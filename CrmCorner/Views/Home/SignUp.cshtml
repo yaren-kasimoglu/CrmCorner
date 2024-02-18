@@ -20,10 +20,10 @@
     <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
     <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
 
-    <link rel="icon" href="/CCTema/bootstrap5/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/CRMTema/bootstrap5/favicon.ico" type="image/x-icon">
     <!-- VENDOR CSS -->
     <!-- MAIN CSS -->
-    <link rel="stylesheet" href="/CCTema/bootstrap5/dist/assets/css/main.css">
+    <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/css/main.css">
 </head>
 
 <body>
@@ -34,43 +34,93 @@
             <div class="d-flex h100vh align-items-center auth-main w-100">
                 <div class="auth-box">
                     <div class="card shadow p-lg-4">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-info" role="alert">
+                                @TempData["SuccessMessage"]
+                            </div>
 
+                        }
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
                         </div>
 
                         <div class="card-header">
                             <p class="fs-5 mb-0">Hesap Oluştur</p>
                         </div>
+                    
                         <div class="card-body">
                             <form asp-controller="Home" asp-action="SignUp" method="post">
                                 <div class="form-floating mb-1">
-                                    <label asp-for="UserName"></label>
+                                  
                                     <input asp-for="UserName" class="form-control">
+                                    <label asp-for="UserName"></label>
                                     <span class="text-danger" asp-validation-for="UserName"></span>
                                 </div>
                                 <div class="form-floating mb-1">
-                                    <label asp-for="Email"></label>
+                                  
                                     <input asp-for="Email" class="form-control">
+                                    <label asp-for="Email"></label>
                                     <span class="text-danger" asp-validation-for="Email"></span>
                                 </div>
+
                                 <div class="form-floating mb-1">
-                                    <label asp-for="Phone"></label>
+
+                                    <input asp-for="NameSurname" class="form-control">
+                                    <label asp-for="NameSurname"></label>
+                                    <span class="text-danger" asp-validation-for="NameSurname"></span>
+                                </div>
+
+                                <div class="form-floating mb-1">
+
+                                    <input asp-for="PositionName" class="form-control">
+                                    <label asp-for="PositionName"></label>
+                                    <span class="text-danger" asp-validation-for="PositionName"></span>
+                                </div>
+
+                                   <div class="form-floating mb-1">
+                                  
+                                    <input asp-for="CompanyName" class="form-control">
+                                    <label asp-for="CompanyName"></label>
+                                    <span class="text-danger" asp-validation-for="CompanyName"></span>
+                                </div>
+
+                                <div class="form-floating mb-1">
+
+                                    <input asp-for="EmployeeCount" class="form-control">
+                                    <label asp-for="EmployeeCount"></label>
+                                    <span class="text-danger" asp-validation-for="EmployeeCount"></span>
+                                </div>
+
+                                <div class="form-floating mb-1">
+
+                                    <input asp-for="Sector" class="form-control">
+                                    <label asp-for="Sector"></label>
+                                    <span class="text-danger" asp-validation-for="Sector"></span>
+                                </div>
+
+
+
+                                <div class="form-floating mb-1">
+                                 
                                     <input asp-for="Phone" class="form-control">
+                                    <label asp-for="Phone"></label>
                                     <span class="text-danger" asp-validation-for="Phone"></span>
                                 </div>
                                 <div class="form-floating mb-1">
+                               
+                                    <input type="password" asp-for="Password" class="form-control">
                                     <label asp-for="Password"></label>
-                                    <input asp-for="Password" class="form-control">
                                     <span class="text-danger" asp-validation-for="Password"></span>
                                 </div>
                                 <div class="form-floating mb-1">
+                                   
+                                    <input type="password"  asp-for="PasswordConfirm" class="form-control">
                                     <label asp-for="PasswordConfirm"></label>
-                                    <input asp-for="PasswordConfirm" class="form-control">
                                     <span class="text-danger" asp-validation-for="PasswordConfirm"></span>
                                 </div>
                                 <div class="my-3">
                                     <button type="submit" class="btn btn-primary w-100 px-3 py-2 mb-2">KAYIT OL</button>
-                                    <span>Zaten hesabın var mı? <a href="page-login.html">Giriş</a></span>
+                                    <span>Zaten hesabın var mı? <a asp-action="SignIn" asp-controller="Home">Giriş</a></span>
                                 </div>
                             </form>
                             @*     <div class="d-grid gap-2 mt-3 pt-3">

@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="CRMCorner HR & Project Admin Dashboard Template with Bootstrap 5x">
         <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
-        <link rel="icon" href="~/CCTema/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon">
 
         <style>
         .logo-container {
@@ -30,12 +30,12 @@
 
     </style>
         <!-- MAIN CSS -->
-        <link href="~/CCTema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
+        <link href="~/CRMTema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
         @RenderSection("Styles", required: false)
 
     </head>
     <body>
-    <div id="layout" class="theme-blue"  data-theme="high-contrast">
+    <div id="layout" class="theme-blue">
             <div id="wrapper">
                 <!-- Page Loader -->
                             <div class="page-loader-wrapper text-center">
@@ -46,17 +46,20 @@
                
                 <!-- top navbar -->
                 <nav class="navbar navbar-fixed-top">
+
                     <div class="container-fluid">
                     <div class="logo-container">
                         <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index"><img src="~/CCtema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo"></a>
                     </div>             
                     </div>
+                    
                 </nav>
 
                 <!-- Sidbar menu -->
+         
                 <div id="left-sidebar" class="sidebar">
                     <div class="user-account p-3 mb-3">
-                      
+
                     </div>
                     <!-- nav tab: menu list -->
                     <ul class="nav nav-tabs text-center mb-2" role="tablist">
@@ -70,12 +73,12 @@
                         <div class="tab-pane fade show active" id="hr_menu" role="tabpanel">
                             <nav class="sidebar-nav">
                                 <ul class="metismenu list-unstyled">
-                              
+
                                     <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-briefcase"></i>Müşteri</a>
+                                        <a class="nav-link" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-briefcase"></i>Müşteri</a>
                                     </li>
                                     <li class="nav-item">
-                                    <a class="nav-link text" asp-area="" asp-controller="Company" asp-action="CompanyList"><i class="fa fa-briefcase"></i>Firma/Şirket</a>
+                                        <a class="nav-link text" asp-area="" asp-controller="Company" asp-action="CompanyList"><i class="fa fa-briefcase"></i>Firma/Şirket</a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="#Employees" class="has-arrow"><i class="fa fa-users"></i><span>Çalışanlar</span></a>
@@ -85,35 +88,50 @@
                                             <li> <a class="nav-link " asp-area="" asp-controller="Employee" asp-action="PositionList">Pozisyon</a></li>
                                         </ul>
                                     </li>
-                                 
-                                
+
+
                                     <li class="nav-item">
                                         <a class="nav-link" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
                                     </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="UserList"><i class="fa fa-user"></i>Kullanıcı Listesi</a>
-                                </li>       
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="WelcomePage"><i class="fa fa-globe"></i>Kullanıcı Ana Sayfa Dön</a>
-                                </li>
-                             
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="UserList"><i class="fa fa-user"></i>Kullanıcı Listesi</a>
+                                    </li>  
+                                    
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="WelcomePage"><i class="fa fa-globe"></i>Kullanıcı Ana Sayfa Dön</a>
+                                    </li>
+                              
+                                    <li class="nav-item">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa fa-users"></i>
+                                            Role Yapısı
+                                        </a>
+                                    <ul class="list-unstyled">
+                                            <li><a class="dropdown-item" asp-controller="Roles" asp-action="RoleList" asp-area="Admin">Tüm Roller</a></li>
+                                            @* <li><a class="dropdown-item" href="#">Rol Ekle</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="#">Something else here</a></li>*@
+                                        </ul>
+                                    </li>
+                            
+
                                 </ul>
                             </nav>
                         </div>
                         <div class="tab-pane fade" id="project_menu" role="tabpanel">
                             <nav class="sidebar-nav">
                                 <ul class="metismenu list-unstyled">
-                                <li><a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-envelope-o"></i><span>Mesaj</span></a></li>
-                                <li><a class="nav-link" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevler</a></li>
-                     
+                                    <li><a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-envelope-o"></i><span>Mesaj</span></a></li>
+                                    <li><a class="nav-link" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevler</a></li>
+
                                 </ul>
                             </nav>
                         </div>
-                      
+
                     </div>
                 </div>
 
-
+           
             <div>&nbsp;</div>
             <div>&nbsp;</div>
                 <div id="main-content">
@@ -127,12 +145,12 @@
         @RenderSection("Scripts", required: false)
 
 
-    <script src="~/CCtema/bootstrap5/js/pages/index.js"></script>
+    <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
 
     </body>
   @*      <!-- core js file -->
-    <script src="~/CCTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
     <!-- page js file -->
-    <script src="~/CCTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>*@
+    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>*@
 </html>

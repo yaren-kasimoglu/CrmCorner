@@ -1,0 +1,110 @@
+﻿@model UserEditViewModel
+@{
+    ViewData["Title"] = "UserEdit";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+@section Styles
+    {
+    <style>
+        .selector {
+            background-image: url("~/CRMTema/bootstrap5/dist/assets/images/auth_bg.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+}
+
+@section Scripts
+    {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+
+
+<div class="d-flex h100vh align-items-center auth-main w-100">
+    <div class="auth-box">
+        <div class="card shadow p-lg-4">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-info" role="alert">
+                    @TempData["SuccessMessage"]
+                </div>
+
+            }
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
+            </div>
+
+            <div class="card-header">
+                <p class="fs-5 mb-0">Kullanıcı Bilgi Güncelleme</p>
+            </div>
+
+            <div class="card-body">
+                <form asp-controller="Member" asp-action="UserEdit" method="post" enctype="multipart/form-data">
+
+                    <div class="form-floating mb-1">
+
+                        <input asp-for="UserName" class="form-control">
+                        <label asp-for="UserName"></label>
+                        <span class="text-danger" asp-validation-for="UserName"></span>
+                    </div>
+                    <div class="form-floating mb-1">
+                        <input asp-for="Email" class="form-control">
+                        <label asp-for="Email"></label>
+                        <span class="text-danger" asp-validation-for="Email"></span>
+                    </div>
+                    <div class="form-floating mb-1">
+                        <input asp-for="Phone" class="form-control">
+                        <label asp-for="Phone"></label>
+                        <span class="text-danger" asp-validation-for="Phone"></span>
+                    </div>
+
+                    <div class="form-floating mb-1">
+                        <input asp-for="BirthDate" class="form-control">
+                        <label asp-for="BirthDate"></label>
+                        <span class="text-danger" asp-validation-for="BirthDate"></span>
+                    </div>
+
+                    <div class="form-floating mb-1">
+                        <input asp-for="City" class="form-control">
+                        <label asp-for="City"></label>
+                        <span class="text-danger" asp-validation-for="City"></span>
+                    </div>
+
+                    <div class="form-floating mb-1">
+
+                        <select class="form-control" asp-for="Gender" asp-items="ViewBag.GenderList">
+
+                            <option value="">Seçiniz</option>
+
+                        </select>
+                        <label asp-for="Gender"></label>
+
+                        <span class="text-danger" asp-validation-for="Gender"></span>
+                    </div>
+
+                    <div class="form-floating mb-1">
+
+                        <input type="file" asp-for="Picture" class="form-control">
+                        <label asp-for="Picture"></label>
+                        <span class="text-danger" asp-validation-for="Picture"></span>
+                    </div>
+
+
+
+                    <div class="my-3">
+                        <button type="submit" class="btn btn-primary w-100 px-3 py-2 mb-2">Güncelle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>

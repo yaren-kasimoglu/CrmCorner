@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize]
     public class EmployeeController : Controller
     {
         private readonly CrmCornerContext _context;
