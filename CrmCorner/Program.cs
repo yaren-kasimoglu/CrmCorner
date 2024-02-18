@@ -78,6 +78,8 @@ if (!app.Environment.IsDevelopment())
 
 
 }
+
+
 //app.Use(async (context, next) =>
 //{
 //    // Kullanıcı giriş yapmış mı kontrol et (Bu örnekte basit bir kontrol mekanizması kullanılmıştır, gerçek uygulamalarda güvenli kimlik doğrulama yöntemleri kullanılmalıdır.)

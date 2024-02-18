@@ -3,10 +3,33 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-<h1>Index</h1>
 
+@if (!User.Identity!.IsAuthenticated)
+{
+     <h1>Index1</h1>
 
+    <div class="d-flex h100vh justify-content-center align-items-center">
+        <div class="text-center">
+            <article>
+                <h1>Yakında yüklenecektir...</h1>
+                <div>
+                    <p>
+                        Platformumuz henüz kullanıma hazır değildir. Eğer kullanıcı iseniz;
+                    </p>
+                    <p>&mdash; Crm Corner</p>
+                </div>
+            </article>
+            <div class="margin-top-30">
 
+                <a asp-action="SignIn" asp-controller="Home" class="btn btn-info"><i class="fa fa-home"></i> <span>Giriş Yapınız</span></a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <h1>Index</h1>
+}
 <!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 

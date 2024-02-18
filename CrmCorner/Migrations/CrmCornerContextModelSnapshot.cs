@@ -55,6 +55,9 @@ namespace CrmCorner.Migrations
                     b.Property<string>("City")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -68,7 +71,7 @@ namespace CrmCorner.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("EmployeeCount")
+                    b.Property<int?>("EmployeeCount")
                         .HasColumnType("int");
 
                     b.Property<byte?>("Gender")
@@ -81,7 +84,6 @@ namespace CrmCorner.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("NameSurname")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("NormalizedEmail")
@@ -103,11 +105,9 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("PositionName")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Sector")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("SecurityStamp")
@@ -128,476 +128,166 @@ namespace CrmCorner.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Date")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("longtext");
 
-                    b.HasKey("Id")
-                        .HasName("PRIMARY");
+                    b.HasKey("Id");
 
-                    b.HasIndex(new[] { "Id" }, "Id");
+                    b.ToTable("Calendars");
+                });
 
-                    b.ToTable("Calendar", (string)null);
+            modelBuilder.Entity("CrmCorner.Models.ChatHistory", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("MessageTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChatHistories");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Company", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("CompanyId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)");
-
-                    b.Property<string>("CompanyEmail")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("int");
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
+                    b.HasKey("CompanyId");
 
-                    b.Property<int?>("IdEmployee")
-                        .HasColumnType("int(11)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<int?>("StatusId")
-                        .HasColumnType("int(11)");
-
-                    b.HasKey("Id")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "IdEmployee" }, "IdEmployee");
-
-                    b.HasIndex(new[] { "StatusId" }, "StatusId");
-
-                    b.ToTable("Company", (string)null);
-
-                    MySqlEntityTypeBuilderExtensions.HasCharSet(b, "latin1");
-                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "latin1_swedish_ci");
+                    b.ToTable("Companies");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.Customer", b =>
+            modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int");
 
-                    b.Property<int?>("CompanyId")
-                        .HasColumnType("int(11)");
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("CompanyEmail")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("CustomerEmail")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("Email"), "utf8mb3");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("Name"), "utf8mb3");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
+                        .HasColumnType("longtext");
 
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("Surname"), "utf8mb3");
+                    b.HasKey("Id");
 
-                    b.HasKey("Id")
-                        .HasName("PRIMARY");
+                    b.HasIndex("AppUserId");
 
-                    b.HasIndex(new[] { "CompanyId" }, "FK_Customer_Company");
-
-                    b.ToTable("Customer", (string)null);
-
-                    MySqlEntityTypeBuilderExtensions.HasCharSet(b, "latin1");
-                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "latin1_swedish_ci");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Department", b =>
-                {
-                    b.Property<int>("IdDepartment")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("idDepartment");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<string>("DepartmentDescription")
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("DepartmentDescription"), "utf8mb3");
-
-                    b.Property<string>("DepartmentName")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("DepartmentName"), "utf8mb3");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.HasKey("IdDepartment")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("Department", (string)null);
-
-                    MySqlEntityTypeBuilderExtensions.HasCharSet(b, "latin1");
-                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "latin1_swedish_ci");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Employee", b =>
-                {
-                    b.Property<int>("IdEmployee")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("idEmployee");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<string>("EmployeeEmail")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("EmployeeEmail"), "utf8mb3");
-
-                    b.Property<string>("EmployeeName")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)");
-
-                    b.Property<string>("EmployeePhone")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("EmployeePhone"), "utf8mb3");
-
-                    b.Property<string>("EmployeeSurname")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("EmployeeSurname"), "utf8mb3");
-
-                    b.Property<int?>("IdDepartment")
-                        .HasColumnType("int(11)");
-
-                    b.Property<int?>("IdPositions")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("idPositions");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.HasKey("IdEmployee")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "IdPositions" }, "FK_Employee_Position");
-
-                    b.HasIndex(new[] { "IdDepartment" }, "fk_Employee_Department");
-
-                    b.ToTable("Employee", (string)null);
-
-                    MySqlEntityTypeBuilderExtensions.HasCharSet(b, "latin1");
-                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "latin1_swedish_ci");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Position", b =>
-                {
-                    b.Property<int>("IdPositions")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("idPositions");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<string>("PositionName")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("PositionName"), "utf8mb3");
-
-                    b.HasKey("IdPositions")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("Positions");
-
-                    MySqlEntityTypeBuilderExtensions.HasCharSet(b, "latin1");
-                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "latin1_swedish_ci");
+                    b.ToTable("CustomerNs");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Status", b =>
                 {
                     b.Property<int>("StatusId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("statusId");
+                        .HasColumnType("int");
 
                     b.Property<string>("StatusName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("statusName");
+                        .HasColumnType("longtext");
 
-                    b.HasKey("StatusId")
-                        .HasName("PRIMARY");
+                    b.HasKey("StatusId");
 
-                    b.ToTable("Status", (string)null);
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.Property<int>("TaskId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("TaskID");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("CustomerId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("customerId");
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int?>("EmployeeId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("employeeId");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ModifiedDate")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("StatusId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("statusId");
-
-                    b.Property<string>("TaskCompcol")
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
-                    b.Property<byte[]>("UploadedFile")
-                        .HasColumnType("blob");
-
-                    b.Property<string>("UploadedFileName")
-                        .HasMaxLength(255)
+                    b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
                     b.Property<decimal?>("ValueOrOffer")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(65,30)");
 
-                    b.HasKey("TaskId")
-                        .HasName("PRIMARY");
+                    b.HasKey("TaskId");
 
-                    b.HasIndex(new[] { "CustomerId" }, "FK_Customer");
+                    b.HasIndex("CustomerId");
 
-                    b.HasIndex(new[] { "EmployeeId" }, "FK_Employee");
+                    b.HasIndex("StatusId");
 
-                    b.HasIndex(new[] { "StatusId" }, "statusId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("TaskComp", (string)null);
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.TaskCompLog", b =>
-                {
-                    b.Property<int>("LogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)");
-
-                    b.Property<string>("NewValue")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("NewValue"), "utf8mb3");
-
-                    b.Property<string>("OldValue")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("OldValue"), "utf8mb3");
-
-                    b.Property<int?>("TaskId")
-                        .HasColumnType("int(11)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int(11)");
-
-                    b.Property<string>("UpdatedField")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .UseCollation("utf8mb3_general_ci");
-
-                    MySqlPropertyBuilderExtensions.HasCharSet(b.Property<string>("UpdatedField"), "utf8mb3");
-
-                    b.HasKey("LogId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "TaskId" }, "FK_TaskCompLog_TaskComp");
-
-                    b.HasIndex(new[] { "UpdatedBy" }, "UpdatedBy");
-
-                    b.ToTable("TaskCompLog", (string)null);
-
-                    MySqlEntityTypeBuilderExtensions.HasCharSet(b, "latin1");
-                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "latin1_swedish_ci");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.User", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("UserID");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<DateOnly?>("DateOfBirth")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("PasswordSalt")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("timestamp")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<string>("UserImage")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.HasKey("UserId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "Email" }, "Email")
-                        .IsUnique();
-
-                    b.HasIndex(new[] { "Username" }, "Username")
-                        .IsUnique();
-
-                    b.ToTable("User");
+                    b.ToTable("TaskComps");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -689,131 +379,46 @@ namespace CrmCorner.Migrations
                     b.ToTable("UserTokens");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.Company", b =>
+            modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
-                    b.HasOne("CrmCorner.Models.Employee", "IdEmployeeNavigation")
-                        .WithMany("Companies")
-                        .HasForeignKey("IdEmployee")
-                        .HasConstraintName("Company_ibfk_2");
-
-                    b.HasOne("CrmCorner.Models.Status", "Status")
-                        .WithMany("Companies")
-                        .HasForeignKey("StatusId")
-                        .HasConstraintName("Company_ibfk_1");
-
-                    b.Navigation("IdEmployeeNavigation");
-
-                    b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Customer", b =>
-                {
-                    b.HasOne("CrmCorner.Models.Company", "Company")
+                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
                         .WithMany("Customers")
-                        .HasForeignKey("CompanyId")
-                        .HasConstraintName("FK_Customer_Company");
+                        .HasForeignKey("AppUserId");
 
-                    b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Employee", b =>
-                {
-                    b.HasOne("CrmCorner.Models.Department", "IdDepartmentNavigation")
-                        .WithMany("Employees")
-                        .HasForeignKey("IdDepartment")
-                        .HasConstraintName("fk_Employee_Department");
-
-                    b.HasOne("CrmCorner.Models.Position", "IdPositionsNavigation")
-                        .WithMany("Employees")
-                        .HasForeignKey("IdPositions")
-                        .HasConstraintName("FK_Employee_Position");
-
-                    b.Navigation("IdDepartmentNavigation");
-
-                    b.Navigation("IdPositionsNavigation");
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
-                    b.HasOne("CrmCorner.Models.Customer", "Customer")
+                    b.HasOne("CrmCorner.Models.CustomerN", "Customer")
                         .WithMany("TaskComps")
-                        .HasForeignKey("CustomerId")
-                        .HasConstraintName("FK_Customer");
-
-                    b.HasOne("CrmCorner.Models.Employee", "Employee")
-                        .WithMany("TaskComps")
-                        .HasForeignKey("EmployeeId")
-                        .HasConstraintName("FK_Employee");
+                        .HasForeignKey("CustomerId");
 
                     b.HasOne("CrmCorner.Models.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId");
+
+                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
                         .WithMany("TaskComps")
-                        .HasForeignKey("StatusId")
-                        .HasConstraintName("TaskComp_ibfk_1");
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("AppUser");
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Employee");
-
                     b.Navigation("Status");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.TaskCompLog", b =>
-                {
-                    b.HasOne("CrmCorner.Models.TaskComp", "Task")
-                        .WithMany("TaskCompLogs")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("FK_TaskCompLog_TaskComp");
-
-                    b.HasOne("CrmCorner.Models.Employee", "UpdatedByNavigation")
-                        .WithMany("TaskCompLogs")
-                        .HasForeignKey("UpdatedBy")
-                        .HasConstraintName("TaskCompLog_ibfk_2");
-
-                    b.Navigation("Task");
-
-                    b.Navigation("UpdatedByNavigation");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Company", b =>
+            modelBuilder.Entity("CrmCorner.Models.AppUser", b =>
                 {
                     b.Navigation("Customers");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Customer", b =>
-                {
-                    b.Navigation("TaskComps");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Department", b =>
-                {
-                    b.Navigation("Employees");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Employee", b =>
-                {
-                    b.Navigation("Companies");
-
-                    b.Navigation("TaskCompLogs");
 
                     b.Navigation("TaskComps");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.Position", b =>
+            modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
-                    b.Navigation("Employees");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.Status", b =>
-                {
-                    b.Navigation("Companies");
-
                     b.Navigation("TaskComps");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
-                {
-                    b.Navigation("TaskCompLogs");
                 });
 #pragma warning restore 612, 618
         }

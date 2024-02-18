@@ -20,18 +20,20 @@ namespace CrmCorner.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly CrmCornerContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailServices _emailServices;
 
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailServices = emailServices;
+            _context = context;
         }
 
         [Authorize]
@@ -40,10 +42,10 @@ namespace CrmCorner.Controllers
             return View();
         }
 
-        public IActionResult Giris()
-        {
-            return View();
-        }
+        //public IActionResult Giris()
+        //{
+        //    return View();
+        //}
 
         #region Giriş
         public IActionResult SignIn()
@@ -98,25 +100,68 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
+
         public async Task<IActionResult> SignUp(SignUpViewModel request)
         {
             if (!ModelState.IsValid)
             {
                 return View();
             }
-            var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, Email = request.Email, PhoneNumber = request.Phone,NameSurname=request.NameSurname,PositionName=request.PositionName,CompanyName=request.CompanyName,EmployeeCount=request.EmployeeCount,Sector=request.Sector }, request.Password);
 
+            // Firma adını Company tablosuna ekle veya varsa mevcut olanını kullan
+            //harfleri küçülterek kaydetsin ki büyük küçük kaydedildiğinde yeniden eklenmesin
+            var company = _context.Companies.FirstOrDefault(c => c.CompanyName.ToLower() == request.CompanyName.ToLower()); 
+            if (company == null)
+            {
+                company = new Company { CompanyName = request.CompanyName };
+                _context.Companies.Add(company);
+                await _context.SaveChangesAsync();
+            }
 
+            // Kullanıcıyı kaydedin
+            var user = new AppUser
+            {
+                UserName = request.UserName,
+                Email = request.Email,
+                PhoneNumber = request.Phone,
+                NameSurname = request.NameSurname,
+                PositionName = request.PositionName,
+                CompanyName=request.CompanyName,   
+            };
+
+            user.CompanyId = company.CompanyId;
+
+            var identityResult = await _userManager.CreateAsync(user, request.Password);
 
             if (identityResult.Succeeded)
             {
                 TempData["SucceesMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
                 return RedirectToAction("SignIn", "Home");
-          
             }
+
             ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
             return View();
         }
+
+        //public async Task<IActionResult> SignUp(SignUpViewModel request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View();
+        //    }
+        //    var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, Email = request.Email, PhoneNumber = request.Phone,NameSurname=request.NameSurname,PositionName=request.PositionName,CompanyName=request.CompanyName,EmployeeCount=request.EmployeeCount,Sector=request.Sector }, request.Password);
+
+
+
+        //    if (identityResult.Succeeded)
+        //    {
+        //        TempData["SucceesMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
+        //        return RedirectToAction("SignIn", "Home");
+
+        //    }
+        //    ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
+        //    return View();
+        //}
         #endregion
 
         public IActionResult ForgetPassword()

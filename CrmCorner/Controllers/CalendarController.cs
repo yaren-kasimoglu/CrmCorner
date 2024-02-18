@@ -101,9 +101,8 @@ namespace CrmCorner.Controllers
 
         [HttpPost]
         public IActionResult CalendarDelete(int? ID)
-        {
-            Calendar calendar = _context.Calendars.Find(ID);
-
+       {
+           Calendar calendar = _context.Calendars.Find(ID);
 
             if (calendar == null)
             {
@@ -122,11 +121,13 @@ namespace CrmCorner.Controllers
 
             if (calendar == null)
             {
-                return Json(new { Message = "error" });
-            }
+                return Json(new { Message = "error"});
+           }
             return Json(new { Message = calendar.Description });
 
         }
+
+        
 
         public async Task<IActionResult> sendEmailAsync(Calendar calendar)
         {

@@ -73,6 +73,21 @@
 
                     <div class="form-floating mb-1">
 
+                        <input asp-for="EmployeeCount" class="form-control">
+                        <label asp-for="EmployeeCount"></label>
+                        <span class="text-danger" asp-validation-for="EmployeeCount"></span>
+                    </div>
+
+                    <div class="form-floating mb-1">
+
+                        <input asp-for="Sector" class="form-control">
+                        <label asp-for="Sector"></label>
+                        <span class="text-danger" asp-validation-for="Sector"></span>
+                    </div>
+
+
+                    <div class="form-floating mb-1">
+
                         <select class="form-control" asp-for="Gender" asp-items="ViewBag.GenderList">
 
                             <option value="">Seçiniz</option>

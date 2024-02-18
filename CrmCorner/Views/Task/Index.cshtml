@@ -96,7 +96,7 @@
                                             <div class="dd-handle" style="border-color:@borderColor">
                                                 <h6>@task.Title</h6>
                                                 <p>
-                                                    @if (task.CustomerId != null)
+                                                   @if (task.CustomerId != null)
                                                     {
                                                         <span>@task.Customer.Name @task.Customer.Surname</span>
                                                     }
@@ -106,26 +106,26 @@
                                                     }
                                                 </p>
                                                 <p>
-                                                    @if (task.EmployeeId != null)
+                                                    @if (task.UserId != null)
                                                     {
-                                                        <span>@task.Employee.EmployeeName @task.Employee.EmployeeSurname</span>
+                                                        <span>@task.AppUser.NameSurname</span>
                                                     }
                                                     else
                                                     {
                                                         <span class="text-danger">No Employee</span>
                                                     }
                                                 </p>
-                                                <a href="/Task/TaskEdit/@task.TaskId" target="_blank">
+                                                <a href="/Task/TaskEdit/@task.TaskId" target="_self">
                                                     <button type="button" class="btn btn-sm btn-outline">
-                                                        <div class="col-md-3 col-sm-4"><i class="fa fa-file-text-o"></i></div>
+                                                <div class="col-md-3 col-sm-4"><i class="fa fa-edit"></i></div>
                                                     </button>
                                                 </a>
                                                 <button type="button" class="btn btn-sm btn-outline" data-taskId="@task.TaskId" onclick="confirmDelete(this)">
                                                     <div class="col-md-3 col-sm-4"> <i class="fa fa-trash-o"></i></div>
                                                 </button>
-                                                <a href="/Task/TaskDetail/@task.TaskId" target="_blank">
+                                        <a href="/Task/TaskDetail/@task.TaskId" target="_self">
                                                     <button type="button" class="btn btn-sm btn-outline">
-                                                        <div class="col-md-3 col-sm-4"> <i class="fa fa-align-left"></i></div>
+                                                <div class="col-md-3 col-sm-4"> <i class="fa fa-file-text-o"></i></div>
                                                     </button>
                                                 </a>
                                             </div>

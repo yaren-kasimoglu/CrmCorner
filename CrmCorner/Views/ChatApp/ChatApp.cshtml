@@ -1,4 +1,4 @@
-﻿@model List<Employee>
+﻿@model List<UserViewModel>
 @{
     ViewData["Title"] = "ChatApp";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
@@ -24,10 +24,10 @@
                             <ul class="list-unstyled chat-list mb-0">
                                 @foreach (var item in Model)
                                 {
-                                    <li onclick="getPaging(this.id)" id="@item.EmployeeName" class="d-flex align-items-center py-2 px-3">
+                                    <li onclick="getPaging(this.id)" id="@item.UserName" class="d-flex align-items-center py-2 px-3">
                                         <img class="avatar rounded" src="/CRMTema/bootstrap5/dist/assets/images/user.png" alt="avatar" />
                                         <div id="deneme" class="about ps-3">
-                                            <div class="fs-6">@item.EmployeeName</div>
+                                            <div class="fs-6">@item.UserName</div>
                                             <div class="small text-muted"><i class="fa fa-circle text-primary me-2"></i>online</div>
                                         </div>
                                     </li>

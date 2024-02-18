@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace CrmCorner.Models;
 
 public partial class TaskComp
 {
+
     public int TaskId { get; set; }
 
     public string Title { get; set; } = null!;
 
     public decimal? ValueOrOffer { get; set; }
-
-    public int? CustomerId { get; set; }
-
-    public int? EmployeeId { get; set; }
-
-    public int? StatusId { get; set; }
 
     public string? Description { get; set; }
 
@@ -23,17 +19,24 @@ public partial class TaskComp
 
     public DateTime? ModifiedDate { get; set; }
 
-    public string? TaskCompcol { get; set; }
+    public int? StatusId { get; set; }
 
-    public byte[]? UploadedFile { get; set; }
-
-    public string? UploadedFileName { get; set; }
-
-    public virtual Customer? Customer { get; set; }
-
-    public virtual Employee? Employee { get; set; }
+    public string? UserId { get; set; }
+    public virtual AppUser? AppUser { get; set; }
 
     public virtual Status? Status { get; set; }
 
-    public virtual ICollection<TaskCompLog> TaskCompLogs { get; set; } = new List<TaskCompLog>();
+    public int? CustomerId { get; set; }
+
+    public virtual CustomerN? Customer { get; set; }
+
+    //public string? TaskCompcol { get; set; }
+
+    //public byte[]? UploadedFile { get; set; }
+
+    //public string? UploadedFileName { get; set; }
+
+
+
+    //public virtual ICollection<TaskCompLog> TaskCompLogs { get; set; } = new List<TaskCompLog>();
 }

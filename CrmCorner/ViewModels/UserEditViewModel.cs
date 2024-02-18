@@ -38,5 +38,12 @@ namespace CrmCorner.ViewModels
         [Display(Name = "Cinsiyet ")]
         public Gender? Gender { get; set; }
 
+        [Display(Name = "Çalışan Sayısı")]
+        public int? EmployeeCount { get; set; }
+
+        [Display(Name = "Sektör")]
+        public string? Sector { get; set; }
+
+
     }
 }
