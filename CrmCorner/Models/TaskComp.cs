@@ -11,9 +11,12 @@ public partial class TaskComp
 
     public string Title { get; set; } = null!;
 
+    [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
     public decimal? ValueOrOffer { get; set; }
 
     public string? Description { get; set; }
+
+    public DateTime? SalesDone { get; set; }
 
     public DateTime CreatedDate { get; set; }
 

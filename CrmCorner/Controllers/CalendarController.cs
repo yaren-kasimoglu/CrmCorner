@@ -87,20 +87,33 @@ namespace CrmCorner.Controllers
             }
 
         }
+
         [HttpPost]
-        public async Task<IActionResult> CalendarAdd(Calendar Calendar)
+        public async Task<IActionResult> CalendarAdd(Calendar calendar)
         {
             if (ModelState.IsValid)
             {
-                _context.Calendars.Add(Calendar);
-                _context.SaveChanges();
-
-                if (!String.IsNullOrEmpty(Calendar.Email.ToString()))
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
                 {
-                    var emailSend = sendEmailAsync(Calendar);
 
+                    calendar.UserId = currentUser.Id;
+
+                    _context.Calendars.Add(calendar);
+                    await _context.SaveChangesAsync();
+
+                    if (!String.IsNullOrEmpty(calendar.Email.ToString()))
+                    {
+                        var emailSend = sendEmailAsync(calendar);
+                    }
+                    return RedirectToAction("Calendar");
                 }
-                return RedirectToAction("Calendar");
+                else
+                {
+                 
+                    ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
+                    return View(calendar); 
+                }
             }
             return RedirectToAction("Calendar");
         }

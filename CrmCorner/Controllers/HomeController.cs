@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NuGet.Common;
 using System.Diagnostics;
 //Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password='yagmuryaren123';" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
@@ -25,6 +26,7 @@ namespace CrmCorner.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailServices _emailServices;
 
+
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context)
@@ -36,16 +38,54 @@ namespace CrmCorner.Controllers
             _context = context;
         }
 
-        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
-
-        //public IActionResult Giris()
+        //public async Task<IActionResult> GetWeather(string city)
         //{
-        //    return View();
+        //    var url = $"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={_apiKey}&units=metric";
+        //    var response = await _httpClient.GetAsync(url);
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        var content = await response.Content.ReadAsStringAsync();
+        //        var weatherData = JsonConvert.DeserializeObject(content);
+        //        return Ok(weatherData); // Hava durumu verilerini JSON olarak döndür
+        //    }
+
+        //    return BadRequest("Hava durumu bilgileri alınamadı.");
         //}
+
+        public async Task<IActionResult> UserTaskStatusChart()
+        {
+            // Aktif kullanıcının ID'sini al
+            var userId = _userManager.GetUserId(User);
+
+            // Kullanıcı ID'sini kullanarak AppUser kaydını ve ilişkili TaskComps'ı bul
+            var user = await _context.Users
+                                     .Include(u => u.TaskComps)
+                                         .ThenInclude(tc => tc.Status)
+                                     .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var chartData = new
+            {
+                labels = user.TaskComps.Select(tc => tc.Status.StatusName).Distinct(),
+                data = user.TaskComps.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
+            };
+
+            return Json(chartData);
+        }
+
+
+        public IActionResult Giris()
+        {
+            return View();
+        }
 
         #region Giriş
         public IActionResult SignIn()
@@ -264,7 +304,6 @@ namespace CrmCorner.Controllers
         }
 
 
-
-
+    
     }
 }

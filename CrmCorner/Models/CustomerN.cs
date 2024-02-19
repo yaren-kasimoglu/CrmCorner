@@ -21,7 +21,7 @@
 
         public AppUser? AppUser { get; set; }
 
-        public virtual ICollection<TaskComp> TaskComps { get; set; }
+        public virtual ICollection<TaskComp>? TaskComps { get; set; }
   
     }
 }

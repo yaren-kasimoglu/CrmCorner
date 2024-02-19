@@ -283,8 +283,8 @@ namespace CrmCorner.Controllers
 
                 if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
                 {
-                    string oldValueString = originalValue.ToString();
-                    string newValueString = editedValue.ToString();
+                    var oldValueString = originalValue.ToString();
+                    var newValueString = editedValue.ToString();
                     string fieldName = property.Name;
 
                     // CustomerId için özel bir işlem yap
@@ -310,6 +310,19 @@ namespace CrmCorner.Controllers
                         newValueString = GetStatusNameById((int?)editedValue);
                         fieldName = "Güncel Durum Bilgisi";
                     }
+
+                    if (property.Name == "ValueOrOffer")
+                    {
+                        // Değerleri decimal olarak dönüştürme
+                        decimal oldValueDecimal = originalValue != null ? Convert.ToDecimal(originalValue) : 0;
+                        decimal newValueDecimal = editedValue != null ? Convert.ToDecimal(editedValue) : 0;
+
+                        // Formatlı string olarak değerleri ayarlama
+                        oldValueString = oldValueDecimal.ToString("N2");
+                        newValueString = newValueDecimal.ToString("N2");
+                        fieldName = "Değer Teklifi";
+                    }
+
 
                     TaskCompLog log = new TaskCompLog
                     {
