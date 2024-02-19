@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20240219073322_salesDoneDate")]
+    partial class salesDoneDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -289,36 +292,6 @@ namespace CrmCorner.Migrations
                     b.ToTable("FileAttachments");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("Notifications");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.Status", b =>
                 {
                     b.Property<int>("StatusId")
@@ -530,15 +503,6 @@ namespace CrmCorner.Migrations
                     b.Navigation("TaskComp");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.Notification", b =>
-                {
-                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
-                        .WithMany("Notifications")
-                        .HasForeignKey("AppUserId");
-
-                    b.Navigation("AppUser");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.HasOne("CrmCorner.Models.CustomerN", "Customer")
@@ -580,8 +544,6 @@ namespace CrmCorner.Migrations
                     b.Navigation("Calendars");
 
                     b.Navigation("Customers");
-
-                    b.Navigation("Notifications");
 
                     b.Navigation("TaskCompLogs");
 

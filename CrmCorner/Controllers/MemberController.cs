@@ -5,24 +5,26 @@ using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 namespace CrmCorner.Controllers
 {
     public class MemberController : Controller //Sadece kullanıcı olanların görebileceği bir sayfadır
     {
-
+        private readonly CrmCornerContext _context;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly IFileProvider _fileProvider;
         private readonly IWebHostEnvironment _environment;
 
-        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider, IWebHostEnvironment environment)
+        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider, IWebHostEnvironment environment, CrmCornerContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _fileProvider = fileProvider;
             _environment = environment;
+            _context = context;
         }
 
         public async Task<IActionResult> MyProfile()
@@ -264,9 +266,30 @@ namespace CrmCorner.Controllers
         //}
 
 
+        //public async Task<IActionResult> UserTaskStatusChart()
+        //{
+        //    // Aktif kullanıcının ID'sini al
+        //    var userId = _userManager.GetUserId(User);
 
+        //    // Kullanıcı ID'sini kullanarak AppUser kaydını ve ilişkili TaskComps'ı bul
+        //    var user = await _context.Users
+        //                             .Include(u => u.TaskComps)
+        //                                 .ThenInclude(tc => tc.Status)
+        //                             .FirstOrDefaultAsync(u => u.Id == userId);
 
+        //    if (user == null)
+        //    {
+        //        return NotFound();
+        //    }
 
+        //    var chartData = new
+        //    {
+        //        labels = user.TaskComps.Select(tc => tc.Status.StatusName).Distinct(),
+        //        data = user.TaskComps.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
+        //    };
+
+        //    return Json(chartData);
+        //}
     }
 
 }

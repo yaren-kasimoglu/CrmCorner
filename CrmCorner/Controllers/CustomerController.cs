@@ -49,7 +49,7 @@ namespace CrmCorner.Controllers
                 return View("SignIn","Home"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
             }
             var companyId = currentUser.CompanyId;
-
+            
             var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
 
             var appUserItems = appUsers
@@ -66,17 +66,26 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public IActionResult CustomerAdd(CustomerN customer)
         {
-            if (ModelState.IsValid)
+            try
             {
-                customer.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
+                if (ModelState.IsValid)
+                {
+                    customer.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
 
-                var customers = _context.CustomerNs./*Include(e => e.IdEmployeeNavigation)*/ToList();
+                    var customers = _context.CustomerNs./*Include(e => e.IdEmployeeNavigation)*/ToList();
 
-                _context.CustomerNs.Add(customer);
-                _context.SaveChanges();
+                    _context.CustomerNs.Add(customer);
+                    _context.SaveChanges();
 
-                return RedirectToAction("CustomerList");
+                    return RedirectToAction("CustomerList");
+                }
             }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+          
 
             var appUsers = _userManager.Users.ToList();
             var appUserItems = appUsers

@@ -50,7 +50,13 @@
             <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
             <span asp-validation-for="StatusId" class="text-danger"></span>
         </div>
-
+        <div class="col-lg-3 col-md-6">
+            <div class="form-group">
+                <label asp-for="SalesDone" class="control-label">Planlanan Satış Kapatma Tarihi</label>
+                <input asp-for="SalesDone" type="date" class="form-control" />
+                <span asp-validation-for="SalesDone" class="text-danger"></span>
+            </div>
+        </div>
     </div>
     <br />
     <div class="form-group">
