@@ -92,15 +92,21 @@ namespace CrmCorner.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Calendars.Add(Calendar);
-                _context.SaveChanges();
-
-                if (!String.IsNullOrEmpty(Calendar.Email.ToString()))
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
                 {
-                    var emailSend = sendEmailAsync(Calendar);
+                    Calendar.UserId = currentUser.Id;
+                    _context.Calendars.Add(Calendar);
+                    _context.SaveChanges();
 
+                    if (!String.IsNullOrEmpty(Calendar.Email.ToString()))
+                    {
+                        var emailSend = sendEmailAsync(Calendar);
+
+                    }
+                    return RedirectToAction("Calendar");
                 }
-                return RedirectToAction("Calendar");
+               
             }
             return RedirectToAction("Calendar");
         }
