@@ -145,7 +145,7 @@ namespace CrmCorner.Controllers
                 _context.Entry(editedCustomer).State = EntityState.Modified;
                 _context.SaveChanges();
 
-                return RedirectToAction("CustomerList");
+                return RedirectToAction("CustomerList"); 
             }
             //ModelState.IsValid false ise
             return View(editedCustomer);
@@ -164,6 +164,7 @@ namespace CrmCorner.Controllers
             }
             _context.CustomerNs.Remove(customer);
             _context.SaveChanges();
+            
 
             return RedirectToAction("CustomerList");
         }
