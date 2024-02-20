@@ -16,9 +16,9 @@ public partial class TaskCompLog
 
     public string? NewValue { get; set; }
 
-    public string? UpdatedById { get; set; }
-
     public DateTime? UpdatedAt { get; set; }
+
+    public string? UpdatedById { get; set; }
 
     [ForeignKey("TaskId")]
     public virtual TaskComp? Task { get; set; }

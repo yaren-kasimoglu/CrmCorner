@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace CrmCorner.Models
 {
-    public class AppUser:IdentityUser
+    public class AppUser : IdentityUser
     {
         public string? City { get; set; }
         public string? Picture { get; set; }

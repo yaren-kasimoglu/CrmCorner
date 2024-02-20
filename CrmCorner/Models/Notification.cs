@@ -1,14 +1,21 @@
-﻿namespace CrmCorner.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace CrmCorner.Models;
+
+public partial class Notification
 {
-    public class Notification
-    {
-        public int Id { get; set; }
-        public string UserId { get; set; }
-        public string Message { get; set; }
-        public bool IsRead { get; set; } = false;
-        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+    public int Id { get; set; }
 
-        public AppUser? AppUser { get; set; }
+    public string UserId { get; set; } = null!;
 
-    }
+    public string Message { get; set; } = null!;
+
+    public bool IsRead { get; set; }
+
+    public DateTime DateCreated { get; set; }
+
+    public string? AppUserId { get; set; }
+
+    public virtual AppUser? AppUser { get; set; }
 }
