@@ -1,5 +1,4 @@
-﻿
-using CrmCorner.Models;
+﻿using CrmCorner.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Web;
 
 namespace CrmCorner.Controllers
 {
@@ -17,12 +17,14 @@ namespace CrmCorner.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public TaskController(CrmCornerContext context, UserManager<AppUser> userManager, IWebHostEnvironment environment)
+        public TaskController(CrmCornerContext context, UserManager<AppUser> userManager, IWebHostEnvironment environment, IWebHostEnvironment hostingEnvironment)
         {
             _context = context;
             _userManager = userManager;
             _environment = environment;
+            _hostingEnvironment = hostingEnvironment;
         }
         public async Task<IActionResult> Index()
         {
@@ -48,6 +50,7 @@ namespace CrmCorner.Controllers
 
 
         }
+
 
 
 
@@ -235,6 +238,7 @@ namespace CrmCorner.Controllers
             //.FirstOrDefault(t => t.TaskId == id);
 
             TaskComp task = _context.TaskComps
+                //.Include(e=>e.FileAttachments)
                 .Include(e => e.Customer).
                 Include(e => e.Status).
                 Include(e => e.AppUser).
@@ -251,6 +255,13 @@ namespace CrmCorner.Controllers
                                     .ToListAsync();
 
             ViewBag.TaskCompLogs = taskCompLogs;
+
+            //if (task.FileAttachments == null)
+            //{
+            //    // FileAttachments koleksiyonu null ise, boş bir liste ile başlat
+            //    task.FileAttachments = new List<FileAttachment>();
+            //}
+
 
             return View("TaskDetail", task);
         }
@@ -340,8 +351,40 @@ namespace CrmCorner.Controllers
             await _context.SaveChangesAsync();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(IFormFile file, int taskId)
+        {
+            if (file != null && file.Length > 0)
+            {
+                var fileName = Path.GetFileName(file.FileName);
+                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", fileName);
 
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
 
+                var fileAttachment = new FileAttachment
+                {
+                    FileName = fileName,
+                    FilePath = filePath,
+                    FileSize = file.Length,
+                    FileType = file.ContentType,
+                    UploadedDate = DateTime.Now,
+                    //TaskId = taskId
+                };
+
+                using (var db = new CrmCornerContext())
+                {
+                    db.FileAttachments.Add(fileAttachment);
+                    await db.SaveChangesAsync();
+                }
+
+                return RedirectToAction("Details", new { id = taskId });
+            }
+
+            return View("Error");
+        }
 
         //[HttpPost]
         //public async Task<IActionResult> UploadFile(int taskId, IFormFile uploadedFile)

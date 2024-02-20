@@ -247,11 +247,6 @@ namespace CrmCorner.Migrations
                     b.ToTable("CustomerNs");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.EmailProperty", b =>
-                {
-                    b.ToTable("EmailProperty");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
                 {
                     b.Property<int>("FileAttachmentId")
@@ -273,18 +268,10 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("TaskCompTaskId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TaskId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UploadedDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("FileAttachmentId");
-
-                    b.HasIndex("TaskCompTaskId");
 
                     b.ToTable("FileAttachments");
                 });
@@ -519,17 +506,6 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
-                {
-                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
-                        .WithMany("FileAttachments")
-                        .HasForeignKey("TaskCompTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TaskComp");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.Notification", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -542,11 +518,11 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.HasOne("CrmCorner.Models.CustomerN", "Customer")
-                        .WithMany("TaskComps")
+                        .WithMany("Taskcomps")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CrmCorner.Models.Status", "Status")
-                        .WithMany()
+                        .WithMany("TaskComps")
                         .HasForeignKey("StatusId");
 
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -590,13 +566,16 @@ namespace CrmCorner.Migrations
 
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
+                    b.Navigation("Taskcomps");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.Status", b =>
+                {
                     b.Navigation("TaskComps");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
-                    b.Navigation("FileAttachments");
-
                     b.Navigation("TaskCompLogs");
                 });
 #pragma warning restore 612, 618

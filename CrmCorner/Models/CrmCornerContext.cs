@@ -58,12 +58,12 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
             .WithMany(u => u.TaskComps) // Bir AppUser, birçok TaskComp ile ilişkilendirilebilir.
             .HasForeignKey(t => t.UserId); // UserId yabancı anahtar olarak kullanılır.
 
-        modelBuilder.Entity<TaskCompLog>().HasKey(t=>t.LogId);
+        modelBuilder.Entity<TaskCompLog>().HasKey(t => t.LogId);
 
-        modelBuilder.Entity<EmailProperty>().HasNoKey();
+        //modelBuilder.Entity<EmailProperty>().HasNoKey();
 
 
-modelBuilder.Entity<Calendar>(entity =>
+        modelBuilder.Entity<Calendar>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
@@ -75,7 +75,7 @@ modelBuilder.Entity<Calendar>(entity =>
             entity.Property(e => e.Date).HasMaxLength(50);
             entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.Title).HasMaxLength(200);
-        });
+        });
 
 
         OnModelCreatingPartial(modelBuilder);

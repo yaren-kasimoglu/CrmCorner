@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CrmCorner.Models;
 
-public  class Calendar
+public class Calendar
 {
     public int Id { get; set; }
 
@@ -31,7 +31,3 @@ public class EmailProperty
     public string Email { get; set; }
     // Diğer özellikler...
 }
-
-
-
-

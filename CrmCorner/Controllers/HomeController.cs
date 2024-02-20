@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NuGet.Common;
 using System.Diagnostics;
-//Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password='yagmuryaren123';" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
-//Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123;" Pomelo.EntityFrameworkCore.MySql --context CrmCorner.Areas.Identity.Data.CrmcornerContext -o Models
-//Scaffold-DbContext "connection-string" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context CrmCornerContext
-// Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -Context CrmCornerContext
 
-//Scaffold - DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123;" Pomelo.EntityFrameworkCore.MySql--context CrmCorner.Areas.Identity.Data.CrmcornerContext - o Models
+
+//Scaffold-DbContext "server=94.73.148.165;database=u1613932_crmCor;user=u1613932_crmcorn;password=.8j:-6njA8WLDf7_;Convert Zero Datetime=True;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
+
+
+
 
 namespace CrmCorner.Controllers
 {
@@ -101,7 +101,7 @@ namespace CrmCorner.Controllers
                 return View();
             }
 
-            returnUrl ??= Url.Action("WelcomePage", "Home"); //null olma durumuna karşılık bu değerin atanması . Basit bir kullanım yöntemi
+            returnUrl ??= Url.Action("Index", "Home"); //null olma durumuna karşılık bu değerin atanması . Basit bir kullanım yöntemi
 
             var hasUser = await _userManager.FindByEmailAsync(model.Email);
             if (hasUser == null)
@@ -287,10 +287,7 @@ namespace CrmCorner.Controllers
             return RedirectToAction("SignIn","Home");
         }
 
-        public IActionResult WelcomePage()
-        {
-            return View();
-        }
+
 
         public IActionResult Privacy()
         {

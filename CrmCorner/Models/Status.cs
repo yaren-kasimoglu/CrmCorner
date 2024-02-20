@@ -9,5 +9,5 @@ public partial class Status
 
     public string StatusName { get; set; } = null!;
 
-    //public virtual ICollection<TaskComp> TaskComps { get; set; } = new List<TaskComp>();
+    public virtual ICollection<TaskComp> TaskComps { get; set; } = new List<TaskComp>();
 }

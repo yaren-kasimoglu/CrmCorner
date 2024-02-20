@@ -1,24 +1,17 @@
 ﻿using System;
-namespace CrmCorner.Models
+using System.Collections.Generic;
+
+namespace CrmCorner.Models;
+
+public partial class ChatHistory
 {
-	public partial class ChatHistory
-	{
-       
-            public string Id { get; set; }
+    public string Id { get; set; } = null!;
 
-            public string SenderId { get; set; }
+    public string SenderId { get; set; } = null!;
 
-            public string ReceiverId { get; set; }
+    public string ReceiverId { get; set; } = null!;
 
-            public string Message { get; set; }
+    public string Message { get; set; } = null!;
 
-            public DateTime MessageTime { get; set; }
-
-            //public ChatHistory()
-            //{
-            //    Id = Id.GenerateNewId();
-            //}
-        
-    }
+    public DateTime MessageTime { get; set; }
 }
-
