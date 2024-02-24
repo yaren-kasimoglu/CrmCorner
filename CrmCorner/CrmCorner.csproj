@@ -60,6 +60,7 @@
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Migrations\" />
     <Folder Include="Views\Calendar\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\CRMTema\bootstrap4\assets\images\coin\BTC.svg" />

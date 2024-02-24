@@ -18,4 +18,7 @@ public partial class Notification
     public string? AppUserId { get; set; }
 
     public virtual AppUser? AppUser { get; set; }
+
+    public int? TaskCompId { get; set; }
+    public virtual TaskComp? TaskComp { get; set; }
 }

@@ -14,6 +14,7 @@ using CrmCorner.Services;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http.Features;
 using CrmCorner;
+using CrmCorner.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
@@ -71,7 +72,10 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 
 
-builder.Services.AddHostedService<NotificationService>();
+//builder.Services.AddHostedService<NotificationService>();
+
+builder.Services.Configure<FileUploadOptions>(builder.Configuration.GetSection("FileUploadOptions"));
+
 
 var app = builder.Build();
 
@@ -108,9 +112,6 @@ if (!app.Environment.IsDevelopment())
 
 //});
 
-
-
-
 app.UseHttpsRedirection();
 app.UseStaticFiles(); //wwwroot klasörünün kullanımını aktifleştirir.
 
@@ -135,3 +136,4 @@ app.MapHub<ChatHub>("/chatHub");
 
 
 app.Run();
+

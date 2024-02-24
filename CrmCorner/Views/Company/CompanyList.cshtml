@@ -11,7 +11,7 @@
     <thead>
         <tr>
             <th scope="col">Firma Adı</th>
-            <th scope="col">İşlemler</th>
+   @*         <th scope="col">İşlemler</th>*@
         </tr>
     </thead>
     <tbody>
@@ -20,17 +20,17 @@
             <tr>
 
                 <td>@item.CompanyName</td>
-
+@*
        <td>
-                    <a href="/Company/CompanyEdit/@item.CompanyId" target="_blank">
+                    <a href="/Company/CompanyEdit/@item.CompanyId" target="_self">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
                             <i class="fa fa-edit"></i>
                         </button>
-                    </a>
-               <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-companyid="@item.CompanyId" onclick="confirmDelete(this)">
+                    </a>*@
+@*               <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-companyid="@item.CompanyId" onclick="confirmDelete(this)">
                 <i class="fa fa-trash-o"></i>
-                </button>
-              </td>
+                </button>*@
+        @*      </td>*@
 
             </tr>
         }

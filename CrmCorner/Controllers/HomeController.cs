@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NuGet.Common;
 using System.Diagnostics;
+using System.Security.Claims;
 
 
 //Scaffold-DbContext "server=94.73.148.165;database=u1613932_crmCor;user=u1613932_crmcorn;password=.8j:-6njA8WLDf7_;Convert Zero Datetime=True;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
@@ -209,6 +210,7 @@ namespace CrmCorner.Controllers
             return View();
         }
 
+
         [HttpPost]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
         {
@@ -300,7 +302,35 @@ namespace CrmCorner.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        public async Task<IActionResult> Notifications()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id; // Kullanıcı ID'sini alın
 
-    
+            if (userId == null)
+            {
+                return NotFound("Kullanıcı bulunamadı.");
+            }
+
+            var notifications = await _context.Notifications
+                                              .Where(n => n.UserId == userId)
+                                              .ToListAsync(); // Kullanıcıya ait bildirimleri çekin
+
+            return View(notifications); // Bildirimleri view'a gönderin
+        }
+
+
+        public async Task<IActionResult> MarkAsRead(int notificationId)
+        {
+            var notification = await _context.Notifications.FindAsync(notificationId);
+            if (notification != null)
+            {
+                notification.IsRead = true;
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Notifications));
+            }
+            return NotFound();
+        }
+
     }
 }
