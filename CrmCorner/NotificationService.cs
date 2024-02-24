@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner
 {
@@ -26,24 +27,37 @@ namespace CrmCorner
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<CrmCornerContext>();
 
+                var todayPlusThreeDays = DateTime.Today.AddDays(3);
                 var salesToNotify = dbContext.TaskComps
-                    .Where(s => s.SalesDone.HasValue && s.SalesDone.Value.Date == DateTime.Today.AddDays(3))
+                    .Include(tc => tc.AppUser) // Eğer TaskComp ve AppUser arasında ilişki varsa
+                    .Where(tc => tc.SalesDone.HasValue && tc.SalesDone.Value.Date == todayPlusThreeDays)
                     .ToList();
 
-                //foreach (var sale in salesToNotify)
-                //{
-                //    var notification = new Notification
-                //    {
-                //        UserId = sale.UserId, // Burada TaskComp modelinizde bir UserId özelliği olduğunu varsayıyorum.
-                //        Message = $"Satış kapatma tarihinize 3 gün kaldı: {sale.Title}",
-                //        // Diğer alanlar...
-                //    };
+                foreach (var sale in salesToNotify)
+                {
+                    // Önce, bu satış için zaten bir bildirim olup olmadığını kontrol edin
+                    var alreadyNotified = dbContext.Notifications.Any(n => n.TaskCompId == sale.TaskId);
 
-                //    dbContext.Notifications.Add(notification);
-                //}
+                    if (!alreadyNotified)
+                    {
+                        var notification = new Notification
+                        {
+                            AppUserId = sale.AppUser?.Id, // TaskComp ile ilişkili AppUser'ın Id'sini kullanın
+                            Message = $"Satış kapatma tarihinize 3 gün kaldı: {sale.Title}",
+                            DateCreated = DateTime.Now,
+                            IsRead = false
+                            // Diğer alanlar...
+                        };
+
+                        dbContext.Notifications.Add(notification);
+                    }
+                }
 
                 await dbContext.SaveChangesAsync(stoppingToken);
             }
         }
+
+
+
     }
 }

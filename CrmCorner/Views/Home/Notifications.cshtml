@@ -1,0 +1,33 @@
+﻿@model List<Notification>
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h1>Notifications</h1>
+
+
+
+<h2>Bildirimler</h2>
+
+@if (Model.Count == 0)
+{
+    <p>Yeni bildiriminiz yok.</p>
+}
+else
+{
+    <ul>
+        @foreach (var notification in Model)
+        {
+            <li>
+                @notification.Message
+            </li>
+        }
+    </ul>
+}
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>

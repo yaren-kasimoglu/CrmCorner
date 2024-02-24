@@ -6,7 +6,6 @@ namespace CrmCorner.Models;
 
 public partial class TaskComp
 {
-
     public int TaskId { get; set; }
 
     public string Title { get; set; } = null!;
@@ -16,6 +15,7 @@ public partial class TaskComp
 
     public string? Description { get; set; }
 
+    [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
     public DateTime? SalesDone { get; set; }
 
     public DateTime CreatedDate { get; set; }
@@ -34,9 +34,9 @@ public partial class TaskComp
     public virtual CustomerN? Customer { get; set; }
 
     // Dosya ekleri için koleksiyon
-    //public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
+    public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
     public virtual ICollection<TaskCompLog>? TaskCompLogs { get; set; }
-
+    public virtual Notification? Notification { get; set; }
 
 
 

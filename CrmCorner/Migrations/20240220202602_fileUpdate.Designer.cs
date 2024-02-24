@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20240220202602_fileUpdate")]
+    partial class fileUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -268,15 +271,10 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("TaskId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UploadedDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("FileAttachmentId");
-
-                    b.HasIndex("TaskId");
 
                     b.ToTable("FileAttachments");
                 });
@@ -300,9 +298,6 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("TaskCompId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -310,9 +305,6 @@ namespace CrmCorner.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
-
-                    b.HasIndex("TaskCompId")
-                        .IsUnique();
 
                     b.ToTable("Notifications");
                 });
@@ -517,30 +509,13 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
-                {
-                    b.HasOne("CrmCorner.Models.TaskComp", "Task")
-                        .WithMany("FileAttachments")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Task");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.Notification", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
                         .WithMany("Notifications")
                         .HasForeignKey("AppUserId");
 
-                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
-                        .WithOne("Notification")
-                        .HasForeignKey("CrmCorner.Models.Notification", "TaskCompId");
-
                     b.Navigation("AppUser");
-
-                    b.Navigation("TaskComp");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
@@ -604,10 +579,6 @@ namespace CrmCorner.Migrations
 
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
-                    b.Navigation("FileAttachments");
-
-                    b.Navigation("Notification");
-
                     b.Navigation("TaskCompLogs");
                 });
 #pragma warning restore 612, 618

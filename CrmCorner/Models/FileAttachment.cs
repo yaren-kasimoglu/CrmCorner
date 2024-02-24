@@ -19,7 +19,7 @@ public partial class FileAttachment
     public DateTime UploadedDate { get; set; }
 
 
-    //public int TaskId { get; set; }
-    //[ForeignKey("TaskId")]
-    //public virtual TaskComp? Task { get; set; }
+    public int TaskId { get; set; }
+    [ForeignKey("TaskId")]
+    public virtual TaskComp? Task { get; set; }
 }
