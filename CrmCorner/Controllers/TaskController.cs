@@ -32,31 +32,37 @@ namespace CrmCorner.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            Dictionary<int, string> statusNames = new Dictionary<int, string>();
+            using (var context = new CrmCornerContext())
+            {
+                var statuses = context.Statuses.ToList();
+                foreach (var status in statuses)
+                {
+                    statusNames.Add(status.StatusId, status.StatusName);
+                }
+            }
+            ViewBag.StatusNames = statusNames;
+            ViewBag.StatusList = statusNames;
 
             var currentUser = await _userManager.GetUserAsync(User);
 
             if (currentUser != null)
             {
                 var tasks = _context.TaskComps
-                    .Include(e => e.Customer)
-                       .Include(e => e.Status)
-                       .Include(e => e.AppUser)
-                       .Where(e => e.UserId == currentUser.Id)
-                       .ToList();
+           .Include(e => e.Customer)
+           .Include(e => e.Status)
+           .Include(e => e.AppUser)
+           .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id) // AssignedUserId görevi gerçekleştiren kullanıcı için yer tutucudur
+           .ToList();
+
                 return View(tasks);
             }
-
             else
             {
                 ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
                 return View();
             }
-
-
         }
-
-
-
 
         #region TaskEkleme
         [HttpGet]
@@ -83,12 +89,12 @@ namespace CrmCorner.Controllers
             }).ToList();
 
 
-            var customer = _context.CustomerNs.Where(c=>c.AppUserId==currentUser.Id).ToList();
+            var customer = _context.CustomerNs.Where(c => c.AppUserId == currentUser.Id).ToList();
 
             List<SelectListItem> customerItems = customer
             .Select(d => new SelectListItem
             {
-                Text = d.Name + " " + d.Surname +" / "+ d.CompanyName,
+                Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
                 Value = d.Id.ToString()
             }).ToList();
 
@@ -126,7 +132,7 @@ namespace CrmCorner.Controllers
         }
         #endregion
 
-        #region TaskGüncelleme/Editmele
+        #region TaskGüncelleme/Editleme
         [HttpGet]
         public async Task<IActionResult> TaskEdit(int id)
         {
@@ -184,8 +190,13 @@ namespace CrmCorner.Controllers
 
                 editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
 
+                if (HttpContext.Request.Form.ContainsKey("AssignedUserId"))
+                {
+                    editedTask.AssignedUserId = HttpContext.Request.Form["AssignedUserId"];
+                }
+
                 // Değişiklikleri kontrol et ve log tablosuna kaydet
-                  await LogChanges(originalTask, editedTask);
+                await LogChanges(originalTask, editedTask);
 
                 // task güncelle
                 _context.TaskComps.Update(editedTask);
@@ -242,7 +253,7 @@ namespace CrmCorner.Controllers
             //.FirstOrDefault(t => t.TaskId == id);
 
             TaskComp task = _context.TaskComps
-               .Include(e=>e.FileAttachments)
+               .Include(e => e.FileAttachments)
                 .Include(e => e.Customer).
                 Include(e => e.Status).
                 Include(e => e.AppUser).
@@ -302,7 +313,7 @@ namespace CrmCorner.Controllers
                     var newValueString = editedValue.ToString();
                     string fieldName = property.Name;
 
-             
+
                     if (property.Name == "CustomerId")
                     {
                         oldValueString = GetCustomerNameById((int?)originalValue);
@@ -316,7 +327,16 @@ namespace CrmCorner.Controllers
                         var newUser = await _userManager.FindByIdAsync(editedValue.ToString());
                         oldValueString = oldUser != null ? oldUser.NameSurname : "Unknown";
                         newValueString = newUser != null ? newUser.NameSurname : "Unknown";
-                        fieldName = "Sorumlu Kullanıcı";
+                        fieldName = "Görüşmeyi Alan";
+                    }
+
+                    if (property.Name == "AssignedUserId")
+                    {
+                        var oldUser = await _userManager.FindByIdAsync(originalValue.ToString());
+                        var newUser = await _userManager.FindByIdAsync(editedValue.ToString());
+                        oldValueString = oldUser != null ? oldUser.NameSurname : "Unknown";
+                        newValueString = newUser != null ? newUser.NameSurname : "Unknown";
+                        fieldName = "Görüşmeyi Gerçekleştiren";
                     }
 
                     if (property.Name == "StatusId")

@@ -108,7 +108,12 @@
                         <img class="rounded-circle" src="~/userprofilepicture/firm.png" width="72" alt="" />
                         <div class="wid-u-info ms-3">
                             <h5 class="mb-0">@Model.Customer.CompanyName</h5>
-                            <span>@Model.Customer.CompanyEmail</span>
+                               <br />
+                            <span>E-Posta: @Model.Customer.CompanyEmail</span>
+                            <br />
+                            <span>Sekötr: @Model.Customer.Industry</span>
+                            <br />
+                            <span class="message"> Çalışan Sayısı: @Model.Customer.EmployeeCount</span>
                         </div>
                     </div>
                     <hr>
@@ -119,7 +124,10 @@
                                 <div class="ms-3 w-100 text-muted">
                                     <span class="name d-block">@Model.Customer.Name</span>
                                     <span class="message">@Model.Customer.CustomerEmail</span>
+                                    <br/>
                                     <span class="message">@Model.Customer.PhoneNumber</span>
+                                    <br />
+                                    <span class="message">@Model.Customer.CustomerTitle</span>
                                 </div>
                             </a>
                         </li>
@@ -128,7 +136,7 @@
             </div> 
             <div class="card mb-2">
                 <div class="card-header">
-                    <h6 class="card-title">Dosyalar & Belgeler</h6>
+                    <h6 class="card-title">Dosyalar & Belgeler & Sözleşmeler</h6>
                     <br />
                     @using (Html.BeginForm("UploadFile", "Task", FormMethod.Post, new { enctype = "multipart/form-data" }))
                     {
@@ -170,7 +178,7 @@
 
             <div class="card mb-2">
                 <div class="card-header">
-                    <h6 class="card-title">Kullanıcı Bilgisi</h6>
+                    <h6 class="card-title">Görevi Oluşturan</h6>
                 </div>
                 <div class="card-body text-center">
                     <div class="profile-image mb-3"> <img src="~/userprofilepicture/defaultpp.png" width="65" height="65" class="rounded-circle" alt=""> </div>
@@ -178,9 +186,9 @@
                         <h4><strong>@Model.AppUser.NameSurname</strong></h4>
                     </div>
                     <div class="mt-3">
-                        <a asp-action="MyProfile" asp-controller="Member">
+               @*         <a asp-action="MyProfile" asp-controller="Member">
                             <button class="btn btn-primary">Profilim</button>
-                        </a>
+                        </a>*@
                         <a asp-action="ChatApp" asp-controller="ChatApp">
                             <button class="btn btn-outline-secondary">Message</button>
                         </a>
@@ -237,7 +245,7 @@
                                         </div>
                                         <div class="timeline-body">
                                             <p>@log.OldValue <i class="fa fa-long-arrow-right"></i> @log.NewValue</p>
-                                            <p>Edited By: @log.UpdatedBy?.NameSurname</p>
+                                            <p>Düzenleyen: @log.UpdatedBy?.NameSurname</p>
                                         </div>
                                     </div>
                                 </div>

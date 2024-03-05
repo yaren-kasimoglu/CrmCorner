@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CrmCorner.Models.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace CrmCorner.Models;
@@ -12,7 +13,8 @@ public partial class CustomerN
     public string Surname { get; set; } = null!;
 
     public string CustomerEmail { get; set; } = null!;
-
+    public string CustomerTitle { get; set; }
+    public int? EmployeeCount { get; set; }
     public string PhoneNumber { get; set; } = null!;
 
     public string CompanyName { get; set; } = null!;
@@ -26,6 +28,8 @@ public partial class CustomerN
     public string? AppUserId { get; set; }
 
     public virtual AppUser? AppUser { get; set; }
+
+    public IndustryType? Industry { get; set; } // Sektör bilgisi
 
     public virtual ICollection<TaskComp> Taskcomps { get; set; } = new List<TaskComp>();
 }
