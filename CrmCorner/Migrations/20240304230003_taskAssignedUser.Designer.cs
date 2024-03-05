@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20240304230003_taskAssignedUser")]
+    partial class taskAssignedUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,16 +228,6 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("CustomerTitle")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("EmployeeCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Industry")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime(6)");
 
@@ -361,14 +354,8 @@ namespace CrmCorner.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("IsFinalDecisionMaker")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Outcome")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("SalesDone")
                         .HasColumnType("datetime(6)");

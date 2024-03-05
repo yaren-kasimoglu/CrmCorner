@@ -39,11 +39,18 @@
             <span asp-validation-for="CustomerId" class="text-danger"></span>
         </div>
         <div class="col-lg-3 col-md-6">
-            <label class="form-label">Sorumlu</label>
+            <label class="form-label">Görüşmeyi Alan</label>
             <select asp-for="UserId" asp-items="ViewBag.Users" class="form-control">
                 <option value="">Lütfen seçiniz</option>
             </select>
             <span asp-validation-for="UserId" class="text-danger"></span>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">Görüşmeyi Gerçekleştiren</label>
+            <select asp-for="AssignedUserId" asp-items="ViewBag.Users" class="form-control">
+                <option value="">Lütfen seçiniz</option>
+            </select>
+            <span asp-validation-for="AssignedUserId" class="text-danger"></span>
         </div>
         <div class="col-lg-3 col-md-6">
             <label class="form-label">Status</label>

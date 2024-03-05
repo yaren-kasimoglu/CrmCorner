@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20240225160843_migNotification")]
+    partial class migNotification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,16 +228,6 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("CustomerTitle")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("EmployeeCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Industry")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime(6)");
 
@@ -349,9 +342,6 @@ namespace CrmCorner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("AssignedUserId")
-                        .HasColumnType("varchar(255)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
@@ -361,14 +351,8 @@ namespace CrmCorner.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("IsFinalDecisionMaker")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Outcome")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("SalesDone")
                         .HasColumnType("datetime(6)");
@@ -387,8 +371,6 @@ namespace CrmCorner.Migrations
                         .HasColumnType("decimal(65,30)");
 
                     b.HasKey("TaskId");
-
-                    b.HasIndex("AssignedUserId");
 
                     b.HasIndex("CustomerId");
 
@@ -569,10 +551,6 @@ namespace CrmCorner.Migrations
 
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
-                    b.HasOne("CrmCorner.Models.AppUser", "AssignedUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedUserId");
-
                     b.HasOne("CrmCorner.Models.CustomerN", "Customer")
                         .WithMany("Taskcomps")
                         .HasForeignKey("CustomerId");
@@ -586,8 +564,6 @@ namespace CrmCorner.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("AppUser");
-
-                    b.Navigation("AssignedUser");
 
                     b.Navigation("Customer");
 

@@ -1,5 +1,7 @@
 ﻿
+using CrmCorner.Extensions;
 using CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +61,14 @@ namespace CrmCorner.Controllers
              Value = u.Id
          })
          .ToList();
+
+            // IndustryType enum'undan dropdown listesi için verileri hazırlama
+            ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+            {
+                Text = v.GetDisplayName(), // Enum için Display Attribute'unu okuyan extension method
+                Value = ((int)v).ToString()
+            }).ToList(), "Value", "Text");
+
 
             ViewBag.AppUsers = appUserItems;
             return View();
@@ -122,6 +132,13 @@ namespace CrmCorner.Controllers
              Value = u.Id
          })
          .ToList();
+
+            ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+            {
+                Text = v.GetDisplayName(),
+                Value = ((int)v).ToString()
+            }).ToList(), "Value", "Text");
+
 
             ViewBag.AppUsers = appUserItems;
             // id parametresini kullanarak düzenlenecek müşteriyi veritabanından al
