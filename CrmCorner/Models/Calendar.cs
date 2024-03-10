@@ -6,7 +6,7 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 
 namespace CrmCorner.Models;
 
-public  class Calendar
+public class Calendar
 {
     public int Id { get; set; }
 
@@ -32,6 +32,7 @@ public class EmailProperty
     [NotMapped]
     public string Email { get; set; }
     // Diğer özellikler...
+
 }
 
 public class OutlookCalendarService
@@ -69,4 +70,7 @@ public class OutlookCalendarService
 }
 
 
+
+
+}
 

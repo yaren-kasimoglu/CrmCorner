@@ -7,14 +7,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NuGet.Common;
 using System.Diagnostics;
-//Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password='yagmuryaren123';" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
-//Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123;" Pomelo.EntityFrameworkCore.MySql --context CrmCorner.Areas.Identity.Data.CrmcornerContext -o Models
-//Scaffold-DbContext "connection-string" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context CrmCornerContext
-// Scaffold-DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -Context CrmCornerContext
+using System.Security.Claims;
 
-//Scaffold - DbContext "server=92.204.221.160;database=crmcorner;user=yaren;password=yagmuryaren123;" Pomelo.EntityFrameworkCore.MySql--context CrmCorner.Areas.Identity.Data.CrmcornerContext - o Models
+
+//Scaffold-DbContext "server=94.73.148.165;database=u1613932_crmCor;user=u1613932_crmcorn;password=.8j:-6njA8WLDf7_;Convert Zero Datetime=True;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
+
+
+
 
 namespace CrmCorner.Controllers
 {
@@ -24,6 +26,7 @@ namespace CrmCorner.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailServices _emailServices;
+
 
         private readonly ILogger<HomeController> _logger;
 
@@ -36,16 +39,54 @@ namespace CrmCorner.Controllers
             _context = context;
         }
 
-        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
-
-        //public IActionResult Giris()
+        //public async Task<IActionResult> GetWeather(string city)
         //{
-        //    return View();
+        //    var url = $"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={_apiKey}&units=metric";
+        //    var response = await _httpClient.GetAsync(url);
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        var content = await response.Content.ReadAsStringAsync();
+        //        var weatherData = JsonConvert.DeserializeObject(content);
+        //        return Ok(weatherData); // Hava durumu verilerini JSON olarak döndür
+        //    }
+
+        //    return BadRequest("Hava durumu bilgileri alınamadı.");
         //}
+
+        public async Task<IActionResult> UserTaskStatusChart()
+        {
+            // Aktif kullanıcının ID'sini al
+            var userId = _userManager.GetUserId(User);
+
+            // Kullanıcı ID'sini kullanarak AppUser kaydını ve ilişkili TaskComps'ı bul
+            var user = await _context.Users
+                                     .Include(u => u.TaskComps)
+                                         .ThenInclude(tc => tc.Status)
+                                     .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var chartData = new
+            {
+                labels = user.TaskComps.Select(tc => tc.Status.StatusName).Distinct(),
+                data = user.TaskComps.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
+            };
+
+            return Json(chartData);
+        }
+
+
+        public IActionResult Giris()
+        {
+            return View();
+        }
 
         #region Giriş
         public IActionResult SignIn()
@@ -61,7 +102,7 @@ namespace CrmCorner.Controllers
                 return View();
             }
 
-            returnUrl ??= Url.Action("WelcomePage", "Home"); //null olma durumuna karşılık bu değerin atanması . Basit bir kullanım yöntemi
+            returnUrl ??= Url.Action("Index", "Home"); //null olma durumuna karşılık bu değerin atanması . Basit bir kullanım yöntemi
 
             var hasUser = await _userManager.FindByEmailAsync(model.Email);
             if (hasUser == null)
@@ -169,6 +210,7 @@ namespace CrmCorner.Controllers
             return View();
         }
 
+
         [HttpPost]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
         {
@@ -247,10 +289,7 @@ namespace CrmCorner.Controllers
             return RedirectToAction("SignIn","Home");
         }
 
-        public IActionResult WelcomePage()
-        {
-            return View();
-        }
+
 
         public IActionResult Privacy()
         {
@@ -263,8 +302,35 @@ namespace CrmCorner.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        public async Task<IActionResult> Notifications()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id; // Kullanıcı ID'sini alın
+
+            if (userId == null)
+            {
+                return NotFound("Kullanıcı bulunamadı.");
+            }
+
+            var notifications = await _context.Notifications
+                                              .Where(n => n.UserId == userId)
+                                              .ToListAsync(); // Kullanıcıya ait bildirimleri çekin
+
+            return View(notifications); // Bildirimleri view'a gönderin
+        }
 
 
+        public async Task<IActionResult> MarkAsRead(int notificationId)
+        {
+            var notification = await _context.Notifications.FindAsync(notificationId);
+            if (notification != null)
+            {
+                notification.IsRead = true;
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Notifications));
+            }
+            return NotFound();
+        }
 
     }
 }

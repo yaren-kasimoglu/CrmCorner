@@ -6,7 +6,7 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-<a href="/Customer/CustomerAdd" target="_blank">
+<a href="/Customer/CustomerAdd" target="_self">
     <input type="button" class="btn btn-success" value="Add Customer">
 </a>
 <div>&nbsp;</div>
@@ -23,10 +23,12 @@
             <th scope="col">Adı</th>
             <th scope="col">Soyadı</th>
             <th scope="col">Müşteri Email</th>
+            <th scope="col">Pozisyon</th>
             <th scope="col">Telefon Numarası</th>
             <th scope="col">Firma Adı</th>
             <th scope="col">Firme Email</th>
-           <th scope="col">Sorumlu Kişi</th>
+            <th scope="col">Sektör</th>
+            <th scope="col">Çalışan Sayısı</th>
             <th scope="col">Operations</th>
         </tr>
     </thead>
@@ -38,31 +40,35 @@
                 <td>@item.Name</td>
                 <td>@item.Surname</td>
                 <td>@item.CustomerEmail</td>
+                <td>@item.CustomerTitle</td>
                 <td>@item.PhoneNumber</td>
                 <td>@item.CompanyName</td>
                 <td>@item.CompanyEmail</td>
                 <td>
-                    @if (item.AppUserId!=null)
-                    {
-                        @item.AppUser!.UserName
-                    }
-                    else
-                    {
-                        <span class="text-danger">Sorumlu bilgisi eklenmemiştir.</span>
-                    }
-
+                    <span class="badge bg-success">@item.Industry</span>
                 </td>
+                @*             <td>
+            @if (item.AppUserId!=null)
+            {
+            <span class="badge bg-success">@item.AppUser!.UserName</span>
+            }
+            else
+            {
+            <span class="text-danger">Sorumlu bilgisi eklenmemiştir.</span>
+            }
 
+            </td>*@
+                <td>@item.EmployeeCount</td>
                 <td>
                     <a href="/Customer/CustomerEdit/@item.Id" target="_self">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
                             <i class="fa fa-edit"></i>
                         </button>
                     </a>
-                  <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
+                    <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
                         <i class="fa fa-trash-o"></i>
                     </button>
-               </td>
+                </td>
 
             </tr>
         }

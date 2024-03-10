@@ -1,13 +1,15 @@
-﻿
-using CrmCorner.Models;
+﻿using CrmCorner.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
+using System.Web;
 
 namespace CrmCorner.Controllers
 {
@@ -17,39 +19,50 @@ namespace CrmCorner.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly IConfiguration _configuration;
 
-        public TaskController(CrmCornerContext context, UserManager<AppUser> userManager, IWebHostEnvironment environment)
+        public TaskController(CrmCornerContext context, UserManager<AppUser> userManager, IWebHostEnvironment environment, IWebHostEnvironment hostingEnvironment, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
             _environment = environment;
+            _hostingEnvironment = hostingEnvironment;
+            _configuration = configuration;
         }
         public async Task<IActionResult> Index()
         {
+            Dictionary<int, string> statusNames = new Dictionary<int, string>();
+            using (var context = new CrmCornerContext())
+            {
+                var statuses = context.Statuses.ToList();
+                foreach (var status in statuses)
+                {
+                    statusNames.Add(status.StatusId, status.StatusName);
+                }
+            }
+            ViewBag.StatusNames = statusNames;
+            ViewBag.StatusList = statusNames;
 
             var currentUser = await _userManager.GetUserAsync(User);
 
             if (currentUser != null)
             {
                 var tasks = _context.TaskComps
-                    .Include(e => e.Customer)
-                       .Include(e => e.Status)
-                       .Include(e => e.AppUser)
-                       .Where(e => e.UserId == currentUser.Id)
-                       .ToList();
+           .Include(e => e.Customer)
+           .Include(e => e.Status)
+           .Include(e => e.AppUser)
+           .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id) // AssignedUserId görevi gerçekleştiren kullanıcı için yer tutucudur
+           .ToList();
+
                 return View(tasks);
             }
-
             else
             {
                 ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
                 return View();
             }
-
-
         }
-
-
 
         #region TaskEkleme
         [HttpGet]
@@ -76,12 +89,12 @@ namespace CrmCorner.Controllers
             }).ToList();
 
 
-            var customer = _context.CustomerNs.Where(c=>c.AppUserId==currentUser.Id).ToList();
+            var customer = _context.CustomerNs.Where(c => c.AppUserId == currentUser.Id).ToList();
 
             List<SelectListItem> customerItems = customer
             .Select(d => new SelectListItem
             {
-                Text = d.Name + " " + d.Surname +" / "+ d.CompanyName,
+                Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
                 Value = d.Id.ToString()
             }).ToList();
 
@@ -119,7 +132,7 @@ namespace CrmCorner.Controllers
         }
         #endregion
 
-        #region TaskGüncelleme/Editmele
+        #region TaskGüncelleme/Editleme
         [HttpGet]
         public async Task<IActionResult> TaskEdit(int id)
         {
@@ -167,7 +180,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public IActionResult TaskEdit(TaskComp editedTask)
+        public async Task<IActionResult> TaskEdit(TaskComp editedTask)
         {
             if (ModelState.IsValid)
             {
@@ -177,8 +190,13 @@ namespace CrmCorner.Controllers
 
                 editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
 
+                if (HttpContext.Request.Form.ContainsKey("AssignedUserId"))
+                {
+                    editedTask.AssignedUserId = HttpContext.Request.Form["AssignedUserId"];
+                }
+
                 // Değişiklikleri kontrol et ve log tablosuna kaydet
-                //  LogChanges(originalTask, editedTask);
+                await LogChanges(originalTask, editedTask);
 
                 // task güncelle
                 _context.TaskComps.Update(editedTask);
@@ -235,6 +253,7 @@ namespace CrmCorner.Controllers
             //.FirstOrDefault(t => t.TaskId == id);
 
             TaskComp task = _context.TaskComps
+               .Include(e => e.FileAttachments)
                 .Include(e => e.Customer).
                 Include(e => e.Status).
                 Include(e => e.AppUser).
@@ -244,317 +263,318 @@ namespace CrmCorner.Controllers
             {
                 return NotFound();
             }
+
+            var taskCompLogs = await _context.TaskCompLogs
+                                    .Where(log => log.TaskId == id)
+                                    .OrderByDescending(log => log.UpdatedAt)
+                                    .ToListAsync();
+
+            ViewBag.TaskCompLogs = taskCompLogs;
+
+            if (task.FileAttachments == null)
+            {
+                // FileAttachments koleksiyonu null ise, boş bir liste ile başlat
+                task.FileAttachments = new List<FileAttachment>();
+            }
+
+
             return View("TaskDetail", task);
         }
 
-
-        [HttpPost]
-        public async Task<IActionResult> UploadFile(int taskId, IFormFile uploadedFile)
+        private string GetCustomerNameById(int? customerId)
         {
-            if (uploadedFile != null || uploadedFile.Length > 0)
+            if (customerId == null) return null;
+            var customer = _context.CustomerNs.FirstOrDefault(c => c.Id == customerId);
+            return customer != null ? $"{customer.Name} {customer.Surname}" : "Unknown";
+        }
+        private string GetStatusNameById(int? statusId)
+        {
+            if (statusId == null) return null;
+            var status = _context.Statuses.FirstOrDefault(c => c.StatusId == statusId);
+            return status != null ? $"{status.StatusName}" : "Unknown";
+        }
+        private string GetUserNameById(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return "Unknown";
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            return user != null ? user.NameSurname : "Unknown";
+        }
+
+        public async Task LogChanges(TaskComp originalTask, TaskComp editedTask)
+        {
+            foreach (var property in typeof(TaskComp).GetProperties())
             {
-                try
+                var originalValue = property.GetValue(originalTask);
+                var editedValue = property.GetValue(editedTask);
+
+                if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
                 {
-                    var task = await _context.TaskComps.FindAsync(taskId);
-                    if (task == null)
+                    var oldValueString = originalValue.ToString();
+                    var newValueString = editedValue.ToString();
+                    string fieldName = property.Name;
+
+
+                    if (property.Name == "CustomerId")
                     {
-                        return NotFound($"Task with Id {taskId} not found.");
+                        oldValueString = GetCustomerNameById((int?)originalValue);
+                        newValueString = GetCustomerNameById((int?)editedValue);
+                        fieldName = "Müşteri Bilgisi";
                     }
 
-                    var uploadsFolderPath = Path.Combine(_environment.WebRootPath, "uploads");
-                    if (!Directory.Exists(uploadsFolderPath))
+                    if (property.Name == "UserId")
                     {
-                        Directory.CreateDirectory(uploadsFolderPath);
+                        var oldUser = await _userManager.FindByIdAsync(originalValue.ToString());
+                        var newUser = await _userManager.FindByIdAsync(editedValue.ToString());
+                        oldValueString = oldUser != null ? oldUser.NameSurname : "Unknown";
+                        newValueString = newUser != null ? newUser.NameSurname : "Unknown";
+                        fieldName = "Görüşmeyi Alan";
                     }
 
-                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + uploadedFile.FileName;
-                    var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    if (property.Name == "AssignedUserId")
                     {
-                        await uploadedFile.CopyToAsync(stream);
+                        var oldUser = await _userManager.FindByIdAsync(originalValue.ToString());
+                        var newUser = await _userManager.FindByIdAsync(editedValue.ToString());
+                        oldValueString = oldUser != null ? oldUser.NameSurname : "Unknown";
+                        newValueString = newUser != null ? newUser.NameSurname : "Unknown";
+                        fieldName = "Görüşmeyi Gerçekleştiren";
                     }
 
-                    // Dosya meta verilerini veritabanına kaydet
-                    var fileAttachment = new FileAttachment
+                    if (property.Name == "StatusId")
                     {
-                        FileName = uniqueFileName,
-                        FilePath = filePath,
-                        FileSize = uploadedFile.Length,
-                        FileType = uploadedFile.ContentType,
-                        UploadedDate = DateTime.UtcNow,
-                        TaskId = taskId
+                        oldValueString = GetStatusNameById((int?)originalValue);
+                        newValueString = GetStatusNameById((int?)editedValue);
+                        fieldName = "Güncel Durum Bilgisi";
+                    }
+
+                    if (property.Name == "ValueOrOffer")
+                    {
+                        // Değerleri decimal olarak dönüştürme
+                        decimal oldValueDecimal = originalValue != null ? Convert.ToDecimal(originalValue) : 0;
+                        decimal newValueDecimal = editedValue != null ? Convert.ToDecimal(editedValue) : 0;
+
+                        // Formatlı string olarak değerleri ayarlama
+                        oldValueString = oldValueDecimal.ToString("N2");
+                        newValueString = newValueDecimal.ToString("N2");
+                        fieldName = "Değer Teklifi";
+                    }
+
+                    if (property.Name == "Description")
+                    {
+                        fieldName = "Açıklama";
+                    }
+
+                    if (property.Name == "SalesDone")
+                    {
+                        fieldName = "Ön Görülen Satış Kapatma Tarihi";
+                        oldValueString = ((DateTime?)originalValue)?.ToString("dd/MM/yyyy") ?? string.Empty;
+                        newValueString = ((DateTime?)editedValue)?.ToString("dd/MM/yyyy") ?? string.Empty;
+                    }
+
+
+                    if (property.Name == "Title")
+                    {
+                        fieldName = "Görev Başlık";
+                    }
+
+
+                    TaskCompLog log = new TaskCompLog
+                    {
+                        TaskId = editedTask.TaskId,
+                        UpdatedField = fieldName,
+                        OldValue = oldValueString,
+                        NewValue = newValueString,
+                        UpdatedById = _userManager.GetUserId(User),
+                        UpdatedAt = DateTime.Now
                     };
 
-                    _context.FileAttachments.Add(fileAttachment);
-                    await _context.SaveChangesAsync();
-                    // Başarılı yükleme mesajı gönder
-                    return Ok(new { message = "Dosya başarıyla yüklendi!", fileName = uniqueFileName });
-                }
-
-                catch (Exception ex)
-                {
-                    ViewBag.Message = "Dosya yüklenirken bir hata oluştu: " + ex.Message;
+                    _context.TaskCompLogs.Add(log);
                 }
             }
-        
-            else
+            await _context.SaveChangesAsync();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(IFormFile file, int taskId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                ViewBag.Message = "Dosya yüklenemedi veya dosya boş!";
+                return RedirectToAction("SignIn", "Home");
+            }
+            var userId = _userManager.GetUserId(User);
+
+            if (file != null && file.Length > 0)
+            {
+                var originalFileName = Path.GetFileName(file.FileName);
+                var uniqueFileName = $"{Guid.NewGuid()}_{originalFileName}";
+
+                // Yapılandırma ayarlarından yükleme yolu alınır
+                var uploadFolderPath = _configuration.GetValue<string>("FileUploadOptions:UploadFolderPath");
+                var relativePath = Path.Combine(uploadFolderPath, uniqueFileName);
+                var absolutePath = Path.Combine(_hostingEnvironment.WebRootPath, relativePath);
+
+                // Klasör yoksa oluştur
+                var directoryPath = Path.GetDirectoryName(absolutePath);
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                using (var stream = new FileStream(absolutePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var fileAttachment = new FileAttachment
+                {
+                    FileName = originalFileName, // Kullanıcıya gösterilecek orijinal dosya adını saklayın
+                    FilePath = "/" + relativePath, // Göreli dosya yolu
+                    FileSize = file.Length,
+                    FileType = file.ContentType,
+                    UploadedDate = DateTime.Now,
+                    TaskId = taskId
+                };
+
+                _context.FileAttachments.Add(fileAttachment);
+                await _context.SaveChangesAsync();
+
+                await LogFileAttachmentChange(null, fileAttachment, userId);
+                return RedirectToAction("TaskDetail", new { id = taskId });
             }
 
-            return RedirectToAction("TaskDetail", new { id = taskId });
+            return View("Error");
+        }
 
+        public async Task<IActionResult> DownloadFile(int fileAttachmentId)
+        {
+            // Veritabanından dosya bilgisini al
+            var fileAttachment = await _context.FileAttachments
+                .FirstOrDefaultAsync(f => f.FileAttachmentId == fileAttachmentId);
+
+            if (fileAttachment == null)
+            {
+                return NotFound(); // Dosya bulunamazsa 404 döndür
+            }
+
+            // FilePath ve WebRootPath kullanarak dosyanın tam yolunu oluştur
+            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, fileAttachment.FilePath.TrimStart('/'));
+
+            // Dosyanın var olup olmadığını kontrol et
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(); // Dosya sistemde bulunamazsa 404 döndür
+            }
+
+            // Dosya içeriğini oku ve bir MemoryStream'a kopyala
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+
+            // İndirme işlemi için dosya içeriğini, MIME türünü ve orijinal dosya adını kullan
+            var contentType = fileAttachment.FileType;
+            var originalFileName = fileAttachment.FileName;
+
+            // Kullanıcıya dosyayı indirme olarak sun
+            return File(memory, contentType, originalFileName);
+        }
+
+        private string GetContentType(string path)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            string contentType;
+            if (!provider.TryGetContentType(path, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
+
+        /// <summary>
+        ///FİLE  LAR EKLENDİĞİNDE LOGLAMA VE TİMELİNE A BASMAK İÇİN YAZILAN METHOD
+        /// </summary>
+        public async Task LogFileAttachmentChange(FileAttachment originalFile, FileAttachment editedFile, string userId)
+        {
+            // Eğer orijinal dosya null ise, bu yeni bir yükleme demektir
+            bool isNewUpload = originalFile == null;
+
+            // Değişiklik log'unu oluştur
+            TaskCompLog log = new TaskCompLog
+            {
+                TaskId = editedFile.TaskId, // ilişkili görev ID
+                UpdatedField = isNewUpload ? "Dosya Yüklendi" : "Dosya Güncellendi",
+                OldValue = isNewUpload ? null : originalFile.FileName, // Eğer yeni yükleme ise eski değer yok
+                NewValue = editedFile.FileName,
+                UpdatedById = userId,
+                UpdatedAt = DateTime.Now
+            };
+
+            // Log'u veritabanına ekle
+            _context.TaskCompLogs.Add(log);
+            await _context.SaveChangesAsync();
         }
 
 
-        //private string GetCustomerNameById(int? customerId)
-        //{
-        //    if (customerId == null) return null;
-        //    var customer = _context.Customers.FirstOrDefault(c => c.Id == customerId);
-        //    return customer != null ? $"{customer.Name} {customer.Surname}" : "Unknown";
-        //}
-        //private string GetStatusNameById(int? statusId)
-        //{
-        //    if (statusId == null) return null;
-        //    var status = _context.Statuses.FirstOrDefault(c => c.StatusId == statusId);
-        //    return status != null ? $"{status.StatusName}" : "Unknown";
-        //}
-        //private string GetEmployeeNameById(int? employeeId)
-        //{
-        //    if (employeeId == null) return null;
-        //    var employee = _context.Employees.FirstOrDefault(c => c.IdEmployee == employeeId);
-        //    return employee != null ? $"{employee.EmployeeName} {employee.EmployeeSurname}" : "Unknown";
-        //}
+        public async Task<IActionResult> DeleteFile(int fileAttachmentId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                // Kullanıcı doğrulanamazsa, oturum açma sayfasına yönlendir veya hata dön
+                return RedirectToAction("Login");
+            }
+            var userId = _userManager.GetUserId(User);
 
 
-        //private void LogChanges(TaskComp originalTask, TaskComp editedTask)
-        //{
-        //    foreach (var property in typeof(TaskComp).GetProperties())
-        //    {
-        //        var originalValue = property.GetValue(originalTask);
-        //        var editedValue = property.GetValue(editedTask);
+            // Veritabanından dosya bilgisini al
+            var fileAttachment = await _context.FileAttachments
+                .FirstOrDefaultAsync(f => f.FileAttachmentId == fileAttachmentId);
 
-        //        if ((originalValue != null && editedValue != null) && !originalValue.Equals(editedValue))
-        //        {
-        //            string oldValueString = originalValue.ToString();
-        //            string newValueString = editedValue.ToString();
-        //            string fieldName = property.Name;
+            if (fileAttachment == null)
+            {
+                return NotFound(); // Dosya bulunamazsa 404 döndür
+            }
 
-        //            //// CustomerId için özel bir işlem yap
-        //            //if (property.Name == "CustomerId")
-        //            //{
-        //            //    oldValueString = GetCustomerNameById((int?)originalValue);
-        //            //    newValueString = GetCustomerNameById((int?)editedValue);
-        //            //    fieldName = "Müşteri Bilgisi";
-        //            //}
-        //            if (property.Name == "EmployeeId")
-        //            {
-        //                oldValueString = GetEmployeeNameById((int?)originalValue);
-        //                newValueString = GetEmployeeNameById((int?)editedValue);
-        //                fieldName = "Sorumlu Çalışan Bilgisi";
-        //            }
-        //            if (property.Name == "StatusId")
-        //            {
-        //                oldValueString = GetStatusNameById((int?)originalValue);
-        //                newValueString = GetStatusNameById((int?)editedValue);
-        //                fieldName = "Güncel Durum Bilgisi";
-        //            }
+            // Dosyanın tam yolunu oluştur
+            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, fileAttachment.FilePath.TrimStart('/'));
 
-        //            TaskCompLog log = new TaskCompLog
-        //            {
-        //                TaskId = editedTask.TaskId,
-        //                UpdatedField = fieldName,
-        //                OldValue = oldValueString,
-        //                NewValue = newValueString,
-        //                UpdatedBy = editedTask.Employee?.IdEmployee,
-        //                UpdatedAt = DateTime.Now
-        //            };
+            // Dosyanın var olup olmadığını kontrol et
+            if (System.IO.File.Exists(filePath))
+            {
+                // Dosyayı sil
+                System.IO.File.Delete(filePath);
+            }
 
-        //            _context.TaskCompLogs.Add(log);
-        //        }
-        //    }
-        //    _context.SaveChanges();
-        //}
+            // Dosya bilgisini veritabanından sil
+            _context.FileAttachments.Remove(fileAttachment);
+            await _context.SaveChangesAsync();
 
-        //public IActionResult TaskCompLog()
-        //{
-        //    var logs = _context.TaskCompLogs.ToList();
-        //    return View(logs);
-        //}
+            await LogFileAttachmentChange(fileAttachment, userId);
+            return RedirectToAction("TaskDetail", new { id = fileAttachment.TaskId });
+        }
 
-        //public IActionResult Timeline()
-        //{
-        //    var tasks = _context.TaskComps
-        //        .Include(t => t.TaskCompLogs)
-        //        .ToList();
+        public async Task LogFileAttachmentChange(FileAttachment originalFile, string userId)
+        {
+            // Dosya silindiğinde originalFile parametresi dışında tüm bilgiler null olacaktır
+            bool isDelete = originalFile != null;
 
-        //    return View(tasks);
-        //}
-        //public IActionResult GetTaskTimeline(int taskId)
-        //{
-        //    // TaskComps tablosundan taskId'ye göre ilgili görevi çek
-        //    var task = _context.TaskComps
-        //                    .Include(t => t.TaskCompLogs)
-        //                    .FirstOrDefault(t => t.TaskId == taskId);
+            // Değişiklik log'unu oluştur
+            TaskCompLog log = new TaskCompLog
+            {
+                TaskId = isDelete ? originalFile.TaskId : 0, // Silinen dosya için ilişkili görev ID
+                UpdatedField = isDelete ? "Dosya Silindi" : "Unknown Operation",
+                OldValue = isDelete ? originalFile.FileName : null, // Silinen dosyanın eski adı
+                NewValue = null, // Dosya silindiği için yeni değer yok
+                UpdatedById = userId,
+                UpdatedAt = DateTime.Now
+            };
 
-        //    if (task != null)
-        //    {
-        //        return Json(task.TaskCompLogs);
-        //    }
-
-        //    return Json(null);
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> UploadFile(int taskId, IFormFile uploadedFile)
-        //{
-        //    if (uploadedFile != null && uploadedFile.Length > 0)
-        //    {
-        //        try
-        //        {
-        //            using (MemoryStream memoryStream = new MemoryStream())
-        //            {
-        //                await uploadedFile.CopyToAsync(memoryStream);
-        //                byte[] fileBytes = memoryStream.ToArray();
-
-        //                TaskComp task = await _context.TaskComps.FindAsync(taskId);
-
-        //                if (task != null)
-        //                {
-        //                    // Mevcut dosyaları al
-        //                    string existingFileNames = task.UploadedFileName ?? "";
-        //                    byte[] existingFiles = task.UploadedFile;
-
-        //                    // Yeni dosya adını ve içeriğini alınan dosyalara ekle
-        //                    existingFileNames += (string.IsNullOrEmpty(existingFileNames) ? "" : ",") + uploadedFile.FileName;
-
-        //                    if (existingFiles == null)
-        //                    {
-        //                        // İlk dosya yükleniyorsa yeni bir byte[] oluştur
-        //                        task.UploadedFile = fileBytes;
-        //                    }
-        //                    else
-        //                    {
-        //                        // Varolan byte[]'ın sonuna yeni dosya içeriğini eklenir
-        //                        byte[] combinedFiles = new byte[existingFiles.Length + fileBytes.Length];
-        //                        Array.Copy(existingFiles, combinedFiles, existingFiles.Length);
-        //                        Array.Copy(fileBytes, 0, combinedFiles, existingFiles.Length, fileBytes.Length);
-        //                        task.UploadedFile = combinedFiles;
-        //                    }
-
-        //                    // Yeni değerleri kaydet
-        //                    task.UploadedFileName = existingFileNames;
-
-        //                    await _context.SaveChangesAsync();
-        //                    ViewBag.Message = "Dosya başarıyla yüklendi ve kaydedildi!";
-        //                }
-        //                else
-        //                {
-        //                    ViewBag.Message = "Belirtilen görev bulunamadı!";
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            ViewBag.Message = "Dosya yüklenirken bir hata oluştu: " + ex.Message;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        ViewBag.Message = "Dosya yüklenemedi veya dosya boş!";
-        //    }
-
-        //    // İlgili view'i döndürürken ViewBag.Message'i kullan
-        //    return RedirectToAction("TaskDetail", new { id = taskId });
-        //}
-
-
-        //public async Task<IActionResult> DownloadFile(int taskId, string fileName)
-        //{
-        //    TaskComp task = await _context.TaskComps.FindAsync(taskId);
-
-        //    if (task != null && !string.IsNullOrEmpty(fileName))
-        //    {
-        //        string[] fileNames = task.UploadedFileName?.Split(',');
-        //        byte[] files = task.UploadedFile;
-
-        //        if (fileNames != null && files != null)
-        //        {
-        //            int index = Array.IndexOf(fileNames, fileName);
-
-        //            if (index >= 0 && index < fileNames.Length)
-        //            {
-        //                byte[] fileContent = files;
-
-        //                return File(fileContent, "application/octet-stream", fileName);
-        //            }
-        //        }
-        //    }
-
-        //    return NotFound(); // Dosya bulunamadıysa 404 Not Found döndür
-        //}
-
-        //private byte[] GetFileContentAtIndex1(byte[] files, int index)
-        //{
-        //    if (files != null && index >= 0 && index < files.Length)
-        //    {
-        //        // İlgili indeksteki dosya içeriğini döndür
-        //        byte[] fileContent = new byte[files.Length - index];
-        //        Array.Copy(files, index, fileContent, 0, files.Length - index);
-        //        return fileContent;
-        //    }
-
-        //    return null;
-        //}
-
-        //public async Task<IActionResult> DeleteFile(int taskId, string fileName)
-        //{
-        //    TaskComp task = await _context.TaskComps.FindAsync(taskId);
-
-        //    if (task != null && !string.IsNullOrEmpty(fileName))
-        //    {
-        //        string[] fileNames = task.UploadedFileName?.Split(',');
-        //        byte[] files = task.UploadedFile;
-
-        //        if (fileNames != null && files != null)
-        //        {
-        //            int index = Array.IndexOf(fileNames, fileName);
-
-        //            if (index >= 0 && index < fileNames.Length)
-        //            {
-        //                // İlgili dosyanın adını listeden çıkar
-        //                List<string> fileList = new List<string>(fileNames);
-        //                fileList.RemoveAt(index);
-        //                fileNames = fileList.ToArray();
-
-        //                // Dosya listesinden çıkarılan dosyanın indeksine karşılık gelen blobu da kaldır
-        //                List<byte> fileBlob = new List<byte>(files);
-        //                fileBlob.RemoveRange(index * sizeof(byte), sizeof(byte));
-        //                files = fileBlob.ToArray();
-
-        //                // Veritabanına güncellenmiş dosya listesi ve blob'u kaydet
-        //                task.UploadedFileName = string.Join(",", fileNames);
-        //                task.UploadedFile = files;
-
-        //                await _context.SaveChangesAsync();
-
-        //                ViewBag.Message = "Dosya başarıyla silindi!";
-        //            }
-        //            else
-        //            {
-        //                ViewBag.Message = "Dosya bulunamadı!";
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        ViewBag.Message = "Belirtilen görev veya dosya bulunamadı!";
-        //    }
-
-        //    return RedirectToAction("TaskDetail", new { id = taskId });
-        //}
-
+            // Log'u veritabanına ekle
+            _context.TaskCompLogs.Add(log);
+            await _context.SaveChangesAsync();
+        }
 
 
         public IActionResult TaskDelete(int id)
@@ -571,5 +591,8 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Index");
         }
     }
-
+    public class FileUploadOptions
+    {
+        public string UploadFolderPath { get; set; }
+    }
 }

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrmCorner", "CrmCorner\CrmCorner.csproj", "{D5B6EDD5-49E9-4BCB-8405-8D6B1D69F683}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrmCorner", "CrmCorner\CrmCorner.csproj", "{D5B6EDD5-49E9-4BCB-8405-8D6B1D69F683}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

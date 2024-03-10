@@ -1,5 +1,7 @@
 ﻿
+using CrmCorner.Extensions;
 using CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +51,7 @@ namespace CrmCorner.Controllers
                 return View("SignIn","Home"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
             }
             var companyId = currentUser.CompanyId;
-
+            
             var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
 
             var appUserItems = appUsers
@@ -60,23 +62,40 @@ namespace CrmCorner.Controllers
          })
          .ToList();
 
+            // IndustryType enum'undan dropdown listesi için verileri hazırlama
+            ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+            {
+                Text = v.GetDisplayName(), // Enum için Display Attribute'unu okuyan extension method
+                Value = ((int)v).ToString()
+            }).ToList(), "Value", "Text");
+
+
             ViewBag.AppUsers = appUserItems;
             return View();
         }
         [HttpPost]
         public IActionResult CustomerAdd(CustomerN customer)
         {
-            if (ModelState.IsValid)
+            try
             {
-                customer.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
+                if (ModelState.IsValid)
+                {
+                    customer.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
 
-                var customers = _context.CustomerNs./*Include(e => e.IdEmployeeNavigation)*/ToList();
+                    var customers = _context.CustomerNs./*Include(e => e.IdEmployeeNavigation)*/ToList();
 
-                _context.CustomerNs.Add(customer);
-                _context.SaveChanges();
+                    _context.CustomerNs.Add(customer);
+                    _context.SaveChanges();
 
-                return RedirectToAction("CustomerList");
+                    return RedirectToAction("CustomerList");
+                }
             }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+          
 
             var appUsers = _userManager.Users.ToList();
             var appUserItems = appUsers
@@ -113,6 +132,13 @@ namespace CrmCorner.Controllers
              Value = u.Id
          })
          .ToList();
+
+            ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+            {
+                Text = v.GetDisplayName(),
+                Value = ((int)v).ToString()
+            }).ToList(), "Value", "Text");
+
 
             ViewBag.AppUsers = appUserItems;
             // id parametresini kullanarak düzenlenecek müşteriyi veritabanından al

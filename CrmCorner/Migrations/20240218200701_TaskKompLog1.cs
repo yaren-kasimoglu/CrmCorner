@@ -5,7 +5,7 @@
 namespace CrmCorner.Migrations
 {
     /// <inheritdoc />
-    public partial class FileAttachement : Migration
+    public partial class TaskKompLog1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

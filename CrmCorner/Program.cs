@@ -13,6 +13,8 @@ using CrmCorner.OptionsModels;
 using CrmCorner.Services;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http.Features;
+using CrmCorner;
+using CrmCorner.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
@@ -70,6 +72,10 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 
 
+//builder.Services.AddHostedService<NotificationService>();
+
+builder.Services.Configure<FileUploadOptions>(builder.Configuration.GetSection("FileUploadOptions"));
+
 
 var app = builder.Build();
 
@@ -96,20 +102,15 @@ if (!app.Environment.IsDevelopment())
 //        // Kullanıcı giriş yapmamışsa ve kök dizindeyse, Giriş sayfasına yönlendir
 //        context.Response.Redirect("/Home/Giris");
 //    }
-//    else if (isUserLoggedIn && path == "/")
+//     if (isUserLoggedIn && (path == "/Home/Giris" || path == "/"))
 //    {
-//        // Kullanıcı giriş yapmışsa ve kök dizindeyse, Index sayfasına yönlendir
+//        // Kullanıcı giriş yapmışsa ve kök dizinde ya da Giriş sayfasındaysa, Index sayfasına yönlendir
 //        context.Response.Redirect("/Home/Index");
 //    }
-//    else
-//    {
-//        // Diğer durumlar için pipeline'ı devam ettir
+
 //        await next();
-//    }
+
 //});
-
-
-
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); //wwwroot klasörünün kullanımını aktifleştirir.
@@ -135,3 +136,4 @@ app.MapHub<ChatHub>("/chatHub");
 
 
 app.Run();
+

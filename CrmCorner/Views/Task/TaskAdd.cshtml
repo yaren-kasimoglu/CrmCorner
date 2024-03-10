@@ -28,6 +28,7 @@
         <textarea asp-for="Description" class="form-control" rows="5" cols="30" required></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
+
     <div class="row g-3">
         <div class="col-lg-3 col-md-6">
             <label class="form-label">Müşteri</label>
@@ -35,17 +36,33 @@
             <span asp-validation-for="CustomerId" class="text-danger"></span>
         </div>
         <div class="col-lg-3 col-md-6">
-            <label class="form-label">Sorumlu</label>
+            <label class="form-label">Görüşmeyi Alan</label>
             <select asp-for="UserId" asp-items="ViewBag.Users" class="form-control">
                 <option value="">Lütfen seçiniz</option>
             </select>
             <span asp-validation-for="UserId" class="text-danger"></span>
         </div>
         <div class="col-lg-3 col-md-6">
+            <label class="form-label">Görüşmeyi Gerçekleştiren</label>
+            <select asp-for="AssignedUserId" asp-items="ViewBag.Users" class="form-control">
+                <option value="">Lütfen seçiniz</option>
+            </select>
+            <span asp-validation-for="AssignedUserId" class="text-danger"></span>
+        </div>
+        <div class="col-lg-3 col-md-6">
             <label class="form-label">Güncel Durum</label>
             <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
             <span asp-validation-for="StatusId" class="text-danger"></span>
         </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="form-group">
+                <label asp-for="SalesDone" class="control-label">Planlanan Satış Kapatma Tarihi</label>
+                <input asp-for="SalesDone" type="date" class="form-control" />
+                <span asp-validation-for="SalesDone" class="text-danger"></span>
+            </div>
+        </div>
+
     </div>
     </br>
     <div class="form-group">

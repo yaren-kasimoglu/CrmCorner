@@ -75,21 +75,37 @@ namespace CrmCorner.Controllers
                     ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
                     return View();
 
+
                 }
 
             }
+
+        }
+
+
         [HttpPost]
-        public async Task<IActionResult> CalendarAdd(Calendar Calendar)
+        public async Task<IActionResult> CalendarAdd(Calendar calendar)
         {
             if (ModelState.IsValid)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser != null)
                 {
+
                     if (!String.IsNullOrEmpty(Calendar.Email.ToString()))
                     {
                         var emailSend = sendEmailAsync(Calendar);
 
+
+                    calendar.UserId = currentUser.Id;
+
+
+                    _context.Calendars.Add(calendar);
+                    await _context.SaveChangesAsync();
+
+                    if (!String.IsNullOrEmpty(calendar.Email.ToString()))
+                    {
+                        var emailSend = sendEmailAsync(calendar);
                     }
                     Calendar.UserId = currentUser.Id;
                     _context.Calendars.Add(Calendar);
@@ -97,7 +113,13 @@ namespace CrmCorner.Controllers
 
                     return RedirectToAction("Calendar");
                 }
-               
+                else
+                {
+                 
+                    ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
+                    return View(calendar); 
+                }
+
             }
             return RedirectToAction("Calendar");
         }

@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<CrmCorner.Models.AppUser>
+
+@{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
@@ -6,8 +8,6 @@
 
 @if (!User.Identity!.IsAuthenticated)
 {
-     <h1>Index1</h1>
-
     <div class="d-flex h100vh justify-content-center align-items-center">
         <div class="text-center">
             <article>
@@ -28,10 +28,100 @@
 }
 else
 {
-    <h1>Index</h1>
+
+    <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>
+
+    <div class="row g-2 clearfix row-deck">
+        <div class="col-6">
+            <div style="width: 50%; height: 400px;">
+                <canvas id="userTaskStatusChart"></canvas>
+            </div>
+        </div>
+
+
+        <div class="col-6">
+            <div class="card-header">
+                <h6 class="card-title">Todo List</h6>
+                <small>This Month task list</small>
+            </div>
+            <div class="card-body todo_list">
+                <ul class="list-unstyled mb-0">
+                    <li class="d-flex justify-content-between mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="Surgical" checked>
+                            <label class="form-check-label" for="Surgical">Surgical Ventricular Restoration</label>
+                        </div>
+                    </li>
+                    <li class="d-flex justify-content-between mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="Coronary">
+                            <label class="form-check-label" for="Coronary">Coronary Revascularization</label>
+                        </div>
+                    </li>
+                    <li class="d-flex justify-content-between mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="Bladder">
+                            <label class="form-check-label" for="Bladder">Bladder Cystectomy</label>
+                        </div>
+                    </li>
+                    <li class="d-flex justify-content-between">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="Thoracic">
+                            <label class="form-check-label" for="Thoracic">Thoracic Aortic Dissection Repair</label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+
 }
 <!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
 <!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+
+        $.ajax({
+            type: "GET",
+            url: "/Home/UserTaskStatusChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
+                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76'];
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+
+    });
+</script>
+
+

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    [Migration("20240218161756_FileAttachement")]
-    partial class FileAttachement
+    [Migration("20240304230003_taskAssignedUser")]
+    partial class taskAssignedUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,6 +133,9 @@ namespace CrmCorner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int(11)");
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("Date")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -148,8 +151,13 @@ namespace CrmCorner.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("longtext");
+
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex(new[] { "Id" }, "Id");
 
@@ -242,11 +250,6 @@ namespace CrmCorner.Migrations
                     b.ToTable("CustomerNs");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.EmailProperty", b =>
-                {
-                    b.ToTable("EmailProperty");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
                 {
                     b.Property<int>("FileAttachmentId")
@@ -268,9 +271,6 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("TaskCompTaskId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TaskId")
                         .HasColumnType("int");
 
@@ -279,9 +279,46 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("FileAttachmentId");
 
-                    b.HasIndex("TaskCompTaskId");
+                    b.HasIndex("TaskId");
 
                     b.ToTable("FileAttachments");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("TaskCompId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("TaskCompId")
+                        .IsUnique();
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Status", b =>
@@ -305,6 +342,9 @@ namespace CrmCorner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<string>("AssignedUserId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
@@ -315,6 +355,9 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("SalesDone")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int?>("StatusId")
@@ -332,6 +375,8 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("TaskId");
 
+                    b.HasIndex("AssignedUserId");
+
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("StatusId");
@@ -339,6 +384,39 @@ namespace CrmCorner.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TaskComps");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.TaskCompLog", b =>
+                {
+                    b.Property<int>("LogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("TaskId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("UpdatedField")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("LogId");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("TaskCompLogs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -430,6 +508,15 @@ namespace CrmCorner.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.Calendar", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
+                        .WithMany("Calendars")
+                        .HasForeignKey("AppUserId");
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -441,23 +528,44 @@ namespace CrmCorner.Migrations
 
             modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
                 {
-                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
+                    b.HasOne("CrmCorner.Models.TaskComp", "Task")
                         .WithMany("FileAttachments")
-                        .HasForeignKey("TaskCompTaskId")
+                        .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.Notification", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
+                        .WithMany("Notifications")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
+                        .WithOne("Notification")
+                        .HasForeignKey("CrmCorner.Models.Notification", "TaskCompId");
+
+                    b.Navigation("AppUser");
 
                     b.Navigation("TaskComp");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
+                    b.HasOne("CrmCorner.Models.AppUser", "AssignedUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedUserId");
+
                     b.HasOne("CrmCorner.Models.CustomerN", "Customer")
-                        .WithMany("TaskComps")
+                        .WithMany("Taskcomps")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CrmCorner.Models.Status", "Status")
-                        .WithMany()
+                        .WithMany("TaskComps")
                         .HasForeignKey("StatusId");
 
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -466,19 +574,47 @@ namespace CrmCorner.Migrations
 
                     b.Navigation("AppUser");
 
+                    b.Navigation("AssignedUser");
+
                     b.Navigation("Customer");
 
                     b.Navigation("Status");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.TaskCompLog", b =>
+                {
+                    b.HasOne("CrmCorner.Models.TaskComp", "Task")
+                        .WithMany("TaskCompLogs")
+                        .HasForeignKey("TaskId");
+
+                    b.HasOne("CrmCorner.Models.AppUser", "UpdatedBy")
+                        .WithMany("TaskCompLogs")
+                        .HasForeignKey("UpdatedById");
+
+                    b.Navigation("Task");
+
+                    b.Navigation("UpdatedBy");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.AppUser", b =>
                 {
+                    b.Navigation("Calendars");
+
                     b.Navigation("Customers");
+
+                    b.Navigation("Notifications");
+
+                    b.Navigation("TaskCompLogs");
 
                     b.Navigation("TaskComps");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
+                {
+                    b.Navigation("Taskcomps");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.Status", b =>
                 {
                     b.Navigation("TaskComps");
                 });
@@ -486,6 +622,10 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.Navigation("FileAttachments");
+
+                    b.Navigation("Notification");
+
+                    b.Navigation("TaskCompLogs");
                 });
 #pragma warning restore 612, 618
         }

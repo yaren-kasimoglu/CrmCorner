@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace CrmCorner.Models
 {
-    public class AppUser:IdentityUser
+    public class AppUser : IdentityUser
     {
         public string? City { get; set; }
         public string? Picture { get; set; }
@@ -21,6 +21,9 @@ namespace CrmCorner.Models
         public virtual ICollection<CustomerN> Customers { get; set; }
         public virtual ICollection<TaskComp> TaskComps { get; set; }
         public virtual ICollection<Calendar> Calendars { get; set; }
-
+        public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual ICollection<TaskCompLog> TaskCompLogs { get; set; } = new List<TaskCompLog>();
     }
+
 }
+
