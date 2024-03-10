@@ -37,7 +37,7 @@
     <div id="layout" class="theme-cyan">
         <div id="wrapper">
             <!-- Page Loader -->
-                       <div class="page-loader-wrapper text-center">
+                       @*<div class="page-loader-wrapper text-center">
             <div class="loader">
             <svg class="p-3 bg-light rounded" width="120px" viewBox="0 0 85 25">
             <path d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
@@ -51,7 +51,7 @@
             </svg>
               <div class="h5 fw-light mt-3">Lütfen Bekleyin</div>
           </div>
-            </div>
+            </div>*@
             
             <!-- top navbar -->
             @*<nav class="navbar navbar-fixed-top">
@@ -117,16 +117,19 @@
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList"><i class="fa fa-briefcase"></i>Firma</a>
                                     </li>
                                     <li class="nav-item">
-                                       @* <a href="#Employees" class="has-arrow"><i class="fa fa-users"></i><span>Çalışanlar</span></a>*@
-                                     @*   <ul class="list-unstyled">*@
+                                        @* <a href="#Employees" class="has-arrow"><i class="fa fa-users"></i><span>Çalışanlar</span></a>*@
+                                        @*   <ul class="list-unstyled">*@
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-users"></i>Çalışanlar</a>
-@*                                            <li><a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="DepartmentList">Departman</a></li>
-                                            <li> <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="PositionList">Pozisyon</a></li>*@
-                                @*        </ul>*@
+                                        @*                                            <li><a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="DepartmentList">Departman</a></li>
+            <li> <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="PositionList">Pozisyon</a></li>*@
+                                        @*        </ul>*@
                                     </li>
-                                    
+
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Calendar</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="ToDoList" asp-action="ToDoList"><i class="fa fa-calendar"></i>To Do</a>
                                     </li>
                                 </ul>
                             </nav>

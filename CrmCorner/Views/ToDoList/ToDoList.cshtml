@@ -1,0 +1,216 @@
+﻿@model CrmCorner.Models.TaskComp
+@{
+    ViewData["Title"] = "ToDoList";
+}
+@{
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-warning my-3 h-100 w-100">
+                <div class="card-header" style="font-family: 'Pacifico', sans-serif;">Today's;</div>
+                <div class="card-body">
+                    <h5 style="font-family: 'Pacifico', sans-serif; text-align: center; font-size:100px; " class="card-title">To Do List:</h5>
+
+                    <div class="col-md-8">
+                        <input type="button" id="ekleButton2" value="+" class="button-plus border rounded-circle icon-shape icon-sm lh-0" data-field="quantity">
+                    </div>
+
+                    <div class="todo-list">
+                        <table id="table">
+                            <tr>
+                                <td>
+                                    <label class="taskcontainer" id="kartContainer2"></label>
+                                </td>
+                                <label class="main-goal">
+                                    <span>Bugün için asıl hedefim:</span>
+                                    <input type="text" placeholder="Hedefim">
+                                </label>
+                        </tr>
+                        </table>
+                    </div>
+                </div>
+                    </div>
+                </div>
+              
+
+<div class="col-md-4">
+    <button type="submit" onclick="combineTextFields()" >Save List</button>
+</div>
+    </div>
+</div>
+
+<div class="container">
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Kart ekleme fonksiyonu
+    function kartEkle() {
+        // Kartın içeriği
+        var kartIcerik = `
+      <input type="checkbox">
+      <span class="custom-checkbox"></span>
+       <input type="text" placeholder="Task">
+    `;
+        // Kartı kartContainer içine ekle
+        $('#kartContainer').append(kartIcerik);
+    }
+
+    // Butona tıklandığında kartEkle fonksiyonunu çağır
+    $('#ekleButton').click(function () {
+        kartEkle();
+    });
+
+    function kartEkle2() {
+        // Kartın içeriği
+        var kartIcerik2 = `
+          <label class="task" >
+             <input type="checkbox" class="taskCheckbox" id="taskCheckbox">
+             <span class="custom-checkbox"></span>
+             <input type="text" name="textValue" placeholder="Yapılacaklar">
+           </label>
+    `;
+        // Kartı kartContainer içine ekle
+        $('#kartContainer2').append(kartIcerik2);
+    }
+
+    // Butona tıklandığında kartEkle fonksiyonunu çağır
+    $('#ekleButton2').click(function () {
+        kartEkle2();
+    });
+
+    function combineTextFields() {
+        var taskLabels = document.querySelectorAll('.task');
+        var selectedTaskTexts = [];
+        var notselectedTaskTexts = [];
+        taskLabels.forEach(function (label) {
+            var checkbox = label.querySelector('.taskCheckbox');
+            var textInput = label.querySelector('input[type="text"]');
+            if (checkbox.checked) {
+                selectedTaskTexts.push(textInput.value);
+            }
+            else {
+                notselectedTaskTexts.push(textInput.value);
+            }
+        });
+
+        console.log('Selected Task Texts:', selectedTaskTexts);
+        console.log('NotSelected Task Texts:', notselectedTaskTexts);
+
+    </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+<style>
+
+
+    .todo-list {
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .todo-list h1 {
+            font-family: 'Cursive', cursive;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+    .task {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+        .task input[type="checkbox"] {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .task input[type="text"] {
+            border: none;
+            border-bottom: 1px solid #333;
+            background-color: transparent;
+            margin-left: 35px;
+            flex-grow: 1;
+            padding: 5px 10px;
+        }
+
+    .taskcontainer {
+        width: 100%;
+    }
+
+    .custom-checkbox {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: #fff;
+        border: 2px solid #333;
+        border-radius: 50%;
+        position: relative;
+        cursor: pointer;
+    }
+
+        .custom-checkbox::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+    input[type="checkbox"]:checked + .custom-checkbox::after {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .main-goal {
+        display: block;
+        margin-top: 20px;
+    }
+
+        .main-goal span {
+            font-weight: bold;
+        }
+
+        .main-goal input[type="text"] {
+            border: none;
+            border-bottom: 1px solid #333;
+            background-color: transparent;
+            width: 100%;
+            padding: 5px 0;
+        }
+
+    button {
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+        button:hover {
+            background-color: #555;
+        }
+</style>
