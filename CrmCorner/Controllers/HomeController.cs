@@ -56,7 +56,35 @@ namespace CrmCorner.Controllers
 
         //    return BadRequest("Hava durumu bilgileri alınamadı.");
         //}
+        public async Task<IActionResult> OutcomeStatusChart()
+        {
+            // Aktif kullanıcının ID'sini al
+            var userId = _userManager.GetUserId(User);
 
+            // Kullanıcı ID'sini kullanarak AppUser kaydını ve ilişkili TaskComps'ı bul
+            var userTaskComps = await _context.Users
+                                                 .Where(u => u.Id == userId)
+                                                 .SelectMany(u => u.TaskComps)
+                                                 .ToListAsync();
+
+            if (userTaskComps == null || !userTaskComps.Any())
+            {
+                return NotFound();
+            }
+
+            var outcomeCounts = userTaskComps.GroupBy(tc => tc.Outcome)
+                                             .Select(group => new {
+                                                 Outcome = group.Key.ToString(), // Enum değerini string'e çevir
+                                                 Count = group.Count()
+                                             }).ToList();
+            var chartData = new
+            {
+                labels = outcomeCounts.Select(oc => oc.Outcome.ToString()),
+                data = outcomeCounts.Select(oc => oc.Count)
+            };
+
+            return Json(chartData);
+        }
         public async Task<IActionResult> UserTaskStatusChart()
         {
             // Aktif kullanıcının ID'sini al

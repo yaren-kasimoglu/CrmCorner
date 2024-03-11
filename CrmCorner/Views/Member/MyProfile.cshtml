@@ -46,14 +46,14 @@
 
  
         <div class="col-lg-6 col-md-12">
-            <div style="width: 50%; height: 400px;">
+            <div style="width: 60%; height: 400px;">
                 <canvas id="userTaskStatusChart"></canvas>
             </div>
         </div>
 
 
         <div class="col-lg-6 col-md-12">
-            <div style="width: 50%; height: 400px;">
+            <div style="width: 60%; height: 400px;">
                 <canvas id="userTaskStatusChart1"></canvas>
             </div>
      
@@ -105,7 +105,7 @@
                 dataType: "json",
                 success: function (data) {
                     var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
-                    var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76'];
+                    var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
                     new Chart(ctx, {
                         type: 'doughnut',
                         data: {
@@ -139,9 +139,9 @@
             dataType: "json",
             success: function (data) {
                 var ctx = document.getElementById('userTaskStatusChart1').getContext('2d');
-                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76'];
+                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
                 new Chart(ctx, {
-                    type: 'bar', // Grafik tipini burada değiştirin
+                    type: 'bar', 
                     data: {
                         labels: data.labels,
                         datasets: [{

@@ -11,3 +11,33 @@ eş zamanlı kullanıcı bilgilerini korumak gibi düşünebiliriz.
 birden fazla oturum kullanılırken bi yerde yaptığımız değişikliğin anında db ye ve ardından diğer oturuma yansıması.
 aynı anda iki farklı yerden güncelleme yapılırsa kullanıcıya uyarı-hata dönüyoruz. 
 opsiyona bağlı ya uyarı veririz ya da ez ve devam et diye ayarlıyoruz.
+
+
+
+grafik türleri:
+
+
+Chart.js kütüphanesi kullanılırken farklı grafik türlerini belirtmek için type özelliğine atayacağınız değerler şunlardır:
+
+Çizgi Grafik (Line Chart) için: type: 'line'
+Alan Grafik (Area Chart) için: Chart.js, doğrudan alan grafik türüne özel bir type değeri sunmaz. Ancak, bir çizgi grafiği (line) kullanıp fill özelliğini true olarak ayarlayarak bir alan grafiği oluşturabilirsiniz.
+Yığılmış Bar Grafik (Stacked Bar Chart) için: type: 'bar', ayrıca options içinde stacked: true belirtmeniz gerekir.
+Yığılmış Alan Grafik (Stacked Area Chart) için: type: 'line', fill özelliğini true yapın ve stacked: true seçeneğini kullanın.
+Pasta Grafik (Pie Chart) için: type: 'pie'
+Sıcaklık Haritası (Heatmap): Chart.js doğrudan bir sıcaklık haritası türü sunmaz. Bu işlevselliği sağlamak için genellikle başka bir kütüphane kullanılır veya özelleştirilmiş bir çözüm geliştirilir.
+Dağılım Grafiği (Scatter Plot) için: type: 'scatter'
+Balon Grafik (Bubble Chart) için: type: 'bubble'
+Radar Grafik (Radar Chart) için: type: 'radar'
+Su Dalgası Grafik (Waterfall Chart) için: Chart.js bu türü doğrudan desteklemez. Özel bir yapı kullanmanız gerekir.
+Kutu Grafik (Box Plot) için: Chart.js bu türü doğrudan desteklemez. Bunun için genellikle bir eklenti veya özel bir çözüm kullanmanız gerekir.
+Ağaç Haritası (Treemap) için: Chart.js doğrudan bu türü desteklemez. Bir eklenti veya özelleştirilmiş bir çözüm gerekir.
+Örneğin, bir çizgi grafiği oluşturmak istiyorsanız, JavaScript kodunuzda şu şekilde bir yapı kullanabilirsiniz:
+
+javascript
+Copy code
+var myChart = new Chart(ctx, {
+    type: 'line', // Bu kısım grafik türünü belirtir
+    data: data,
+    options: options
+});
+Her bir grafik türü, belirli bir veri yapısı ve seçenekler dizisi gerektirir, bu yüzden grafik türünü belirledikten sonra veri ve seçeneklerinizi buna göre yapılandırmalısınız.

@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -98,6 +99,14 @@ namespace CrmCorner.Controllers
                 Value = d.Id.ToString()
             }).ToList();
 
+            ViewBag.OutcomeStatus = Enum.GetValues(typeof(OutcomeStatus))
+                                .Cast<OutcomeStatus>()
+                                .Select(e => new SelectListItem
+                                {
+                                    Text = e.ToString(),
+                                    Value = ((int)e).ToString()
+                                }).ToList();
+
 
             ViewBag.Customer = customerItems;
             ViewBag.Status = statusItems;
@@ -136,6 +145,14 @@ namespace CrmCorner.Controllers
         [HttpGet]
         public async Task<IActionResult> TaskEdit(int id)
         {
+
+            TaskComp task = _context.TaskComps.Find(id);
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+
             var status = _context.Statuses.ToList();
             List<SelectListItem> statusItems = status
         .Select(d => new SelectListItem
@@ -164,6 +181,16 @@ namespace CrmCorner.Controllers
                 Value = d.Id.ToString()
             }).ToList();
 
+     
+            ViewBag.OutcomeStatus = Enum.GetValues(typeof(OutcomeStatus))
+                                     .Cast<OutcomeStatus>()
+                                     .Select(e => new SelectListItem
+                                     {
+                                         Text = e.ToString(),
+                                         Value = ((int)e).ToString(),
+                                         Selected = task.Outcome == e // Mevcut task'ın Outcome değerini kontrol edin
+                                     }).ToList();
+
 
             ViewBag.Users = userItems;
 
@@ -171,11 +198,7 @@ namespace CrmCorner.Controllers
 
             ViewBag.Customer = customerItems;
 
-            TaskComp task = _context.TaskComps.Find(id);
-            if (task == null)
-            {
-                return NotFound();
-            }
+   
             return View("TaskEdit", task);
         }
 
@@ -285,19 +308,19 @@ namespace CrmCorner.Controllers
         {
             if (customerId == null) return null;
             var customer = _context.CustomerNs.FirstOrDefault(c => c.Id == customerId);
-            return customer != null ? $"{customer.Name} {customer.Surname}" : "Unknown";
+            return customer != null ? $"{customer.Name} {customer.Surname}" : "Bilinmiyor";
         }
         private string GetStatusNameById(int? statusId)
         {
             if (statusId == null) return null;
             var status = _context.Statuses.FirstOrDefault(c => c.StatusId == statusId);
-            return status != null ? $"{status.StatusName}" : "Unknown";
+            return status != null ? $"{status.StatusName}" : "Bilinmiyor";
         }
         private string GetUserNameById(string userId)
         {
-            if (string.IsNullOrEmpty(userId)) return "Unknown";
+            if (string.IsNullOrEmpty(userId)) return "Bilinmiyor";
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            return user != null ? user.NameSurname : "Unknown";
+            return user != null ? user.NameSurname : "Bilinmiyor";
         }
 
         public async Task LogChanges(TaskComp originalTask, TaskComp editedTask)
@@ -361,6 +384,18 @@ namespace CrmCorner.Controllers
                     if (property.Name == "Description")
                     {
                         fieldName = "Açıklama";
+                    }
+
+                    if (property.Name == "Outcome")
+                    {
+                        fieldName = "Olumlu/Olumsuz";
+                    }
+
+                    if (property.Name == "IsFinalDecisionMaker")
+                    {
+                        fieldName = "Son Karar Mercii Bilgisi";
+                        oldValueString = (bool)originalValue ? "Evet" : "Hayır";
+                        newValueString = (bool)editedValue ? "Evet" : "Hayır";
                     }
 
                     if (property.Name == "SalesDone")
@@ -575,6 +610,21 @@ namespace CrmCorner.Controllers
             _context.TaskCompLogs.Add(log);
             await _context.SaveChangesAsync();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(int taskId, int statusId)
+        {
+            var task = await _context.TaskComps.FirstOrDefaultAsync(t => t.TaskId == taskId);
+            if (task != null)
+            {
+                task.StatusId = statusId;
+                _context.Update(task);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
 
 
         public IActionResult TaskDelete(int id)

@@ -4,66 +4,82 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 <form asp-action="TaskAdd" asp-controller="Task" method="post">
-    <div class="col-lg-12">
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="form-group">
-                    <label asp-for="Title" class="control-label">Başlık</label>
-                    <input asp-for="Title" class="form-control" />
-                    <span asp-validation-for="Title" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="form-group">
-                    <label asp-for="ValueOrOffer" class="control-label">Değer Teklifi</label>
-                    <input asp-for="ValueOrOffer" class="form-control" />
-                    <span asp-validation-for="ValueOrOffer" class="text-danger"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Description" class="control-label">Açıklama</label>
-        <textarea asp-for="Description" class="form-control" rows="5" cols="30" required></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="row g-3">
-        <div class="col-lg-3 col-md-6">
-            <label class="form-label">Müşteri</label>
-            <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
-            <span asp-validation-for="CustomerId" class="text-danger"></span>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <label class="form-label">Görüşmeyi Alan</label>
-            <select asp-for="UserId" asp-items="ViewBag.Users" class="form-control">
-                <option value="">Lütfen seçiniz</option>
-            </select>
-            <span asp-validation-for="UserId" class="text-danger"></span>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <label class="form-label">Görüşmeyi Gerçekleştiren</label>
-            <select asp-for="AssignedUserId" asp-items="ViewBag.Users" class="form-control">
-                <option value="">Lütfen seçiniz</option>
-            </select>
-            <span asp-validation-for="AssignedUserId" class="text-danger"></span>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <label class="form-label">Güncel Durum</label>
-            <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
-            <span asp-validation-for="StatusId" class="text-danger"></span>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
+    <div class="row">
+        <!-- Başlık, Değer Teklifi, Açıklama için ayrı bir row -->
+        <div class="col-lg-6">
             <div class="form-group">
-                <label asp-for="SalesDone" class="control-label">Planlanan Satış Kapatma Tarihi</label>
-                <input asp-for="SalesDone" type="date" class="form-control" />
-                <span asp-validation-for="SalesDone" class="text-danger"></span>
+                <label asp-for="Title" class="control-label">Başlık</label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ValueOrOffer" class="control-label">Değer Teklifi</label>
+                <input asp-for="ValueOrOffer" class="form-control" />
+                <span asp-validation-for="ValueOrOffer" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label">Açıklama</label>
+                <textarea asp-for="Description" class="form-control" rows="5" cols="30" required></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            </br>
+            <div class="form-group">
+                <label class="control-label">Sonuç Durumu</label>
+                @foreach (var status in ViewBag.OutcomeStatus as List<SelectListItem>)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="Outcome" type="radio" value="@status.Value" id="@status.Text" />
+                        <label class="form-check-label" for="@status.Text">@status.Text</label>
+                    </div>
+                }
+                <span asp-validation-for="Outcome" class="text-danger"></span>
             </div>
         </div>
 
+        <div class="col-lg-6">
+            <div class="col-lg-12 col-md-6">
+                <label class="form-label">Müşteri</label>
+                <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
+                <span asp-validation-for="CustomerId" class="text-danger"></span>
+            </div>
+            <div class="col-lg-12 col-md-6">
+                <label class="form-label">Görüşmeyi Alan</label>
+                <select asp-for="UserId" asp-items="ViewBag.Users" class="form-control">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+            <div class="col-lg-12 col-md-6">
+                <label class="form-label">Görüşmeyi Gerçekleştiren</label>
+                <select asp-for="AssignedUserId" asp-items="ViewBag.Users" class="form-control">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+                <span asp-validation-for="AssignedUserId" class="text-danger"></span>
+            </div>
+            <div class="col-lg-12 col-md-6">
+                <label class="form-label">Güncel Durum</label>
+                <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
+                <span asp-validation-for="StatusId" class="text-danger"></span>
+            </div>
+            <div class="col-lg-12 col-md-6">
+                <div class="form-group">
+                    <label asp-for="SalesDone" class="control-label">Planlanan Satış Kapatma Tarihi</label>
+                    <input asp-for="SalesDone" type="date" class="form-control" />
+                    <span asp-validation-for="SalesDone" class="text-danger"></span>
+                </div>
+            </div>
+            </br>
+            <div class="form-group">
+                <input asp-for="IsFinalDecisionMaker" class="form-check-input" />
+                <label asp-for="IsFinalDecisionMaker" class="control-label">Son Karar Mercii İle Görüşüldü</label>
+                <span asp-validation-for="IsFinalDecisionMaker" class="text-danger"></span>
+            </div>
+
+
+        </div>
     </div>
+
+ 
     </br>
     <div class="form-group">
         <input type="submit" value="EKLE" class="btn btn-primary" />

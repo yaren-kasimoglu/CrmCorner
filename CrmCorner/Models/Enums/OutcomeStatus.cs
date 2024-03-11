@@ -2,8 +2,8 @@
 {
     public enum OutcomeStatus
     {
-        Positive, // Olumlu
-        Negative, // Olumsuz
-        Undefined // Belirsiz
+        Olumlu, // Olumlu
+        Olumsuz, // Olumsuz
+        Belirsiz // Belirsiz
     }
 }

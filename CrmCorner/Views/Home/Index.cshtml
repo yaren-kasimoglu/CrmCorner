@@ -4,7 +4,14 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
-
+<style>
+    .chart-title {
+        text-align: center; /* Başlığı ortalar */
+        margin-bottom: 10px; /* Başlık ile grafiği ayırmak için alt boşluk ekler */
+        font-size: 24px; /* Başlık font boyutunu ayarlar */
+        /* Daha fazla stil özelleştirmesi yapabilirsiniz */
+    }
+</style>
 
 @if (!User.Identity!.IsAuthenticated)
 {
@@ -29,17 +36,26 @@
 else
 {
 
-    <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>
+   @* <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>*@
 
     <div class="row g-2 clearfix row-deck">
         <div class="col-6">
+            <div class="chart-title">Görevlerim</div>
             <div style="width: 50%; height: 400px;">
                 <canvas id="userTaskStatusChart"></canvas>
+           
+            </div>
+        </div>
+
+        <div class="col-6">
+            <h5>Görevlerin Durumlarına Göre Dağılımları</h5>
+            <div style="width: 50%; height: 400px;">
+                <canvas id="outcomeStatusChart"></canvas>
             </div>
         </div>
 
 
-        <div class="col-6">
+@*        <div class="col-6">
             <div class="card-header">
                 <h6 class="card-title">Todo List</h6>
                 <small>This Month task list</small>
@@ -72,7 +88,7 @@ else
                     </li>
                 </ul>
             </div>
-        </div>
+        </div>*@
 
 
     </div>
@@ -87,13 +103,11 @@ else
 <!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
-
+<script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function () {
-
-
 
         $.ajax({
             type: "GET",
@@ -102,7 +116,7 @@ else
             dataType: "json",
             success: function (data) {
                 var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
-                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76'];
+                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
@@ -119,9 +133,48 @@ else
             error: function (error) {
                 console.error('Error fetching data:', error);
             }
-        });
-
+        }); 
+        
     });
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Home/OutcomeStatusChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var ctx = document.getElementById('outcomeStatusChart').getContext('2d');
+                var colors = ['#cb8fe7', '#BA55D3', '#800080'];
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Görev Durumu',
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            barThickness: 30,
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    });
+
+
 </script>
 
 

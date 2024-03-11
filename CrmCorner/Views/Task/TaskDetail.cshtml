@@ -1,8 +1,26 @@
-﻿@model CrmCorner.Models.TaskComp
+﻿@using CrmCorner.Models.Enums;
+@model CrmCorner.Models.TaskComp
 @{
     ViewData["Title"] = "TaskDetail";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+@functions {
+    private string GetOutcomeClass(OutcomeStatus outcome)
+    {
+        switch (outcome)
+        {
+            case OutcomeStatus.Olumlu:
+                return "badge badge-light text-success border border-success"; // Yeşil arka plan
+            case OutcomeStatus.Olumsuz:
+                return "badge badge-light text-danger border border-danger"; // Kırmızı arka plan
+            case OutcomeStatus.Belirsiz:
+                return "badge badge-light text-secondary border border-secondary"; // Gri arka plan
+            default:
+                return "badge badge-light text-info border border-info"; // Mavi arka plan
+        }
+    }
+}
+
 @section Styles{
     <style>
         /*        <link rel="stylesheet" href="~/CCThema/bootstrap5/dist/assets/vendor/dropify/css/dropify.min.css" >*/
@@ -68,6 +86,10 @@
             text-overflow: ellipsis;
             display: block;
         }
+
+        .buyukYazi {
+            font-size: 20px; /* Yazı boyutunu istediğiniz piksel değeri olarak ayarlayabilirsiniz */
+        }
     </style>
 
     }
@@ -78,6 +100,7 @@
                 <div class="card-body">
                     <h6 class="card-title mb-4">Detaylar/Notlar</h6>
                     <p>@Model.Description</p>
+                    <span class="buyukYazi badge @GetOutcomeClass(Model.Outcome)">@Model.Outcome</span>
                     <div class="progress-container progress-info">
                         @*           <div class="progress">
                         <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 78%;">
@@ -93,9 +116,8 @@
                         <li class="d-flex justify-content-between mb-3">Sorumlu:<span class="badge bg-primary">@Model.AppUser.NameSurname</span></li>
                         <li class="d-flex justify-content-between mb-3">Görev Oluşturma Tarihi:<span class="bg-success badge">@Model.CreatedDate</span></li>
                         <li class="d-flex justify-content-between mb-3">Güncel Durum:<span class="bg-info badge">@Model.Status.StatusName</span></li>
-                        <li class="d-flex justify-content-between mb-3">Planlanan Kapatma Tarihi:<span class="bg-danger badge">@Model.SalesDone?.ToString("d")</span></li>
+                        <li class="d-flex justify-content-between mb-3">Satış Kapatma Tarihi:<span class="bg-danger badge">@Model.SalesDone?.ToString("d")</span></li>
                         <li class="d-flex justify-content-between mb-3">Değer Teklifi:<span class="bg-warning badge">@Model.ValueOrOffer?.ToString("N2")</span></li>
-
                     </ul>
                 </div>
             </div>
@@ -108,10 +130,10 @@
                         <img class="rounded-circle" src="~/userprofilepicture/firm.png" width="72" alt="" />
                         <div class="wid-u-info ms-3">
                             <h5 class="mb-0">@Model.Customer.CompanyName</h5>
-                               <br />
+                            <br />
                             <span>E-Posta: @Model.Customer.CompanyEmail</span>
                             <br />
-                            <span>Sekötr: @Model.Customer.Industry</span>
+                            <span>Sektör: @Model.Customer.Industry</span>
                             <br />
                             <span class="message"> Çalışan Sayısı: @Model.Customer.EmployeeCount</span>
                         </div>
@@ -119,21 +141,34 @@
                     <hr>
                     <ul class="right_chat list-unstyled mb-0">
                         <li class="offline">
-                            <a class="d-flex mb-3" href="javascript:void(0);">
+                            <a class="d-flex mb-3" href="/Customer/CustomerList">
                                 <img class="rounded-circle" src="~/userprofilepicture/defaultpp.png" width="35" height="35" alt="" />
                                 <div class="ms-3 w-100 text-muted">
                                     <span class="name d-block">@Model.Customer.Name</span>
                                     <span class="message">@Model.Customer.CustomerEmail</span>
-                                    <br/>
+                                    <br />
                                     <span class="message">@Model.Customer.PhoneNumber</span>
                                     <br />
-                                    <span class="message">@Model.Customer.CustomerTitle</span>
+                                    <span class="message">@Model.Customer.CustomerTitle</span>  
                                 </div>
                             </a>
+                            <br />
+                            <span class="badge badge-dark text-dark border border-dark message">
+                                Son Karar Mercii : 
+                                @if (Model.IsFinalDecisionMaker)
+                                {
+                                    <i class="fa fa-check-circle" style="color: green;"></i> <!-- Evet durumu için tik işareti -->
+                                }
+                                else
+                                {
+                                    <i class="fa fa-times-circle" style="color: red;"></i> <!-- Hayır durumu için çarpı işareti -->
+                                }
+                            </span>
+
                         </li>
                     </ul>
                 </div>
-            </div> 
+            </div>
             <div class="card mb-2">
                 <div class="card-header">
                     <h6 class="card-title">Dosyalar & Belgeler & Sözleşmeler</h6>
@@ -159,22 +194,22 @@
                                 <th>İşlemler</th>
                             </tr>
                         </thead>
-                    <tbody>
-                        @foreach (var file in Model.FileAttachments)
-                        {
-                            <tr>
-                                <td><div class="ellipsis" title="@file.FileName">@file.FileName</div></td>
-                                <td>
+                        <tbody>
+                            @foreach (var file in Model.FileAttachments)
+                            {
+                                <tr>
+                                    <td><div class="ellipsis" title="@file.FileName">@file.FileName</div></td>
+                                    <td>
                                         <a href="@Url.Action("DownloadFile", "Task", new { fileAttachmentId = file.FileAttachmentId })"><span class="badge bg-success">İndir</span></a>
                                         <a href="@Url.Action("DeleteFile", "Task", new { fileAttachmentId = file.FileAttachmentId })"><span class="badge bg-danger">Sil</span></a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
                     </table>
                 </div>
             </div>
-           
+
 
             <div class="card mb-2">
                 <div class="card-header">
@@ -186,8 +221,8 @@
                         <h4><strong>@Model.AppUser.NameSurname</strong></h4>
                     </div>
                     <div class="mt-3">
-               @*         <a asp-action="MyProfile" asp-controller="Member">
-                            <button class="btn btn-primary">Profilim</button>
+                        @*         <a asp-action="MyProfile" asp-controller="Member">
+                        <button class="btn btn-primary">Profilim</button>
                         </a>*@
                         <a asp-action="ChatApp" asp-controller="ChatApp">
                             <button class="btn btn-outline-secondary">Message</button>

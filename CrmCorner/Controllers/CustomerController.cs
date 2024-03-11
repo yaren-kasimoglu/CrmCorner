@@ -186,5 +186,35 @@ namespace CrmCorner.Controllers
             return RedirectToAction("CustomerList");
         }
 
+
+
+        public async Task<IActionResult> IndustryChart()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var user = await _context.Users
+                                      .Include(u => u.Customers)
+                                      .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Sektörleri gruplayıp sayılarına göre chart verisi oluşturma
+            var chartData = user.Customers
+                                 .GroupBy(c => c.Industry)
+                                 .Select(group => new { Industry = group.Key, Count = group.Count() })
+                                 .ToList();
+
+            // labels ve data alanlarını doldur
+            var labels = chartData.Select(data => data.Industry.ToString()).ToArray();
+            var dataValues = chartData.Select(data => data.Count).ToArray();
+
+            return Json(new { labels, data = dataValues });
+        }
+
+
+
     }
 }
