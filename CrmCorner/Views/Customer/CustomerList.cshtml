@@ -75,6 +75,16 @@
     </tbody>
 </table>
 
+<div class="row justify-content-center">
+<div class="col-6">
+    <div class="chart-title">Sektörel Dağılım</div>
+    <div style="width: 50%; height: 400px;">
+        <canvas id="industuryChart"></canvas>
+
+    </div>
+</div>
+</div>
+
 
 <!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
@@ -83,7 +93,8 @@
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
-
+<script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     function confirmDelete(button) {
         // Kullanıcıya silme işlemini onaylamasını sor
@@ -110,4 +121,49 @@
                 ]
             });
     });
+</script>
+<script>
+    $(document).ready(function () {
+
+        $.ajax({
+            type: "GET",
+            url: "/Customer/IndustryChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var ctx = document.getElementById('industuryChart').getContext('2d');
+                // Dinamik olarak renk seçimi
+                var colors = generateColors(data.labels.length);
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                });
+            },
+            error: function (error) {
+                // Hata durumunda kullanıcıya bildirim
+                console.error('Error fetching data:', error);
+                alert('Error fetching data. Please try again later.');
+            }
+        });
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var colors = [];
+            for (var i = 0; i < count; i++) {
+                // Rastgele renk üretme (örneğin)
+                var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                colors.push(color);
+            }
+            return colors;
+        }
+
+    });
+
 </script>

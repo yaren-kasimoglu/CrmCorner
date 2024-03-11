@@ -113,7 +113,8 @@
                             <ol class="dd-list">
                                 @foreach (var task in tasksInThisStatus)
                                 {
-                                    <li class="dd-item" data-taskid="@task.TaskId" data-newstatusid="@task.StatusId">
+                                        <li class="dd-item" data-taskid="@task.TaskId" data-statusid="@task.Status.StatusId">
+
                                         <div class="dd-handle">
                                                 <a href="/Task/TaskDetail/@task.TaskId" class="dd-item-title">
                                                     <h6>@task.Title</h6>
@@ -209,33 +210,58 @@
         }
     }
 
-    $('.dd-list').droppable({
-        accept: '.dd-item',
-        drop: function (event, ui) {
-            var newStatusId = $(this).data('statusid'); // Bu kolonun statusId'sini alın.
-            var taskId = ui.draggable.data('taskid');
-
-            ui.draggable.detach().appendTo($(this)); // Görevi yeni listeye ekleyin.
-            updateTaskStatus(taskId, newStatusId); // Durumu güncelleyin.
+    // Görevleri sürüklenebilir yapın
+    $('.dd-item').draggable({
+        cursor: 'move',
+        helper: 'clone', // Bu, sürüklenirken bir klon oluşturacak
+        revert: 'invalid', // Geçerli bir bırakma noktası bulunamazsa, öğe orijinal konumuna geri döner
+        start: function (event, ui) {
+            $(this).css('opacity', 0.5); // Sürüklenirken orijinal öğeyi soluk yap
+        },
+        stop: function (event, ui) {
+            $(this).css('opacity', 1); // Sürükleme durduğunda orijinal öğeyi normale döndür
         }
     });
 
+    // Durum listelerini bırakılabilir yapın
+    $('.dd-list').droppable({
+        hoverClass: 'active', // Bırakma noktası üzerindeyken bir sınıf ekler
+        drop: function (event, ui) {
+            var newStatusId = $(this).data('statusid'); // Bu listeleme sütununun statusId'sini al
+            var taskId = ui.draggable.data('taskid'); // Sürüklenen görevin id'sini al
+
+
+            ui.draggable.fadeOut(function () {
+                // Görevi yeni listeye ekleyin ve UI'da gösterin
+                $(this).appendTo($('.dd-list[data-statusid="' + newStatusId + '"]')).fadeIn();
+            });
+
+            updateTaskStatus(taskId, newStatusId); // AJAX ile görev durumunu güncelleyin
+        }
+    });
+
+    function updateTaskStatus(taskId, statusId) {
+        // AJAX isteğini gönder
+        $.ajax({
+            url: '/Task/UpdateStatus',
+            type: 'POST',
+            data: { taskId: taskId, statusId: statusId },
+            success: function (response) {
+                if (response.success) {
+                    console.log('Task status updated!');
+                    // İsteğin başarılı olduğunu ve görevin durumunun güncellendiğini bildir
+                } else {
+                    console.error('Failed to update task status.');
+                    // Güncelleme başarısız olursa, bir hata mesajı göster
+                }
+            },
+            error: function () {
+                console.error('Failed to update task status.');
+                // AJAX isteği başarısız olursa, bir hata mesajı göster
+            }
+        });
+    }
 
 </script>
 
 
-
-
-@* <script>
-
-        //$(function () {
-        //    $('.dd').nestable();
-
-        //    $('.dd').on('change', function () {
-        //        var $this = $(this);
-        //        var serializedData = window.JSON.stringify($($this).nestable('serialize'));
-
-        //        $this.parents('div.body').find('textarea').val(serializedData);
-        //    });
-        //});
-   </script>*@
