@@ -21,7 +21,23 @@
             color: #006400; /* Üzerine gelindiğinde metin rengini değiştirir */
         }
 
+    .dd-list {
+        min-height: 50px; /* Boş listelerde görünürlük sağlamak için */
+        padding: 10px; /* Boş listelerde iç boşluk sağlamak için */
+        background-color: #f9f9f9; /* Görsel olarak ayırt edilebilir olması için */
+    }
+
+    .drop-hover {
+        background-color: #e0e0e0; /* Sürüklenen öğenin üzerinde olduğu alanı belirtmek için */
+    }
+
+    .card {
+        /* Kartlara bir minimum yükseklik verin */
+        min-height: 100px; /* Kartın içindeki liste boşsa bile görsel bir alan sağlar */
+    }
 </style>
+
+
 @functions {
 
     int GetStatusOrder(int statusId)
@@ -90,7 +106,7 @@
                             break;
                     }
                 }
-                <div class="card mb-4 @statusClass" style="border-color:@borderColor; min-height:400px;">
+                <div class="card mb-4 @statusClass" style="border-color:@borderColor; min-height:400px;" data-statusid="@status.Key">
                     <div class="card-header">
                         <h6 class="card-title">@status.Value</h6>
                         <ul class="header-dropdown">
@@ -110,7 +126,7 @@
                         {
                         // Görevleri listele
                         <div class="dd" data-plugin="nestable">
-                            <ol class="dd-list">
+                                <ol class="dd-list" data-statusid="@status.Key">
                                 @foreach (var task in tasksInThisStatus)
                                 {
                                         <li class="dd-item" data-taskid="@task.TaskId" data-statusid="@task.Status.StatusId">
@@ -224,28 +240,94 @@
     });
 
     // Durum listelerini bırakılabilir yapın
-    $('.dd-list').droppable({
-        hoverClass: 'active', // Bırakma noktası üzerindeyken bir sınıf ekler
+    // Kartları bırakılabilir yapın, böylece boş kartlar da görevleri kabul edebilir
+    // Kartları ve listeleri bırakılabilir yapın
+
+    $('.card, .dd-list').droppable({
+         accept: '.dd-item',
+        hoverClass: 'drop-hover', // Sürüklerken görsel ipucu sağlamak için
+        tolerance: 'pointer', // İşaretçi droppable alanın üzerine geldiğinde bırakmayı kabul eder
         drop: function (event, ui) {
-            var newStatusId = $(this).data('statusid'); // Bu listeleme sütununun statusId'sini al
-            var taskId = ui.draggable.data('taskid'); // Sürüklenen görevin id'sini al
 
+            var $card = $(this);
+            var newStatusId = $card.data('statusid');
+            var taskId = ui.draggable.data('taskid');
 
-            ui.draggable.fadeOut(function () {
-                // Görevi yeni listeye ekleyin ve UI'da gösterin
-                $(this).appendTo($('.dd-list[data-statusid="' + newStatusId + '"]')).fadeIn();
-            });
-
-            updateTaskStatus(taskId, newStatusId); // AJAX ile görev durumunu güncelleyin
+            if (newStatusId !== undefined) {
+                // Yeni durum id alındıysa ve farklıysa
+                ui.draggable.fadeOut(function () {
+                    // Sürüklenen öğeyi yeni listeye ekleyin
+                    $(this).appendTo($('.dd-list[data-statusid="' + newStatusId + '"]')).fadeIn();
+                    // Durumu server'da güncelleyin
+                    updateTaskStatus(taskId, newStatusId);
+                });
+            } else {
+                // Durum aynıysa veya tanımlanmamışsa
+                ui.draggable.css('top', '0').css('left', '0').fadeIn();
+            }
         }
     });
 
-    function updateTaskStatus(taskId, statusId) {
+
+
+    //$('.card, .dd-list').droppable({
+    //    accept: '.dd-item',
+    //    hoverClass: 'active',
+    //    tolerance: 'pointer', // Sürüklenen öğe hedefin bir kısmı üzerinde olduğunda bırakmayı kabul et
+    //    drop: function (event, ui) {
+    //        // Kart üzerine bırakılan görevler için statusId'yi alın
+    //        var newStatusId = $(this).data('statusid') || $(this).closest('.card').data('statusid');
+    //        var taskId = ui.draggable.data('taskid');
+    //        var oldStatusId = ui.draggable.data('statusid');
+
+    //        if (newStatusId && newStatusId !== oldStatusId) {
+    //            ui.draggable.fadeOut(function () {
+    //                // Sürüklenen öğeyi yeni listeye ekleyin
+    //                var targetList = $('.dd-list[data-statusid="' + newStatusId + '"]');
+    //                // Eğer hedef liste boşsa (yani yeni kart), hedefi doğru kartın içindeki listeye ayarlayın
+    //                if (targetList.length === 0) {
+    //                    targetList = $(event.target).closest('.card').find('.dd-list');
+    //                }
+    //                $(this).appendTo(targetList).fadeIn();
+    //                // Server'da durumu güncelle
+    //                updateTaskStatus(taskId, newStatusId);
+    //            });
+    //        } else {
+    //            // Durum aynıysa veya newStatusId yoksa, görevi geri yerine koy
+    //            $(ui.draggable).css({ top: 0, left: 0 }).fadeIn();
+    //        }
+    //    }
+    //});
+
+
+    //$('.dd-list').droppable({
+    //    hoverClass: 'active',
+    //    drop: function (event, ui) {
+    //        // Sürüklenen öğenin eski statusId'si
+    //        var oldStatusId = ui.draggable.data('statusid');
+    //        // drop event'inin gerçekleştiği .dd-list elementinin statusId'si
+    //        var newStatusId = $(this).data('statusid');
+
+    //        if (newStatusId !== oldStatusId) {
+    //            var taskId = ui.draggable.data('taskid');
+    //            // UI'da görevin yeni konumunu güncelle
+    //            ui.draggable.fadeOut(function () {
+    //                $(this).appendTo($(event.target).closest('.dd-list')).fadeIn();
+    //                // Server'da durumu güncelle
+    //                updateTaskStatus(taskId, newStatusId);
+    //            });
+    //        }
+    //    }
+    //});
+
+
+
+    function updateTaskStatus(taskId, newStatusId) {
         // AJAX isteğini gönder
         $.ajax({
             url: '/Task/UpdateStatus',
             type: 'POST',
-            data: { taskId: taskId, statusId: statusId },
+            data: { taskId: taskId, statusId: newStatusId },
             success: function (response) {
                 if (response.success) {
                     console.log('Task status updated!');

@@ -3,6 +3,12 @@
     ViewData["Title"] = "TaskAdd";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning" role="alert">
+        @TempData["Warning"].ToString()
+    </div>
+}
 <form asp-action="TaskAdd" asp-controller="Task" method="post">
     <div class="row">
         <!-- Başlık, Değer Teklifi, Açıklama için ayrı bir row -->

@@ -385,9 +385,6 @@ namespace CrmCorner.Controllers
 
     //        //  var calendarId = "primary";
     //        //  Event results = await service.Events.Insert(googleCalendarEvent, calendarId).ExecuteAsync();
-    //        return View("Calendar");
-    //    }
-
   
 
 
