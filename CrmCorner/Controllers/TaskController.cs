@@ -121,9 +121,10 @@ namespace CrmCorner.Controllers
             {
                 task.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
 
-
                 if (task.StatusId.HasValue && task.StatusId.Value != 0) // StatusId kontrolü
                 {
+
+
                     _context.TaskComps.Add(task); // Task'ı ekleyin
                     _context.SaveChanges(); // Değişiklikleri kaydedin
                     return RedirectToAction("Index"); // Başarılıysa, Index sayfasına yönlendir
