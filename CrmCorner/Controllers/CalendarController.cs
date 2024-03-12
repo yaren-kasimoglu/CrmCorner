@@ -385,46 +385,43 @@ namespace CrmCorner.Controllers
 
     //        //  var calendarId = "primary";
     //        //  Event results = await service.Events.Insert(googleCalendarEvent, calendarId).ExecuteAsync();
-    //    //   return View("Calendar");
-    //    }
-
   
 
 
-    ////private static string Base64UrlEncode(string input)
-    ////    {
-    ////        var inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
-    ////        // Special "url-safe" base64 encode.
-    ////        return Convert.ToBase64String(inputBytes)
-    ////          .Replace('+', '-')
-    ////          .Replace('/', '_')
-    ////          .Replace("=", "");
-    ////    }
-    ////    [HttpPost]
-    ////    public async Task<IActionResult> CalendarSearch(string email)
-    ////    {
-    ////        var currentUser = await _userManager.GetUserAsync(User);
+    //private static string Base64UrlEncode(string input)
+    //    {
+    //        var inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
+    //        // Special "url-safe" base64 encode.
+    //        return Convert.ToBase64String(inputBytes)
+    //          .Replace('+', '-')
+    //          .Replace('/', '_')
+    //          .Replace("=", "");
+    //    }
+    //    [HttpPost]
+    //    public async Task<IActionResult> CalendarSearch(string email)
+    //    {
+    //        var currentUser = await _userManager.GetUserAsync(User);
 
-    ////        var employess = _context.Users
-    ////                   .Include(e => e.Customers)
-    ////                   .Select(m => m.Email).ToList();
-    ////        var filteremployes = employess.Where(word => word.Contains(email)).ToList();
-    ////        ViewBag.Filteremployes = filteremployes;
-    ////        if (filteremployes == null)
-    ////        {
-    ////            return NotFound();
-    ////        }
-    ////        return Json(new { Message = filteremployes });
-    ////        //var employess = _context.Employees.Select(m => m.EmployeeEmail).ToList();
-    ////        //var filteremployes = employess.Where(word => word.Contains(email)).ToList();
-    ////        //ViewBag.Filteremployes = filteremployes;
-    ////        //if (filteremployes == null)
-    ////        //{
-    ////        //    return NotFound();
-    ////        //}
-    ////        //return Json(new { Message = filteremployes });
+    //        var employess = _context.Users
+    //                   .Include(e => e.Customers)
+    //                   .Select(m => m.Email).ToList();
+    //        var filteremployes = employess.Where(word => word.Contains(email)).ToList();
+    //        ViewBag.Filteremployes = filteremployes;
+    //        if (filteremployes == null)
+    //        {
+    //            return NotFound();
+    //        }
+    //        return Json(new { Message = filteremployes });
+    //        //var employess = _context.Employees.Select(m => m.EmployeeEmail).ToList();
+    //        //var filteremployes = employess.Where(word => word.Contains(email)).ToList();
+    //        //ViewBag.Filteremployes = filteremployes;
+    //        //if (filteremployes == null)
+    //        //{
+    //        //    return NotFound();
+    //        //}
+    //        //return Json(new { Message = filteremployes });
        
-    ////    }
+    //    }
        
     //}
 
