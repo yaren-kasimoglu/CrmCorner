@@ -61,6 +61,20 @@
         }
     }
 }
+<div class="filter-search-container">
+    <input type="text" id="taskSearch" placeholder="Görev ara..." onkeyup="filterTasks()">
+    <select id="statusFilter" onchange="filterTasks()">
+        <option value="">Tüm Durumlar</option>
+        <option value="1">İlk Temas</option>
+        <option value="2">Görüşme Ayarlandı</option>
+        <option value="3">Görüşme Gerçekleşti</option>
+        <option value="4">Teklif Gönderildi</option>
+        <option value="5">Sözleşme Aşamasında</option>
+        <option value="6">Satış Tamamlandı</option>
+        <!-- Diğer durumlar -->
+    </select>
+</div>
+
 <div class="row g-3">
     @{
         // ViewBag'dan durum isimlerini ve durumların listesini al
@@ -106,9 +120,13 @@
                             break;
                     }
                 }
+                @{
+                    var tasksInThisStatus = Model.Where(task => task.Status != null && task.Status.StatusId == status.Key).ToList();
+                }
                 <div class="card mb-4 @statusClass" style="border-color:@borderColor; min-height:400px;" data-statusid="@status.Key">
                     <div class="card-header">
-                        <h6 class="card-title">@status.Value</h6>
+                        <h6 class="card-title">@status.Value       <span id="taskCount_@status.Key">@(tasksInThisStatus.Count())</span></h6> 
+
                         <ul class="header-dropdown">
                             <li>
                                 @if (status.Key == 1)
@@ -119,9 +137,9 @@
                         </ul>
                     </div>
                     <div class="card-body">
-                      @{
-                            var tasksInThisStatus = Model.Where(task => task.Status != null && task.Status.StatusId == status.Key);
-                        }
+                    
+                   
+
                         @if (tasksInThisStatus.Any())
                         {
                         // Görevleri listele
@@ -268,60 +286,6 @@
         }
     });
 
-
-
-    //$('.card, .dd-list').droppable({
-    //    accept: '.dd-item',
-    //    hoverClass: 'active',
-    //    tolerance: 'pointer', // Sürüklenen öğe hedefin bir kısmı üzerinde olduğunda bırakmayı kabul et
-    //    drop: function (event, ui) {
-    //        // Kart üzerine bırakılan görevler için statusId'yi alın
-    //        var newStatusId = $(this).data('statusid') || $(this).closest('.card').data('statusid');
-    //        var taskId = ui.draggable.data('taskid');
-    //        var oldStatusId = ui.draggable.data('statusid');
-
-    //        if (newStatusId && newStatusId !== oldStatusId) {
-    //            ui.draggable.fadeOut(function () {
-    //                // Sürüklenen öğeyi yeni listeye ekleyin
-    //                var targetList = $('.dd-list[data-statusid="' + newStatusId + '"]');
-    //                // Eğer hedef liste boşsa (yani yeni kart), hedefi doğru kartın içindeki listeye ayarlayın
-    //                if (targetList.length === 0) {
-    //                    targetList = $(event.target).closest('.card').find('.dd-list');
-    //                }
-    //                $(this).appendTo(targetList).fadeIn();
-    //                // Server'da durumu güncelle
-    //                updateTaskStatus(taskId, newStatusId);
-    //            });
-    //        } else {
-    //            // Durum aynıysa veya newStatusId yoksa, görevi geri yerine koy
-    //            $(ui.draggable).css({ top: 0, left: 0 }).fadeIn();
-    //        }
-    //    }
-    //});
-
-
-    //$('.dd-list').droppable({
-    //    hoverClass: 'active',
-    //    drop: function (event, ui) {
-    //        // Sürüklenen öğenin eski statusId'si
-    //        var oldStatusId = ui.draggable.data('statusid');
-    //        // drop event'inin gerçekleştiği .dd-list elementinin statusId'si
-    //        var newStatusId = $(this).data('statusid');
-
-    //        if (newStatusId !== oldStatusId) {
-    //            var taskId = ui.draggable.data('taskid');
-    //            // UI'da görevin yeni konumunu güncelle
-    //            ui.draggable.fadeOut(function () {
-    //                $(this).appendTo($(event.target).closest('.dd-list')).fadeIn();
-    //                // Server'da durumu güncelle
-    //                updateTaskStatus(taskId, newStatusId);
-    //            });
-    //        }
-    //    }
-    //});
-
-
-
     function updateTaskStatus(taskId, newStatusId) {
         // AJAX isteğini gönder
         $.ajax({
@@ -343,6 +307,29 @@
             }
         });
     }
+
+
+    function filterTasks() {
+        var searchText = document.getElementById('taskSearch').value.toLowerCase();
+        var statusFilter = document.getElementById('statusFilter').value;
+
+        var tasks = document.querySelectorAll('.dd-item');
+
+        tasks.forEach(function (task) {
+            var title = task.querySelector('.dd-item-title h6').textContent.toLowerCase();
+            var status = task.getAttribute('data-statusid');
+
+            var titleMatch = title.indexOf(searchText) > -1;
+            var statusMatch = statusFilter === "" || status === statusFilter;
+
+            if (titleMatch && statusMatch) {
+                task.style.display = '';
+            } else {
+                task.style.display = 'none';
+            }
+        });
+    }
+
 
 </script>
 

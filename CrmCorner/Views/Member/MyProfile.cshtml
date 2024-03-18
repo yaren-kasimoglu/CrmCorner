@@ -41,24 +41,38 @@
                 </div>
             </div>
         </div>
-
-
-
- 
-        <div class="col-lg-6 col-md-12">
-            <div style="width: 60%; height: 400px;">
-                <canvas id="userTaskStatusChart"></canvas>
+        <div class="col-lg-9 col-md-12">
+        <!-- Sekme menüsü -->
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#doughnutChartContainer" data-bs-toggle="tab">Pasta dilimi</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#barChartContainer" data-bs-toggle="tab">Grafik</a>
+            </li>
+        </ul>
+  
+        <!-- Sekme içerikleri -->
+        <div class="tab-content">
+            <div id="doughnutChartContainer" class="tab-pane fade show active">
+                <div class="col-lg-8">
+                    <div style="width: 60%; height: 400px;">
+                        <canvas id="userTaskStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div id="barChartContainer" class="tab-pane fade">
+                <div class="col-lg-8">
+                    <div style="width: 60%; height: 400px;">
+                        <canvas id="userTaskStatusChart1"></canvas>
+                    </div>
             </div>
         </div>
 
 
-        <div class="col-lg-6 col-md-12">
-            <div style="width: 60%; height: 400px;">
-                <canvas id="userTaskStatusChart1"></canvas>
-            </div>
-     
 
         </div>
+
 
     </div>
 
@@ -76,6 +90,9 @@
     <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
     <script src="~/CRMTema/bootstrap5/js/pages/profile.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
     <script>
@@ -91,6 +108,17 @@
                     ]
                 });
         });
+
+        var triggerTabList = [].slice.call(document.querySelectorAll('.nav-tabs a'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
+
     </script>
 
     <script type="text/javascript">
@@ -151,15 +179,15 @@
                             borderWidth: 1
                         }]
                     },
-                    options: {
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero: true
-                                }
-                            }]
-                        }
-                    }
+                    //options: {
+                    //    scales: {
+                    //        yAxes: [{
+                    //            ticks: {
+                    //                beginAtZero: true
+                    //            }
+                    //        }]
+                    //    }
+                    //}
                 });
             },
             error: function (error) {

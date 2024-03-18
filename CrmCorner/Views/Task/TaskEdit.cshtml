@@ -80,17 +80,22 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             </br>
+
             <div class="form-group">
-                <label class="control-label">Sonuç Durumu</label>
-                @foreach (var status in ViewBag.OutcomeStatus as List<SelectListItem>)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="Outcome" type="radio" value="@status.Value" id="@status.Text" />
-                        <label class="form-check-label" for="@status.Text">@status.Text</label>
-                    </div>
-                }
-                <span asp-validation-for="Outcome" class="text-danger"></span>
+                <input asp-for="IsPositiveOutcome" class="form-check-input" />
+                <label asp-for="IsPositiveOutcome" class="control-label">Olumlu</label>
+                <span asp-validation-for="IsPositiveOutcome" class="text-danger"></span>
             </div>
+
+
+            @if (!Model.IsPositiveOutcome)
+            {
+                <div class="form-group">
+                    <label for="negativeReason" class="control-label">Olumsuz Nedeni</label>
+                    <textarea id="negativeReason" name="NegativeReason" class="form-control" rows="3" cols="30" placeholder="Olumsuz nedenini buraya yazınız..." required></textarea>
+                    <span asp-validation-for="NegativeReason" class="text-danger"></span>
+                </div>
+            }
         </div>
 
         <div class="col-lg-6">
@@ -145,3 +150,23 @@
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 <!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // IsPositiveOutcome checkbox'ının durumunu kontrol et
+        toggleNegativeReason($('#IsPositiveOutcome').is(':checked'));
+
+        // IsPositiveOutcome checkbox'ının durumu değiştiğinde tetikle
+        $('#IsPositiveOutcome').change(function () {
+            toggleNegativeReason($(this).is(':checked'));
+        });
+
+        function toggleNegativeReason(isPositive) {
+            if (isPositive) {
+                $('#negativeReason').closest('.form-group').hide();
+            } else {
+                $('#negativeReason').closest('.form-group').show();
+            }
+        }
+    });
+</script>

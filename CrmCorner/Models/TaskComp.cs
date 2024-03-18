@@ -36,8 +36,10 @@ public partial class TaskComp
     public int? CustomerId { get; set; }
     public virtual CustomerN? Customer { get; set; }
 
-    public bool IsFinalDecisionMaker { get; set; } // Son karar mercii olup olmadığı
-    public OutcomeStatus Outcome { get; set; } // Olumlu/olumsuz durum
+    public bool IsFinalDecisionMaker { get; set; } = false;// Son karar mercii olup olmadığı
+    public bool IsPositiveOutcome { get; set; } = false; // CheckBox ile kontrol edilecek
+
+    public string NegativeReason { get; set; }
 
     // Dosya ekleri için koleksiyon
     public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
@@ -45,3 +47,5 @@ public partial class TaskComp
     public virtual Notification? Notification { get; set; }
 
 }
+       
+
