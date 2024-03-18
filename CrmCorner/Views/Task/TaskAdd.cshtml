@@ -3,12 +3,25 @@
     ViewData["Title"] = "TaskAdd";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
-@if (TempData["Warning"] != null)
+@if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert alert-warning" role="alert">
-        @TempData["Warning"].ToString()
+    <div class="alert alert-warning alert-dismissible my-custom-alert" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
 }
+<style>
+    .my-custom-alert {
+        border-radius: 5px; /* Daha kare köşeler için */
+        text-align: center; /* Yazıyı ortala */
+        max-width: 600px; /* Uyarı kutusunun maksimum genişliği */
+        margin: 0 auto; /* Sol ve sağ marjları otomatik ayarla */
+        padding: 10px 20px; /* İç boşlukları ayarla */
+    }
+</style>
+
 <form asp-action="TaskAdd" asp-controller="Task" method="post">
     <div class="row">
         <!-- Başlık, Değer Teklifi, Açıklama için ayrı bir row -->
@@ -30,15 +43,9 @@
             </div>
             </br>
             <div class="form-group">
-                <label class="control-label">Sonuç Durumu</label>
-                @foreach (var status in ViewBag.OutcomeStatus as List<SelectListItem>)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="Outcome" type="radio" value="@status.Value" id="@status.Text" />
-                        <label class="form-check-label" for="@status.Text">@status.Text</label>
-                    </div>
-                }
-                <span asp-validation-for="Outcome" class="text-danger"></span>
+                <input asp-for="IsPositiveOutcome" class="form-check-input" />
+                <label asp-for="IsPositiveOutcome" class="control-label">Olumlu</label>
+                <span asp-validation-for="IsPositiveOutcome" class="text-danger"></span>
             </div>
         </div>
 
@@ -134,3 +141,4 @@
         </div>
     </div>
 </div>
+

@@ -5,18 +5,19 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 @functions {
-    private string GetOutcomeClass(OutcomeStatus outcome)
+    private string GetOutcomeClass(bool? isPositiveOutcome)
     {
-        switch (outcome)
+        if (isPositiveOutcome == true)
         {
-            case OutcomeStatus.Olumlu:
-                return "badge badge-light text-success border border-success"; // Yeşil arka plan
-            case OutcomeStatus.Olumsuz:
-                return "badge badge-light text-danger border border-danger"; // Kırmızı arka plan
-            case OutcomeStatus.Belirsiz:
-                return "badge badge-light text-secondary border border-secondary"; // Gri arka plan
-            default:
-                return "badge badge-light text-info border border-info"; // Mavi arka plan
+            return "badge badge-light text-success border border-success"; // Yeşil arka plan
+        }
+        else if (isPositiveOutcome == false)
+        {
+            return "badge badge-light text-danger border border-danger"; // Kırmızı arka plan
+        }
+        else
+        {
+            return "badge badge-light text-secondary border border-secondary"; // Gri arka plan, eğer null ise
         }
     }
 }
@@ -100,7 +101,10 @@
                 <div class="card-body">
                     <h6 class="card-title mb-4">Detaylar/Notlar</h6>
                     <p>@Model.Description</p>
-                    <span class="buyukYazi badge @GetOutcomeClass(Model.Outcome)">@Model.Outcome</span>
+                    <span class="buyukYazi @GetOutcomeClass(Model.IsPositiveOutcome)">
+                        @(Model.IsPositiveOutcome ? "Olumlu" : "Olumsuz")
+                    </span>
+
                     <div class="progress-container progress-info">
                         @*           <div class="progress">
                         <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 78%;">

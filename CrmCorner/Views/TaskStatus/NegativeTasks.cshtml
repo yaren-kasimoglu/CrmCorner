@@ -1,0 +1,116 @@
+﻿@model List<TaskComp>
+@{
+    ViewData["Title"] = "NegativeTasks";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewBag.ErrorMessage
+    </div>
+}
+<table class="table table-bordered" id="taskStatus_List">
+    <thead>
+        <tr>
+            <th scope="col">Görev Adı</th>
+            <th scope="col">Değer Teklifi</th>
+            <th scope="col">Açıklama</th>
+            <th scope="col">Son Durum</th>
+            <th scope="col">Görüşmeyi Alan / Görev Sahibi</th>
+            <th scope="col">Görüşmeyi Gerçekleştiren</th>
+            <th scope="col">Müşteri Bilgileri</th>
+            <th scope="col">Görüşülen Kişi Son Karar Mercii</th>
+            <th scope="col">Olumsuz Olma Sebebi</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>@item.Title</td>
+                <td>@item.ValueOrOffer?.ToString("N2")</td>
+                <td>@item.Description</td>
+                <td>
+                    @if (item.Status != null)
+                    {
+                        @item.Status.StatusName
+                    }
+                    else
+                    {
+                        @:Durum bilgisi yok
+                    }
+                </td>
+                <td>
+                    @if (item.AppUser != null)
+                    {
+                        @item.AppUser.NameSurname
+                    }
+                    else
+                    {
+                        @:Kişi bilgisi yok
+                    }
+                </td>
+                <td>
+                    @if (item.AssignedUser != null)
+                    {
+                        @item.AssignedUser.NameSurname
+                    }
+                    else
+                    {
+                        @:Kişi bilgisi yok
+                    }
+                </td>
+                <td>
+                    @if (item.Customer != null)
+                    {
+                        @($"{item.Customer.Name} {item.Customer.Surname} {item.Customer.CustomerEmail}")
+                    }
+                    else
+                    {
+                        @:Müşteri bilgisi yok
+                    }
+                </td>
+                <td>
+                    <span class="badge badge-dark text-dark border border-dark message">
+                        @if (item.IsFinalDecisionMaker)
+                        {
+                            <i class="fa fa-check-circle" style="color: green;"></i> <!-- Evet durumu için tik işareti -->
+                        }
+                        else
+                        {
+                            <i class="fa fa-times-circle" style="color: red;"></i> <!-- Hayır durumu için çarpı işareti -->
+                        }
+                    </span>
+                </td>
+                <td>@item.NegativeReason</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
+
+
+
+<script>
+    $(document).ready(function () {
+        $('#taskStatus_List')
+            .dataTable({
+                responsive: true,
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: [0]
+                    }
+                ]
+            });
+    });
+</script>
+

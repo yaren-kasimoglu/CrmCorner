@@ -58,10 +58,8 @@ namespace CrmCorner.Controllers
         //}
         public async Task<IActionResult> OutcomeStatusChart()
         {
-            // Aktif kullanıcının ID'sini al
             var userId = _userManager.GetUserId(User);
 
-            // Kullanıcı ID'sini kullanarak AppUser kaydını ve ilişkili TaskComps'ı bul
             var userTaskComps = await _context.Users
                                                  .Where(u => u.Id == userId)
                                                  .SelectMany(u => u.TaskComps)
@@ -72,16 +70,19 @@ namespace CrmCorner.Controllers
                 return NotFound();
             }
 
-            var outcomeCounts = userTaskComps.GroupBy(tc => tc.Outcome)
-                                             .Select(group => new {
-                                                 Outcome = group.Key.ToString(), // Enum değerini string'e çevir
-                                                 Count = group.Count()
-                                             }).ToList();
+            var positiveCount = userTaskComps.Count(tc => tc.IsPositiveOutcome);
+            var negativeCount = userTaskComps.Count(tc => !tc.IsPositiveOutcome);
+         //   var positiveTitles = _context.TaskComps.Where(tc => tc.IsPositiveOutcome && tc.UserId == userId).Select(tc => tc.Title).ToList();
+         //   var negativeTitles = _context.TaskComps.Where(tc => !tc.IsPositiveOutcome && tc.UserId == userId).Select(tc => tc.Title).ToList();
+
             var chartData = new
             {
-                labels = outcomeCounts.Select(oc => oc.Outcome.ToString()),
-                data = outcomeCounts.Select(oc => oc.Count)
+                labels = new[] { "Olumlu", "Olumsuz" },
+                data = new[] { positiveCount, negativeCount },
+                //PositiveTitles = positiveTitles,
+                //NegativeTitles = negativeTitles
             };
+
 
             return Json(chartData);
         }

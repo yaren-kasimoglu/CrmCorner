@@ -99,15 +99,6 @@ namespace CrmCorner.Controllers
                 Value = d.Id.ToString()
             }).ToList();
 
-            ViewBag.OutcomeStatus = Enum.GetValues(typeof(OutcomeStatus))
-                                .Cast<OutcomeStatus>()
-                                .Select(e => new SelectListItem
-                                {
-                                    Text = e.ToString(),
-                                    Value = ((int)e).ToString()
-                                }).ToList();
-
-
             ViewBag.Customer = customerItems;
             ViewBag.Status = statusItems;
             ViewBag.Users = userItems;
@@ -117,14 +108,20 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public IActionResult TaskAdd(TaskComp task)
         {
+            var existingTask = _context.TaskComps.FirstOrDefault(t => t.CustomerId == task.CustomerId);
+
+            if (existingTask != null)
+            {
+                TempData["ErrorMessage"] = "Bu müşteri için zaten bir görev eklenmiş.";
+                return RedirectToAction("TaskAdd");
+            }
+
             if (ModelState.IsValid)
             {
                 task.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
 
                 if (task.StatusId.HasValue && task.StatusId.Value != 0) // StatusId kontrolü
                 {
-
-
                     _context.TaskComps.Add(task); // Task'ı ekleyin
                     _context.SaveChanges(); // Değişiklikleri kaydedin
                     return RedirectToAction("Index"); // Başarılıysa, Index sayfasına yönlendir
@@ -182,24 +179,13 @@ namespace CrmCorner.Controllers
                 Value = d.Id.ToString()
             }).ToList();
 
-     
-            ViewBag.OutcomeStatus = Enum.GetValues(typeof(OutcomeStatus))
-                                     .Cast<OutcomeStatus>()
-                                     .Select(e => new SelectListItem
-                                     {
-                                         Text = e.ToString(),
-                                         Value = ((int)e).ToString(),
-                                         Selected = task.Outcome == e // Mevcut task'ın Outcome değerini kontrol edin
-                                     }).ToList();
-
-
             ViewBag.Users = userItems;
 
             ViewBag.Status = statusItems;
 
             ViewBag.Customer = customerItems;
 
-   
+
             return View("TaskEdit", task);
         }
 
@@ -232,77 +218,6 @@ namespace CrmCorner.Controllers
             {
                 return View("ErrorView", editedTask);
             }
-        }
-        #endregion
-
-        public async Task<IActionResult> TaskDetail(int id)
-        {
-            var status = _context.Statuses.ToList();
-            List<SelectListItem> statusItems = status
-        .Select(d => new SelectListItem
-        {
-            Text = d.StatusName,
-            Value = d.StatusId.ToString()
-        }).ToList();
-
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            var currentUserCompanyId = currentUser?.CompanyId;
-
-            var users = _context.Users.Where(u => u.CompanyId == currentUserCompanyId!.Value).ToList();
-            var userItems = users.Select(u => new SelectListItem
-            {
-                Text = u.UserName,
-                Value = u.Id.ToString()
-            }).ToList();
-
-
-            var customer = _context.CustomerNs.Where(c => c.AppUserId == currentUser.Id).ToList();
-
-            List<SelectListItem> customerItems = customer
-            .Select(d => new SelectListItem
-            {
-                Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
-                Value = d.Id.ToString()
-            }).ToList();
-
-
-            ViewBag.Customer = customerItems;
-            ViewBag.Status = statusItems;
-            ViewBag.Users = userItems;
-
-            // TaskComp task = _context.TaskComps
-            //.Include(t => t.TaskCompLogs)
-            ///*     .Include(t => t.Customer)*/ // TaskComp nesnesinin Customer ilişkisini yükle
-            //.FirstOrDefault(t => t.TaskId == id);
-
-            TaskComp task = _context.TaskComps
-               .Include(e => e.FileAttachments)
-                .Include(e => e.Customer).
-                Include(e => e.Status).
-                Include(e => e.AppUser).
-                FirstOrDefault(t => t.TaskId == id);
-
-            if (task == null)
-            {
-                return NotFound();
-            }
-
-            var taskCompLogs = await _context.TaskCompLogs
-                                    .Where(log => log.TaskId == id)
-                                    .OrderByDescending(log => log.UpdatedAt)
-                                    .ToListAsync();
-
-            ViewBag.TaskCompLogs = taskCompLogs;
-
-            if (task.FileAttachments == null)
-            {
-                // FileAttachments koleksiyonu null ise, boş bir liste ile başlat
-                task.FileAttachments = new List<FileAttachment>();
-            }
-
-
-            return View("TaskDetail", task);
         }
 
         private string GetCustomerNameById(int? customerId)
@@ -387,9 +302,11 @@ namespace CrmCorner.Controllers
                         fieldName = "Açıklama";
                     }
 
-                    if (property.Name == "Outcome")
+                    if (property.Name == "IsPositiveOutcome")
                     {
                         fieldName = "Olumlu/Olumsuz";
+                        oldValueString = (bool)originalValue ? "Olumlu" : "Olumsuz";
+                        newValueString = (bool)editedValue ? "Olumlu" : "Olumsuz";
                     }
 
                     if (property.Name == "IsFinalDecisionMaker")
@@ -428,6 +345,81 @@ namespace CrmCorner.Controllers
             }
             await _context.SaveChangesAsync();
         }
+
+        #endregion
+
+        public async Task<IActionResult> TaskDetail(int id)
+        {
+            var status = _context.Statuses.ToList();
+            List<SelectListItem> statusItems = status
+        .Select(d => new SelectListItem
+        {
+            Text = d.StatusName,
+            Value = d.StatusId.ToString()
+        }).ToList();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            var currentUserCompanyId = currentUser?.CompanyId;
+
+            var users = _context.Users.Where(u => u.CompanyId == currentUserCompanyId!.Value).ToList();
+            var userItems = users.Select(u => new SelectListItem
+            {
+                Text = u.UserName,
+                Value = u.Id.ToString()
+            }).ToList();
+
+
+            var customer = _context.CustomerNs.Where(c => c.AppUserId == currentUser.Id).ToList();
+
+            List<SelectListItem> customerItems = customer
+            .Select(d => new SelectListItem
+            {
+                Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
+                Value = d.Id.ToString()
+            }).ToList();
+
+
+            ViewBag.Customer = customerItems;
+            ViewBag.Status = statusItems;
+            ViewBag.Users = userItems;
+
+            // TaskComp task = _context.TaskComps
+            //.Include(t => t.TaskCompLogs)
+            ///*     .Include(t => t.Customer)*/ // TaskComp nesnesinin Customer ilişkisini yükle
+            //.FirstOrDefault(t => t.TaskId == id);
+
+            TaskComp task = _context.TaskComps
+               .Include(e => e.FileAttachments)
+                .Include(e => e.Customer).
+                Include(e => e.Status).
+                Include(e => e.AppUser).
+                FirstOrDefault(t => t.TaskId == id);
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            var taskCompLogs = await _context.TaskCompLogs
+                                    .Where(log => log.TaskId == id)
+                                    .OrderByDescending(log => log.UpdatedAt)
+                                    .ToListAsync();
+
+            ViewBag.TaskCompLogs = taskCompLogs;
+
+            if (task.FileAttachments == null)
+            {
+                // FileAttachments koleksiyonu null ise, boş bir liste ile başlat
+                task.FileAttachments = new List<FileAttachment>();
+            }
+
+
+            return View("TaskDetail", task);
+        }
+
+
+        #region DOSYA İŞLEMLERİ
 
         [HttpPost]
         public async Task<IActionResult> UploadFile(IFormFile file, int taskId)
@@ -517,17 +509,6 @@ namespace CrmCorner.Controllers
             return File(memory, contentType, originalFileName);
         }
 
-        private string GetContentType(string path)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            string contentType;
-            if (!provider.TryGetContentType(path, out contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-            return contentType;
-        }
-
         /// <summary>
         ///FİLE  LAR EKLENDİĞİNDE LOGLAMA VE TİMELİNE A BASMAK İÇİN YAZILAN METHOD
         /// </summary>
@@ -551,7 +532,6 @@ namespace CrmCorner.Controllers
             _context.TaskCompLogs.Add(log);
             await _context.SaveChangesAsync();
         }
-
 
         public async Task<IActionResult> DeleteFile(int fileAttachmentId)
         {
@@ -611,7 +591,18 @@ namespace CrmCorner.Controllers
             _context.TaskCompLogs.Add(log);
             await _context.SaveChangesAsync();
         }
+        #endregion
 
+        private string GetContentType(string path)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            string contentType;
+            if (!provider.TryGetContentType(path, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(int taskId, int statusId)
         {
@@ -625,8 +616,6 @@ namespace CrmCorner.Controllers
             }
             return Json(new { success = false });
         }
-
-
 
         public IActionResult TaskDelete(int id)
         {
