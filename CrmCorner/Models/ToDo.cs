@@ -10,13 +10,13 @@ namespace CrmCorner.Models
         public int Id { get; set; }
 
 
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
-        public string MainGoalTitle { get; set; }
+        public string? MainGoalTitle { get; set; }
 
-        public string DoneList { get; set; }
+        public string? DoneList { get; set; }
 
-        public string NotDoneList { get; set; }
+        public string? NotDoneList { get; set; }
 
 
         public DateTime SystemDate { get; set; }
