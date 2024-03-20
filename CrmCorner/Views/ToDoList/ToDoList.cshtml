@@ -16,7 +16,7 @@
             <div class="card border-warning my-3 h-100 w-100">
                 <div class="card-header" style="font-family: 'DM Sans', sans-serif;">Bugün;</div>
                 <div class="card-body">
-                    <input type="text" style="font-family: 'DM Sans', sans-serif; text-align: center; font-size: xxx-large; border:none; " id="todotitle" class="card-title" placeholder="Yapılacaklar:" />
+                    <input type="text" style="font-family: 'DM Sans', sans-serif; text-align: center; font-size: xxx-large; border:none; " id="todotitle" class="card-title" placeholder="Yapılacaklar:"  />
 
                     <div class="col-md-8">
                         <input type="button" id="ekleButton" value="+" class="button-plus border rounded-circle icon-shape icon-sm lh-0" data-field="quantity">
@@ -35,14 +35,15 @@
                             </tr>
                         </table>
                     </div>
+                    <div class="col-md-4">
+                        <button type="submit" onclick="save()">Kaydet</button>
+                    </div>
                 </div>
             </div>
         </div>
 
 
-        <div class="col-md-4">
-            <button type="submit" onclick="save()">Kaydet</button>
-        </div>
+        
     </div>
 </div>
 
@@ -102,30 +103,30 @@
         height: 20px;
         background-color: #fff;
         border: 2px solid #333;
-        border-radius: 50%;
         position: relative;
         cursor: pointer;
     }
 
         .custom-checkbox::after {
-            content: '';
+            content: ''; /* İçeriğini boş bırakın */
+            width: 6px; /* Tik uzunluğu */
+            height: 12px; /* Tik yüksekliği */
+            border: solid #333; /* Tik rengi */
+            border-width: 0 2px 2px 0; /* Tik şekli */
             position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 12px;
-            height: 12px;
-            background: #333;
-            border-radius: 50%;
-            opacity: 0;
-            transform: scale(0);
-            transition: all 0.3s ease;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg); /* Tik konumu ve dönüşü */
+            opacity: 0; /* Başlangıçta görünmez */
+            transition: opacity 0.3s ease; /* Geçiş efekti */
         }
 
     input[type="checkbox"]:checked + .custom-checkbox::after {
         opacity: 1;
-        transform: scale(1);
     }
-
+    .taskCheckbox:checked + .custom-checkbox {
+        background-color: #2eacb3; /* Checkbox seçildiğinde arka plan rengini yeşil yap */
+    }
     .main-goal {
         display: block;
         margin-top: 20px;
@@ -166,9 +167,9 @@
             @foreach (var task in taskData)
             {
                <label class="task">
-        <input type="checkbox" class="taskCheckbox" id="taskCheckbox" @(true ? "checked" : "")>
+        <input type="checkbox" class="taskCheckbox"  id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" name="textValue" placeholder="Yapılacaklar" value="@task">
+        <input type="text" style="text-decoration:line-through" name="textValue" placeholder="Yapılacaklar" value="@task">
             </label>
         }
                 }
@@ -194,9 +195,9 @@
         // Kartın içeriği
         var kartIcerik2 = `
           <label class="task" >
-             <input type="checkbox" class="taskCheckbox" id="taskCheckbox">
+             <input type="checkbox" class="taskCheckbox" id="taskCheckbox" onclick="clickToDoCheckbox(this)">
              <span class="custom-checkbox"></span>
-             <input type="text" name="textValue" placeholder="Yapılacaklar">
+             <input type="text" name="textValue" id="textInput" onclick="textVisible()"  placeholder="Yapılacaklar">
            </label>
     `;
         // Kartı kartContainer içine ekle
@@ -208,6 +209,19 @@
         addtodo();
     });
 
+    function clickToDoCheckbox(checkbox) {
+        var label = checkbox.parentElement.querySelector('input[type="text"]');
+        if (checkbox.checked) {
+            label.style.textDecoration = "line-through";
+        } else {
+            label.style.textDecoration = "none";
+        }
+    }
+    function textVisible() {
+        var inputElement = document.getElementById("textInput");
+        inputElement.style.textDecoration = "none"; // 
+    }
+   
     function save() {
         var taskLabels = document.querySelectorAll('.task');
         var selectedTaskTexts = [];
@@ -241,6 +255,7 @@
             data: { selected: selectedTaskTextsString, unselected: notselectedTaskTextsString, maingoals: toDoMainGoal, title: toDoTitle },
             dataType: "json",
             success: function () {
+                location.reload();
             }
         });
     }</script>
