@@ -20,37 +20,8 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> ToDoList()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            var today = DateTime.Today;
-            string[] dataArray;
-            string[] dataArrays;
-            if (currentUser != null)
-            {
-               var todo = _context.ToDos
-            .Where(e => e.UserId == currentUser.Id && e.SystemDate == today)
-            .ToList();
-                if (todo.Count>0)
-                {
-                    var selected = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.DoneList;
-                    var unselected = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.NotDoneList;
-                    if (selected != null)
-                    {
-                        dataArray = selected.Split(',');
-                        ViewBag.TaskData = dataArray;
-                    }
-                    if (unselected != null)
-                    {
-                        dataArrays = unselected.Split(',');
-                        ViewBag.NotTaskData = dataArrays;
-                    }
-                }
-                //seçili olanları ve seçili olmayanları ekle
-                return View(todo);
-            }
-            else
-            {
-                ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
-                return View();
-            }
+            ToDoListDay(currentUser);
+            return View();
 
         }
 
@@ -87,6 +58,47 @@ namespace CrmCorner.Controllers
            return Json(new { Message = "success" });
             
          
+        }
+        [HttpPost]
+        public async Task<IActionResult> ToDoListDay(AppUser currentUser)
+        {
+            if (currentUser.CompanyId == 0)
+            {
+                currentUser = await _userManager.GetUserAsync(User);
+            }
+            var today = DateTime.Today;
+            string[] dataArray;
+            string[] dataArrays;
+            if (currentUser != null)
+            {
+                var todo = _context.ToDos
+             .Where(e => e.UserId == currentUser.Id && e.SystemDate == today)
+             .ToList();
+                if (todo.Count > 0)
+                {
+                    var selected = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.DoneList;
+                    var unselected = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.NotDoneList;
+                    if (selected != null)
+                    {
+                        dataArray = selected.Split(',');
+                        ViewBag.TaskData = dataArray;
+                    }
+                    if (unselected != null)
+                    {
+                        dataArrays = unselected.Split(',');
+                        ViewBag.NotTaskData = dataArrays;
+                    }
+                    ViewBag.TitleValue = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.Title;
+                    ViewBag.MainGoalTitle = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.MainGoalTitle;
+                }
+                //seçili olanları ve seçili olmayanları ekle
+                return View(todo);
+            }
+            else
+            {
+                ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
+                return View();
+            }
         }
     }
         

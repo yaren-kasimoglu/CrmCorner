@@ -23,6 +23,8 @@
     <None Remove="wwwroot\node_modules\**" />
     <Content Remove="wwwroot\json\" />
     <None Remove="Views\ToDoList\" />
+    <Content Remove="wwwroot\icons\" />
+    <Content Remove="wwwroot\icons\todo\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.SignalR" Version="2.4.3" />
@@ -78,6 +80,8 @@
 
     <Folder Include="wwwroot\uploads\" />
 
+    <Folder Include="wwwroot\icons\" />
+    <Folder Include="wwwroot\icons\todo\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\CRMTema\bootstrap4\assets\images\coin\BTC.svg" />
