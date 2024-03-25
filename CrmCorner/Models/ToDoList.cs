@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace CrmCorner.Models
 {
 	public class ToDoList
@@ -21,6 +23,9 @@ namespace CrmCorner.Models
         public DateTime SystemDate { get; set; }
 
         public string? UserId { get; set; }
+        [NotMapped]
+        public int Count { get; set; }
+
 
         //public virtual AppUser? AppUser { get; set; }
 
