@@ -36,14 +36,57 @@
 else
 {
 
-   @* <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>*@
+    @* <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>*@
 
-    <div class="row g-2 clearfix row-deck">
-        <div class="col-6">
-            <div class="chart-title">Görevlerim</div>
-            <div style="width: 50%; height: 400px;">
-                <canvas id="userTaskStatusChart"></canvas>
-           
+
+    <div class="row">
+    @if (Model.CurrentUser != null)
+    {
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="card top_counter">
+                <div class="list-group list-group-custom list-group-flush">
+                    <div class="list-group-item d-flex align-items-center py-3">
+                        <div class="icon text-center me-3"><i class="fa fa-user"></i> </div>
+                        <div class="content">
+                            <div>Çalışan Sayımız</div>
+                            <h5 class="mb-0">@Model.CompanyUsers.Count</h5>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center py-3">
+                        <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
+                        <div class="content">
+                            <div>Müşterilerim</div>
+                            <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
+                        </div>
+                    </div>
+                        <div class="list-group-item d-flex align-items-center py-3">
+                            <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
+                            <div class="content">
+                                <div>Sahip Olduğum Görev Sayısı</div>
+                                <h5 class="mb-0">@Model.CurrentUser.TaskComps.Count</h5>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center py-3">
+                            <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
+                            <div class="content">
+                                <div>Müşterilerim</div>
+                                <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+        <div class="col-xl-8 col-lg-12 col-md-12">
+            <div class="col-12">
+                <div class="custom-card" style="width: 50%;">
+                <div class="chart-title">Görevlerim</div>  
+                    <div class="card-body">
+                        <canvas id="userTaskStatusChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -166,6 +209,35 @@ else
                     //        }]
                     //    }
                     //},
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Home/IsFinalDesicionMaker",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var ctx = document.getElementById('isFinalDesicionMaker').getContext('2d');
+                var colors = ['#2eacb3', '#FED049'];
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: '',
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            barThickness: 30,
+                        }]
+                    },
                 });
             },
             error: function (error) {

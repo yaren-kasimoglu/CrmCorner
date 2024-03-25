@@ -3,6 +3,22 @@
     ViewData["Title"] = "TaskAdd";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var key in ViewData.ModelState.Keys)
+            {
+                @foreach (var error in ViewData.ModelState[key].Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-warning alert-dismissible my-custom-alert" role="alert">
@@ -28,7 +44,7 @@
         <div class="col-lg-6">
             <div class="form-group">
                 <label asp-for="Title" class="control-label">Başlık</label>
-                <input asp-for="Title" class="form-control" />
+                <input asp-for="Title" class="form-control"  required/>
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -52,12 +68,13 @@
         <div class="col-lg-6">
             <div class="col-lg-12 col-md-6">
                 <label class="form-label">Müşteri</label>
-                <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
+                <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select select2" aria-label="Default select example" required> 
+                    <option value="">Lütfen seçiniz</option></select>
                 <span asp-validation-for="CustomerId" class="text-danger"></span>
             </div>
             <div class="col-lg-12 col-md-6">
                 <label class="form-label">Görüşmeyi Alan</label>
-                <select asp-for="UserId" asp-items="ViewBag.Users" class="form-control">
+                <select asp-for="UserId" asp-items="ViewBag.Users" class="form-control" required>
                     <option value="">Lütfen seçiniz</option>
                 </select>
                 <span asp-validation-for="UserId" class="text-danger"></span>
@@ -71,7 +88,8 @@
             </div>
             <div class="col-lg-12 col-md-6">
                 <label class="form-label">Güncel Durum</label>
-                <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
+                <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example" required>
+                    <option value="">Lütfen seçiniz</option></select>
                 <span asp-validation-for="StatusId" class="text-danger"></span>
             </div>
             <div class="col-lg-12 col-md-6">

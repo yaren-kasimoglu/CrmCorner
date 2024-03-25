@@ -41,7 +41,29 @@ namespace CrmCorner.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var currentUser = await _userManager.GetUserAsync(User);
+            currentUser = await _context.Users
+                         .Include(u => u.Customers)
+                         .Include(u => u.TaskComps)
+                         .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+      
+            var companyUsers = await _context.Users
+                                             .Where(u => u.CompanyId == currentUser.CompanyId)
+                                             .ToListAsync();
+
+            
+            var viewModel = new CompanyUsersViewModel
+            {
+                CurrentUser = currentUser,
+                CompanyUsers = companyUsers
+            };
+
+            return View(viewModel); // ViewModel'i View'a geçir
         }
         //public async Task<IActionResult> GetWeather(string city)
         //{
@@ -56,7 +78,8 @@ namespace CrmCorner.Controllers
 
         //    return BadRequest("Hava durumu bilgileri alınamadı.");
         //}
-        public async Task<IActionResult> OutcomeStatusChart()
+
+                 public async Task<IActionResult> IsFinalDesicionMaker()
         {
             var userId = _userManager.GetUserId(User);
 
@@ -70,19 +93,50 @@ namespace CrmCorner.Controllers
                 return NotFound();
             }
 
-            var positiveCount = userTaskComps.Count(tc => tc.IsPositiveOutcome);
-            var negativeCount = userTaskComps.Count(tc => !tc.IsPositiveOutcome);
-         //   var positiveTitles = _context.TaskComps.Where(tc => tc.IsPositiveOutcome && tc.UserId == userId).Select(tc => tc.Title).ToList();
-         //   var negativeTitles = _context.TaskComps.Where(tc => !tc.IsPositiveOutcome && tc.UserId == userId).Select(tc => tc.Title).ToList();
+            var isFinalDesicionMaker = userTaskComps.Count(tc => tc.IsFinalDecisionMaker);
+            var IsNotFinalDesicionMaker = userTaskComps.Count(tc => !tc.IsFinalDecisionMaker);
+
+            var chartData = new
+            {
+                labels = new[] { "Evet", "Hayır" },
+                data = new[] { isFinalDesicionMaker, IsNotFinalDesicionMaker },
+            };
+
+
+            return Json(chartData);
+        }
+
+        public async Task<IActionResult> OutcomeStatusChart()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // AppUser olarak atanan TaskComps'ı bul
+            var appUserTasks = await _context.TaskComps
+                                              .Where(tc => tc.UserId == userId)
+                                              .ToListAsync();
+
+            // AssignedUser olarak atanan TaskComps'ı bul
+            var assignedUserTasks = await _context.TaskComps
+                                                   .Where(tc => tc.AssignedUserId == userId)
+                                                   .ToListAsync();
+
+            // İki listeyi birleştir
+            var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
+
+            if (!combinedTasks.Any())
+            {
+                return NotFound();
+            }
+
+            // Olumlu ve olumsuz sonuçların sayısını hesapla
+            var positiveCount = combinedTasks.Count(tc => tc.IsPositiveOutcome);
+            var negativeCount = combinedTasks.Count(tc => !tc.IsPositiveOutcome);
 
             var chartData = new
             {
                 labels = new[] { "Olumlu", "Olumsuz" },
                 data = new[] { positiveCount, negativeCount },
-                //PositiveTitles = positiveTitles,
-                //NegativeTitles = negativeTitles
             };
-
 
             return Json(chartData);
         }
@@ -91,26 +145,30 @@ namespace CrmCorner.Controllers
             // Aktif kullanıcının ID'sini al
             var userId = _userManager.GetUserId(User);
 
-            // Kullanıcı ID'sini kullanarak AppUser kaydını ve ilişkili TaskComps'ı bul
-            var user = await _context.Users
-                                     .Include(u => u.TaskComps)
-                                         .ThenInclude(tc => tc.Status)
-                                     .FirstOrDefaultAsync(u => u.Id == userId);
+            // AppUser olarak atanan TaskComps'ı bul
+            var appUserTasks = await _context.TaskComps
+                                              .Include(tc => tc.Status)
+                                              .Where(tc => tc.UserId == userId)
+                                              .ToListAsync();
 
-            if (user == null)
-            {
-                return NotFound();
-            }
+            // AssignedUser olarak atanan TaskComps'ı bul
+            var assignedUserTasks = await _context.TaskComps
+                                                   .Include(tc => tc.Status)
+                                                   .Where(tc => tc.AssignedUserId == userId)
+                                                   .ToListAsync();
+
+            // İki listeyi birleştir
+            var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
 
             var chartData = new
             {
-                labels = user.TaskComps.Select(tc => tc.Status.StatusName).Distinct(),
-                data = user.TaskComps.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
+                labels = combinedTasks.Select(tc => tc.Status.StatusName).Distinct(),
+                data = combinedTasks.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
             };
 
             return Json(chartData);
         }
-
+        #endregion
 
         public IActionResult Giris()
         {
@@ -180,7 +238,7 @@ namespace CrmCorner.Controllers
 
             // Firma adını Company tablosuna ekle veya varsa mevcut olanını kullan
             //harfleri küçülterek kaydetsin ki büyük küçük kaydedildiğinde yeniden eklenmesin
-            var company = _context.Companies.FirstOrDefault(c => c.CompanyName.ToLower() == request.CompanyName.ToLower()); 
+            var company = _context.Companies.FirstOrDefault(c => c.CompanyName.ToLower() == request.CompanyName.ToLower());
             if (company == null)
             {
                 company = new Company { CompanyName = request.CompanyName };
@@ -196,7 +254,7 @@ namespace CrmCorner.Controllers
                 PhoneNumber = request.Phone,
                 NameSurname = request.NameSurname,
                 PositionName = request.PositionName,
-                CompanyName=request.CompanyName,   
+                CompanyName = request.CompanyName,
             };
 
             user.CompanyId = company.CompanyId;
@@ -234,11 +292,11 @@ namespace CrmCorner.Controllers
         //}
         #endregion
 
+        #region ŞİFRE İŞLEMLERİ
         public IActionResult ForgetPassword()
         {
             return View();
         }
-
 
         [HttpPost]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
@@ -283,12 +341,12 @@ namespace CrmCorner.Controllers
             return View();
         }
 
-        [HttpPost]
+       [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
         {
             var userId = TempData["userId"];
             var token = TempData["token"];
-            if (userId==null || token==null)
+            if (userId == null || token == null)
             {
                 throw new Exception("Bir hata meydana geldi.");
 
@@ -312,13 +370,13 @@ namespace CrmCorner.Controllers
             else
             {
                 ModelState.AddModelErrorList(result.Errors.Select(x => x.Description).ToList());
-           
+
             }
 
-            return RedirectToAction("SignIn","Home");
+            return RedirectToAction("SignIn", "Home");
         }
 
-
+        #endregion
 
         public IActionResult Privacy()
         {

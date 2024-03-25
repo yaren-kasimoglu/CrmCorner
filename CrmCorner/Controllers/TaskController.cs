@@ -131,10 +131,23 @@ namespace CrmCorner.Controllers
                     ModelState.AddModelError("", "Lütfen geçerli bir durum seçiniz.");
                 }
             }
+            else
+            {
+                foreach (var state in ModelState)
+                {
+                    if (state.Value.Errors.Count > 0)
+                    {
+                        Console.WriteLine(state.Key + ": " + state.Value.Errors[0].ErrorMessage);
+                    }
+                }
+            }
+
+      
+
 
             ViewBag.Status = new SelectList(_context.Statuses.ToList(), "StatusId", "StatusName", task.StatusId);
             ViewBag.Users = new SelectList(_context.Users.ToList(), "Id", "UserName", task.UserId);
-            ViewBag.Customer = new SelectList(_context.Users.ToList(), "Id", "Name", task.CustomerId);
+            ViewBag.Customer = new SelectList(_context.CustomerNs.ToList(), "Id", "Name", task.CustomerId);
             return View(task); // Formu ModelState hataları ile geri gönder
         }
         #endregion
@@ -603,6 +616,7 @@ namespace CrmCorner.Controllers
             }
             return contentType;
         }
+
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(int taskId, int statusId)
         {
@@ -615,6 +629,36 @@ namespace CrmCorner.Controllers
                 return Json(new { success = true });
             }
             return Json(new { success = false });
+        }
+
+
+        //Statuslar arası geçiş kurallarının kontrol edileceği method
+        [HttpPost]
+        public async Task<IActionResult> CheckRequiredFieldsBeforeStatusChange(int taskId, int newStatusId)
+        {
+            var task = await _context.TaskComps.FirstOrDefaultAsync(t => t.TaskId == taskId);
+            if (task == null) return Json(new { isValid = false, message = "Task not found." });
+
+            // Örneğin, durum 'Görüşme Gerçekleşti' ise ve 'ValueOrOffer' boşsa
+            if (newStatusId == 4 && string.IsNullOrEmpty(task.ValueOrOffer.ToString()))
+            {
+                return Json(new { isValid = false, message = "Görevinizi buraya kaydetmek için Değer Teklifi alanını girmeniz gerekmektedir." });
+            }
+
+            // Diğer durumlar için benzer kontroller eklenecek
+
+            return Json(new { isValid = true });
+        }
+
+
+        public async Task<IActionResult> FilterSalesDone(DateTime startDate, DateTime endDate)
+        {
+            var filteredTasks = await _context.TaskComps
+                .Where(t => t.SalesDone >= startDate && t.SalesDone <= endDate)
+                .ToListAsync();
+
+            // Filtrelenmiş görevleri döndür
+            return View(filteredTasks);
         }
 
         public IActionResult TaskDelete(int id)
@@ -631,6 +675,8 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Index");
         }
     }
+
+
     public class FileUploadOptions
     {
         public string UploadFolderPath { get; set; }

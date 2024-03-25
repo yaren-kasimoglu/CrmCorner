@@ -23,6 +23,9 @@ public partial class TaskComp
 
     public DateTime? ModifiedDate { get; set; }
 
+    [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
+    public DateTime? FinalSalesDone { get; set; }
+
     public int? StatusId { get; set; }
 
     public string? UserId { get; set; }
@@ -39,7 +42,7 @@ public partial class TaskComp
     public bool IsFinalDecisionMaker { get; set; } = false;// Son karar mercii olup olmadığı
     public bool IsPositiveOutcome { get; set; } = false; // CheckBox ile kontrol edilecek
 
-    public string NegativeReason { get; set; }
+    public string? NegativeReason { get; set; }
 
     // Dosya ekleri için koleksiyon
     public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
