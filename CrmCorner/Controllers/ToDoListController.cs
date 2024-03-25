@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using CrmCorner.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Exchange.WebServices.Data;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Graph;
+using MySqlX.XDevAPI.Relational;
 
 namespace CrmCorner.Controllers
 {
@@ -20,14 +22,37 @@ namespace CrmCorner.Controllers
         }
         public async Task<IActionResult> ToDoList()
         {
-            
+            string[] dataArray;
+
             var currentUser = await _userManager.GetUserAsync(User);
             ToDoListDay();
             var todoList = _context.ToDoList
              .Where(e => e.UserId == currentUser.Id)
              .ToList();
-             ViewBag.ToDoList = todoList;
-             return View();
+            int titleCounts=0;
+
+            foreach (var item in todoList)
+            {
+                var title = item.Title;
+                if(title.Length>7)
+                    item.Title = title.Substring(0, 7)+"...";
+                var unselected = todoList.FirstOrDefault(e => e.Title == title)?.NotDoneList;
+                if (unselected != null)
+                {
+                    dataArray = unselected.Split(',');
+                    var count = dataArray.Length;
+                    if (count != null)
+                    {
+                        item.Count = (int)count;
+                    }
+                }
+                else
+                    item.Count = 0;
+                dataArray =null; 
+            }
+            ViewBag.ToDoList = todoList;
+            
+            return View();
         }
 
         [HttpPost]
@@ -35,7 +60,7 @@ namespace CrmCorner.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var today = DateTime.Today;
-            if (itemId ==0)
+            if (itemId ==1)
             {
                 var toDoValue = _context.ToDos
               .Include(e => e.AppUser)
@@ -100,14 +125,19 @@ namespace CrmCorner.Controllers
             toDolist.SystemDate = DateTime.Today;
             toDolist.UserId = currentUser.Id;
             toDolist.Title = title;
-            try
+            var toDoValue = _context.ToDoList
+               .Where(e => e.UserId == currentUser.Id && e.Title == title)
+               .Select(e => e.Id).FirstOrDefault();
+            if (toDoValue == 0)
             {
-                _context.ToDoList.Add(toDolist);
-                _context.SaveChanges();
+               _context.ToDoList.Add(toDolist);
+               _context.SaveChanges();
+              
             }
-            catch(Exception ex)
+            else
             {
-           
+                _context.ToDoList.Update(toDolist);
+                _context.SaveChanges();
             }
             return Json(new { Message = "success" });
         }
@@ -192,7 +222,8 @@ namespace CrmCorner.Controllers
                     MainGoalTitle = ViewBag.MainGoalTitle,
                     Title = ViewBag.TitleValue,
                     TaskData = ViewBag.TaskData,
-                    NotTaskData = ViewBag.NotTaskData
+                    NotTaskData = ViewBag.NotTaskData,
+                    Count= todo.Count
                 };
                 return Json(new { Message = jsonData });
 
