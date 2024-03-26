@@ -1,4 +1,4 @@
-﻿@model List<CrmCorner.Models.AppUser>
+﻿@model CompanyUsersViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -6,10 +6,16 @@
 }
 <style>
     .chart-title {
-        text-align: center; /* Başlığı ortalar */
         margin-bottom: 10px; /* Başlık ile grafiği ayırmak için alt boşluk ekler */
-        font-size: 24px; /* Başlık font boyutunu ayarlar */
+        font-size: 20px; /* Başlık font boyutunu ayarlar */
         /* Daha fazla stil özelleştirmesi yapabilirsiniz */
+    }
+
+    .custom-card {
+        background-color: #fff; /* Gri tonunda bir arka plan rengi */
+        border-radius: 3px; /* Hafif yuvarlak köşeler */
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Hafif bir gölge */
+        margin-bottom: 30px;
     }
 </style>
 
@@ -40,49 +46,49 @@ else
 
 
     <div class="row">
-    @if (Model.CurrentUser != null)
+        @*@if (Model.CurrentUser != null)
     {
-        <div class="col-xl-4 col-lg-6 col-md-6">
-            <div class="card top_counter">
-                <div class="list-group list-group-custom list-group-flush">
-                    <div class="list-group-item d-flex align-items-center py-3">
-                        <div class="icon text-center me-3"><i class="fa fa-user"></i> </div>
-                        <div class="content">
-                            <div>Çalışan Sayımız</div>
-                            <h5 class="mb-0">@Model.CompanyUsers.Count</h5>
-                        </div>
-                    </div>
-                    <div class="list-group-item d-flex align-items-center py-3">
-                        <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
-                        <div class="content">
-                            <div>Müşterilerim</div>
-                            <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
-                        </div>
-                    </div>
-                        <div class="list-group-item d-flex align-items-center py-3">
-                            <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
-                            <div class="content">
-                                <div>Sahip Olduğum Görev Sayısı</div>
-                                <h5 class="mb-0">@Model.CurrentUser.TaskComps.Count</h5>
-                            </div>
-                        </div>
-                        <div class="list-group-item d-flex align-items-center py-3">
-                            <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
-                            <div class="content">
-                                <div>Müşterilerim</div>
-                                <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
-                            </div>
-                        </div>
-                </div>
-            </div>
-        </div>
-    }
+    <div class="col-xl-4 col-lg-6 col-md-6">
+    <div class="card top_counter">
+    <div class="list-group list-group-custom list-group-flush">
+    <div class="list-group-item d-flex align-items-center py-3">
+    <div class="icon text-center me-3"><i class="fa fa-user"></i> </div>
+    <div class="content">
+    <div>Çalışan Sayımız</div>
+    <h5 class="mb-0">@Model.CompanyUsers.Count</h5>
+    </div>
+    </div>
+    <div class="list-group-item d-flex align-items-center py-3">
+    <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
+    <div class="content">
+    <div>Müşterilerim</div>
+    <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
+    </div>
+    </div>
+    <div class="list-group-item d-flex align-items-center py-3">
+    <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
+    <div class="content">
+    <div>Sahip Olduğum Görev Sayısı</div>
+    <h5 class="mb-0">@Model.CurrentUser.TaskComps.Count</h5>
+    </div>
+    </div>
+    <div class="list-group-item d-flex align-items-center py-3">
+    <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
+    <div class="content">
+    <div>Müşterilerim</div>
+    <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    }*@
 
 
         <div class="col-xl-8 col-lg-12 col-md-12">
             <div class="col-12">
                 <div class="custom-card" style="width: 50%;">
-                <div class="chart-title">Görevlerim</div>  
+                    <div class="chart-title">Görevlerim</div>
                     <div class="card-body">
                         <canvas id="userTaskStatusChart"></canvas>
                     </div>
@@ -90,50 +96,31 @@ else
             </div>
         </div>
 
-        <div class="col-6">
-            <h5>Görevlerin Durumlarına Göre Dağılımları</h5>
-            <div style="width: 50%; height: 400px;">
-                <canvas id="outcomeStatusChart"></canvas>
+    </div>
+
+
+    <div class="custom-card">
+        <div class="row g-2 clearfix row-deck">
+            <div class="col-12">
+                <div class="card-body text-center">
+                    <div class="col-6">
+                        <h6>Görevlerin Durumlarına Göre Dağılımları</h6>
+                        <div style="width: 50%;">
+                            <canvas id="outcomeStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body text-center">
+                    <div class="col-6">
+                        <h6>Son Karar Mercii İle Görüşme Durumları</h6>
+                        <div style="width: 50%;">
+                            <canvas id="isFinalDesicionMaker"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-
-@*        <div class="col-6">
-            <div class="card-header">
-                <h6 class="card-title">Todo List</h6>
-                <small>This Month task list</small>
-            </div>
-            <div class="card-body todo_list">
-                <ul class="list-unstyled mb-0">
-                    <li class="d-flex justify-content-between mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="Surgical" checked>
-                            <label class="form-check-label" for="Surgical">Surgical Ventricular Restoration</label>
-                        </div>
-                    </li>
-                    <li class="d-flex justify-content-between mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="Coronary">
-                            <label class="form-check-label" for="Coronary">Coronary Revascularization</label>
-                        </div>
-                    </li>
-                    <li class="d-flex justify-content-between mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="Bladder">
-                            <label class="form-check-label" for="Bladder">Bladder Cystectomy</label>
-                        </div>
-                    </li>
-                    <li class="d-flex justify-content-between">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="Thoracic">
-                            <label class="form-check-label" for="Thoracic">Thoracic Aortic Dissection Repair</label>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>*@
-
-
     </div>
 
 
@@ -176,8 +163,8 @@ else
             error: function (error) {
                 console.error('Error fetching data:', error);
             }
-        }); 
-        
+        });
+
     });
     $(document).ready(function () {
         $.ajax({
@@ -187,9 +174,9 @@ else
             dataType: "json",
             success: function (data) {
                 var ctx = document.getElementById('outcomeStatusChart').getContext('2d');
-                var colors = ['#cb8fe7', '#BA55D3', '#800080'];
+                var colors = ['#FED049', '#2D6187'];
                 new Chart(ctx, {
-                    type: 'bar',
+                    type: 'doughnut',
                     data: {
                         labels: data.labels,
                         datasets: [{
