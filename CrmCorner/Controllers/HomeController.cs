@@ -129,7 +129,7 @@ namespace CrmCorner.Controllers
 
             return Json(chartData);
         }
-        #endregion
+#endregion
 
         public IActionResult Giris()
         {
