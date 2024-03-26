@@ -12,12 +12,6 @@ using NuGet.Common;
 using System.Diagnostics;
 using System.Security.Claims;
 
-
-//Scaffold-DbContext "server=94.73.148.165;database=u1613932_crmCor;user=u1613932_crmcorn;password=.8j:-6njA8WLDf7_;Convert Zero Datetime=True;" Pomelo.EntityFrameworkCore.MySql -OutputDir Models -force
-
-
-
-
 namespace CrmCorner.Controllers
 {
     public class HomeController : Controller
@@ -41,45 +35,12 @@ namespace CrmCorner.Controllers
 
         public IActionResult Index()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            currentUser = await _context.Users
-                         .Include(u => u.Customers)
-                         .Include(u => u.TaskComps)
-                         .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
-
-            if (currentUser == null)
-            {
-                return NotFound();
-            }
-      
-            var companyUsers = await _context.Users
-                                             .Where(u => u.CompanyId == currentUser.CompanyId)
-                                             .ToListAsync();
-
-            
-            var viewModel = new CompanyUsersViewModel
-            {
-                CurrentUser = currentUser,
-                CompanyUsers = companyUsers
-            };
-
-            return View(viewModel); // ViewModel'i View'a geçir
+            return View();
         }
-        //public async Task<IActionResult> GetWeather(string city)
-        //{
-        //    var url = $"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={_apiKey}&units=metric";
-        //    var response = await _httpClient.GetAsync(url);
-        //    if (response.IsSuccessStatusCode)
-        //    {
-        //        var content = await response.Content.ReadAsStringAsync();
-        //        var weatherData = JsonConvert.DeserializeObject(content);
-        //        return Ok(weatherData); // Hava durumu verilerini JSON olarak döndür
-        //    }
 
-        //    return BadRequest("Hava durumu bilgileri alınamadı.");
-        //}
+        #region CHARTS
 
-                 public async Task<IActionResult> IsFinalDesicionMaker()
+        public async Task<IActionResult> IsFinalDesicionMaker()
         {
             var userId = _userManager.GetUserId(User);
 
@@ -341,7 +302,7 @@ namespace CrmCorner.Controllers
             return View();
         }
 
-       [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
         {
             var userId = TempData["userId"];

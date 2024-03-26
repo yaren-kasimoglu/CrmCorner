@@ -639,13 +639,27 @@ namespace CrmCorner.Controllers
             var task = await _context.TaskComps.FirstOrDefaultAsync(t => t.TaskId == taskId);
             if (task == null) return Json(new { isValid = false, message = "Task not found." });
 
-            // Örneğin, durum 'Görüşme Gerçekleşti' ise ve 'ValueOrOffer' boşsa
+            // Örneğin, durum 'Teklif Gönderildi' ise ve 'ValueOrOffer' boşsa
             if (newStatusId == 4 && string.IsNullOrEmpty(task.ValueOrOffer.ToString()))
             {
-                return Json(new { isValid = false, message = "Görevinizi buraya kaydetmek için Değer Teklifi alanını girmeniz gerekmektedir." });
+                return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için Değer Teklifi alanını doldurmanız gerekmektedir." });
+            }
+            if (newStatusId == 3)
+            {
+                // Görüşmeyi Gerçekleştiren kontrolü
+                if (string.IsNullOrEmpty(task.AssignedUserId))
+                {
+                    return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'Görüşmeyi Gerçekleştiren' alanını doldurmanız gerekmektedir." });
+                }
+
+                // Olumlu Sonuç ve Satış Kapatma Tarihi kontrolü
+                if (task.IsPositiveOutcome && !task.SalesDone.HasValue)
+                {
+                    return Json(new { isValid = false, message = "Satış süreciniz olumlu ilerliyorsa lütfen 'Planlanan Satış Kapatma Tarihi' alanını doldurunuz." });
+                }
             }
 
-            // Diğer durumlar için benzer kontroller eklenecek
+      
 
             return Json(new { isValid = true });
         }

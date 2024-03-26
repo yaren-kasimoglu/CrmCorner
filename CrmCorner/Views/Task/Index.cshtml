@@ -35,6 +35,137 @@
         /* Kartlara bir minimum yükseklik verin */
         min-height: 100px; /* Kartın içindeki liste boşsa bile görsel bir alan sağlar */
     }
+
+
+
+    .search-filter-container {
+        display: flex;
+        justify-content: start;
+        align-items: stretch; /* İçerikleri aynı yükseklikte hizalar */
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 0;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border: 1px solid #2D6187;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .status-filter {
+        display: flex;
+        align-items: center;
+        padding: 1px;
+        margin-right: 8px;
+        border: 1px solid #2D6187;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .search-box input[type="text"] {
+        flex-grow: 1; /* Arama kutusunu esnet ve mevcut alana doldur */
+        border: 1px solid #d3d3d3;
+        margin-right: 8px;
+        padding: 10px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .status-filter select {
+        padding: 10px;
+        border: none;
+        background-color: #fff;
+        cursor: pointer;
+        -webkit-appearance: none; /* Özelleştirilmiş dropdown için */
+        -moz-appearance: none;
+        appearance: none;
+        font-size: 14px;
+        color: #333;
+        background-image: url('dropdown-arrow.svg'); /* Sizin sağladığınız ok ikonu */
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 16px;
+        position: relative;
+    }
+
+    /* Dropdown menünün altındaki ok işaretini eklemek için kullanılan SVG */
+    .status-filter select {
+        background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23000" d="M2 0L0 2h4L2 0z"/></svg>');
+        background-position: right 15px center;
+        background-size: 12px 6px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+
+    .final-decision-filter {
+        display: flex;
+        align-items: center;
+        padding: 1px;
+        margin-right: 8px;
+        border: 1px solid #2D6187;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+        .final-decision-filter select {
+            padding: 10px;
+            border: none;
+            background-color: #fff;
+            cursor: pointer;
+            -webkit-appearance: none; /* Özelleştirilmiş dropdown için */
+            -moz-appearance: none;
+            appearance: none;
+            font-size: 14px;
+            color: #333;
+            background-image: url('dropdown-arrow.svg'); /* Sizin sağladığınız ok ikonu */
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            position: relative;
+            padding-right: 30px;
+        }
+
+        .final-decision-filter select {
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23000" d="M2 0L0 2h4L2 0z"/></svg>');
+            background-position: right 15px center;
+            background-size: 12px 6px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 30px;
+        }
+
+
+            /* Hover efektleri */
+            .search-box input[type="text"]:hover,
+            .search-box input[type="text"]:focus,
+            .status-filter select:hover,
+            .status-filter select:focus,
+            .final-decision-filter select:hover,
+            .final-decision-filter select:focus {
+                background-color: #e6e6e6;
+            }
+
+    @@media (max-width: 768px) {
+        .search-filter-container {
+            flex-direction: column;
+        }
+
+        .search-box,
+        .status-filter {
+            width: 100%;
+            margin-right: 0;
+            margin-bottom: 10px;
+            border: 3px solid #2D6187; /* Gri tonlu 1 piksel kalınlığında çerçeve */
+            border-radius: 4px; /* Hafif yuvarlatılmış köşeler için */
+        }
+    }
 </style>
 
 
@@ -61,19 +192,45 @@
         }
     }
 }
-<div class="filter-search-container">
-    <input type="text" id="taskSearch" placeholder="Görev ara..." onkeyup="filterTasks()">
-    <select id="statusFilter" onchange="filterTasks()">
-        <option value="">Tüm Durumlar</option>
-        <option value="1">İlk Temas</option>
-        <option value="2">Görüşme Ayarlandı</option>
-        <option value="3">Görüşme Gerçekleşti</option>
-        <option value="4">Teklif Gönderildi</option>
-        <option value="5">Sözleşme Aşamasında</option>
-        <option value="6">Satış Tamamlandı</option>
-        <!-- Diğer durumlar -->
-    </select>
+
+<div class="search-filter-container">
+    <div class="search-box">
+        <input type="text" placeholder="Ara . . ." id="searchTasks" style="border-color:#2D6187;  border-radius: 4px;">
+
+        <div class="status-filter">
+            <select id="statusFilter">
+                <option value="">Tüm Durumlar</option>
+                <option value="1">İlk Temas</option>
+                <option value="2">Görüşme Ayarlandı</option>
+                <option value="3">Görüşme Gerçekleşti</option>
+                <option value="4">Teklif Gönderildi</option>
+                <option value="5">Sözleşme Aşamasında</option>
+                <option value="6">Satış Tamamlandı</option>
+            </select>
+        </div>
+
+        <div class="final-decision-filter">
+            <select id="isFinalDecisionMaker">
+                <option value="">Son Karar Mercii İle Görüşüldü</option>
+                <option value="true">Evet</option>
+                <option value="false">Hayır</option>
+            </select>
+        </div>
+
+        @*        <div class="sales-done-filter">
+        <label for="startDate">Başlangıç Tarihi:</label>
+        <input type="date" id="startDate" name="startDate">
+
+        <label for="endDate">Bitiş Tarihi:</label>
+        <input type="date" id="endDate" name="endDate">
+
+        <button type="button" id="filterButton">Filtrele</button>
+        </div>*@
+
+
+    </div>
 </div>
+
 
 <div class="row g-3">
     @{
@@ -125,7 +282,8 @@
                 }
                 <div class="card mb-4 @statusClass" style="border-color:@borderColor; min-height:400px;" data-statusid="@status.Key">
                     <div class="card-header">
-                        <h6 class="card-title">@status.Value       <span id="taskCount_@status.Key">@(tasksInThisStatus.Count())</span></h6> 
+                        <h6 class="card-title">@status.Value </h6>
+                        <span id="taskCount_@status.Key">Görev Sayısı:@(tasksInThisStatus.Count())</span>
 
                         <ul class="header-dropdown">
                             <li>
@@ -137,19 +295,31 @@
                         </ul>
                     </div>
                     <div class="card-body">
-                    
-                   
+
+
 
                         @if (tasksInThisStatus.Any())
                         {
-                        // Görevleri listele
-                        <div class="dd" data-plugin="nestable">
+                            // Görevleri listele
+                            <div class="dd" data-plugin="nestable">
                                 <ol class="dd-list" data-statusid="@status.Key">
-                                @foreach (var task in tasksInThisStatus)
-                                {
-                                        <li class="dd-item" data-taskid="@task.TaskId" data-statusid="@task.Status.StatusId">
+                                    @foreach (var task in tasksInThisStatus)
+                                    {
+                                        <li class="dd-item" data-taskid="@task.TaskId" data-statusid="@task.Status.StatusId" data-title="@task.Title"
+                                            data-value-or-offer="@task.ValueOrOffer?.ToString("0.##")"
+                                            data-description="@task.Description"
+                                            data-sales-done="@task.SalesDone?.ToString("dd-MM-yyyyTHH:mm:ss")"
+                                            data-created-date="@task.CreatedDate.ToString("dd-MM-yyyyTHH:mm:ss")"
+                                            data-modified-date="@task.ModifiedDate?.ToString("dd-MM-yyyyTHH:mm:ss")"
+                                            data-is-final-decision-maker="@task.IsFinalDecisionMaker"
+                                            data-is-positive-outcome="@task.IsPositiveOutcome"
+                                            data-negative-reason="@task.NegativeReason"
+                                            data-user-name="@task.AppUser?.UserName"
+                                            data-assigned-user-name="@task.AssignedUser?.UserName"
+                                            data-customer-name="@task.Customer?.Name @task.Customer?.Surname">
 
-                                        <div class="dd-handle">
+
+                                            <div class="dd-handle">
                                                 <a href="/Task/TaskDetail/@task.TaskId" class="dd-item-title">
                                                     <h6>@task.Title</h6>
                                                 </a>
@@ -168,24 +338,43 @@
                                                         </button>
                                                     </a>
                                                 </div>
-                                        </div>
-                                    </li>
-                                }
-                            </ol>
-                        </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ol>
+                            </div>
                         }
                         else
                         {
-                        // Eğer bu duruma ait görev yoksa
-                        <p>Görev Yok.</p>
+                            // Eğer bu duruma ait görev yoksa
+                            <p>Görev Yok.</p>
                         }
                     </div>
                 </div>
             </div>
         }
     }
+
 </div>
 
+<!-- Modal = statuslar arasında geçişte uyarı verilecek ekran için ayarlandı-->
+<div class="modal fade" id="requiredFieldModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Dikkat</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- core js file -->
@@ -195,10 +384,126 @@
 <link href="~/jquery/jquery-ui/dist/themes/base/jquery-ui.min.css" rel="stylesheet" />
 
 
-@* Burada Index sayfasına özgü JavaScript dosyaları ve scriptler yer alacak *@
+@* Burada Task Index sayfasına özgü JavaScript dosyaları ve scriptler yer alacak *@
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/plugin/nestable/jquery.nestable.min.js"></script>
 <script src="~/jquery/jquery-ui/dist/jquery-ui.min.js"></script>
+
+
+
+<script>
+    function performSearch() {
+
+        var searchTerm = document.getElementById('searchTasks').value.toLowerCase();
+
+        var tasks = document.querySelectorAll('.dd-item');
+
+        tasks.forEach(function (task) {
+
+            var title = task.getAttribute('data-title').toString().toLowerCase();
+            var description = task.getAttribute('data-description').toString().toLowerCase();
+            var valueOrOffer = task.getAttribute('data-value-or-offer') ? task.getAttribute('data-value-or-offer').toLowerCase() : '';
+            var salesDone = task.getAttribute('data-sales-done') ? task.getAttribute('data-sales-done').toLowerCase() : '';
+            var createdDate = task.getAttribute('data-created-date') ? task.getAttribute('data-created-date').toLowerCase() : '';
+            var modifiedDate = task.getAttribute('data-modified-date') ? task.getAttribute('data-modified-date').toLowerCase() : '';
+            var isFinalDecisionMaker = task.getAttribute('data-is-final-decision-maker') ? task.getAttribute('data-is-final-decision-maker').toLowerCase() : '';
+            var isPositiveOutcome = task.getAttribute('data-is-positive-outcome') ? task.getAttribute('data-is-positive-outcome').toLowerCase() : '';
+            var negativeReason = task.getAttribute('data-negative-reason') ? task.getAttribute('data-negative-reason').toLowerCase() : '';
+
+
+            var userName = task.getAttribute('data-user-name') ? task.getAttribute('data-user-name').toLowerCase() : '';
+            var assignedUserName = task.getAttribute('data-assigned-user-name') ? task.getAttribute('data-assigned-user-name').toLowerCase() : '';
+            var customerName = task.getAttribute('data-customer-name') ? task.getAttribute('data-customer-name').toLowerCase() : '';
+
+            isFinalDecisionMaker = isFinalDecisionMaker === 'true' ? 'evet' : (isFinalDecisionMaker === 'false' ? 'hayır' : '');
+            isPositiveOutcome = isPositiveOutcome === 'true' ? 'olumlu' : (isPositiveOutcome === 'false' ? 'olumsuz' : '');
+
+            if (title.includes(searchTerm)
+                || description.includes(searchTerm)
+                || valueOrOffer.includes(searchTerm)
+                || salesDone.includes(searchTerm)
+                || createdDate.includes(searchTerm)
+                || modifiedDate.includes(searchTerm)
+                || isFinalDecisionMaker.includes(searchTerm)
+                || isPositiveOutcome.includes(searchTerm)
+                || negativeReason.includes(searchTerm)
+                || userName.includes(searchTerm)
+                || assignedUserName.includes(searchTerm)
+                || customerName.includes(searchTerm)) {
+                task.style.display = ''; // Eşleşen görevleri göster
+            }
+
+
+            else {
+                task.style.display = 'none'; // Eşleşmeyen görevleri gizle
+            }
+        });
+    }
+
+    // Arama kutusuna girilen her karakterde performSearch fonksiyonunu çağır
+    document.getElementById('searchTasks').addEventListener('keyup', performSearch);
+
+
+    function filterByStatus() {
+        var selectedStatus = document.getElementById('statusFilter').value;
+        var cards = document.querySelectorAll('.card');
+
+        cards.forEach(function (card) {
+            var cardStatus = card.getAttribute('data-statusid');
+            if (selectedStatus === "" || cardStatus === selectedStatus) {
+                card.style.display = ''; // Seçilen durumla eşleşen kartları göster
+            } else {
+                card.style.display = 'none'; // Eşleşmeyen kartları gizle
+            }
+        });
+    }
+
+    // Dropdown'da bir seçim yapıldığında filterByStatus fonksiyonunu çağır
+    document.getElementById('statusFilter').addEventListener('change', filterByStatus);
+
+
+
+    // Filtreleme fonksiyonu for isFinalDecisionMaker
+    function filterFinalDecision() {
+
+        // Dropdown'dan seçilen değeri al
+        var filterValue = document.getElementById('isFinalDecisionMaker').value.toLowerCase(); // Küçük harfle yazılmasını sağla
+
+        // Tüm görevleri al
+        var tasksArray = Array.from(document.querySelectorAll('.dd-item'));
+
+
+        if (tasksArray.length === 0) {
+            console.log('Hiç görev öğesi bulunamadı.');
+        }
+
+        else {
+            // Her görev için döngü
+            tasksArray.forEach(function (task) {
+
+                var isFinalAttribute = task.getAttribute('data-is-final-decision-maker');
+                var isFinal = isFinalAttribute === 'True' ? 'true' : (isFinalAttribute === 'False' ? 'false' : '');
+
+
+                // Görevi göster veya gizle
+                if (filterValue === "" || filterValue === isFinal) {
+                    task.style.display = '';
+                } else {
+                    task.style.display = 'none';
+                }
+            });
+
+        }
+    }
+
+
+    document.getElementById('isFinalDecisionMaker').addEventListener('change', filterFinalDecision);
+
+
+    filterFinalDecision();
+
+</script>
+
 
 
 <script>
@@ -262,29 +567,43 @@
     // Kartları ve listeleri bırakılabilir yapın
 
     $('.card, .dd-list').droppable({
-         accept: '.dd-item',
-        hoverClass: 'drop-hover', // Sürüklerken görsel ipucu sağlamak için
-        tolerance: 'pointer', // İşaretçi droppable alanın üzerine geldiğinde bırakmayı kabul eder
+        accept: '.dd-item',
+        hoverClass: 'drop-hover',
+        tolerance: 'pointer',
         drop: function (event, ui) {
-
             var $card = $(this);
             var newStatusId = $card.data('statusid');
             var taskId = ui.draggable.data('taskid');
 
             if (newStatusId !== undefined) {
-                // Yeni durum id alındıysa ve farklıysa
-                ui.draggable.fadeOut(function () {
-                    // Sürüklenen öğeyi yeni listeye ekleyin
-                    $(this).appendTo($('.dd-list[data-statusid="' + newStatusId + '"]')).fadeIn();
-                    // Durumu server'da güncelleyin
-                    updateTaskStatus(taskId, newStatusId);
+                // Önce gerekli alanların kontrolü için AJAX isteği gönder
+                $.ajax({
+                    url: '/Task/CheckRequiredFieldsBeforeStatusChange',
+                    type: 'POST',
+                    data: { taskId: taskId, newStatusId: newStatusId },
+                    success: function (response) {
+                        if (response.isValid) {
+                            // Alanlar geçerliyse, görevin durumunu güncelleyin
+                            updateTaskStatus(taskId, newStatusId);
+                            ui.draggable.fadeOut(function () {
+                                $(this).appendTo($('.dd-list[data-statusid="' + newStatusId + '"]')).fadeIn();
+                            });
+                        } else {
+                            // Alanlar geçerli değilse, modal ile uyarı mesajı göster
+                            $('#requiredFieldModal .modal-body').text(response.message);
+                            $('#requiredFieldModal').modal('show');
+                        }
+                    },
+                    error: function () {
+                        console.error('Failed to check required fields.');
+                    }
                 });
             } else {
-                // Durum aynıysa veya tanımlanmamışsa
                 ui.draggable.css('top', '0').css('left', '0').fadeIn();
             }
         }
     });
+
 
     function updateTaskStatus(taskId, newStatusId) {
         // AJAX isteğini gönder
@@ -309,28 +628,5 @@
     }
 
 
-    function filterTasks() {
-        var searchText = document.getElementById('taskSearch').value.toLowerCase();
-        var statusFilter = document.getElementById('statusFilter').value;
-
-        var tasks = document.querySelectorAll('.dd-item');
-
-        tasks.forEach(function (task) {
-            var title = task.querySelector('.dd-item-title h6').textContent.toLowerCase();
-            var status = task.getAttribute('data-statusid');
-
-            var titleMatch = title.indexOf(searchText) > -1;
-            var statusMatch = statusFilter === "" || status === statusFilter;
-
-            if (titleMatch && statusMatch) {
-                task.style.display = '';
-            } else {
-                task.style.display = 'none';
-            }
-        });
-    }
-
 
 </script>
-
-
