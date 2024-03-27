@@ -33,9 +33,35 @@ namespace CrmCorner.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser == null)
+            {
+                return View();
+            }
+
+            currentUser = await _context.Users
+                             .Include(u => u.Customers)
+                             .Include(u => u.TaskComps)
+                             .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+
+        
+            var companyUsers = await _context.Users
+                                             .Where(u => u.CompanyId == currentUser.CompanyId)
+                                             .ToListAsync();
+
+            var taskComps = await _context.TaskComps.ToListAsync(); // Bu satırı görevleri yüklemek için ekledim
+
+            var viewModel = new CompanyUsersViewModel
+            {
+                CurrentUser = currentUser,
+                CompanyUsers = companyUsers,
+                TaskComps = taskComps // ViewModel'e TaskComps ekleyin
+            };
+
+            return View(viewModel);
         }
 
         #region CHARTS

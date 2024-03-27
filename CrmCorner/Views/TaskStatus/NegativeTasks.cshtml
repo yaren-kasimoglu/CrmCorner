@@ -15,13 +15,14 @@
         <tr>
             <th scope="col">Görev Adı</th>
             <th scope="col">Değer Teklifi</th>
+            <th scope="col">Olumsuz Olma Sebebi</th>
             <th scope="col">Açıklama</th>
             <th scope="col">Son Durum</th>
             <th scope="col">Görüşmeyi Alan / Görev Sahibi</th>
             <th scope="col">Görüşmeyi Gerçekleştiren</th>
             <th scope="col">Müşteri Bilgileri</th>
             <th scope="col">Görüşülen Kişi Son Karar Mercii</th>
-            <th scope="col">Olumsuz Olma Sebebi</th>
+            
         </tr>
     </thead>
     <tbody>
@@ -31,6 +32,7 @@
 
                 <td>@item.Title</td>
                 <td>@item.ValueOrOffer?.ToString("N2")</td>
+                <td>@item.NegativeReason</td>
                 <td>@item.Description</td>
                 <td>
                     @if (item.Status != null)
@@ -84,7 +86,7 @@
                         }
                     </span>
                 </td>
-                <td>@item.NegativeReason</td>
+          
             </tr>
         }
     </tbody>
