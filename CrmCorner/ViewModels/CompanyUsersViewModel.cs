@@ -4,7 +4,8 @@ namespace CrmCorner.ViewModels
 {
     public class CompanyUsersViewModel
     {
-        public AppUser  CurrentUser { get; set; }
-        public AppUser CompanyUsers { get; set; }
+        public AppUser CurrentUser { get; set; }
+        public List<AppUser> CompanyUsers { get; set; }
+        public List<TaskComp> TaskComps { get; set; } // Eğer TaskComps'ı ayrıca göstermek istiyorsanız
     }
 }

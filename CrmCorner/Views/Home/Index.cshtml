@@ -17,6 +17,31 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Hafif bir gölge */
         margin-bottom: 30px;
     }
+
+
+
+    /* Responsive grid ayarları */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .col-xl-4, .col-lg-6, .col-md-6, .col-xl-8, .col-lg-12, .col-md-12 {
+        padding: 15px; /* İç boşluk */
+    }
+
+    /* Küçük cihazlar için sütun boyutları */
+    @@media (max-width: 768px) {
+        .col-xl-4, .col-lg-6, .col-md-6, .col-xl-8, .col-lg-12, .col-md-12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .custom-card, .card-body {
+            width: 100% !important; /* !important kullanımı genelde kaçınılması gereken bir yöntemdir ama burada özel bir durum için kullanılmıştır. */
+        }
+    }
+
 </style>
 
 @if (!User.Identity!.IsAuthenticated)
@@ -46,7 +71,9 @@ else
 
 
     <div class="row">
-        @*@if (Model.CurrentUser != null)
+
+
+        @if (Model.CurrentUser != null)
     {
     <div class="col-xl-4 col-lg-6 col-md-6">
     <div class="card top_counter">
@@ -75,14 +102,14 @@ else
     <div class="list-group-item d-flex align-items-center py-3">
     <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
     <div class="content">
-    <div>Müşterilerim</div>
-    <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
+    <div>Sektör</div>
+    <h5 class="mb-0">@Model.CurrentUser.Sector</h5>
     </div>
     </div>
     </div>
     </div>
     </div>
-    }*@
+    }
 
 
         <div class="col-xl-8 col-lg-12 col-md-12">
