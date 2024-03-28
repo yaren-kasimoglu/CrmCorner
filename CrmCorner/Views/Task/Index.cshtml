@@ -562,9 +562,30 @@
         }
     });
 
+
+
+    var statusOrder = [1, 2, 3, 4, 5, 6]; // Durumların sıralı ID'leri
+
+    function canChangeStatus(currentStatusId, newStatusId) {
+        var currentIndex = statusOrder.indexOf(currentStatusId);
+        var newIndex = statusOrder.indexOf(newStatusId);
+
+        // Yeni durum, mevcut durumdan hemen sonraki durumsa veya mevcut durum yeni durumdan büyükse (geriye izin veriliyorsa) true döner
+        return newIndex === currentIndex + 1 || currentIndex > newIndex;
+    }
     // Durum listelerini bırakılabilir yapın
     // Kartları bırakılabilir yapın, böylece boş kartlar da görevleri kabul edebilir
     // Kartları ve listeleri bırakılabilir yapın
+
+    var statusOrder = [1, 2, 3, 4, 5, 6]; // Örnek olarak belirlediğim durum ID'leri
+
+    function canChangeStatus(currentStatusId, newStatusId) {
+        var currentIndex = statusOrder.indexOf(currentStatusId);
+        var newIndex = statusOrder.indexOf(newStatusId);
+
+        // Yeni durum, mevcut durumdan hemen sonraki durumsa veya mevcut durum yeni durumdan büyükse (geriye izin veriliyorsa) true döner
+        return newIndex === currentIndex + 1 || currentIndex > newIndex;
+    }
 
     $('.card, .dd-list').droppable({
         accept: '.dd-item',
@@ -574,9 +595,10 @@
             var $card = $(this);
             var newStatusId = $card.data('statusid');
             var taskId = ui.draggable.data('taskid');
+            var currentStatusId = ui.draggable.closest('.dd-list').data('statusid'); // Mevcut durum ID'sini al
 
-            if (newStatusId !== undefined) {
-                // Önce gerekli alanların kontrolü için AJAX isteği gönder
+            if (newStatusId !== undefined && canChangeStatus(currentStatusId, newStatusId)) {
+                // Gerekli alanların kontrolü için AJAX isteği gönder
                 $.ajax({
                     url: '/Task/CheckRequiredFieldsBeforeStatusChange',
                     type: 'POST',
@@ -588,6 +610,7 @@
                             ui.draggable.fadeOut(function () {
                                 $(this).appendTo($('.dd-list[data-statusid="' + newStatusId + '"]')).fadeIn();
                             });
+
                         } else {
                             // Alanlar geçerli değilse, modal ile uyarı mesajı göster
                             $('#requiredFieldModal .modal-body').text(response.message);
@@ -599,10 +622,14 @@
                     }
                 });
             } else {
-                ui.draggable.css('top', '0').css('left', '0').fadeIn();
+                // Durum değişikliği sıraya uygun değilse, kullanıcıya bir uyarı göster
+                $('#requiredFieldModal .modal-body').text("Bu durum değişikliği izin verilen bir sırayı takip etmiyor. Süreç sırasını takip ediniz.");
+                $('#requiredFieldModal').modal('show');
+                ui.draggable.css('top', '0').css('left', '0').fadeIn(); // Öğeyi eski konumuna geri getir
             }
         }
     });
+
 
 
     function updateTaskStatus(taskId, newStatusId) {
@@ -614,10 +641,10 @@
             success: function (response) {
                 if (response.success) {
                     console.log('Task status updated!');
-                    // İsteğin başarılı olduğunu ve görevin durumunun güncellendiğini bildir
+                    location.reload();
+                    paginateTasks();
                 } else {
                     console.error('Failed to update task status.');
-                    // Güncelleme başarısız olursa, bir hata mesajı göster
                 }
             },
             error: function () {
@@ -627,6 +654,30 @@
         });
     }
 
+    var maxTasksPerCard = 10;
+
+    // Görevleri sayfalandırma işlevi
+    function paginateTasks() {
+        $('.dd-list').each(function () {
+            var tasks = $(this).find('.dd-item').slice(maxTasksPerCard); // 10'dan fazla olan görevleri seç
+            tasks.hide(); // Fazladan olanları gizle
+            // Daha fazla görev varsa, 'Daha fazla göster' bağlantısını ekleyebilirsiniz
+            if (tasks.length > 0) {
+                var moreLink = $('<a href="#" class="show-more-tasks">Daha fazla göster...</a>');
+                $(this).after(moreLink);
+                moreLink.on('click', function (e) {
+                    e.preventDefault();
+                    tasks.slice(0, maxTasksPerCard).fadeIn(); // Sonraki 10 görevi göster
+                    $(this).remove(); // 'Daha fazla göster' bağlantısını kaldır
+                });
+            }
+        });
+    }
+
+    // Sayfa yüklendiğinde ve görev listesi değiştiğinde sayfalandırmayı çağır
+    $(document).ready(function () {
+        paginateTasks();
+    });
 
 
 </script>

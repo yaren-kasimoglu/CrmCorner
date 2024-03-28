@@ -342,6 +342,11 @@ namespace CrmCorner.Controllers
                         fieldName = "Görev Başlık";
                     }
 
+                    if (property.Name == "NegativeReason")
+                    {
+                        fieldName = "Olumsuz Olma Nedeni";
+                    }
+
 
                     TaskCompLog log = new TaskCompLog
                     {
@@ -636,14 +641,12 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public async Task<IActionResult> CheckRequiredFieldsBeforeStatusChange(int taskId, int newStatusId)
         {
-            var task = await _context.TaskComps.FirstOrDefaultAsync(t => t.TaskId == taskId);
+            var task = await _context.TaskComps
+                          .Include(t => t.FileAttachments) 
+                          .FirstOrDefaultAsync(t => t.TaskId == taskId);
+
             if (task == null) return Json(new { isValid = false, message = "Task not found." });
 
-            // Örneğin, durum 'Teklif Gönderildi' ise ve 'ValueOrOffer' boşsa
-            if (newStatusId == 4 && string.IsNullOrEmpty(task.ValueOrOffer.ToString()))
-            {
-                return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için Değer Teklifi alanını doldurmanız gerekmektedir." });
-            }
             if (newStatusId == 3)
             {
                 // Görüşmeyi Gerçekleştiren kontrolü
@@ -658,8 +661,31 @@ namespace CrmCorner.Controllers
                     return Json(new { isValid = false, message = "Satış süreciniz olumlu ilerliyorsa lütfen 'Planlanan Satış Kapatma Tarihi' alanını doldurunuz." });
                 }
             }
+            
+            if (newStatusId == 4 && string.IsNullOrEmpty(task.ValueOrOffer.ToString()))
+            {
+                return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için Değer Teklifi alanını doldurmanız gerekmektedir." });
+            }
 
-      
+            if (newStatusId==5)
+            {
+                if (task.FileAttachments == null || task.FileAttachments.Count < 1)
+                {
+                    return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'Sözleşme / Anlaşma' dosyalarını yüklemeniz gerekmektedir. Sözleşme dosyalarınızın sisteme doğru bir şekilde yüklendiğinden emin olun." });
+                }
+            }
+
+            if (newStatusId==6)
+            {
+                if (task.IsPositiveOutcome==true)
+                {
+                    if (task.FinalSalesDone==null)
+                    {
+                        return Json(new { isValid = false, message = "Satış süreci olumlu bir şekilde tamamlanmış görünüyor. Lütfen Gerçekleşen Satış Kapatma Tarihi alanını doldurunuz." });
+                    }
+                }
+            }
+
 
             return Json(new { isValid = true });
         }
