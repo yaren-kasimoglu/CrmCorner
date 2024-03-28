@@ -21,7 +21,7 @@ namespace CrmCorner.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailServices _emailServices;
 
-
+        //deneme yorum
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context)
