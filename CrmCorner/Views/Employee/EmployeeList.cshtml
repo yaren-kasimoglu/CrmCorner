@@ -8,9 +8,11 @@
 <table id="user_List" class="table center-aligned-table">
     <thead>
         <tr>
-            <th>Kullanıcı Adı</th>
+            <th>Adı Soyadı</th>
             <th>Email</th>
-            <th>Firma</th>
+            <th>Telefon Numarası</th>
+            <th>Pozisyon</th>
+            <th>Kurum Adı</th>
         </tr>
 
     </thead>
@@ -18,12 +20,15 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.UserName</td>
+                <td>@item.NameSurname</td>
                 <td>@item.Email</td>
+                <td>@item.PhoneNumber</td>
+                <td>@item.PositionName</td>
                 <td>
                     <span class="badge bg-info">@item.CompanyName</span>
-                    </td>
-         
+                </td>
+
+
             </tr>
         }
 
@@ -40,29 +45,29 @@
 
     <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
     <script>
-     function confirmDelete(button) {
-        // Kullanıcıya silme işlemini onaylamasını sor
-        if (confirm('Are you sure you want to dele te this employee?')) {
-            var employeeid = button.getAttribute('data-employeeid');
-            var form = document.createElement('form');
-            form.action = '/Employee/EmployeeDelete/' + employeeid;
-            form.method = 'post';
-            document.body.appendChild(form);
-            form.submit();
+        function confirmDelete(button) {
+            // Kullanıcıya silme işlemini onaylamasını sor
+            if (confirm('Are you sure you want to dele te this employee?')) {
+                var employeeid = button.getAttribute('data-employeeid');
+                var form = document.createElement('form');
+                form.action = '/Employee/EmployeeDelete/' + employeeid;
+                form.method = 'post';
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
-    }
-       $(document).ready(function () {
+        $(document).ready(function () {
             $('#user_List')
-            .dataTable({
-                responsive: true,
-                columnDefs: [
-                    {
-                        orderable: false,
-                        targets: [0]
-                    }
-                ]
-            });
-    });
+                .dataTable({
+                    responsive: true,
+                    columnDefs: [
+                        {
+                            orderable: false,
+                            targets: [0]
+                        }
+                    ]
+                });
+        });
     </script>
 }
 

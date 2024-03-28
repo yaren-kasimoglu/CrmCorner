@@ -41,7 +41,6 @@
             width: 100% !important; /* !important kullanımı genelde kaçınılması gereken bir yöntemdir ama burada özel bir durum için kullanılmıştır. */
         }
     }
-
 </style>
 
 @if (!User.Identity!.IsAuthenticated)
@@ -74,42 +73,42 @@ else
 
 
         @if (Model.CurrentUser != null)
-    {
-    <div class="col-xl-4 col-lg-6 col-md-6">
-    <div class="card top_counter">
-    <div class="list-group list-group-custom list-group-flush">
-    <div class="list-group-item d-flex align-items-center py-3">
-    <div class="icon text-center me-3"><i class="fa fa-user"></i> </div>
-    <div class="content">
-    <div>Çalışan Sayımız</div>
-    <h5 class="mb-0">@Model.CompanyUsers.Count</h5>
-    </div>
-    </div>
-    <div class="list-group-item d-flex align-items-center py-3">
-    <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
-    <div class="content">
-    <div>Müşterilerim</div>
-    <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
-    </div>
-    </div>
-    <div class="list-group-item d-flex align-items-center py-3">
-    <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
-    <div class="content">
-    <div>Sahip Olduğum Görev Sayısı</div>
-    <h5 class="mb-0">@Model.CurrentUser.TaskComps.Count</h5>
-    </div>
-    </div>
-    <div class="list-group-item d-flex align-items-center py-3">
-    <div class="icon text-center me-3"><i class="fa fa-users"></i> </div>
-    <div class="content">
-    <div>Sektör</div>
-    <h5 class="mb-0">@Model.CurrentUser.Sector</h5>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    }
+        {
+            <div class="col-xl-4 col-lg-6 col-md-6">
+                <div class="card top_counter">
+                    <div class="list-group list-group-custom list-group-flush">
+                        <div class="list-group-item d-flex align-items-center py-3">
+                            <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-user"></i> </a></div>
+                            <div class="content">
+                                <div>Çalışan Sayımız</div>
+                                <h5 class="mb-0">@Model.CompanyUsers.Count</h5>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center py-3">
+                            <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i></a> </div>
+                            <div class="content">
+                                <div>Müşterilerim</div>
+                                <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center py-3">
+                            <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-users"></i></a> </div>
+                            <div class="content">
+                                <div>Sahip Olduğum Görev Sayısı</div>
+                                <h5 class="mb-0">@Model.CurrentUser.TaskComps.Count</h5>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center py-3">
+                            <div class="icon text-center me-3"><i class="fa fa-briefcase"></i></div>
+                            <div class="content">
+                                <div>Sektör</div>
+                                <h5 class="mb-0">@Model.CurrentUser.Sector</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
 
 
         <div class="col-xl-8 col-lg-12 col-md-12">

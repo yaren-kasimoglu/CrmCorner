@@ -42,7 +42,9 @@ namespace CrmCorner.Controllers
                 UserName = x.UserName,
                 Email = x.Email,
                 PhoneNumber = x.PhoneNumber,
-                CompanyName = x.CompanyName
+                CompanyName = x.CompanyName,
+                PositionName = x.PositionName,
+                NameSurname=x.NameSurname
 
             }).ToList();
             return View(userViewModelList);
