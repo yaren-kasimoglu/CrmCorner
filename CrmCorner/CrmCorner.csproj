@@ -72,7 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Views\Calendar\" />
 
     <Folder Include="wwwroot\json\" />
