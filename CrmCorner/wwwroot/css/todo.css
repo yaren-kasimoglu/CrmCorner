@@ -1,198 +1,59 @@
-﻿.close {
-    border: 1px solid #ccc; /* Kenar çizgisi */
-    padding: 5px 10px; /* İç boşluk */
-    background-color: #f9f9f9; /* Arka plan rengi */
-    cursor: pointer;
-    width: fit-content;
-    text-align: end;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 50%;
-}
-
-/* Kapatma düğmesi stilleri */
-
-#container4 {
-   
-    display: flex;
-    flex-direction: column; /* Öğeleri dikey olarak hizalar */
-}
-
-#container3 {
-    flex-direction: column;
-    margin: 7% 0px 0px -17%;
-    padding-top: 10px;
-}
-
-.horizontal-line {
-    border-top: 1px solid black; /* Çizgiyi siyah yapar */
-    width: 20%; /* Çizginin genişliğini ayarlar */
-    margin: 7% 0px 0px -12%;
-    display: flex; /* İstediğiniz boşluğu ayarlayabilirsiniz */
-}
-
-.vertical-line {
-    border-left: 1px solid #000; /* Dikey çizgi stilini ve rengini ayarla */
-    height: 100px; /* Dikey çizginin yüksekliğini ayarla */
-    margin: 0 30px; /* Dikey çizginin sol ve sağ kenarlarında boşluk bırak */
-}
-
-.wrapper {
-    display: flex;
-}
-
-#container1 {
-    display: flex;
-    align-items: flex-start;
-}
-
-    #container1 .img {
-        margin-right: 5px; /* Resim ile etiket arasına bir boşluk ekler */
+﻿@media screen and (max-width: 768px) {
+    .container {
+        padding-left: 5%;
+        margin-top: 7%;
     }
 
-.logo {
-    width: 40px; /* Logo genişliği */
-    height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
-    border-radius: 50%; /* Yuvarlak kenarlar için */
-}
-
-.date {
-    cursor: pointer;
-    padding-top: 5%;
-    text-align: center;
-    font-size: x-large;
-}
-
-.todolist {
-    cursor: pointer;
-    text-align: center;
-    font-size: x-large;
-    margin-top: -20%;
-}
-
-.logo {
-    width: 40px; /* Logo genişliği */
-    height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
-}
-
-.date {
-    cursor: pointer;
-}
-
-.todo-list {
-    padding: 20px;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-    .todo-list h1 {
-        font-family: 'Cursive', cursive;
-        color: #2eacb3;
-        text-align: center;
-        margin-bottom: 20px;
+    .custom-table {
+        width: 100%;
     }
 
-.task {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-    .task input[type="checkbox"] {
-        opacity: 0;
-        position: absolute;
+    .logotable {
+        padding-left: 0;
     }
 
     .task input[type="text"] {
-        border: none;
-        margin-left: 35px;
-        flex-grow: 1;
-        padding: 5px 10px;
-        box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
+        margin-left: 10px;
+        width: 70%;
     }
 
-.taskcontainer {
-    width: 100%;
+    button {
+        width: 30%;
+    }
 }
 
-.custom-checkbox {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-color: #fff;
-    border: 2px solid #333;
-    position: relative;
-    cursor: pointer;
-}
-
-    .custom-checkbox::after {
-        content: ''; /* İçeriğini boş bırakın */
-        width: 6px; /* Tik uzunluğu */
-        height: 12px; /* Tik yüksekliği */
-        border: solid #333; /* Tik rengi */
-        border-width: 0 2px 2px 0; /* Tik şekli */
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(45deg); /* Tik konumu ve dönüşü */
-        opacity: 0; /* Başlangıçta görünmez */
-        transition: opacity 0.3s ease; /* Geçiş efekti */
+/* Ekran genişliği 576 piksel veya daha küçük olduğunda uygulanacak stiller */
+@media screen and (max-width: 576px) {
+    .container {
+        padding-left: 2%;
     }
 
-input[type="checkbox"]:checked + .custom-checkbox::after {
-    opacity: 1;
-}
-
-.taskCheckbox:checked + .custom-checkbox {
-    background-color: #2eacb3; /* Checkbox seçildiğinde arka plan rengini yeşil yap */
-}
-
-.main-goal {
-    display: block;
-    margin-top: 20px;
-}
-
-    .main-goal span {
-        font-weight: bold;
-    }
-
-    .main-goal input[type="text"] {
-        border: none;
-        border-bottom: 1px solid #333;
-        background-color: transparent;
+    .custom-table {
         width: 100%;
-        padding: 5px 0;
     }
 
-button {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: block;
-    width: 100%;
-    margin-top: 20px;
+    .task input[type="text"] {
+        margin-left: 5px;
+        width: 60%;
+    }
+
+    button {
+        width: 40%;
+    }
 }
 
-    button:hover {
-        background-color: #555;
+/* Ekran genişliği 400 piksel veya daha küçük olduğunda uygulanacak stiller */
+@media screen and (max-width: 400px) {
+    .container {
+        padding-left: 0;
     }
+
+    .task input[type="text"] {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+    }
+}

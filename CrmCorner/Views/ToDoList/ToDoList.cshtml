@@ -11,12 +11,11 @@
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Pacifico&display=swap" rel="stylesheet">
-<link href="~/css/todo.css"  rel="stylesheet"/>
-
+<link href="~/css/todo.css" rel="stylesheet" />
 
 <div class="wrapper">
     <div id="container1">
-        <img src="~/icons/todo/todays1.png" alt="Logo" class="logo">
+        <img src="~/icons/todo/sun.png" alt="Logo" class="logo">
         <label onclick="show()" class="date">Günüm</label>
     </div>
     <div class="horizontal-line"></div>
@@ -28,7 +27,7 @@
                 {
                     <tr>
                         <td>
-                            <img src="~/icons/todo/lists.png" alt="Logo" class="logo">
+                            <img src="~/icons/todo/deneme.png" alt="Logo" class="logotable">
                         </td>
                         <td>
                             <label class="todolist" onclick="showItem(@item.Id)">@item.Title</label>
@@ -43,40 +42,46 @@
 
                 }
             </table>
-            </div>
-              
-                <div id="Containerlist">
-                    <input type="text" id="ekleButton2" placeholder="Liste Ekle">
-                </div>
-            </div>
-    <div class="container" style="padding-left: 10%;margin-top: 7%;"id="container2">
+        </div>
+
+        <div id="Containerlist">
+            <input type="text" id="ekleButton2" class="addlist" placeholder="Liste Ekle">
+        </div>
+    </div>
+    <div class="container" style="padding-left: 10%; margin-top: 7%;" id="container2">
         <div class="row">
             <div class="col-md-10">
-                <div style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
-                    <div class="card-header" id="todaymaintitle" style="font-family: 'DM Sans', sans-serif;">Bugün;</div>
-                    <div class="card-body">
-                        <input type="text" style="font-family: 'DM Sans', sans-serif; text-align: center; font-size: xxx-large; border:none; " id="todotitle" class="card-title" placeholder="Yapılacaklar:" value="@ViewBag.TitleValue" />
-
-                        <div class="col-md-8">
-                            <input type="button" id="ekleButton" value="+" class="button-plus border rounded-circle icon-shape icon-sm lh-0" data-field="quantity">
-                        </div>
+                <div style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); border: 2px solid #2eacb3;">
+                    <div class="card-header" id="todaymaintitle" style="font-family: 'DM Sans', sans-serif;"></div>
+                    <div class="card-body" style=" background-color: #f4f4f4;">
+                        <input type="text" style="font-family: 'DM Sans', sans-serif; background-color: #f4f4f4;text-align: center; font-size: xxx-large; border:none;width:100%; " id="todotitle" class="card-title" placeholder="Başlık bilginizi buraya giriniz.." value="@ViewBag.TitleValue" />
 
                         <div class="todo-list">
                             <table id="table">
                                 <tr>
                                     <td>
-                                        <label class="taskcontainer" id="kartContainer2"></label>
+                                        <label class="task">
+                                            <input type="checkbox" class="taskCheckbox" id="taskCheckbox" onclick="clickToDoCheckbox(this)">
+                                            <span class="custom-checkbox"></span>
+                                            <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle">
+                                        </label>
+                                        <div class="taskcontainer" id="kartContainer2"></div>
                                     </td>
                                     <label class="main-goal">
                                         <span>Bugün için asıl hedefim:</span>
-                                        <input type="text" id="maingoal" class="maingoal" value="@ViewBag.MainGoalTitle" placeholder="Hedefim">
+                                        <input type="text" style="outline:none;border:none" id="maingoal" class="maingoal" value="@ViewBag.MainGoalTitle" placeholder="Hedefim">
                                     </label>
+
                                 </tr>
                             </table>
                         </div>
-                        <div class="col-md-4">
+                      
+                        <!-- Submit düğmesini en sağa hizalamak için -->
+                        <div class="d-flex justify-content-end" style="margin-top: 5%;">
                             <button type="submit" onclick="save()">Kaydet</button>
                         </div>
+
+                        <!-- Modal -->
                         <div id="myModal" class="modal">
                             <!-- Modal içeriği -->
                             <div class="modal-content">
@@ -89,6 +94,7 @@
             </div>
         </div>
     </div>
+    
 
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -102,18 +108,16 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
 
-<script src="~/js/todo.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-
     var kartIcerik = `@if (taskData != null) {
             @foreach (var task in taskData)
             {
                <label class="task">
         <input type="checkbox" class="taskCheckbox"  onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" style="text-decoration:line-through"  id="textInput"  name="textValue" placeholder="Yapılacaklar" value="@task">
+        <input type="text" style="text-decoration:line-through" class="textInput2"   id="textInput"  name="textValue" placeholder="Görev Ekle" value="@task">
             </label>
         }
                 }
@@ -125,7 +129,7 @@
                <label class="task">
         <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" name="textValue" id="textInput" placeholder="Yapılacaklar"  value="@task">
+        <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle"  value="@task">
             </label>
             }
                 }
@@ -156,7 +160,7 @@ function show() {
                 <label class="task">
                     <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
                     <span class="custom-checkbox"></span>
-                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue" placeholder="Yapılacaklar" value="${task}">
+                    <input type="text" style="text-decoration:line-through" id="textInput" class="textInput2"   name="textValue" placeholder="Görev Ekle" value="${task}">
                 </label>`;
                 }
             }
@@ -167,7 +171,7 @@ function show() {
               <label class="task">
         <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" name="textValue" id="textInput" placeholder="Yapılacaklar"  value="${task2}">
+        <input type="text" name="textValue" id="textInput" class="textInput2"   placeholder="Görev Ekle"  value="${task2}">
             </label>`;
                 }
 
@@ -205,7 +209,7 @@ function showItem(id) {
                 <label class="task">
                     <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
                     <span class="custom-checkbox"></span>
-                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue" placeholder="Yapılacaklar" value="${task}">
+                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue"  class="textInput2"   placeholder="Görev Ekle" value="${task}">
                 </label>`;
                 }
             }
@@ -216,7 +220,7 @@ function showItem(id) {
               <label class="task">
         <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" name="textValue" id="textInput" placeholder="Yapılacaklar"  value="${task2}">
+        <input type="text" name="textValue"  class="textInput2"   id="textInput" placeholder="Görev Ekle"  value="${task2}">
             </label>`;
                 }
             }
@@ -229,5 +233,501 @@ function showItem(id) {
     });
 
 }
+function addtodo() {
+    // Kartın içeriği
+    var kartIcerik2 = `
+          <label class="task" >
+             <input type="checkbox" class="taskCheckbox" id="taskCheckbox" onclick="clickToDoCheckbox(this)">
+             <span class="custom-checkbox"></span>
+             <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle">
+           </label>
+    `;
+    // Kartı kartContainer içine ekle
+    $('#kartContainer2').append(kartIcerik2);
+}
+
+// Butona tıklandığında kartEkle fonksiyonunu çağır
+    $(document).on('keyup', '.textInput2', function (event) {
+        console.log("girdi");
+        if (event.key === "Enter") {
+            event.preventDefault();
+            addtodo();
+        }
+});
+
+$("#ekleButton2").keyup(function (event) {
+    console.log(event.keyCode);
+    if (event.keyCode === 13) {
+        console.log(event);
+        var inputElement = document.getElementById("ekleButton2");
+        var toDoTitleList = inputElement.value;
+        $.ajax({
+            type: 'POST',
+            url: "/ToDoList/ToDoListAddList/",
+            encode: true,
+            data: { title: toDoTitleList },
+            dataType: "json",
+            success: function () {
+                location.reload();
+            }
+        });
+    }
+
+});
+
+
+function clickToDoCheckbox(checkbox) {
+    var label = checkbox.parentElement.querySelector('input[type="text"]');
+    if (checkbox.checked) {
+        label.style.textDecoration = "line-through";
+    } else {
+        label.style.textDecoration = "none";
+    }
+}
+function textVisibleshow() {
+    console.log("textVisibleshow girdi");
+    var inputElement = document.getElementById("textInput");
+    inputElement.style.textDecoration = "none";
+}
+
+function textVisible() {
+    console.log("textVisible girdi");
+    var inputElement = document.getElementById("textInput");
+    inputElement.style.textDecoration = "none"; //
+}
+
+function save() {
+    var taskLabels = document.querySelectorAll('.task');
+    var selectedTaskTexts = [];
+    var notselectedTaskTexts = [];
+    var inputElement = document.getElementById("todotitle");
+    var toDoTitle = inputElement.value;
+    var maingoal = document.getElementById("maingoal");
+    var toDoMainGoal = maingoal.value;
+
+    taskLabels.forEach(function (label) {
+        var checkbox = label.querySelector('.taskCheckbox');
+        var textInput = label.querySelector('input[type="text"]');
+        var maingoal = document.getElementById("maingoal").innerText;
+        var values = textInput.value.split(',');
+        if (checkbox.checked) {
+            selectedTaskTexts.push(textInput.value.trim());
+        }
+        else {
+            notselectedTaskTexts.push(textInput.value.trim());
+        }
+
+    });
+    var selectedTaskTextsString = selectedTaskTexts.join(",");
+    var notselectedTaskTextsString = notselectedTaskTexts.join(",");
+    var inputElement = document.getElementById("todolistId");
+    var todoListId = inputElement.value;
+
+    $.ajax({
+        type: 'POST',
+        url: "/ToDoList/ToDoListAdd/",
+        encode: true,
+        data: { selected: selectedTaskTextsString, unselected: notselectedTaskTextsString, maingoals: toDoMainGoal, title: toDoTitle, itemId: todoListId },
+        dataType: "json",
+        success: function () {
+            document.getElementById("maingoal").value = toDoMainGoal;
+            document.getElementById("todotitle").value = toDoTitle;
+            var kartIcerik = '';
+            var kartIcerik2 = '';
+            if (selectedTaskTexts != null) {
+                for (var i = 0; i < selectedTaskTexts.length; i++) {
+                    var task = selectedTaskTexts[i];
+                    kartIcerik += `
+                <label class="task">
+                    <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
+                    <span class="custom-checkbox"></span>
+                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue" placeholder="Görev Ekle" value="${task}">
+                </label>`;
+                }
+            }
+            if (notselectedTaskTexts != null) {
+                for (var i = 0; i < notselectedTaskTexts.length; i++) {
+                    var task2 = notselectedTaskTexts[i];
+                    kartIcerik2 += `
+              <label class="task">
+        <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
+        <span class="custom-checkbox"></span>
+        <input type="text" name="textValue" id="textInput" placeholder="Görev Ekle"  value="${task2}">
+            </label>`;
+                }
+            }
+            $('#kartContainer2').empty();
+            var toplam = kartIcerik + kartIcerik2;
+            $('#kartContainer2').append(toplam);
+
+            var input = document.getElementById("textInput");
+            var button = document.getElementById("myButton");
+            document.getElementById("myModal").style.display = "block";
+        }
+    });
+}
+document.querySelector(".close").addEventListener("click", function () {
+    // Modalı gizle
+    document.getElementById("myModal").style.display = "none";
+    location.reload();
+
+});
+
 </script>
+<style>
+
+    
+
+    .dropbtn {
+        background-color: #f1f1f1;
+        color: black;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* Açılır menü içeriği stilleri */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        z-index: 1;
+    }
+
+    /* Açılır menü içeriğini göstermek için */
+
+
+    /* Açılır menü içeriği linkleri */
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+        /* Açılır menü içeriği linklerinin üzerine gelindiğinde */
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+    .close {
+        border: 1px solid #ccc; /* Kenar çizgisi */
+        padding: 5px 10px; /* İç boşluk */
+        background-color: #f9f9f9; /* Arka plan rengi */
+        cursor: pointer;
+        width: fit-content;
+        text-align: end;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+    }
+
+    /* Kapatma düğmesi stilleri */
+
+    #container4 {
+        display: flex;
+        flex-direction: column; /* Öğeleri dikey olarak hizalar */
+    }
+
+    #container3 {
+        flex-direction: column;
+        margin: 7% 0px 0px -17%;
+        padding-top: 10px;
+    }
+
+    .horizontal-line {
+        border-top: 1px solid black; /* Çizgiyi siyah yapar */
+        width: 20%; /* Çizginin genişliğini ayarlar */
+        margin: 7% 0px 0px -12%;
+        display: flex; /* İstediğiniz boşluğu ayarlayabilirsiniz */
+    }
+
+    .vertical-line {
+        border-left: 1px solid #000; /* Dikey çizgi stilini ve rengini ayarla */
+        height: 100px; /* Dikey çizginin yüksekliğini ayarla */
+        margin: 0 30px; /* Dikey çizginin sol ve sağ kenarlarında boşluk bırak */
+    }
+
+    .wrapper {
+        display: flex;
+    }
+
+    #container1 {
+        display: flex;
+        align-items: flex-start;
+        margin-top:50px;
+    }
+
+        #container1 .img {
+            margin-right: 5px; /* Resim ile etiket arasına bir boşluk ekler */
+        }
+
+    .logo {
+        width: 20%; /* Logo genişliği */
+        height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
+        border-radius: 50%; /* Yuvarlak kenarlar için */
+    }
+
+    .date {
+        cursor: pointer;
+        text-align: center;
+        font-size: x-large;
+    }
+
+    .todolist {
+        cursor: pointer;
+        text-align: center;
+        font-size: x-large;
+        margin-top: -20%;
+        transition: background-color 0.3s ease; /* Geçiş efekti */
+        font-family: "Arial", sans-serif; /* Profesyonel bir yazı tipi */
+    }
+
+    .custom-table tr:hover {
+        background-color: #f0f0f0; /* Gri arka plan rengi */
+    }
+    .addlist {
+        border: none; /* Kenar çizgisini kaldır */
+        outline: none;
+        padding-left: 6%;
+        width: 200px; /* Genişlik */
+        height: 40px;
+    }
+
+    .addlist:hover {
+        background-color: #f0f0f0; /* Gri arka plan rengi */
+    }
+    
+
+    .todo-list {
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+        .todo-list h1 {
+            font-family: 'Cursive', cursive;
+            color: #2eacb3;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+    .task {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+        .task input[type="checkbox"] {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .task input[type="text"] {
+            border: none;
+            outline: none;
+            margin-left: 35px;
+            flex-grow: 1;
+            padding: 5px 10px;
+            box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
+            max-width: 200px;
+        }
+
+    .taskcontainer {
+        width: 100%;
+    }
+
+    .custom-checkbox {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: #fff;
+        border: 2px solid #333;
+        position: relative;
+        cursor: pointer;
+    }
+
+        .custom-checkbox::after {
+            content: ''; /* İçeriğini boş bırakın */
+            width: 6px; /* Tik uzunluğu */
+            height: 12px; /* Tik yüksekliği */
+            border: solid #333; /* Tik rengi */
+            border-width: 0 2px 2px 0; /* Tik şekli */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg); /* Tik konumu ve dönüşü */
+            opacity: 0; /* Başlangıçta görünmez */
+            transition: opacity 0.3s ease; /* Geçiş efekti */
+        }
+
+    input[type="checkbox"]:checked + .custom-checkbox::after {
+        opacity: 1;
+    }
+
+    .taskCheckbox:checked + .custom-checkbox {
+        background-color: #2eacb3; /* Checkbox seçildiğinde arka plan rengini yeşil yap */
+    }
+
+    .main-goal {
+        display: block;
+        margin-top: 20px;
+    }
+
+        .main-goal span {
+            font-weight: bold;
+        }
+
+        .main-goal input[type="text"] {
+            border: none;
+            border-bottom: 1px solid #333;
+            background-color: transparent;
+            width: 100%;
+            padding: 5px 0;
+        }
+      .main-goal input[type="text"]:hover {
+                background-color: #f0f0f0; /* Gri arka plan rengi */
+            }
+    button {
+        background-color: #2eacb3;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        width: 15%;
+    }
+
+    .logotable {
+        padding-left: 18%;
+        width: 40px; /* Logo genişliği */
+        height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
+        border-radius: 50%; /* Yuvarlak kenarlar için */
+    }
+
+    .container {
+        padding-left: 10%;
+        margin-top: 7%;
+    }
+
+    .custom-table {
+        width: 50%;
+    }
+
+    .logotable {
+        padding-left: 18%;
+        width: 40px;
+        height: auto;
+        border-radius: 50%;
+    }
+
+    
+    .taskcontainer {
+        width: 100%;
+    }
+
+    .custom-checkbox {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: #fff;
+        border: 2px solid #333;
+        position: relative;
+        cursor: pointer;
+    }
+
+        .custom-checkbox::after {
+            content: '';
+            width: 6px;
+            height: 12px;
+            border: solid #333;
+            border-width: 0 2px 2px 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+    input[type="checkbox"]:checked + .custom-checkbox::after {
+        opacity: 1;
+    }
+
+    .taskCheckbox:checked + .custom-checkbox {
+        background-color: #2eacb3;
+    }
+
+    .main-goal {
+        display: block;
+        margin-top: 20px;
+    }
+
+        .main-goal span {
+            font-weight: bold;
+        }
+
+        .main-goal input[type="text"] {
+            border: none;
+            border-bottom: 1px solid #333;
+            background-color: transparent;
+            width: 100%;
+            padding: 5px 0;
+        }
+
+    button {
+        background-color: #2eacb3;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        width: 15%;
+    }
+
+    .addlist {
+        border: none;
+        outline: none;
+        padding-left: 6%;
+        width: 200px;
+        height: 40px;
+    }
+
+        .addlist:hover {
+            background-color: #f0f0f0;
+        }
+
+ 
+    .todo-list {
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+        .todo-list h1 {
+            font-family: 'Cursive', cursive;
+            color: #2eacb3;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+</style>
 
