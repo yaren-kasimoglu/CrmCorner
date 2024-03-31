@@ -60,19 +60,24 @@
             <!-- Olumlu/Olumsuz Seçimi -->
             <div class="form-group">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="Outcome" id="PositiveOutcome" value="true">
-                    <label class="form-check-label" for="PositiveOutcome">Olumlu</label>
+                    <input class="form-check-input" type="radio" name="Outcomes" id="OlumluOutcome" value="Olumlu" checked>
+                    <label class="form-check-label" for="OlumluOutcome">Olumlu</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="Outcome" id="NegativeOutcome" value="false">
+                    <input class="form-check-input" type="radio" name="Outcomes" id="SurecteOutcome" value="Surecte">
+                    <label class="form-check-label" for="SurecteOutcome">Süreçte</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Outcomes" id="NegativeOutcome" value="Olumsuz">
                     <label class="form-check-label" for="NegativeOutcome">Olumsuz</label>
                 </div>
             </div>
             <div class="form-group" id="NegativeReasonSection" style="display:none;">
-                <label for="negativeReason" class="control-label">Olumsuz Nedeni</label>
-                <textarea id="negativeReason" name="NegativeReason" class="form-control" rows="3" placeholder="Olumsuz nedenini buraya yazınız..."></textarea>
+                <label asp-for="NegativeReason" class="control-label">Olumsuz Nedeni</label>
+                <textarea asp-for="NegativeReason" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="NegativeReason" class="text-danger"></span>
             </div>
+
         </div>
 
         <div class="col-lg-6">
@@ -134,13 +139,19 @@
 <script>
     $(document).ready(function () {
         function toggleNegativeReasonSection() {
-            if ($('#NegativeOutcome').is(':checked')) {
+            var outcome = $('input[type="radio"][name="Outcomes"]:checked').val();
+            // "Olumsuz" değeri string olarak kontrol edilir
+            if (outcome === 'Olumsuz') { // Enum değeri doğrudan string olarak kontrol edilir.
                 $('#NegativeReasonSection').show();
             } else {
                 $('#NegativeReasonSection').hide();
             }
         }
 
-        $('input[type="radio"][name="Outcome"]').change(toggleNegativeReasonSection);
+        // Outcome değiştiğinde fonksiyonu çağır
+        $('input[type="radio"][name="Outcomes"]').change(toggleNegativeReasonSection);
+
+        // Sayfa yüklendiğinde fonksiyonu çağırarak başlangıç durumuna göre ayarla
+        toggleNegativeReasonSection();
     });
 </script>

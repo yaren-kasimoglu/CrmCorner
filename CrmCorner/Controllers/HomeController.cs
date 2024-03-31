@@ -93,40 +93,40 @@ namespace CrmCorner.Controllers
             return Json(chartData);
         }
 
-        public async Task<IActionResult> OutcomeStatusChart()
-        {
-            var userId = _userManager.GetUserId(User);
+        //public async Task<IActionResult> OutcomeStatusChart()
+        //{
+        //    var userId = _userManager.GetUserId(User);
 
-            // AppUser olarak atanan TaskComps'ı bul
-            var appUserTasks = await _context.TaskComps
-                                              .Where(tc => tc.UserId == userId)
-                                              .ToListAsync();
+        //    // AppUser olarak atanan TaskComps'ı bul
+        //    var appUserTasks = await _context.TaskComps
+        //                                      .Where(tc => tc.UserId == userId)
+        //                                      .ToListAsync();
 
-            // AssignedUser olarak atanan TaskComps'ı bul
-            var assignedUserTasks = await _context.TaskComps
-                                                   .Where(tc => tc.AssignedUserId == userId)
-                                                   .ToListAsync();
+        //    // AssignedUser olarak atanan TaskComps'ı bul
+        //    var assignedUserTasks = await _context.TaskComps
+        //                                           .Where(tc => tc.AssignedUserId == userId)
+        //                                           .ToListAsync();
 
-            // İki listeyi birleştir
-            var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
+        //    // İki listeyi birleştir
+        //    var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
 
-            if (!combinedTasks.Any())
-            {
-                return NotFound();
-            }
+        //    if (!combinedTasks.Any())
+        //    {
+        //        return NotFound();
+        //    }
 
-            // Olumlu ve olumsuz sonuçların sayısını hesapla
-            var positiveCount = combinedTasks.Count(tc => tc.IsPositiveOutcome);
-            var negativeCount = combinedTasks.Count(tc => !tc.IsPositiveOutcome);
+        //    // Olumlu ve olumsuz sonuçların sayısını hesapla
+        //    var positiveCount = combinedTasks.Count(tc => tc.IsPositiveOutcome);
+        //    var negativeCount = combinedTasks.Count(tc => !tc.IsPositiveOutcome);
 
-            var chartData = new
-            {
-                labels = new[] { "Olumlu", "Olumsuz" },
-                data = new[] { positiveCount, negativeCount },
-            };
+        //    var chartData = new
+        //    {
+        //        labels = new[] { "Olumlu", "Olumsuz" },
+        //        data = new[] { positiveCount, negativeCount },
+        //    };
 
-            return Json(chartData);
-        }
+        //    return Json(chartData);
+        //}
         public async Task<IActionResult> UserTaskStatusChart()
         {
             // Aktif kullanıcının ID'sini al
