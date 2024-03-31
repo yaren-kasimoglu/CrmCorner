@@ -28,7 +28,7 @@ namespace CrmCorner.Controllers
                 .Include(t=>t.AppUser)
                 .Include(t=>t.AssignedUser)
                 .Include(t=>t.Customer)
-                .Where(t => t.IsPositiveOutcome).ToList();
+            /*    .Where(t => t.IsPositiveOutcome)*/.ToList();
 
 
             return View(positiveTasks);
@@ -47,7 +47,7 @@ namespace CrmCorner.Controllers
                 .Include(t => t.AssignedUser)
                 .Include(t => t.Customer)
                 .Where(u => u.AppUser.CompanyName == currentUserCompanyName)
-                .Where(t => !t.IsPositiveOutcome).ToList();
+             /*   .Where(t => !t.IsPositiveOutcome)*/.ToList();
 
 
             return View(negativeTaks);

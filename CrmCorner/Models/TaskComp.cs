@@ -39,9 +39,9 @@ public partial class TaskComp
     public int? CustomerId { get; set; }
     public virtual CustomerN? Customer { get; set; }
 
-    public bool IsFinalDecisionMaker { get; set; } = false;// Son karar mercii olup olmadığı
-    public bool IsPositiveOutcome { get; set; } = false; // CheckBox ile kontrol edilecek
+    public bool IsFinalDecisionMaker { get; set; } = true;
 
+    public OutcomeType Outcomes { get; set; }
     public string? NegativeReason { get; set; }
 
     // Dosya ekleri için koleksiyon
@@ -50,5 +50,5 @@ public partial class TaskComp
     public virtual Notification? Notification { get; set; }
 
 }
-       
+
 

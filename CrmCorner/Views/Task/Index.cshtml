@@ -299,8 +299,8 @@
 
 
                         @if (tasksInThisStatus.Any())
-                        {
-                            // Görevleri listele
+                        {//        data-is-positive-outcome="@task.IsPositiveOutcome"
+                         // Görevleri listele
                             <div class="dd" data-plugin="nestable">
                                 <ol class="dd-list" data-statusid="@status.Key">
                                     @foreach (var task in tasksInThisStatus)
@@ -312,7 +312,6 @@
                                             data-created-date="@task.CreatedDate.ToString("dd-MM-yyyyTHH:mm:ss")"
                                             data-modified-date="@task.ModifiedDate?.ToString("dd-MM-yyyyTHH:mm:ss")"
                                             data-is-final-decision-maker="@task.IsFinalDecisionMaker"
-                                            data-is-positive-outcome="@task.IsPositiveOutcome"
                                             data-negative-reason="@task.NegativeReason"
                                             data-user-name="@task.AppUser?.UserName"
                                             data-assigned-user-name="@task.AssignedUser?.UserName"
