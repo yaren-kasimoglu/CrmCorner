@@ -1,5 +1,6 @@
 ﻿using CrmCorner.Extensions;
 using CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using CrmCorner.Services;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -47,7 +48,7 @@ namespace CrmCorner.Controllers
                              .Include(u => u.TaskComps)
                              .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
 
-        
+
             var companyUsers = await _context.Users
                                              .Where(u => u.CompanyId == currentUser.CompanyId)
                                              .ToListAsync();
@@ -65,6 +66,33 @@ namespace CrmCorner.Controllers
         }
 
         #region CHARTS
+
+        public async Task<IActionResult> IndustryChart()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var user = await _context.Users
+                                      .Include(u => u.Customers)
+                                      .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Sektörleri gruplayıp sayılarına göre chart verisi oluşturma
+            var chartData = user.Customers
+                                 .GroupBy(c => c.Industry)
+                                 .Select(group => new { Industry = group.Key, Count = group.Count() })
+                                 .ToList();
+
+            // labels ve data alanlarını doldur
+            var labels = chartData.Select(data => data.Industry.ToString()).ToArray();
+            var dataValues = chartData.Select(data => data.Count).ToArray();
+
+            return Json(new { labels, data = dataValues });
+        }
+
 
         public async Task<IActionResult> IsFinalDesicionMaker()
         {
@@ -93,40 +121,48 @@ namespace CrmCorner.Controllers
             return Json(chartData);
         }
 
-        //public async Task<IActionResult> OutcomeStatusChart()
-        //{
-        //    var userId = _userManager.GetUserId(User);
+        public async Task<IActionResult> OutcomeStatusChart()
+        {
+            var userId = _userManager.GetUserId(User);
 
-        //    // AppUser olarak atanan TaskComps'ı bul
-        //    var appUserTasks = await _context.TaskComps
-        //                                      .Where(tc => tc.UserId == userId)
-        //                                      .ToListAsync();
+            // AppUser olarak atanan TaskComps'ı bul
+            var appUserTasks = await _context.TaskComps
+                                              .Where(tc => tc.UserId == userId)
+                                              .ToListAsync();
 
-        //    // AssignedUser olarak atanan TaskComps'ı bul
-        //    var assignedUserTasks = await _context.TaskComps
-        //                                           .Where(tc => tc.AssignedUserId == userId)
-        //                                           .ToListAsync();
+            // AssignedUser olarak atanan TaskComps'ı bul
+            var assignedUserTasks = await _context.TaskComps
+                                                   .Where(tc => tc.AssignedUserId == userId)
+                                                   .ToListAsync();
 
-        //    // İki listeyi birleştir
-        //    var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
+            // İki listeyi birleştir
+            var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
 
-        //    if (!combinedTasks.Any())
-        //    {
-        //        return NotFound();
-        //    }
+            if (!combinedTasks.Any())
+            {
+                return NotFound();
+            }
 
-        //    // Olumlu ve olumsuz sonuçların sayısını hesapla
-        //    var positiveCount = combinedTasks.Count(tc => tc.IsPositiveOutcome);
-        //    var negativeCount = combinedTasks.Count(tc => !tc.IsPositiveOutcome);
 
-        //    var chartData = new
-        //    {
-        //        labels = new[] { "Olumlu", "Olumsuz" },
-        //        data = new[] { positiveCount, negativeCount },
-        //    };
+            var outcomeCounts = combinedTasks.GroupBy(tc => tc.Outcomes)
+                                     .ToDictionary(g => g.Key.ToString(), g => g.Count());
 
-        //    return Json(chartData);
-        //}
+            // Tüm olası enum değerlerini döngü ile işle
+            var labels = Enum.GetNames(typeof(OutcomeType)).ToList();
+            var data = new List<int>();
+            foreach (var label in labels)
+            {
+                outcomeCounts.TryGetValue(label, out var count);
+                data.Add(count);
+            }
+
+            var chartData = new
+            {
+                labels = labels.ToArray(),
+                data = data.ToArray(),
+            };
+            return Json(chartData);
+        }
         public async Task<IActionResult> UserTaskStatusChart()
         {
             // Aktif kullanıcının ID'sini al

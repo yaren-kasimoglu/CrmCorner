@@ -315,12 +315,12 @@ namespace CrmCorner.Controllers
                         fieldName = "Açıklama";
                     }
 
-                    //if (property.Name == "IsPositiveOutcome")
-                    //{
-                    //    fieldName = "Olumlu/Olumsuz";
-                    //    oldValueString = (bool)originalValue ? "Olumlu" : "Olumsuz";
-                    //    newValueString = (bool)editedValue ? "Olumlu" : "Olumsuz";
-                    //}
+                    if (property.Name == "Outcomes")
+                    {
+                        fieldName = "Sonuç Durumu";
+                        oldValueString = Enum.GetName(typeof(OutcomeType), originalValue);
+                        newValueString = Enum.GetName(typeof(OutcomeType), editedValue);
+                    }
 
                     if (property.Name == "IsFinalDecisionMaker")
                     {
@@ -655,11 +655,11 @@ namespace CrmCorner.Controllers
                     return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'Görüşmeyi Gerçekleştiren' alanını doldurmanız gerekmektedir." });
                 }
 
-                //// Olumlu Sonuç ve Satış Kapatma Tarihi kontrolü
-                //if (task.IsPositiveOutcome && !task.SalesDone.HasValue)
-                //{
-                //    return Json(new { isValid = false, message = "Satış süreciniz olumlu ilerliyorsa lütfen 'Planlanan Satış Kapatma Tarihi' alanını doldurunuz." });
-                //}
+                // Olumlu Sonuç ve Satış Kapatma Tarihi kontrolü
+                if (task.Outcomes==OutcomeType.Olumlu && !task.SalesDone.HasValue)
+                {
+                    return Json(new { isValid = false, message = "Satış süreciniz olumlu ilerliyorsa lütfen 'Planlanan Satış Kapatma Tarihi' alanını doldurunuz." });
+                }
             }
             
             if (newStatusId == 4 && string.IsNullOrEmpty(task.ValueOrOffer.ToString()))
@@ -675,16 +675,16 @@ namespace CrmCorner.Controllers
                 }
             }
 
-            //if (newStatusId==6)
-            //{
-            //    if (task.IsPositiveOutcome==true)
-            //    {
-            //        if (task.FinalSalesDone==null)
-            //        {
-            //            return Json(new { isValid = false, message = "Satış süreci olumlu bir şekilde tamamlanmış görünüyor. Lütfen Gerçekleşen Satış Kapatma Tarihi alanını doldurunuz." });
-            //        }
-            //    }
-            //}
+            if (newStatusId == 6)
+            {
+                if (task.Outcomes==OutcomeType.Olumlu)
+                {
+                    if (task.FinalSalesDone == null)
+                    {
+                        return Json(new { isValid = false, message = "Satış süreci olumlu bir şekilde tamamlanmış görünüyor. Lütfen Gerçekleşen Satış Kapatma Tarihi alanını doldurunuz." });
+                    }
+                }
+            }
 
 
             return Json(new { isValid = true });
@@ -703,11 +703,19 @@ namespace CrmCorner.Controllers
 
         public IActionResult TaskDelete(int id)
         {
-            TaskComp task = _context.TaskComps.Find(id);
+            TaskComp task = _context.TaskComps
+                           .Include(t => t.TaskCompLogs) // İlişkili log kayıtlarını dahil et
+                           .FirstOrDefault(t => t.TaskId == id);
 
             if (task == null)
             {
                 return NotFound();
+            }
+
+            // İlişkili TaskCompLogs kayıtlarını sil
+            foreach (var log in task.TaskCompLogs.ToList())
+            {
+                _context.TaskCompLogs.Remove(log);
             }
 
             _context.TaskComps.Remove(task);

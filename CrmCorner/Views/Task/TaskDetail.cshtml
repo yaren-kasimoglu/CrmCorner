@@ -5,19 +5,18 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 @functions {
-    private string GetOutcomeClass(bool? isPositiveOutcome)
+    private string GetOutcomeClass(OutcomeType outcome)
     {
-        if (isPositiveOutcome == true)
+        switch (outcome)
         {
-            return "badge badge-light text-success border border-success"; // Yeşil arka plan
-        }
-        else if (isPositiveOutcome == false)
-        {
-            return "badge badge-light text-danger border border-danger"; // Kırmızı arka plan
-        }
-        else
-        {
-            return "badge badge-light text-secondary border border-secondary"; // Gri arka plan, eğer null ise
+            case OutcomeType.Olumlu:
+                return "badge badge-light text-success border border-success"; // Yeşil arka plan
+            case OutcomeType.Olumsuz:
+                return "badge badge-light text-danger border border-danger"; // Kırmızı arka plan
+            case OutcomeType.Surecte:
+                return "badge badge-light text-warning border border-warning"; // Sarı arka plan, süreçte ise
+            default:
+                return "badge badge-light text-secondary border border-secondary"; // Gri arka plan, varsayılan durum
         }
     }
 }
@@ -101,9 +100,9 @@
                 <div class="card-body">
                     <h6 class="card-title mb-4">Detaylar/Notlar</h6>
                     <p>@Model.Description</p>
-               @*     <span class="buyukYazi @GetOutcomeClass(Model.IsPositiveOutcome)">
-                        @(Model.IsPositiveOutcome ? "Olumlu" : "Olumsuz")
-                    </span>*@
+                    <span class="buyukYazi @GetOutcomeClass(Model.Outcomes)">
+                        @Model.Outcomes.ToString()
+                    </span>
 
                     <div class="progress-container progress-info">
                         @*           <div class="progress">
@@ -310,10 +309,6 @@
 <!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
-
-@*<script src="~/CRMTema/bootstrap5/dist/assets/bundles/vendorscripts.bundle.js"></script>*@
-@*<script src="~/CRMTema/bootstrap5/dist/assets/vendor/dropify/js/dropify.min.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/js/pages/forms/dropify.js"></script>*@
 
 <script>
     $(document).ready(function () {

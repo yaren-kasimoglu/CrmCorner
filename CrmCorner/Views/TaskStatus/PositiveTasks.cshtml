@@ -48,7 +48,7 @@
                     }
                     else
                     {
-                        @:Status bilgisi yok
+                        @:Kullanıcı bilgisi yok
                     }
                 </td>
                 <td>
@@ -58,10 +58,19 @@
                     }
                     else
                     {
-                        @:Status bilgisi yok
+                        @:Görüşmeyi alan bilgisi yok
                     }
                 </td>
-                <td>@item.Customer.CustomerTitle  @item.Customer.CustomerEmail</td>
+                <td>@if (item.Customer!=null)
+                    {
+                        @item.Customer.CustomerTitle  @item.Customer.CustomerEmail
+                    }
+                    else
+                    {
+                        @:Müşteri bilgisi yok veya eksik
+                    }
+                
+                </td>
                 <td>
                 <span class="badge badge-dark text-dark border border-dark message">
                     @if (item.IsFinalDecisionMaker)
