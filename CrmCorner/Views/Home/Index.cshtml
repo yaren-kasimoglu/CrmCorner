@@ -131,7 +131,7 @@ else
                 <div class="card-body text-center">
                     <div class="col-6">
                         <h6>Görevlerin Durumlarına Göre Dağılımları</h6>
-                        <div style="width: 50%;">
+                        <div style="width: 60%;">
                             <canvas id="outcomeStatusChart"></canvas>
                         </div>
                     </div>
@@ -140,7 +140,7 @@ else
                 <div class="card-body text-center">
                     <div class="col-6">
                         <h6>Son Karar Mercii İle Görüşme Durumları</h6>
-                        <div style="width: 50%;">
+                        <div style="width: 60%;">
                             <canvas id="isFinalDesicionMaker"></canvas>
                         </div>
                     </div>
@@ -148,6 +148,16 @@ else
             </div>
         </div>
     </div>
+
+
+
+        <div class="col-6">
+            <div class="chart-title">Müşterilerin sektörel dağılımları</div>
+            <div class="custom-card" style="width: 60%;">
+                <canvas id="industuryChart"></canvas>
+            </div>
+        </div>
+ 
 
 
 
@@ -200,7 +210,7 @@ else
             dataType: "json",
             success: function (data) {
                 var ctx = document.getElementById('outcomeStatusChart').getContext('2d');
-                var colors = ['#FED049', '#2D6187'];
+                var colors = ['#FED049', '#2D6187', '#89BEB3'];
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
@@ -262,4 +272,48 @@ else
 
 </script>
 
+<script>
+    $(document).ready(function () {
 
+        $.ajax({
+            type: "GET",
+            url: "/Home/IndustryChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var ctx = document.getElementById('industuryChart').getContext('2d');
+                // Dinamik olarak renk seçimi
+                var colors = generateColors(data.labels.length);
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                });
+            },
+            error: function (error) {
+                // Hata durumunda kullanıcıya bildirim
+                console.error('Error fetching data:', error);
+                alert('Error fetching data. Please try again later.');
+            }
+        });
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var colors = [];
+            for (var i = 0; i < count; i++) {
+                // Rastgele renk üretme (örneğin)
+                var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                colors.push(color);
+            }
+            return colors;
+        }
+
+    });
+
+</script>

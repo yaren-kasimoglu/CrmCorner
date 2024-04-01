@@ -299,7 +299,7 @@
 
 
                         @if (tasksInThisStatus.Any())
-                        {//        data-is-positive-outcome="@task.IsPositiveOutcome"
+                        {
                          // Görevleri listele
                             <div class="dd" data-plugin="nestable">
                                 <ol class="dd-list" data-statusid="@status.Key">
@@ -315,7 +315,8 @@
                                             data-negative-reason="@task.NegativeReason"
                                             data-user-name="@task.AppUser?.UserName"
                                             data-assigned-user-name="@task.AssignedUser?.UserName"
-                                            data-customer-name="@task.Customer?.Name @task.Customer?.Surname">
+                                            data-customer-name="@task.Customer?.Name @task.Customer?.Surname"
+                                            data-outcome-type="@task.Outcomes.ToString()">
 
 
                                             <div class="dd-handle">
@@ -406,7 +407,7 @@
             var createdDate = task.getAttribute('data-created-date') ? task.getAttribute('data-created-date').toLowerCase() : '';
             var modifiedDate = task.getAttribute('data-modified-date') ? task.getAttribute('data-modified-date').toLowerCase() : '';
             var isFinalDecisionMaker = task.getAttribute('data-is-final-decision-maker') ? task.getAttribute('data-is-final-decision-maker').toLowerCase() : '';
-            var isPositiveOutcome = task.getAttribute('data-is-positive-outcome') ? task.getAttribute('data-is-positive-outcome').toLowerCase() : '';
+            var outcomeType = task.getAttribute('data-outcome-type') ? task.getAttribute('data-outcome-type').toLowerCase() : '';
             var negativeReason = task.getAttribute('data-negative-reason') ? task.getAttribute('data-negative-reason').toLowerCase() : '';
 
 
@@ -415,7 +416,7 @@
             var customerName = task.getAttribute('data-customer-name') ? task.getAttribute('data-customer-name').toLowerCase() : '';
 
             isFinalDecisionMaker = isFinalDecisionMaker === 'true' ? 'evet' : (isFinalDecisionMaker === 'false' ? 'hayır' : '');
-            isPositiveOutcome = isPositiveOutcome === 'true' ? 'olumlu' : (isPositiveOutcome === 'false' ? 'olumsuz' : '');
+
 
             if (title.includes(searchTerm)
                 || description.includes(searchTerm)
@@ -424,9 +425,9 @@
                 || createdDate.includes(searchTerm)
                 || modifiedDate.includes(searchTerm)
                 || isFinalDecisionMaker.includes(searchTerm)
-                || isPositiveOutcome.includes(searchTerm)
                 || negativeReason.includes(searchTerm)
                 || userName.includes(searchTerm)
+                || outcomeType.includes(searchTerm)
                 || assignedUserName.includes(searchTerm)
                 || customerName.includes(searchTerm)) {
                 task.style.display = ''; // Eşleşen görevleri göster

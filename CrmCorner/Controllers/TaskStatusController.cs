@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,11 +25,13 @@ namespace CrmCorner.Controllers
         public IActionResult PositiveTasks()
         {
             var positiveTasks = _context.TaskComps
-                .Include(t=>t.Status)
-                .Include(t=>t.AppUser)
-                .Include(t=>t.AssignedUser)
-                .Include(t=>t.Customer)
-            /*    .Where(t => t.IsPositiveOutcome)*/.ToList();
+        .Include(t => t.Status)
+        .Include(t => t.AppUser)
+        .Include(t => t.AssignedUser)
+        .Include(t => t.Customer)
+        .Where(t => t.Outcomes == OutcomeType.Olumlu) // 'Olumlu' enum değerine göre filtreleme
+        .ToList();
+
 
 
             return View(positiveTasks);
@@ -47,7 +50,8 @@ namespace CrmCorner.Controllers
                 .Include(t => t.AssignedUser)
                 .Include(t => t.Customer)
                 .Where(u => u.AppUser.CompanyName == currentUserCompanyName)
-             /*   .Where(t => !t.IsPositiveOutcome)*/.ToList();
+            .Where(t => t.Outcomes == OutcomeType.Olumsuz)
+             .ToList();
 
 
             return View(negativeTaks);
