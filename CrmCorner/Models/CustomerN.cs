@@ -1,6 +1,7 @@
 ﻿using CrmCorner.Models.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace CrmCorner.Models;
 
@@ -14,7 +15,6 @@ public partial class CustomerN
 
     public string CustomerEmail { get; set; } = null!;
     public string CustomerTitle { get; set; }
-    public int? EmployeeCount { get; set; }
     public string PhoneNumber { get; set; } = null!;
 
     public string CompanyName { get; set; } = null!;
@@ -24,6 +24,9 @@ public partial class CustomerN
     public DateTime CreatedDate { get; set; }
 
     public DateTime? ModifiedDate { get; set; }
+
+    [Display(Name = "Çalışan Sayısı")]
+    public EmployeeCountRange? EmployeeCount { get; set; }
 
     public string? AppUserId { get; set; }
 
