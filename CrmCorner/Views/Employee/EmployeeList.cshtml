@@ -1,11 +1,35 @@
-﻿@model List<UserViewModel>
+﻿@model List<DashboardEmpViewModel>
 @{
     ViewData["Title"] = "EmployeeList";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+<style>
+    .table-spacing {
+        margin-bottom: 40px !important;
+    }
+</style>
 
+@{
+    var statusOrder = new Dictionary<string, int>
+    {
+        {"İLK TEMAS", 1},
+        {"GÖRÜŞME AYARLANDI", 2},
+        {"GÖRÜŞME GERÇEKLEŞTİ", 3},
+        {"TEKLİF GÖNDERİLDİ", 4},
+        {"SÖZLEŞME AŞAMASINDA", 5},
+        {"SATIŞ TAMAMLANDI", 6},
+    
+    };
 
-<table id="user_List" class="table center-aligned-table">
+    var orderedStatuses = Model
+        .SelectMany(m => m.TaskStatusCountsByUser.Keys)
+        .Distinct()
+        .OrderBy(status => statusOrder.ContainsKey(status) ? statusOrder[status] : int.MaxValue)
+        .ToList();
+}
+
+<table id="user_List" class="table center-aligned-table table-spacing">
+
     <thead>
         <tr>
             <th>Adı Soyadı</th>
@@ -20,12 +44,12 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.NameSurname</td>
-                <td>@item.Email</td>
-                <td>@item.PhoneNumber</td>
-                <td>@item.PositionName</td>
+                <td>@item.User.NameSurname</td>
+                <td>@item.User.Email</td>
+                <td>@item.User.PhoneNumber</td>
+                <td>@item.User.PositionName</td>
                 <td>
-                    <span class="badge bg-info">@item.CompanyName</span>
+                    <span class="badge bg-info">@item.User.CompanyName</span>
                 </td>
 
 
@@ -35,6 +59,35 @@
     </tbody>
 
 </table>
+
+<div class="table-spacing"></div>
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr class="table-primary">
+            <th>Çalışan</th>
+            @foreach (var status in orderedStatuses)
+            {
+                <th class="text-center align-middle">@status</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var dashboardModel in Model)
+        {
+            <tr>
+                <td>@dashboardModel.User.NameSurname</td>
+                @foreach (var status in orderedStatuses)
+                {
+                    <td class="align-middle">@dashboardModel.TaskStatusCountsByUser.GetValueOrDefault(status, 0)</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
 
 @section Scripts {
     <!-- core js file -->
