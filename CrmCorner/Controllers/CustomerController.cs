@@ -22,7 +22,7 @@ namespace CrmCorner.Controllers
         }
         public async Task<IActionResult> CustomerList()
         {
-            var currentUser=await _userManager.GetUserAsync(User);
+            var currentUser = await _userManager.GetUserAsync(User);
 
             if (currentUser != null)
             {
@@ -48,10 +48,10 @@ namespace CrmCorner.Controllers
 
             if (currentUser == null)
             {
-                return View("SignIn","Home"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+                return View("SignIn", "Home"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
             }
             var companyId = currentUser.CompanyId;
-            
+
             var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
 
             var appUserItems = appUsers
@@ -68,6 +68,15 @@ namespace CrmCorner.Controllers
                 Text = v.GetDisplayName(), // Enum için Display Attribute'unu okuyan extension method
                 Value = ((int)v).ToString()
             }).ToList(), "Value", "Text");
+
+
+            ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
+        .Cast<EmployeeCountRange>()
+        .Select(e => new SelectListItem
+        {
+            Text = e.GetDisplayName(),
+            Value = ((int)e).ToString()
+        }).ToList();
 
 
             ViewBag.AppUsers = appUserItems;
@@ -95,7 +104,7 @@ namespace CrmCorner.Controllers
 
                 throw;
             }
-          
+
 
             var appUsers = _userManager.Users.ToList();
             var appUserItems = appUsers
@@ -140,9 +149,20 @@ namespace CrmCorner.Controllers
             }).ToList(), "Value", "Text");
 
 
+
+
             ViewBag.AppUsers = appUserItems;
             // id parametresini kullanarak düzenlenecek müşteriyi veritabanından al
             CustomerN customer = _context.CustomerNs.Find(id);
+
+            ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
+.Cast<EmployeeCountRange>()
+.Select(e => new SelectListItem
+{
+    Text = e.GetDisplayName(),
+    Value = ((int)e).ToString(),
+    Selected = e == customer.EmployeeCount // mevcut değeri işaretle
+}).ToList();
 
             // Eğer müşteri bulunamazsa
             if (customer == null)
@@ -162,7 +182,7 @@ namespace CrmCorner.Controllers
                 _context.Entry(editedCustomer).State = EntityState.Modified;
                 _context.SaveChanges();
 
-                return RedirectToAction("CustomerList"); 
+                return RedirectToAction("CustomerList");
             }
             //ModelState.IsValid false ise
             return View(editedCustomer);
@@ -181,7 +201,7 @@ namespace CrmCorner.Controllers
             }
             _context.CustomerNs.Remove(customer);
             _context.SaveChanges();
-            
+
 
             return RedirectToAction("CustomerList");
         }

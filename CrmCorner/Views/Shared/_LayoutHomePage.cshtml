@@ -113,6 +113,32 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-home"></i>Anasayfam</a>
                                     </li>
+
+@*                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a>
+                                    </li>
+*@
+
+
+                                    <li>
+                                        <a href="#Tasks" class="has-arrow"><i class="fa fa-users"></i><span>Satış</span></a>
+                                        <ul class="list-unstyled">
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Tümü</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="TaskStatus" asp-action="PositiveTasks"><i class="fa fa-calendar"></i>Kazanılan</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="TaskStatus" asp-action="NegativeTasks"><i class="fa fa-calendar"></i>Kaybedilen</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="ToDoList" asp-action="ToDoList"><i class="fa fa-calendar"></i>Yapılacaklar</a>
+                                    </li>
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i>Müşterilerim</a>
                                     </li>
@@ -125,20 +151,16 @@
 
                                     </li>
 
-                                    <li class="nav-item">
+                             @*       <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
-                                    </li>
+                                    </li>*@
 
                                    @* <li class="nav-item">
                                         <a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a>
                                     </li>*@
 
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="ToDoList" asp-action="ToDoList"><i class="fa fa-calendar"></i>Yapılacaklar</a>
-                                    </li>     
+
+                               
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="TaskStatus" asp-action="PositiveTasks"><i class="fa fa-calendar"></i>Kazanılan Satışlar</a>
                                     </li>

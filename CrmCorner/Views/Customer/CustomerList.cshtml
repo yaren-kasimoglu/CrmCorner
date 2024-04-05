@@ -1,4 +1,5 @@
-﻿@model List<CustomerN>
+﻿@using CrmCorner.Extensions;
+@model List<CustomerN>
 @{
     ViewData["Title"] = "CustomerList";
 }
@@ -58,7 +59,16 @@
             }
 
             </td>*@
-               @* <td>@item.EmployeeCount</td>*@
+                <td>
+                    @if (item.EmployeeCount.HasValue)
+                    {
+                        @item.EmployeeCount.Value.GetDisplayName()
+                    }
+                    else
+                    {
+                        <span class="text-danger">Bilinmiyor</span>
+                    }
+                </td>
                 <td>
                     <a href="/Customer/CustomerEdit/@item.Id" target="_self">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
