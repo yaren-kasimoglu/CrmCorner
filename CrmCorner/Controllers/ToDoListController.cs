@@ -8,6 +8,7 @@ using Microsoft.Exchange.WebServices.Data;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Graph;
 using MySqlX.XDevAPI.Relational;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CrmCorner.Controllers
 {
@@ -234,7 +235,100 @@ namespace CrmCorner.Controllers
                 return View();
             }
         }
-        
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteToDo(string selectedItem, string title,int itemId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var today = DateTime.Today;
+            string[] splittedselected = null;
+            string[] splittedunselected = null;
+            string[] resultselected = null;
+            string[] resultunselected = null;
+            if (itemId == 1)
+            {
+                var toDoValue = _context.ToDos.AsNoTracking()
+              .Include(e => e.AppUser)
+              .Where(e => e.UserId == currentUser.Id && e.SystemDate == today).FirstOrDefault();
+                if (toDoValue.DoneList != null)
+                {
+                    splittedselected = toDoValue.DoneList.Split(',');
+                    resultselected = RemoveItemFromArray(splittedselected, selectedItem);
+                }
+                if (toDoValue.NotDoneList != null)
+                {
+                    splittedunselected = toDoValue.NotDoneList.Split(',');
+                    resultunselected = RemoveItemFromArray(splittedunselected, selectedItem);
+                }
+                ToDo toDo = new ToDo();
+                toDo.SystemDate = DateTime.Today;
+                toDo.DoneList = resultselected!=null ? string.Join(",", resultselected) : toDoValue.DoneList;
+                toDo.NotDoneList = resultunselected!=null ? string.Join(",", resultunselected) : toDoValue.NotDoneList;
+                toDo.UserId = currentUser.Id;
+                toDo.MainGoalTitle = toDoValue.MainGoalTitle;
+                toDo.Title = title;
+                try
+                {
+                    toDo.Id = toDoValue.Id;
+                    _context.ToDos.Update(toDo);
+                    _context.SaveChanges();
+                }
+                catch(Exception ex)
+                {
+                    Console.Write(ex.Message);
+                }
+            }
+            else
+            {
+                var toDoValue = _context.ToDoList.AsNoTracking()
+                .Where(e => e.UserId == currentUser.Id && e.Id == itemId)
+               .FirstOrDefault();
+                splittedselected = toDoValue.DoneList!=null? toDoValue.DoneList.Split(','): null;
+                splittedunselected = toDoValue.NotDoneList!=null? toDoValue.NotDoneList.Split(','):null;
+                if(splittedselected!=null)
+                    resultselected = RemoveItemFromArray(splittedselected, selectedItem);
+                if (splittedunselected != null)
+                    resultunselected = RemoveItemFromArray(splittedunselected, selectedItem);
+                ToDoList toDo = new ToDoList();
+                toDo.SystemDate = DateTime.Today;
+                toDo.DoneList = resultselected.Count() >0? string.Join(",", resultselected) : toDoValue.DoneList == "" ? null : toDoValue.DoneList; 
+                toDo.NotDoneList = resultunselected.Count()>0 ? string.Join(",", resultunselected) : toDoValue.NotDoneList==""?null: toDoValue.NotDoneList; 
+                toDo.UserId = currentUser.Id;
+                toDo.MainGoalTitle = toDoValue.MainGoalTitle; 
+                toDo.Title = title;
+                toDo.Id = itemId;
+                try
+                {
+                    _context.ToDoList.Update(toDo);
+                    _context.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    Console.Write(ex.Message);
+                }
+
+            }
+                return Json(new { Message = "success" });
+        }
+        static string[] RemoveItemFromArray(string[] array, string item)
+        {
+            item = item == null ? "" : item;
+            if (!array.Contains(item))
+                return array;
+            // Verilen öğeyi içermeyen yeni bir dizi oluştur
+            string[] newArray = new string[array.Length - 1];
+            int index = 0;
+
+            foreach (string element in array)
+            {
+                if (element != item)
+                {
+                    newArray[index] = element;
+                    index++;
+                }
+            }
+            return newArray;
+        }
     }
         
 }

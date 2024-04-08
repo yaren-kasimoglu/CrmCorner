@@ -162,6 +162,7 @@
                             </div>
                             <span>@item.Count</span>
                             <input type="text" id="todolistId" value="@item.Id" style="display:none" />
+                            <label id="todoId" style="display:none"></label>
                         </a>
                     }
                 </ul>
@@ -182,7 +183,7 @@
                                             <label class="task">
                                                 <input type="checkbox" class="taskCheckbox" id="taskCheckbox" onclick="clickToDoCheckbox(this)">
                                                 <span class="custom-checkbox"></span>
-                                                <input type="text" name="textValue" class="form-control" id="textInput" placeholder="Görev Ekle">
+                                                <input type="text" name="textValue" class="textInput2" id="textInput" placeholder="Görev Ekle">
                                             </label>
                                             <div class="taskcontainer" id="kartContainer2"></div>
                                         </td>
@@ -227,26 +228,31 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    var kartIcerik = `@if (taskData != null) {
+        var kartIcerik = `@if (taskData != null) {
             @foreach (var task in taskData)
             {
-               <label class="task">
-        <input type="checkbox" class="taskCheckbox"  onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
+               <div style="display: flex;">
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+          <label class="task" >
+        <input type="checkbox" class="taskCheckbox"  onclick="clickToDoCheckbox(this);document.getElementById('delbutton').blur();" id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"></span>
         <input type="text" style="text-decoration:line-through" class="textInput2"   id="textInput"  name="textValue" placeholder="Görev Ekle" value="@task">
-            </label>
+            </label> </div>
         }
                 }
             `;
 
-    var kartIcerik2 = `@if (notTaskData != null) {
+        var kartIcerik2 = `@if (notTaskData != null) {
                 @foreach (var task in notTaskData)
             {
-               <label class="task">
-        <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
+               <div style="display: flex;">
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+          <label class="task" >
+        <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this);document.getElementById('delbutton').blur();" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
         <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle"  value="@task">
             </label>
+             </div>
             }
                 }
             `;
@@ -272,22 +278,28 @@ function show() {
                 for (var i = 0; i < data.message.taskData.length; i++) {
                     var task = data.message.taskData[i];
                     kartIcerik += `
-                <label class="task">
+               <div style="display: flex;">
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+          <label class="task" >
                     <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
                     <span class="custom-checkbox"></span>
                     <input type="text" style="text-decoration:line-through" id="textInput" class="textInput2"   name="textValue" placeholder="Görev Ekle" value="${task}">
-                </label>`;
+                </label>
+                 </div>`;
                 }
             }
             if (data.message.notTaskData != null) {
                 for (var i = 0; i < data.message.notTaskData.length; i++) {
                     var task2 = data.message.notTaskData[i];
                     kartIcerik2 += `
-              <label class="task">
+               <div style="display: flex;">
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+          <label class="task" >
         <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
         <input type="text" name="textValue" id="textInput" class="textInput2"   placeholder="Görev Ekle"  value="${task2}">
-            </label>`;
+            </label>
+             </div>`;
                 }
 
 
@@ -303,6 +315,8 @@ function show() {
 function showItem(id) {
     document.getElementById("todaymaintitle").style.visibility = "hidden";
     document.getElementById("todotitle").readOnly = true;
+    var inputElement = document.getElementById("todoId");
+    document.getElementById("todoId").value = id;
     document.getElementById("todolistId").value = 2;
 
     $.ajax({
@@ -320,24 +334,32 @@ function showItem(id) {
                 for (var i = 0; i < data.message.taskData.length; i++) {
                     var task = data.message.taskData[i];
                     kartIcerik += `
-                <label class="task">
-                    <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
+            <div style="display: flex;">
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+                    <label class="task">
+                  <input type="checkbox" class="taskCheckbox" style="padding-left:50%" id="taskCheckbox" @(true ? "checked" : "")>
                     <span class="custom-checkbox"></span>
-                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue"  class="textInput2"   placeholder="Görev Ekle" value="${task}">
-                </label>`;
+                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue" class="textInput2" placeholder="Görev Ekle" value="${task}">
+                    </label>
+            </div>`;
                 }
             }
             if (data.message.notTaskData != null) {
                 for (var i = 0; i < data.message.notTaskData.length; i++) {
                     var task2 = data.message.notTaskData[i];
                     kartIcerik2 += `
+                      <div style="display: flex;">
+                        <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
               <label class="task">
-        <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
+        <input type="checkbox" class="taskCheckbox"  id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
         <input type="text" name="textValue"  class="textInput2"   id="textInput" placeholder="Görev Ekle"  value="${task2}">
-            </label>`;
+            </label>
+             </div>`;
                 }
             }
+
+            //onclick = "clickToDoCheckbox(this)"
             $('#kartContainer2').empty();
             var toplam = kartIcerik + kartIcerik2;
             $('#kartContainer2').append(toplam);
@@ -350,19 +372,22 @@ function showItem(id) {
 function addtodo() {
     // Kartın içeriği
     var kartIcerik2 = `
+                <div style="display: flex;">
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
           <label class="task" >
              <input type="checkbox" class="taskCheckbox" id="taskCheckbox" onclick="clickToDoCheckbox(this)">
              <span class="custom-checkbox"></span>
              <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle">
            </label>
+           </div>
     `;
     // Kartı kartContainer içine ekle
     $('#kartContainer2').append(kartIcerik2);
 }
 
-// Butona tıklandığında kartEkle fonksiyonunu çağır
     $(document).on('keyup', '.textInput2', function (event) {
-        if (event.key === "Enter") {
+        console.log("girdi")
+        if (event.keyCode === 13) {
             event.preventDefault();
             addtodo();
         }
@@ -405,6 +430,37 @@ function textVisible() {
     inputElement.style.textDecoration = "none"; //
 }
 
+
+ function deleteToDo(item) {
+        if (confirm("Gerçekten silmek istiyor musunuz?")) {
+            var label = item.parentElement.querySelector('input[type="text"]');
+            console.log(label.value);
+            var inputElement = document.getElementById("todoId");
+            console.log(inputElement);
+            var inputTitle = document.getElementById("todotitle");
+            console.log(inputTitle);
+
+            var todoListId = inputElement.value;
+            console.log(todoListId);
+
+
+            $.ajax({
+                type: 'POST',
+                url: "/ToDoList/DeleteToDo/",
+                encode: true,
+                data: { selectedItem: label.value, title: inputTitle.value, itemId: todoListId },
+                dataType: "json",
+                success: function () {
+                    location.reload();
+                }
+
+            });
+
+            return false;
+        }
+
+
+}
 function save() {
     var taskLabels = document.querySelectorAll('.task');
     var selectedTaskTexts = [];
@@ -419,14 +475,18 @@ function save() {
         var textInput = label.querySelector('input[type="text"]');
         var maingoal = document.getElementById("maingoal").innerText;
         var values = textInput.value.split(',');
-        if (checkbox.checked) {
-            selectedTaskTexts.push(textInput.value.trim());
-        }
-        else {
-            notselectedTaskTexts.push(textInput.value.trim());
+        if (values!='') {
+            if (checkbox.checked) {
+                selectedTaskTexts.push(textInput.value.trim());
+            }
+            else {
+                notselectedTaskTexts.push(textInput.value.trim());
+            }
         }
 
     });
+    console.log(selectedTaskTexts);
+    console.log(notselectedTaskTexts);
     var selectedTaskTextsString = selectedTaskTexts.join(",");
     var notselectedTaskTextsString = notselectedTaskTexts.join(",");
     var inputElement = document.getElementById("todolistId");
@@ -482,11 +542,18 @@ document.querySelector(".close").addEventListener("click", function () {
 
 });
 
+
+
 </script>
 <style>
 
 
+    .task {
+        display: flex;
+        align-items: center;
+    }
 
+     
     .dropbtn {
         background-color: #f1f1f1;
         color: black;
