@@ -13,135 +13,6 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Pacifico&display=swap" rel="stylesheet">
 <link href="~/css/todo.css" rel="stylesheet" />
 
-@*<div class="wrapper">
-    <div id="container1">
-        <img src="~/icons/todo/sun.png" alt="Logo" class="logo">
-        <label onclick="show()" class="date">Günüm</label>
-    </div>
-    <div class="horizontal-line"></div>*@
-@*<div id="container3">
-        <div id="container4" style=" contain: inline-size;">
-            <table class="custom-table" style="width: 50%;">
-
-                @foreach (var item in ViewBag.ToDoList)
-                {
-                    <tr>
-                        <td>
-                            <img src="~/icons/todo/deneme.png" alt="Logo" class="logotable">
-                        </td>
-                        <td>
-                            <label class="todolist" onclick="showItem(@item.Id)">@item.Title</label>
-                        </td>
-                        <td>
-                            <input type="text" id="todolistId" value="@item.Id" style="display:none" />
-                        </td>
-                        <td>
-                            <h9>@item.Count</h9>
-                        </td>
-                    </tr>
-
-                }
-            </table>
-        </div>
-
-        <div id="Containerlist">
-            <input type="text" id="ekleButton2" class="addlist" placeholder="Liste Ekle">
-        </div>
-    </div>*@
-<!--<div class="container">
-    <div class="row">
-        <div class="col-6">
-            <ul class="list-group">
-                @foreach (var item in ViewBag.ToDoList)
-                {
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" onclick="showItem(@item.Id)">
-                        <div>
-                            <img src="~/icons/todo/deneme.png" alt="Logo" style="max-width: 30px; margin-right: 10px;">
-                            <span style="font-size: 14px; margin-right: 5px;">@item.Title</span>
-                        </div>
-                        <span>@item.Count</span>
-                        <input type="text" id="todolistId" value="@item.Id" style="display:none" />
-                    </a>
-                }
-            </ul>
-        </div>
-    </div>
-</div>
-    <div class="container" id="container2">
-        <div class="row">
-            <div class="col-md-10">
-                <div style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); border: 2px solid #2eacb3;">
-                    <div class="card-header" id="todaymaintitle" style="font-family: 'DM Sans', sans-serif;"></div>
-                    <div class="card-body" style=" background-color: #f4f4f4;">
-                        <input type="text" style="font-family: 'DM Sans', sans-serif; background-color: #f4f4f4;text-align: center; font-size: xxx-large; border:none;width:100%; " id="todotitle" class="card-title" placeholder="Başlık bilginizi buraya giriniz.." value="@ViewBag.TitleValue" />
-
-                        <div class="todo-list">
-                            <table id="table">
-                                <tr>
-                                    <td>
-                                        <label class="task">
-                                            <input type="checkbox" class="taskCheckbox" id="taskCheckbox" onclick="clickToDoCheckbox(this)">
-                                            <span class="custom-checkbox"></span>
-                                            <input type="text" name="textValue" class="textInput2" id="textInput" placeholder="Görev Ekle">
-                                        </label>
-                                        <div class="taskcontainer" id="kartContainer2"></div>
-                                    </td>
-                                    <label class="main-goal">
-                                        <span>Bugün için asıl hedefim:</span>
-                                        <input type="text" style="outline:none;border:none" id="maingoal" class="maingoal" value="@ViewBag.MainGoalTitle" placeholder="Hedefim">
-                                    </label>
-
-                                </tr>
-                            </table>
-                        </div>-->
-<!-- Submit düğmesini en sağa hizalamak için -->
-<!--<div class="d-flex justify-content-end" style="margin-top: 5%;">
-    <button type="submit" onclick="save()">Kaydet</button>
-</div>-->
-<!-- Modal -->
-<!--<div id="myModal" class="modal">-->
-<!-- Modal içeriği -->
-<!--<div class="modal-content">
-                            <p>Kaydedildi!</p>
-                            <span class="close">Tamam</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>-->
-@*<div class="wrapper">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <div id="container1">
-                        <img src="~/icons/todo/sun.png" alt="Logo" class="logo" style="max-width: 50px; max-height: 50px;">
-                        <label onclick="show()" class="date">Günüm</label>
-                    </div>
-
-                        <div class="col-md-3">
-                            <div class="horizontal-line" style="padding-bottom:15px"></div>
-                        </div>
-
-                    <ul class="list-group">
-                        @foreach (var item in ViewBag.ToDoList)
-                        {
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" onclick="showItem(@item.Id)">
-                                <div>
-                                    <img src="~/icons/todo/deneme.png" alt="Logo" style="max-width: 30px; margin-right: 10px;">
-                                    <span style="font-size: 14px; margin-right: 5px;">@item.Title</span>
-                                </div>
-                                <span>@item.Count</span>
-                                <input type="text" id="todolistId" value="@item.Id" style="display:none" />
-                            </a>
-                        }
-                    </ul>
-                </div>
-            </div>
-
-        </div>
-    </div>*@
 
 <div class="wrapper" style="margin-top:-10%">
     <div class="container">
@@ -152,19 +23,19 @@
                     <label onclick="show()" class="date">Günüm</label>
                 </div>
                 <div class="horizontal-line" style="padding-bottom:15px;width: 97%;margin-left: 1%;"></div>
-                <ul class="list-group">
+                <ul class="list-group"  style="width: 100%;">
                     @foreach (var item in ViewBag.ToDoList)
                     {
                         <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" onclick="showItem(@item.Id)">
-                            <div>
-                                <img src="~/icons/todo/deneme.png" alt="Logo" style="max-width: 30px; margin-right: 10px;">
-                                <span style="font-size: 14px; margin-right: 5px;">@item.Title</span>
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="openPopup('@item.Id'); disableOtherButtons(this);"><img src="~/icons/todo/düzenle.png" alt="Düzenle" style="max-width: 20px;"></button>
+                                    <img src="~/icons/todo/deneme.png" alt="Logo" style="max-width: 30px; margin-right: 10px;" />
+                                    <span style="font-size: 14px; margin-right: 5px;">@item.Title</span>
                             </div>
                             <span>@item.Count</span>
-                            <input type="text" id="todolistId" value="@item.Id" style="display:none" />
                             <label id="todoId" style="display:none"></label>
                         </a>
-                    }
+                     }
                 </ul>
                 <div id="Containerlist">
                     <input type="text" id="ekleButton2" class="addlist"  style="width: 100%;" placeholder="Liste Ekle..">
@@ -173,9 +44,9 @@
             <div class="col-md-9">
                 <div class="container" id="container2">
                     <div class="card" style="background-color: #f4f4f4;box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); border: 2px solid #2eacb3;">
-                        <div class="card-header" style=" background-color: #f4f4f4;" id="todaymaintitle">Bugünün Görevleri</div>
+                        <div class="card-header" style=" background-color: #f4f4f4; text-align: center; font-size: 32px; font-weight: normal;color: #333; margin: 0;" id="todaymaintitle">Günüm</div>
                         <div class="card-body">
-                            <input type="text" class="form-control mb-3" id="todotitle" placeholder="Başlık bilginizi buraya giriniz.." value="@ViewBag.TitleValue">
+                                <h1 class="main-title"></h1>
                             <div class="todo-list">
                                 <table class="table">
                                     <tr>
@@ -187,16 +58,12 @@
                                             </label>
                                             <div class="taskcontainer" id="kartContainer2"></div>
                                         </td>
-                                        <td>
-                                            <label class="main-goal">
-                                                <span>Bugün için asıl hedefim:</span>
-                                                <input type="text" class="form-control" id="maingoal" value="@ViewBag.MainGoalTitle" placeholder="Hedefim">
-                                            </label>
-                                        </td>
+
                                     </tr>
                                 </table>
                             </div>
                             <div class="text-end mt-3">
+                                <button type="submit" id="deleteToDoList" class="btn btn-info btn-sm" style="width:auto;visibility:hidden" onclick="deleteToDoList(this)">Listeyi Sil</button>
                                 <button type="submit" class="btn btn-primary btn-sm" style="width:auto" onclick="save()">Kaydet</button>
                             </div>
                             <div id="myModal" class="modal">
@@ -211,7 +78,7 @@
             </div>
         </div>
     </div>
-</div>
+
 
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -227,30 +94,122 @@
 
 
 <script>
+    function openPopup(itemId) {
+
+        $.ajax({
+            type: 'GET',
+            url: '/ToDoList/GetTitle/',
+            data: { id: itemId },
+            success: function (data) {
+                // Bilgi metni
+                var title = data.message;
+                var infoText = "Liste adınızı güncellemek için aşağıdaki kutucuğa giriniz.";
+                // Popup içeriğini oluştur
+                var popupContent = '<p>' + infoText + '</p>' +
+                    '<input type="text" value="' + title + '" onkeypress="handleKeyPress(event, ' + itemId + ')" id="editInput"  style="outline:none;border-bottom:1px solid #333;box-shadow:0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);border:none;font-size:x-large;border: outset;width:-webkit-fill-available">';
+
+                var popupDiv = document.createElement('div');
+                popupDiv.innerHTML = popupContent;
+                popupDiv.classList.add('popup-containeredit');
+                popupDiv.innerHTML = popupContent;
+                popupDiv.style.backgroundColor = 'white';
+                popupDiv.style.border = '1px solid black';
+                popupDiv.style.padding = '20px';
+                popupDiv.style.position = 'fixed';
+                popupDiv.style.top = '50%';
+                popupDiv.style.left = '50%';
+                popupDiv.style.transform = 'translate(-50%, -50%)';
+                popupDiv.style.zIndex = '9999';
+
+                // Overlay divini oluştur
+                var overlayDiv = document.createElement('div');
+                overlayDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                overlayDiv.style.position = 'fixed';
+                overlayDiv.style.top = '0';
+                overlayDiv.style.left = '0';
+                overlayDiv.style.width = '100%';
+                overlayDiv.style.height = '100%';
+                overlayDiv.style.zIndex = '9998';
+
+                // Overlay'e tıklandığında popup'ı kapat
+                overlayDiv.addEventListener('click', function () {
+                    document.body.removeChild(popupDiv);
+                    document.body.removeChild(overlayDiv);
+                });
+
+                // Popup ve overlay divlerini sayfaya ekle
+                document.body.appendChild(overlayDiv);
+                document.body.appendChild(popupDiv);
+
+                // Edit input alanını seç ve odaklan
+                var editInput = document.getElementById('editInput');
+                console.log(editInput.value);
+                editInput.focus();
+            }
+         });
+    }
+    function handleKeyPress(event, itemId) {
+        if (event.key === 'Enter') {
+            updateTitle(itemId);
+        }
+    }
+    function updateTitle(itemId) {
+        var newTitle = document.getElementById('editInput').value;
+        console.log(newTitle);
+        $.ajax({
+            type: 'POST',
+            url: "/ToDoList/UpdateTitle/",
+            encode: true,
+            data: { itemId: itemId, newtitle: newTitle },
+            dataType: "json",
+            success: function () {
+                location.reload();
+            }
+
+        });
+        var editButtons = document.querySelectorAll('.list-group-item button');
+
+        // Tüm düğmelerin tıklanabilirliğini geri yükle
+        editButtons.forEach(function (button) {
+            button.disabled = false;
+        });
+    }
+    function disableOtherButtons(clickedButton) {
+        // Tüm düzenleme düğmelerini seç
+        var editButtons = document.querySelectorAll('.list-group-item button');
+
+        // Tıklanan düğmeyi hariç, diğer düğmelerin tıklanabilirliğini devre dışı bırak
+        editButtons.forEach(function (button) {
+            if (button !== clickedButton) {
+                button.disabled = true;
+            }
+        });
+    }
     document.addEventListener("DOMContentLoaded", function () {
-        var kartIcerik = `@if (taskData != null) {
+            var kartIcerik = `@if (taskData != null) {
             @foreach (var task in taskData)
             {
-               <div style="display: flex;">
-            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
-          <label class="task" >
-        <input type="checkbox" class="taskCheckbox"  onclick="clickToDoCheckbox(this);document.getElementById('delbutton').blur();" id="taskCheckbox" @(true ? "checked" : "")>
+                <div>
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30" style="margin-right:1%;margin-left:-8%;cursor: pointer;float: left;">
+        <label class="task">
+             <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" style="text-decoration:line-through" class="textInput2"   id="textInput"  name="textValue" placeholder="Görev Ekle" value="@task">
-            </label> </div>
+             <input type="text" name="textContent" class="textContent" style="text-decoration:line-through"  id="textContent" placeholder="Görev Ekle" value="${task}">
+        </label>
+            </div>
         }
                 }
             `;
 
-        var kartIcerik2 = `@if (notTaskData != null) {
-                @foreach (var task in notTaskData)
+      var kartIcerik2 = `@if (notTaskData != null) {
+                @foreach (var task2 in notTaskData)
             {
-               <div style="display: flex;">
-            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+               <div>
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30" style="margin-right:1%;margin-left:-8%;cursor: pointer;float: left;">
           <label class="task" >
         <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this);document.getElementById('delbutton').blur();" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle"  value="@task">
+        <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle"  value="@task2">
             </label>
              </div>
             }
@@ -260,50 +219,72 @@
     var toplam = kartIcerik + kartIcerik2;
     $('#kartContainer2').append(toplam);
     });
+
+    function deleteToDoList(item) {
+        if (confirm("Gerçekten silmek istiyor musunuz?")) {
+            var inputElement = document.getElementById("todoId");
+            console.log(inputElement.value);
+            $.ajax({
+                type: 'POST',
+                url: "/ToDoList/DeleteToDoList/",
+                encode: true,
+                data: { itemId: inputElement.value },
+                dataType: "json",
+                success: function () {
+                    location.reload();
+                }
+
+            });
+        }
+
+    }
+
+
 function show() {
-    document.getElementById("todaymaintitle").style.visibility = "visible";
-    document.getElementById("todotitle").readOnly = false;
-    document.getElementById("todolistId").value = 1;
+    document.getElementById("todaymaintitle").style.display = "block";
+    var mainTitle = document.querySelector('.main-title');
+    mainTitle.style.display = 'none';
+    var inputElement = document.getElementById("todoId");
+    document.getElementById("todoId").value = 0;
+    document.getElementById("deleteToDoList").style.visibility = "hidden";
     $.ajax({
         type: 'POST',
         url: "/ToDoList/ToDoListDay/",
         encode: true,
         dataType: "json",
         success: function (data) {
-            document.getElementById("maingoal").value = data.message.mainGoalTitle;
-            document.getElementById("todotitle").value = data.message.title;
+            var baslik = data.message.title;
+            $(".main-title").text(baslik);
             var kartIcerik = '';
             var kartIcerik2 = '';
             if (data.message.taskData != null) {
                 for (var i = 0; i < data.message.taskData.length; i++) {
                     var task = data.message.taskData[i];
                     kartIcerik += `
-               <div style="display: flex;">
-            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
-          <label class="task" >
-                    <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
-                    <span class="custom-checkbox"></span>
-                    <input type="text" style="text-decoration:line-through" id="textInput" class="textInput2"   name="textValue" placeholder="Görev Ekle" value="${task}">
-                </label>
-                 </div>`;
+                       <div>
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30" style="margin-right:1%;margin-left:-8%;cursor: pointer;float: left;">
+        <label class="task">
+             <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
+        <span class="custom-checkbox"></span>
+             <input type="text" name="textContent" class="textContent" style="text-decoration:line-through"  id="textContent" placeholder="Görev Ekle" value="${task}">
+        </label>
+            </div>`;
+
                 }
             }
             if (data.message.notTaskData != null) {
                 for (var i = 0; i < data.message.notTaskData.length; i++) {
                     var task2 = data.message.notTaskData[i];
                     kartIcerik2 += `
-               <div style="display: flex;">
-            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
-          <label class="task" >
-        <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
+                      <div>
+                        <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right:1%;margin-left:-8%;cursor: pointer;float: left;">
+              <label class="task">
+        <input type="checkbox" class="taskCheckbox"  id="taskCheckbox"  onclick="clickToDoCheckbox(this)" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" name="textValue" id="textInput" class="textInput2"   placeholder="Görev Ekle"  value="${task2}">
+             <input type="text" name="textContent" class="textContent"  id="textContent" placeholder="Görev Ekle" value="${task2}">
             </label>
              </div>`;
                 }
-
-
-
             }
             $('#kartContainer2').empty();
             var toplam = kartIcerik + kartIcerik2;
@@ -312,35 +293,40 @@ function show() {
     });
 
 }
-function showItem(id) {
-    document.getElementById("todaymaintitle").style.visibility = "hidden";
-    document.getElementById("todotitle").readOnly = true;
-    var inputElement = document.getElementById("todoId");
-    document.getElementById("todoId").value = id;
-    document.getElementById("todolistId").value = 2;
+    function showItem(id) {
+
+        document.getElementById("todaymaintitle").style.display = "none";
+        var mainTitle = document.querySelector('.main-title');
+        mainTitle.style.display = 'block';
+        var inputElement = document.getElementById("todoId");
+        var el = document.querySelector("list-group-item")
+        console.log(el);
+        document.getElementById("todoId").value = id;
+        document.getElementById("deleteToDoList").style.visibility = "visible";
+
 
     $.ajax({
-        type: 'POST',
+        type: 'GET',
         url: "/ToDoList/GetToDoList/",
         encode: true,
         data: { id: id },
         dataType: "json",
         success: function (data) {
-            document.getElementById("maingoal").value = data.message.mainGoalTitle;
-            document.getElementById("todotitle").value = data.message.title;
+            var baslik = data.message.title;
+            $(".main-title").text(baslik);
             var kartIcerik = '';
             var kartIcerik2 = '';
             if (data.message.taskData != null) {
                 for (var i = 0; i < data.message.taskData.length; i++) {
                     var task = data.message.taskData[i];
                     kartIcerik += `
-            <div style="display: flex;">
-            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
-                    <label class="task">
-                  <input type="checkbox" class="taskCheckbox" style="padding-left:50%" id="taskCheckbox" @(true ? "checked" : "")>
-                    <span class="custom-checkbox"></span>
-                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue" class="textInput2" placeholder="Görev Ekle" value="${task}">
-                    </label>
+                      <div>
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30" style="margin-right:1%;margin-left:-8%;cursor: pointer;float: left;">
+        <label class="task">
+             <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
+        <span class="custom-checkbox"></span>
+             <input type="text" name="textContent" class="textContent" style="text-decoration:line-through"  id="textContent" placeholder="Görev Ekle" value="${task}">
+        </label>
             </div>`;
                 }
             }
@@ -348,12 +334,12 @@ function showItem(id) {
                 for (var i = 0; i < data.message.notTaskData.length; i++) {
                     var task2 = data.message.notTaskData[i];
                     kartIcerik2 += `
-                      <div style="display: flex;">
-                        <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+                      <div>
+                        <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right:1%;margin-left:-8%;cursor: pointer;float: left;">
               <label class="task">
-        <input type="checkbox" class="taskCheckbox"  id="taskCheckbox" @(false ? "checked" : "")>
+        <input type="checkbox" class="taskCheckbox"  id="taskCheckbox"  onclick="clickToDoCheckbox(this)" @(false ? "checked" : "")>
         <span class="custom-checkbox"></span>
-        <input type="text" name="textValue"  class="textInput2"   id="textInput" placeholder="Görev Ekle"  value="${task2}">
+             <input type="text" name="textContent" class="textContent"  id="textContent" placeholder="Görev Ekle" value="${task2}">
             </label>
              </div>`;
                 }
@@ -363,7 +349,6 @@ function showItem(id) {
             $('#kartContainer2').empty();
             var toplam = kartIcerik + kartIcerik2;
             $('#kartContainer2').append(toplam);
-
         }
 
     });
@@ -372,12 +357,12 @@ function showItem(id) {
 function addtodo() {
     // Kartın içeriği
     var kartIcerik2 = `
-                <div style="display: flex;">
-            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right: 10px;margin-left: -16%;cursor: pointer;">
+                <div>
+            <img src="/icons/todo/delete2.png" id="delbutton" onclick="deleteToDo(this)" width="30" height="30"  style="margin-right:1%;margin-left:-8%;cursor: pointer;float: left;">
           <label class="task" >
              <input type="checkbox" class="taskCheckbox" id="taskCheckbox" onclick="clickToDoCheckbox(this)">
              <span class="custom-checkbox"></span>
-             <input type="text" name="textValue" class="textInput2"  id="textInput" placeholder="Görev Ekle">
+             <input type="text" name="textContent" class="textContent"  id="textContent" placeholder="Görev Ekle">
            </label>
            </div>
     `;
@@ -416,6 +401,7 @@ function clickToDoCheckbox(checkbox) {
     var label = checkbox.parentElement.querySelector('input[type="text"]');
     if (checkbox.checked) {
         label.style.textDecoration = "line-through";
+
     } else {
         label.style.textDecoration = "none";
     }
@@ -437,8 +423,6 @@ function textVisible() {
             console.log(label.value);
             var inputElement = document.getElementById("todoId");
             console.log(inputElement);
-            var inputTitle = document.getElementById("todotitle");
-            console.log(inputTitle);
 
             var todoListId = inputElement.value;
             console.log(todoListId);
@@ -448,10 +432,14 @@ function textVisible() {
                 type: 'POST',
                 url: "/ToDoList/DeleteToDo/",
                 encode: true,
-                data: { selectedItem: label.value, title: inputTitle.value, itemId: todoListId },
+                data: { selectedItem: label.value, itemId: todoListId },
                 dataType: "json",
                 success: function () {
-                    location.reload();
+                    if (inputElement.value != 0)
+                        showItem(inputElement.value);
+                    else
+                        show();
+                    clear();
                 }
 
             });
@@ -465,15 +453,12 @@ function save() {
     var taskLabels = document.querySelectorAll('.task');
     var selectedTaskTexts = [];
     var notselectedTaskTexts = [];
-    var inputElement = document.getElementById("todotitle");
-    var toDoTitle = inputElement.value;
-    var maingoal = document.getElementById("maingoal");
-    var toDoMainGoal = maingoal.value;
+    var toDoTitle = document.querySelector(".main-title").innerText;
+    console.log(toDoTitle);
 
     taskLabels.forEach(function (label) {
         var checkbox = label.querySelector('.taskCheckbox');
         var textInput = label.querySelector('input[type="text"]');
-        var maingoal = document.getElementById("maingoal").innerText;
         var values = textInput.value.split(',');
         if (values!='') {
             if (checkbox.checked) {
@@ -489,51 +474,25 @@ function save() {
     console.log(notselectedTaskTexts);
     var selectedTaskTextsString = selectedTaskTexts.join(",");
     var notselectedTaskTextsString = notselectedTaskTexts.join(",");
-    var inputElement = document.getElementById("todolistId");
+    var inputElement = document.getElementById("todoId");
     var todoListId = inputElement.value;
 
     $.ajax({
         type: 'POST',
         url: "/ToDoList/ToDoListAdd/",
         encode: true,
-        data: { selected: selectedTaskTextsString, unselected: notselectedTaskTextsString, maingoals: toDoMainGoal, title: toDoTitle, itemId: todoListId },
-        dataType: "json",
-        success: function () {
-            document.getElementById("maingoal").value = toDoMainGoal;
-            document.getElementById("todotitle").value = toDoTitle;
-            var kartIcerik = '';
-            var kartIcerik2 = '';
-            if (selectedTaskTexts != null) {
-                for (var i = 0; i < selectedTaskTexts.length; i++) {
-                    var task = selectedTaskTexts[i];
-                    kartIcerik += `
-                <label class="task">
-                    <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
-                    <span class="custom-checkbox"></span>
-                    <input type="text" style="text-decoration:line-through" id="textInput" name="textValue" placeholder="Görev Ekle" value="${task}">
-                </label>`;
-                }
-            }
-            if (notselectedTaskTexts != null) {
-                for (var i = 0; i < notselectedTaskTexts.length; i++) {
-                    var task2 = notselectedTaskTexts[i];
-                    kartIcerik2 += `
-              <label class="task">
-        <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(false ? "checked" : "")>
-        <span class="custom-checkbox"></span>
-        <input type="text" name="textValue" id="textInput" placeholder="Görev Ekle"  value="${task2}">
-            </label>`;
-                }
-            }
-            $('#kartContainer2').empty();
-            var toplam = kartIcerik + kartIcerik2;
-            $('#kartContainer2').append(toplam);
+        data: { selected: selectedTaskTextsString, unselected: notselectedTaskTextsString, title: "test", itemId: todoListId },
+        success: function (data) {
+            if (inputElement.value != 0)
+                showItem(inputElement.value);
+            else
+                show();
+            clear();
+            // ToDoList sayfasına giderek yeni görevin id değerini gönder
 
-            var input = document.getElementById("textInput");
-            var button = document.getElementById("myButton");
-            document.getElementById("myModal").style.display = "block";
         }
     });
+
 }
 document.querySelector(".close").addEventListener("click", function () {
     // Modalı gizle
@@ -542,18 +501,49 @@ document.querySelector(".close").addEventListener("click", function () {
 
 });
 
-
+    function clear() {
+        document.getElementById("textInput").value = "";
+        var checkbox = document.getElementById("taskCheckbox");
+        if (checkbox.checked) {
+            checkbox.checked = false;
+        }
+        var textInput = document.getElementById("textInput");
+        if (textInput.value.trim() !== "") {
+            textInput.style.textDecoration = "line-through";
+        } else {
+            textInput.style.textDecoration = "none";
+        }
+    }
 
 </script>
 <style>
-
-
-    .task {
-        display: flex;
-        align-items: center;
+    .popup-containeredit {
+        background-color: white;
+        border-radius: 10px; /* Yuvarlak kenarlar */
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Gölgeli efekt */
+        padding: 20px;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
     }
-
-     
+    .popup-content text {
+        font-size: 16px; /* Metin boyutunu ayarla (örneğin 16 piksel) */
+    }
+    .main-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: normal; /* Yazı tipi ağırlığı azaltıldı */
+        color: #333;
+        margin: 0;
+    }
+    .selected {
+        ransform: scale(1.1); /* Seçilen elemanın boyutunu artırır */
+        transition: transform 0.2s ease; /* Dönüşümün yumuşak olması için geçiş efekti ekler */
+        border: 1px solid #ccc; /* Çizgi stilini belirler */
+        border-radius: 10px;
+    }
     .dropbtn {
         background-color: #f1f1f1;
         color: black;
@@ -564,7 +554,7 @@ document.querySelector(".close").addEventListener("click", function () {
     }
 
     /* Açılır menü içeriği stilleri */
-    .dropdown-content {
+        .dropdown-content {
         display: none;
         position: absolute;
         background-color: #f1f1f1;
@@ -677,7 +667,20 @@ document.querySelector(".close").addEventListener("click", function () {
         transition: background-color 0.3s ease; /* Geçiş efekti */
         font-family: "Arial", sans-serif; /* Profesyonel bir yazı tipi */
     }
-
+    .textContent {
+        border: none;
+        outline: none;
+        margin-left: 35px;
+        flex-grow: 1;
+        padding: 5px 10px;
+        box-sizing: border-box;
+        box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
+        overflow: auto;
+        border-bottom: 1px solid #333;
+        background-color: transparent;
+        text-align: left;
+        word-wrap: break-word;
+    }
     .custom-table tr:hover {
         background-color: #f0f0f0; /* Gri arka plan rengi */
     }
@@ -719,20 +722,22 @@ document.querySelector(".close").addEventListener("click", function () {
             position: absolute;
         }
 
-        .task input[type="text"] {
-            border: none;
-            outline: none;
-            margin-left: 35px;
-            flex-grow: 1;
-            padding: 5px 10px;
-            box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
-            max-width: 200px;
-        }
-
-    .taskcontainer {
-        width: 100%;
+    .textInput2 {
+        border: none;
+        outline: none;
+        margin-left: 35px;
+        flex-grow: 1;
+        padding: 5px 10px;
+        box-sizing: border-box;
+        box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
+        overflow: auto;
+        border-bottom: 1px solid #333;
+        background-color: transparent;
+        text-align: left;
+        word-wrap: break-word;
     }
 
+ 
     .custom-checkbox {
         display: inline-block;
         width: 20px;
@@ -765,27 +770,7 @@ document.querySelector(".close").addEventListener("click", function () {
         background-color: #2eacb3; /* Checkbox seçildiğinde arka plan rengini yeşil yap */
     }
 
-    .main-goal {
-        display: block;
-        margin-top: 20px;
-    }
-
-        .main-goal span {
-            font-weight: bold;
-        }
-
-        .main-goal input[type="text"] {
-            border: none;
-            border-bottom: 1px solid #333;
-            background-color: transparent;
-            width: 100%;
-            padding: 5px 0;
-        }
-
-            .main-goal input[type="text"]:hover {
-                background-color: #f0f0f0; /* Gri arka plan rengi */
-            }
-
+   
     button {
         background-color: #2eacb3;
         color: #fff;
@@ -804,7 +789,6 @@ document.querySelector(".close").addEventListener("click", function () {
     }
 
     .container {
-        padding-left: 10%;
         margin-top: 7%;
     }
 
@@ -820,10 +804,15 @@ document.querySelector(".close").addEventListener("click", function () {
     }
 
 
-    .taskcontainer {
-        width: 100%;
+   
+    #inputDiv {
+        /* İlgili div'in genişlik ve yüksekliğini ayarlayın */
+        width: 300px; /* Örnek olarak 300 piksel genişlik */
+        height: 50px; /* Örnek olarak 50 piksel yükseklik */
+        /* Diğer isteğe bağlı stil özellikleri ekleyebilirsiniz */
+        display: flex; /* Öğeleri yatay düzende hizalamak için */
+        align-items: center; /* Yatay düzlemde hizalamak için */
     }
-
     .custom-checkbox {
         display: inline-block;
         width: 20px;
@@ -856,32 +845,6 @@ document.querySelector(".close").addEventListener("click", function () {
         background-color: #2eacb3;
     }
 
-    .main-goal {
-        display: block;
-        margin-top: 20px;
-    }
-
-        .main-goal span {
-            font-weight: bold;
-        }
-
-        .main-goal input[type="text"] {
-            border: none;
-            border-bottom: 1px solid #333;
-            background-color: transparent;
-            width: 100%;
-            padding: 5px 0;
-        }
-
-    button {
-        background-color: #2eacb3;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        display: block;
-        width: 15%;
-    }
 
     .addlist {
         border: none;
