@@ -67,33 +67,45 @@ namespace CrmCorner.Controllers
 
         #region CHARTS
 
+        [Authorize]
         public async Task<IActionResult> IndustryChart()
         {
-            var userId = _userManager.GetUserId(User);
-
-            var user = await _context.Users
-                                      .Include(u => u.Customers)
-                                      .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
+            try
             {
-                return NotFound();
+                var userId = _userManager.GetUserId(User);
+
+                var user = await _context.Users
+                                          .Include(u => u.Customers)
+                                          .FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                // Sektörleri gruplayıp sayılarına göre chart verisi oluşturma
+                var chartData = user.Customers
+                                     .GroupBy(c => c.Industry)
+                                     .Select(group => new { Industry = group.Key, Count = group.Count() })
+                                     .ToList();
+
+                // labels ve data alanlarını doldur
+                var labels = chartData.Select(data => data.Industry.ToString()).ToArray();
+                var dataValues = chartData.Select(data => data.Count).ToArray();
+
+                return Json(new { labels, data = dataValues });
             }
+            catch (Exception ex)
+            {
+                // Hata günlüğüne yaz
+                _logger.LogError(ex, "An error occurred while fetching industry chart data.");
 
-            // Sektörleri gruplayıp sayılarına göre chart verisi oluşturma
-            var chartData = user.Customers
-                                 .GroupBy(c => c.Industry)
-                                 .Select(group => new { Industry = group.Key, Count = group.Count() })
-                                 .ToList();
-
-            // labels ve data alanlarını doldur
-            var labels = chartData.Select(data => data.Industry.ToString()).ToArray();
-            var dataValues = chartData.Select(data => data.Count).ToArray();
-
-            return Json(new { labels, data = dataValues });
+                // Hata mesajıyla birlikte bir server hatası döndür
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
-
+        [Authorize]
         public async Task<IActionResult> IsFinalDesicionMaker()
         {
             var userId = _userManager.GetUserId(User);
@@ -121,6 +133,7 @@ namespace CrmCorner.Controllers
             return Json(chartData);
         }
 
+        [Authorize]
         public async Task<IActionResult> OutcomeStatusChart()
         {
             var userId = _userManager.GetUserId(User);
@@ -163,6 +176,7 @@ namespace CrmCorner.Controllers
             };
             return Json(chartData);
         }
+        [Authorize]
         public async Task<IActionResult> UserTaskStatusChart()
         {
             // Aktif kullanıcının ID'sini al

@@ -61,7 +61,7 @@
 </table>
 
 <div class="table-spacing"></div>
-<table class="table table-striped table-bordered">
+<table id="user_List1" class="table table-striped table-bordered">
     <thead>
         <tr class="table-primary">
             <th>Çalışan</th>
@@ -111,6 +111,20 @@
         }
         $(document).ready(function () {
             $('#user_List')
+                .dataTable({
+                    responsive: true,
+                    columnDefs: [
+                        {
+                            orderable: false,
+                            targets: [0]
+                        }
+                    ]
+                });
+        });
+
+
+        $(document).ready(function () {
+            $('#user_List1')
                 .dataTable({
                     responsive: true,
                     columnDefs: [
