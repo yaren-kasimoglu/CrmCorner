@@ -268,13 +268,9 @@ else
             }
         });
     });
-
-
 </script>
-
 <script>
     $(document).ready(function () {
-
         $.ajax({
             type: "GET",
             url: "/Home/IndustryChart",
@@ -296,10 +292,11 @@ else
                     },
                 });
             },
-            error: function (error) {
+            error: function (xhr, status, error) {
                 // Hata durumunda kullanıcıya bildirim
-                console.error('Error fetching data:', error);
-                alert('Error fetching data. Please try again later.');
+                var errorMessage = xhr.status + ': ' + xhr.statusText
+                console.error('Error - ' + errorMessage);
+          //     alert('Failed to fetch data. Error: ' + errorMessage);
             }
         });
 
