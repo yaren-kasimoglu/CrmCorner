@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CrmCorner.Models;
 using Independentsoft.Graph.Users;
 using Microsoft.AspNetCore.Identity;
@@ -60,7 +61,7 @@ namespace CrmCorner.Controllers
 
             // Eğer istek AJAX isteği değilse, yönlendirme gerçekleştir
         }
-
+       
         [HttpPost]
         public async Task<IActionResult> ToDoListAdd(string selected, string unselected,string title, int itemId)
         {
@@ -79,7 +80,7 @@ namespace CrmCorner.Controllers
                 toDo.NotDoneList = unselected;
                 toDo.UserId = currentUser.Id;
                 toDo.MainGoalTitle = "";
-                toDo.Title = title;
+                toDo.Title = "Günüm";
                 if (currentUser != null)
                 {
 
@@ -114,10 +115,9 @@ namespace CrmCorner.Controllers
                             dataArrays = unselectedNotDone.Split(',');
                             ViewBag.NotTaskData = dataArrays;
                         }
-                        ViewBag.TitleValue = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.Title;
+                        ViewBag.TitleValue = "Günüm";
                     }
                 }
-                return Ok();
             }
             else
             {
@@ -154,7 +154,7 @@ namespace CrmCorner.Controllers
                         var unselectedNotDone = toDoValue.FirstOrDefault(e => e.UserId == currentUser.Id)?.NotDoneList;
                         if (selected != null)
                         {
-                            dataArray = selected.Split(',');
+                            dataArray = selected.Split(','); 
                             ViewBag.TaskData = dataArray;
                         }
                         if (unselected != null)
@@ -162,11 +162,12 @@ namespace CrmCorner.Controllers
                             dataArrays = unselected.Split(',');
                             ViewBag.NotTaskData = dataArrays;
                         }
-                        ViewBag.TitleValue = toDoValue.FirstOrDefault(e => e.UserId == currentUser.Id)?.Title;
+                        ViewBag.TitleValue = toDoValue.FirstOrDefault(e => e.UserId == currentUser.Id && e.Id== itemId)?.Title;
                     };
                 }
-                return Ok();
+                
             }
+            return Ok();
         }
         [HttpPost]
         public async Task<IActionResult> ToDoListAddList(string title)
@@ -373,20 +374,35 @@ namespace CrmCorner.Controllers
             item = item == null ? "" : item;
             if (!array.Contains(item))
                 return array;
+
+            // İlk bulunan öğenin indeksini bulun
+            int indexToRemove = Array.IndexOf(array, item);
+
+            // Eğer öğe dizide yoksa veya öğenin ilk bulunan indeksi -1 ise diziyi aynen döndürün
+            if (indexToRemove == -1)
+                return array;
+
             // Verilen öğeyi içermeyen yeni bir dizi oluştur
             string[] newArray = new string[array.Length - 1];
             int index = 0;
 
-            foreach (string element in array)
+            // Yeni diziyi oluştururken, sadece ilk bulunan öğeyi atlayın
+            for (int i = 0; i < array.Length; i++)
             {
-                if (element != item)
+                if (i != indexToRemove)
                 {
-                    newArray[index] = element;
+                    newArray[index] = array[i];
                     index++;
                 }
             }
-            return newArray;
+
+            // Yeni dizide boş olmayan öğeleri seçerek temizlenmiş diziyi elde edin
+            var clearNewArray = newArray.Where(e => !string.IsNullOrEmpty(e)).ToArray();
+            return clearNewArray;
         }
+
+
+
         [HttpPost]
         public async Task<IActionResult> UpdateTitle(int itemId,string newTitle)
         {
