@@ -23,19 +23,19 @@
                     <label onclick="show()" class="date">Günüm</label>
                 </div>
                 <div class="horizontal-line" style="padding-bottom:15px;width: 97%;margin-left: 1%;"></div>
-                <ul class="list-group"  style="width: 100%;">
+                <ul class="list-group" style="width: 100%;">
                     @foreach (var item in ViewBag.ToDoList)
                     {
                         <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" onclick="showItem(@item.Id)">
                             <div class="d-flex align-items-center">
                                 <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="openPopup('@item.Id'); disableOtherButtons(this);"><img src="~/icons/todo/düzenle.png" alt="Düzenle" style="max-width: 20px;"></button>
-                                    <img src="~/icons/todo/deneme.png" alt="Logo" style="max-width: 30px; margin-right: 10px;" />
-                                    <span style="font-size: 14px; margin-right: 5px;">@item.Title</span>
+                                <img src="~/icons/todo/deneme.png" alt="Logo" style="max-width: 30px; margin-right: 10px;" />
+                                <span style="font-size: 14px; margin-right: 5px;">@item.Title</span>
                             </div>
-                            <span>@item.Count</span>
-                            <label id="todoId" style="display:none"></label>
+                            <span id="count_@item.Id">@item.Count</span> <!-- id'yi unique hale getir -->
+                            <label id="todoId" style="display:none">@item.Id</label> <!-- id değeri gizli bir şekilde burada tutulabilir -->
                         </a>
-                     }
+                    }
                 </ul>
                 <div id="Containerlist">
                     <input type="text" id="ekleButton2" class="addlist"  style="width: 100%;" placeholder="Liste Ekle..">
@@ -63,7 +63,7 @@
                                 </table>
                             </div>
                             <div class="text-end mt-3">
-                                <button type="submit" id="deleteToDoList" class="btn btn-info btn-sm" style="width:auto;visibility:hidden" onclick="deleteToDoList(this)">Listeyi Sil</button>
+                                <button type="submit" id="deleteToDoList" class="btn btn-danger btn-sm" style="width:auto;visibility:hidden" onclick="deleteToDoList(this)">Listeyi Sil</button>
                                 <button type="submit" class="btn btn-primary btn-sm" style="width:auto" onclick="save()">Kaydet</button>
                             </div>
                             <div id="myModal" class="modal">
@@ -194,7 +194,7 @@
         <label class="task">
              <input type="checkbox" class="taskCheckbox" onclick="clickToDoCheckbox(this)" id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"></span>
-             <input type="text" name="textContent" class="textContent" style="text-decoration:line-through"  id="textContent" placeholder="Görev Ekle" value="${task}">
+             <input type="text" name="textContent" class="textContent" style="text-decoration:line-through"  id="textContent" placeholder="Görev Ekle" value="@task">
         </label>
             </div>
         }
@@ -220,6 +220,7 @@
     $('#kartContainer2').append(toplam);
     });
 
+
     function deleteToDoList(item) {
         if (confirm("Gerçekten silmek istiyor musunuz?")) {
             var inputElement = document.getElementById("todoId");
@@ -244,8 +245,18 @@ function show() {
     document.getElementById("todaymaintitle").style.display = "block";
     var mainTitle = document.querySelector('.main-title');
     mainTitle.style.display = 'none';
-    var inputElement = document.getElementById("todoId");
-    document.getElementById("todoId").value = 0;
+    var labelElement = document.getElementById("todoId");
+    console.log(labelElement);
+
+    if (labelElement !== null) {
+        // labelElement değişkeni bir değer içeriyorsa (null değilse)
+        labelElement.value = 0;
+    } else {
+        // labelElement değişkeni null ise (hiçbir öğe bulunamazsa)
+        console.log("todoId elementi bulunamadı.");
+        // Değer yoksa, 0 atama
+        labelElement = 0;
+    }
     document.getElementById("deleteToDoList").style.visibility = "hidden";
     $.ajax({
         type: 'POST',
@@ -298,10 +309,21 @@ function show() {
         document.getElementById("todaymaintitle").style.display = "none";
         var mainTitle = document.querySelector('.main-title');
         mainTitle.style.display = 'block';
-        var inputElement = document.getElementById("todoId");
+        var labelElement = document.getElementById("todoId");
+        console.log(labelElement);
+
+        if (labelElement !== null) {
+            // labelElement değişkeni bir değer içeriyorsa (null değilse)
+            labelElement.value = id;
+        } else {
+            // labelElement değişkeni null ise (hiçbir öğe bulunamazsa)
+            console.log("todoId elementi bulunamadı.");
+            // Değer yoksa, 0 atama
+            labelElement = id;
+        }
         var el = document.querySelector("list-group-item")
         console.log(el);
-        document.getElementById("todoId").value = id;
+        //document.getElementById("todoId").value = id;
         document.getElementById("deleteToDoList").style.visibility = "visible";
 
 
@@ -423,8 +445,9 @@ function textVisible() {
             console.log(label.value);
             var inputElement = document.getElementById("todoId");
             console.log(inputElement);
-
-            var todoListId = inputElement.value;
+            var todoListId = 0;
+            if (inputElement != null)
+                todoListId = inputElement.value;
             console.log(todoListId);
 
 
@@ -435,32 +458,40 @@ function textVisible() {
                 data: { selectedItem: label.value, itemId: todoListId },
                 dataType: "json",
                 success: function () {
-                    if (inputElement.value != 0)
+                    if (todoListId != 0)
                         showItem(inputElement.value);
                     else
                         show();
                     clear();
+                    if (todoListId != 0) {
+                        var countElement = document.getElementById("count_" + todoListId);
+                        if (countElement) {
+                            var currentCount = parseInt(countElement.innerText); // Mevcut count değerini al
+                            countElement.innerText = currentCount - 1; // Count değerini 1 artırarak güncelle
+                        }
+                    }
+
                 }
 
             });
+
 
             return false;
         }
 
 
-}
+ }
+
 function save() {
     var taskLabels = document.querySelectorAll('.task');
     var selectedTaskTexts = [];
     var notselectedTaskTexts = [];
     var toDoTitle = document.querySelector(".main-title").innerText;
-    console.log(toDoTitle);
 
     taskLabels.forEach(function (label) {
         var checkbox = label.querySelector('.taskCheckbox');
         var textInput = label.querySelector('input[type="text"]');
-        var values = textInput.value.split(',');
-        if (values!='') {
+        if (textInput.value !=null) {
             if (checkbox.checked) {
                 selectedTaskTexts.push(textInput.value.trim());
             }
@@ -470,30 +501,38 @@ function save() {
         }
 
     });
-    console.log(selectedTaskTexts);
     console.log(notselectedTaskTexts);
     var selectedTaskTextsString = selectedTaskTexts.join(",");
     var notselectedTaskTextsString = notselectedTaskTexts.join(",");
     var inputElement = document.getElementById("todoId");
-    var todoListId = inputElement.value;
-
+    var todoListId = 0;
+    if (inputElement != null)
+        todoListId = inputElement.value;
     $.ajax({
         type: 'POST',
         url: "/ToDoList/ToDoListAdd/",
         encode: true,
-        data: { selected: selectedTaskTextsString, unselected: notselectedTaskTextsString, title: "test", itemId: todoListId },
+        data: { selected: selectedTaskTextsString, unselected: notselectedTaskTextsString, title: toDoTitle, itemId: todoListId },
         success: function (data) {
-            if (inputElement.value != 0)
+            if (todoListId != 0) {
+                console.log(todoListId);
                 showItem(inputElement.value);
+            }
             else
                 show();
             clear();
-            // ToDoList sayfasına giderek yeni görevin id değerini gönder
-
+            if (todoListId != 0) {
+                var countElement = document.getElementById("count_" + todoListId);
+                if (countElement) {
+                    var currentCount = notselectedTaskTexts.length; // Mevcut count değerini al
+                    countElement.innerText = currentCount; // Count değerini 1 artırarak güncelle
+                }
+            }
         }
     });
 
 }
+
 document.querySelector(".close").addEventListener("click", function () {
     // Modalı gizle
     document.getElementById("myModal").style.display = "none";
