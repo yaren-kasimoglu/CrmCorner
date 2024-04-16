@@ -241,7 +241,8 @@
     }
 
 
-function show() {
+    function show() {
+        console.log("show a girdi");
     document.getElementById("todaymaintitle").style.display = "block";
     var mainTitle = document.querySelector('.main-title');
     mainTitle.style.display = 'none';
@@ -305,25 +306,20 @@ function show() {
 
 }
     function showItem(id) {
-
+        console.log("showItem a girdi");
         document.getElementById("todaymaintitle").style.display = "none";
         var mainTitle = document.querySelector('.main-title');
         mainTitle.style.display = 'block';
         var labelElement = document.getElementById("todoId");
-        console.log(labelElement);
+        console.log("314" + labelElement);
 
         if (labelElement !== null) {
-            // labelElement değişkeni bir değer içeriyorsa (null değilse)
             labelElement.value = id;
         } else {
-            // labelElement değişkeni null ise (hiçbir öğe bulunamazsa)
-            console.log("todoId elementi bulunamadı.");
-            // Değer yoksa, 0 atama
+            console.log("319" + "todoId elementi bulunamadı.");
             labelElement = id;
         }
         var el = document.querySelector("list-group-item")
-        console.log(el);
-        //document.getElementById("todoId").value = id;
         document.getElementById("deleteToDoList").style.visibility = "visible";
 
 
@@ -444,13 +440,9 @@ function textVisible() {
             var label = item.parentElement.querySelector('input[type="text"]');
             console.log(label.value);
             var inputElement = document.getElementById("todoId");
-            console.log(inputElement);
             var todoListId = 0;
-            if (inputElement != null)
+            if (inputElement != null && typeof inputElement.value !== "undefined")
                 todoListId = inputElement.value;
-            console.log(todoListId);
-
-
             $.ajax({
                 type: 'POST',
                 url: "/ToDoList/DeleteToDo/",
@@ -506,7 +498,7 @@ function save() {
     var notselectedTaskTextsString = notselectedTaskTexts.join(",");
     var inputElement = document.getElementById("todoId");
     var todoListId = 0;
-    if (inputElement != null)
+    if (inputElement != null && typeof inputElement.value !== "undefined")
         todoListId = inputElement.value;
     $.ajax({
         type: 'POST',
@@ -515,8 +507,7 @@ function save() {
         data: { selected: selectedTaskTextsString, unselected: notselectedTaskTextsString, title: toDoTitle, itemId: todoListId },
         success: function (data) {
             if (todoListId != 0) {
-                console.log(todoListId);
-                showItem(inputElement.value);
+                showItem(todoListId);
             }
             else
                 show();
