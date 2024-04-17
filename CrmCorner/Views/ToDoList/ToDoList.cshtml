@@ -438,7 +438,9 @@ function textVisible() {
  function deleteToDo(item) {
         if (confirm("Gerçekten silmek istiyor musunuz?")) {
             var label = item.parentElement.querySelector('input[type="text"]');
+            var checkbox = item.parentElement.querySelector('.taskCheckbox');
             console.log(label.value);
+            console.log(checkbox.checked);
             var inputElement = document.getElementById("todoId");
             var todoListId = 0;
             if (inputElement != null && typeof inputElement.value !== "undefined")
@@ -457,7 +459,7 @@ function textVisible() {
                     clear();
                     if (todoListId != 0) {
                         var countElement = document.getElementById("count_" + todoListId);
-                        if (countElement) {
+                        if (countElement && !checkbox.checked) {
                             var currentCount = parseInt(countElement.innerText); // Mevcut count değerini al
                             countElement.innerText = currentCount - 1; // Count değerini 1 artırarak güncelle
                         }
@@ -493,9 +495,17 @@ function save() {
         }
 
     });
+
+    var temizlenmisDizi = notselectedTaskTexts.filter(function (item) {
+        return item.trim() !== ''; // Boş dize olmayanları filtrele
+    });
+
+    console.log(temizlenmisDizi.length);
     console.log(notselectedTaskTexts);
-    var selectedTaskTextsString = selectedTaskTexts.join(",");
-    var notselectedTaskTextsString = notselectedTaskTexts.join(",");
+    var selectedTaskTextsString1 = selectedTaskTexts.join(",");
+    var notselectedTaskTextsString1 = notselectedTaskTexts.join(",");
+    var selectedTaskTextsString= selectedTaskTextsString1.replace(/^,|,$/g, '');
+    var notselectedTaskTextsString=notselectedTaskTextsString1.replace(/^,|,$/g, '');
     var inputElement = document.getElementById("todoId");
     var todoListId = 0;
     if (inputElement != null && typeof inputElement.value !== "undefined")
@@ -515,7 +525,8 @@ function save() {
             if (todoListId != 0) {
                 var countElement = document.getElementById("count_" + todoListId);
                 if (countElement) {
-                    var currentCount = notselectedTaskTexts.length; // Mevcut count değerini al
+                    console.log(notselectedTaskTexts.length);
+                    var currentCount = temizlenmisDizi.length; // Mevcut count değerini al
                     countElement.innerText = currentCount; // Count değerini 1 artırarak güncelle
                 }
             }
