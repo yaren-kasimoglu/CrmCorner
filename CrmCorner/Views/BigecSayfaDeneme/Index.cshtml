@@ -1,0 +1,57 @@
+﻿@model List<BigecSayfaDeneme>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h1>Index</h1>
+
+
+<table>
+    <tr>
+        <th>Id</th>
+        <th>Content</th>
+
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>@item.Content</td>
+
+        </tr>
+    }
+ <style>
+     .btn{
+         text-decoration:  none;
+         font-size:19px;
+         margin :100px adisplay : inline-block;
+         padding : 15px 30px;
+     }
+     .btn{
+         background-color: #182747;
+         color: #D8D8D8;
+
+     }
+     .btn:hover {
+         opacity:0.7;
+     }
+ </style>
+        <head>
+            <body>
+               <a href="#"> class="btn buton">Buton</a>
+            </body>
+        </head>
+    
+   
+</table>
+@* buton ver
+Content add için sayfa oluştur(razor)
+butonu add sayfasına nasıl yönlendireceğine bak
+yönlendirme doğru çalışıyorsa yani tıkladığında o sayfaya gidebiliyorsan;
+http get methoduyla eklenmesi gereken sayfayı çağıracaksın.
+http post methoduyla veritabanına ekleme işlemleri yapılacak
+ *@
+

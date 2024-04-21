@@ -30,7 +30,7 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
     public DbSet<TaskCompLog> TaskCompLogs { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-    public DbSet<BigeçSayfaDeneme>BigeçSayfaDenemes  { get; set; }
+    public DbSet<BigecSayfaDeneme>BigeçSayfaDenemes  { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
