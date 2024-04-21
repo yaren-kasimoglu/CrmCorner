@@ -2,7 +2,7 @@
 
 namespace CrmCorner.Models;
 
-public class BigeçSayfaDeneme
+public partial class BigecSayfaDeneme
 {
     public int Id { get; set; }
    
