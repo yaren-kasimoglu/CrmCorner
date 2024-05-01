@@ -46,8 +46,12 @@ namespace CrmCorner.Controllers
             foreach (var item in todoList)
             {
                 var title = item.Title;
+                item.Title = char.ToUpper(title[0]) + title.Substring(1).ToLower();
                 if (title.Length > 20)
+                {
                     item.Title = title.Substring(0, 7) + "...";
+                }
+
                 var unselected = todoList.FirstOrDefault(e => e.Id == item.Id)?.NotDoneList;
                 if (unselected != null)
                 {
@@ -374,7 +378,7 @@ namespace CrmCorner.Controllers
             }
             _context.ToDoList.Remove(todoList);
             _context.SaveChanges();
-            return RedirectToAction("ToDoList", new { id = id });
+            return RedirectToAction("ToDoList", new { id = 0 });
 
         }
 
@@ -487,6 +491,60 @@ namespace CrmCorner.Controllers
             }
 
             return Json(new { Message = "success" });
+        }
+
+        
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateToDoText(int id, string notselectedtext,string selectedtext)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var today = DateTime.Today;
+            string[] splittedselected = null;
+            string[] splittedunselected = null;
+            string[] resultselected = null;
+            string[] resultunselected = null;
+            if (notselectedtext != null || selectedtext!=null)
+            {
+                    if (id > 0)
+                    {
+                        var toDoValue = _context.ToDoList.AsNoTracking()
+                        .Where(e => e.UserId == currentUser.Id && e.Id == id)
+                        .FirstOrDefault();
+
+                        ToDoList toDo = new ToDoList();
+                        toDo.SystemDate = DateTime.Today;
+                        toDo.UserId = currentUser.Id;
+                        toDo.MainGoalTitle = "";
+                        toDo.Title = toDoValue.Title;
+                        toDo.Id = id;
+                  
+                        toDo.DoneList = selectedtext;
+                    
+                        toDo.NotDoneList = notselectedtext;
+                    
+                    _context.ToDoList.Update(toDo);
+                    _context.SaveChanges();
+                    }
+                    else
+                    {
+                        var toDoValue = _context.ToDos.AsNoTracking()
+                        .Include(e => e.AppUser)
+                        .Where(e => e.UserId == currentUser.Id && e.SystemDate == today).FirstOrDefault();
+                        ToDo toDo = new ToDo();
+                        toDo.SystemDate = DateTime.Today;
+                        toDo.UserId = currentUser.Id;
+                        toDo.MainGoalTitle = "";
+                        toDo.Title = toDoValue.Title;
+                        toDo.Id = toDoValue.Id;
+                         toDo.DoneList = selectedtext;
+
+                        toDo.NotDoneList = notselectedtext;
+                    _context.ToDos.Update(toDo);
+                        _context.SaveChanges();
+                    }
+            }
+            return RedirectToAction("ToDoList", new { id = id });
         }
         static string[] RemoveItemFromArray(string[] array, string item)
         {
