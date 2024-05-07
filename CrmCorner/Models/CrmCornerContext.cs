@@ -84,6 +84,18 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
 
         OnModelCreatingPartial(modelBuilder);
+        modelBuilder.Entity<AppUserRole>()
+       .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+        modelBuilder.Entity<AppUserRole>()
+            .HasOne(ur => ur.User)
+            .WithMany(u => u.UserRoles)
+            .HasForeignKey(ur => ur.UserId);
+
+        modelBuilder.Entity<AppUserRole>()
+            .HasOne(ur => ur.Role)
+            .WithMany(r => r.UserRoles)
+            .HasForeignKey(ur => ur.RoleId);
     }
 
     public Task InsertOneAsync(ChatHistory chatHistory)

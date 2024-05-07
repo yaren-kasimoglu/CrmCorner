@@ -46,8 +46,13 @@ var connectionString = builder.Configuration.GetConnectionString("CrmConnection"
 // Veritabanı bağlantısını ekleyin
 builder.Services.AddDbContext<CrmCornerContext>(options =>
 {
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)))
+           .EnableSensitiveDataLogging()  // Detaylı loglama için
+           .EnableDetailedErrors();      // Daha detaylı hata mesajları için
 });
+//builder.Services.AddIdentity<AppUser, AppRole>()
+//     .AddEntityFrameworkStores<CrmCornerContext>()
+//     .AddDefaultTokenProviders();
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 

@@ -12,11 +12,13 @@ namespace CrmCorner.Areas.Admin.Controllers
     {
         private readonly RoleManager<AppRole> _roleManager;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<RolesController> _logger;
 
-        public RolesController(RoleManager<AppRole> roleManager, UserManager<AppUser> userManager)
+        public RolesController(RoleManager<AppRole> roleManager, UserManager<AppUser> userManager, ILogger<RolesController> logger)
         {
             _roleManager = roleManager;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> RoleList()
@@ -109,48 +111,85 @@ namespace CrmCorner.Areas.Admin.Controllers
             var currentUser = await _userManager.FindByIdAsync(id);
             ViewBag.userId = id;
             var roles = await _roleManager.Roles.ToListAsync();
-
             var userRoller = await _userManager.GetRolesAsync(currentUser);
-
             var roleVMList = new List<AssignRoleToUserVM>();
-
-           
 
             foreach (var role in roles)
             {
                 var assignRoleToUserVM = new AssignRoleToUserVM() { Id = role.Id, Name = role.Name! };
-
                 if (userRoller.Contains(role.Name!))
                 {
                     assignRoleToUserVM.Exist = true;
-
                 }
-
                 roleVMList.Add(assignRoleToUserVM);
-
             }
-
             return View(roleVMList);
         }
 
         [HttpPost]
         public async Task<IActionResult> AssignRoleTouser(string userId, List<AssignRoleToUserVM> requestList)
         {
-            var userToAssignRoles=(await _userManager.FindByIdAsync(userId))!;
-
-            foreach (var role in requestList)
+            _logger.LogInformation("Assigning roles to user. UserID: {UserId}, RequestListCount: {Count}", userId, requestList.Count);
+            if (string.IsNullOrEmpty(userId))
             {
-                if (role.Exist)
+                return BadRequest("User ID must not be null or empty.");
+            }
+
+            if (requestList == null || requestList.Count == 0)
+            {
+                return BadRequest("Request list must not be null or empty.");
+            }
+
+            try
+            {
+                var userToAssignRoles = await _userManager.Users
+     .Include(u => u.UserRoles)
+     .ThenInclude(ur => ur.Role)
+     .FirstOrDefaultAsync(u => u.Id == userId);
+
+
+                if (userToAssignRoles == null)
                 {
-                    await _userManager.AddToRoleAsync(userToAssignRoles,role.Name);
-                }
-                else
-                {
-                    await _userManager.RemoveFromRoleAsync(userToAssignRoles,role.Name);
+                    return NotFound($"User with ID {userId} not found.");
                 }
 
+                foreach (var role in requestList)
+                {
+                    if (role == null || string.IsNullOrEmpty(role.Name))
+                    {
+                        // Hatalı veri durumunda hata
+                        return BadRequest("Invalid role data.");
+                    }
+
+                    if (role.Exist)
+                    {
+                        _logger.LogInformation("Adding user {UserId} to role {RoleName}", userToAssignRoles.Id, role.Name);
+
+                        var addResult = await _userManager.AddToRoleAsync(userToAssignRoles, role.Name);
+                        if (!addResult.Succeeded)
+                        {
+                            _logger.LogError("Failed to add role. Role: {RoleName}, UserID: {UserId}, Errors: {Errors}", role.Name, userId, string.Join(", ", addResult.Errors.Select(e => e.Description)));
+                            return BadRequest($"Failed to add role {role.Name} to user {userId}. Errors: {string.Join(", ", addResult.Errors.Select(e => e.Description))}");
+                        }
+                    }
+                    else
+                    {
+                        var removeResult = await _userManager.RemoveFromRoleAsync(userToAssignRoles, role.Name);
+
+                        if (!removeResult.Succeeded)
+                        {
+                            return BadRequest($"Failed to remove role {role.Name} from user {userId}. Errors: {string.Join(", ", removeResult.Errors.Select(e => e.Description))}");
+                        }
+                    }
+                }
+
+                return RedirectToAction(nameof(HomeController.UserList), "Home");
             }
-            return RedirectToAction(nameof(HomeController.UserList),"Home");
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel { RequestId = HttpContext.TraceIdentifier, Message = ex.Message });
+            }
         }
+
     }
 }
