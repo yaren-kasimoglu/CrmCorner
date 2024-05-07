@@ -139,7 +139,7 @@ namespace CrmCorner.Migrations
                     b.ToTable("AppUserRole");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.BigeçSayfaDeneme", b =>
+            modelBuilder.Entity("CrmCorner.Models.BigecSayfaDeneme", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -355,6 +355,41 @@ namespace CrmCorner.Migrations
                         .IsUnique();
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CanUseLogo")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsContinuationConsidered")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsFirstPaymentMade")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsThereAProblem")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsTrustpilotReviewed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ProblemDescription")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TaskCompId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskCompId");
+
+                    b.ToTable("PostSaleInfos");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Status", b =>
@@ -680,6 +715,17 @@ namespace CrmCorner.Migrations
                         .HasForeignKey("CrmCorner.Models.Notification", "TaskCompId");
 
                     b.Navigation("AppUser");
+
+                    b.Navigation("TaskComp");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
+                {
+                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
+                        .WithMany()
+                        .HasForeignKey("TaskCompId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("TaskComp");
                 });

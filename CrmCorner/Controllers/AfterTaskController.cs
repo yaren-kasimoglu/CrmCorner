@@ -18,6 +18,21 @@ namespace CrmCorner.Controllers
             _context = context;
         }
 
+        public async Task<IActionResult> ListPositiveSales()
+        {
+            var userId = _userManager.GetUserId(User); // Aktif kullanıcının UserId'sini alır
+
+            var positiveSales = await _context.PostSaleInfos
+                                              .Include(psi => psi.TaskComp)
+                                              .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
+                                              .Where(psi => psi.TaskComp.Outcomes == OutcomeType.Olumlu &&
+                                                            psi.TaskComp.UserId == userId) // Satışı yapan kullanıcıya göre filtrele
+                                              .ToListAsync();
+
+            return View(positiveSales);
+        }
+
+
         public async Task<IActionResult> AddPostSaleInfo(int taskId)
         {
             var task = await _context.TaskComps
