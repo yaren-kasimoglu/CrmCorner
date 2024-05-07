@@ -31,6 +31,7 @@ namespace CrmCorner.Controllers
             _hostingEnvironment = hostingEnvironment;
             _configuration = configuration;
         }
+
         public async Task<IActionResult> Index()
         {
             Dictionary<int, string> statusNames = new Dictionary<int, string>();
@@ -49,14 +50,31 @@ namespace CrmCorner.Controllers
 
             if (currentUser != null)
             {
-                var tasks = _context.TaskComps
-           .Include(e => e.Customer)
-           .Include(e => e.Status)
-           .Include(e => e.AppUser)
-           .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id) // AssignedUserId görevi gerçekleştiren kullanıcı için yer tutucudur
-           .ToList();
+                if (currentUser.Email == "berkay@saascorner.co" || currentUser.Email== "yaren.kkasimoglu@gmail.com") 
+                {
+                    var companyUsers = _context.Users.Where(u => u.CompanyName == currentUser.CompanyName).ToList();
+                    var companyUserIds = companyUsers.Select(u => u.Id).ToList();
 
-                return View(tasks);
+                    var tasks = _context.TaskComps
+                        .Include(e => e.Customer)
+                        .Include(e => e.Status)
+                        .Include(e => e.AppUser)
+                        .Where(e => companyUserIds.Contains(e.UserId) || companyUserIds.Contains(e.AssignedUserId))
+                        .ToList();
+
+                    return View(tasks);
+                }
+                else
+                {
+                    var tasks = _context.TaskComps
+                        .Include(e => e.Customer)
+                        .Include(e => e.Status)
+                        .Include(e => e.AppUser)
+                        .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id)
+                        .ToList();
+
+                    return View(tasks);
+                }
             }
             else
             {
@@ -64,6 +82,42 @@ namespace CrmCorner.Controllers
                 return View();
             }
         }
+
+
+        //YORUMA ALINDI 06.05.2024 GERİ AÇILACAK ROL İŞLEVLERİ YAPILINCA
+        //public async Task<IActionResult> Index()
+        //{
+        //    Dictionary<int, string> statusNames = new Dictionary<int, string>();
+        //    using (var context = new CrmCornerContext())
+        //    {
+        //        var statuses = context.Statuses.ToList();
+        //        foreach (var status in statuses)
+        //        {
+        //            statusNames.Add(status.StatusId, status.StatusName);
+        //        }
+        //    }
+        //    ViewBag.StatusNames = statusNames;
+        //    ViewBag.StatusList = statusNames;
+
+        //    var currentUser = await _userManager.GetUserAsync(User);
+
+        //    if (currentUser != null)
+        //    {
+        //        var tasks = _context.TaskComps
+        //   .Include(e => e.Customer)
+        //   .Include(e => e.Status)
+        //   .Include(e => e.AppUser)
+        //   .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id) // AssignedUserId görevi gerçekleştiren kullanıcı için yer tutucudur
+        //   .ToList();
+
+        //        return View(tasks);
+        //    }
+        //    else
+        //    {
+        //        ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
+        //        return View();
+        //    }
+        //}
 
         #region TaskEkleme
         [HttpGet]

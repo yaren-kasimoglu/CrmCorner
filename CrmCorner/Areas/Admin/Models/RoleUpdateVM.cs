@@ -9,6 +9,6 @@ namespace CrmCorner.Areas.Admin.Models
 
         [Required(ErrorMessage = "Rol Adı alanı boş bırakılamaz.")]
         [Display(Name = "Rol Adı ")]
-        public string Name { get; set; }
+        public string Name { get; set; } 
     }
 }

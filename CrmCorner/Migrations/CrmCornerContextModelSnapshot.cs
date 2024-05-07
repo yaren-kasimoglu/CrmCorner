@@ -124,6 +124,21 @@ namespace CrmCorner.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.AppUserRole", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AppUserRole");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.BigeçSayfaDeneme", b =>
                 {
                     b.Property<int>("Id")
@@ -604,6 +619,25 @@ namespace CrmCorner.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.AppUserRole", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppRole", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrmCorner.Models.AppUser", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.Calendar", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -701,6 +735,11 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.AppRole", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.AppUser", b =>
                 {
                     b.Navigation("Calendars");
@@ -712,6 +751,8 @@ namespace CrmCorner.Migrations
                     b.Navigation("TaskCompLogs");
 
                     b.Navigation("TaskComps");
+
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
