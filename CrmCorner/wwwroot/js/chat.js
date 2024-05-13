@@ -1,32 +1,67 @@
-﻿"use strict";
+﻿$(function () {
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+    var $SendMessageTextArea = $("#SendMessageTextArea");
+    var $UserListSelectBox = $("#UserList");
+    var $SendMessageBtn = $("#SendMessageBtn");
+    var $MessageBox = $("#MessageBox");
+    var isMyMessage = false;
 
-//Disable the send button until connection is established.
-document.getElementById("sendButton").disabled = true;
+    var signalRConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
-connection.on("ReceiveMessage", function (user, message,date) {
-    var li = document.createElement("li");
-    document.getElementById("messagesList").appendChild(li);
-    // We can assign user-supplied strings to an element's textContent because it
-    // is not interpreted as markup. If you're assigning in any other way, you 
-    // should be aware of possible script injection concerns.
-    li.textContent = `${user} : ${message}`;
-});
+    signalRConnection.on("ChatChannel", function (message, dateTime) {
 
-connection.start().then(function () {
-    document.getElementById("sendButton").disabled = false;
-}).catch(function (err) {
-    return console.error(err.toString());
-});
+        $MessageBox.append(`<li class="clearfix">
+                                <div class="message-data mb-3">
+                                    <span class="small text-muted me-3">${dateTime}</span>
+                                </div>
+                                <div class="message my-message d-inline-block">
+                                    ${message}
+                                </div>
+                            </li>`);
+        $SendMessageTextArea.val("");
+    });
 
-document.getElementById("sendButton").addEventListener("click", function (event) {
-    var user = document.getElementById("selectedUser").innerHTML;
-    var message = document.getElementById("messageInput").value;
-     var currentdate = new Date();
-    var date = "Tarih: " + currentdate.getDay() + "/" + currentdate.getMonth() + "/" + currentdate.getFullYear() + "-" + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
-    connection.invoke("SendMessage", user, message, date).catch(function (err) {
+    $SendMessageBtn.click(function () {
+
+        var userId = document.getElementById("selectedUserId").value;
+        var message = $SendMessageTextArea.val();
+        var now = new Date();
+        var day = ("0" + now.getDate()).slice(-2); 
+        var month = ("0" + (now.getMonth() + 1)).slice(-2); 
+        var year = now.getFullYear(); // Yılı al
+        var hour = ("0" + now.getHours()).slice(-2); 
+        var minute = ("0" + now.getMinutes()).slice(-2); 
+        var dateTime = day + "." + month + "." + year + " " + hour + ":" + minute;
+
+        console.log(dateTime);
+        $MessageBox.append(`<li class="clearfix">
+                                <div class="message-data text-end mb-3 me-3">
+                                    <span class="small text-muted me-2"> ${dateTime}</span>
+                                    </div>
+                                 <div class="message other-message d-inline-block float-end">
+                                ${message}
+                                </div>
+                        </li>`);
+        signalRConnection.invoke("SendMessage", message, userId, dateTime);
+    });
+
+    signalRConnection.start().then(function () {
+
+    }).catch(function (err) {
         return console.error(err.toString());
     });
-    event.preventDefault();
-});
+    setInterval(function () {
+        console.log("SignalR bağlantısı yenileniyor...");
+        connection.stop()
+            .then(function () {
+                return connection.start();
+            })
+            .then(function () {
+                console.log("SignalR bağlantısı başarıyla yenilendi.");
+            })
+            .catch(function (err) {
+                console.error("SignalR bağlantısı yenilenemedi: " + err);
+            });
+    }, 60000); 
+
+})
