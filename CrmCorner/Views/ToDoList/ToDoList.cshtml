@@ -108,7 +108,7 @@
         <div class="row">
             <div class="col-md-3">
                 <div id="hover-effect" class="d-flex align-items-center">
-                    <img src="/icons/todo/sun.png" alt="Logo" class="logo" style="max-width: 50px; max-height: 50px;">
+                    <img src="/icons/todo/sun.jpeg" alt="Logo" class="logo" style="max-width: 50px; max-height: 50px;">
                     <label onclick="clickToday()" class="date">Günüm</label>
                 </div>
                 <br />
@@ -120,7 +120,7 @@
                 <hr class="horizontal-line">
                 <div class="btn-group" style="width: -webkit-fill-available;">
                     <button type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="height:50px; font-size: 18px; width: -webkit-fill-available; text-align: left;">
-                        <img src="/icons/todo/deneme.png" alt="Logo" style="max-width: 20px; margin-right: 5px;">
+                        <img src="/icons/todo/deneme.jpeg" alt="Logo" style="max-width: 20px; margin-right: 5px;">
                         Listelerim
                         <i class="fa fa-caret-down" style="font-size: 30px; float: right;"></i>
                     </button>
@@ -131,7 +131,7 @@
                             <li class="list-group-item" onclick="toggleAltMenu(this)">
                                 <div class="d-flex align-items-center">
                                     <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="openPopup('@item.Id'); disableOtherButtons(this);">
-                                        <img src="/icons/todo/düzenle.png" alt="Düzenle" style="max-width: 20px;">
+                                        <img src="/icons/todo/düzenle.jpeg" alt="Düzenle" style="max-width: 20px;">
                                     </button>
                                     <span style="font-size: 14px; margin-right: 10px;">
                                         <a href="#" style="margin-left: 8px;" class="link-item" data-id="@item.Id">@item.Title</a>
@@ -164,21 +164,21 @@
 
                             <div class="card" id="cardpng" style="display:none;background-color: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 10px; text-align: center;">
                                 <div style="text-align: center;">
-                                    <img src="/icons/todo/calendar.png" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
+                                    <img src="/icons/todo/calendar.jpeg" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
                                 </div>
                                 <h2 style="font-size: 20px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">Gününüze odaklanın</h2>
                                 <h2 style="font-size: 18px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">Her gün yenilenen Günüm listesiyle işlerinizi tamamlayın.</h2>
                             </div>
                             <div class="card" id="cardpng2" style="display:none;background-color: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 10px; text-align: center;">
                                 <div style="text-align: center;">
-                                    <img src="/icons/todo/importantlogo.png" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
+                                    <img src="/icons/todo/importantlogo.jpeg" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
                                 </div>
                                 <h2 style="font-size: 20px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">Önemli listenize odaklanın</h2>
                                 <h2 style="font-size: 18px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">Önemli listesiyle işlerinizi tamamlayın.</h2>
                             </div>
                             <div class="card" id="cardpng3" style="display:none;background-color: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 10px; text-align: center;">
                                 <div style="text-align: center;">
-                                    <img src="/icons/todo/listlogo.png" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
+                                    <img src="/icons/todo/listlogo.jpeg" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
                                 </div>
                                 <h2 style="font-size: 20px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">@ViewBag.TitleValue listenize odaklanın</h2>
                                 <h2 style="font-size: 18px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">@ViewBag.TitleValue listesiyle işlerinizi tamamlayın.</h2>
@@ -434,7 +434,7 @@
             <input type="hidden" name="taskId" class="taskId">
     <input type="hidden" name="textContent" id="textContent" value="@task">
     <button type="button" onclick="deleteTodo(this)" id="delete-button" class="delete-button" style="margin-right: 5px;width:4%;background: none; border: none; display: flex; justify-content: center; align-items: center;">
-        <img src="/icons/todo/delete3.png" width="30" height="30" style="padding: 0;cursor: pointer;">
+        <img src="/icons/todo/delete3.jpeg" width="30" height="30" style="padding: 0;cursor: pointer;">
     </button>
     <label class="task" style="display: flex; align-items: center;position:releative;">
         <input type="checkbox" name="taskCheckbox" class="taskCheckbox" onclick="clickToDoCheckbox(this); document.getElementById('delbutton').blur();" id="taskCheckbox" @(true ? "checked" : "")>
@@ -445,7 +445,7 @@
  @if (mainTitle != "Önemli")
     {
         <button type="button" style="margin-left:85%;width:4%;background: none; border: none;" onclick="addTaskImportant(this)" >
-            <img src="/icons/todo/staradd.png" width="30" height="30" style="cursor: pointer;" id="logo">
+            <img src="/icons/todo/staradd.jpeg" width="30" height="30" style="cursor: pointer;" id="logo">
         </button>
     }
  
@@ -463,7 +463,7 @@
     <input type="hidden" name="taskId" class="taskId">
     <input type="hidden" name="textContent" id="textContent" value="@task2">
     <button type="button" onclick="deleteTodo(this)" id="delete-button" class="delete-button" style="margin-right: 5px;width:4%;background: none; border: none; display: flex; justify-content: center; align-items: center;">
-        <img src="/icons/todo/delete3.png" width="30" height="30" style="padding: 0;cursor: pointer;">
+        <img src="/icons/todo/delete3.jpeg" width="30" height="30" style="padding: 0;cursor: pointer;">
     </button>
     <label class="task" style="display: flex; align-items: center;position:releative;">
         <input type="checkbox" name="taskCheckbox" class="taskCheckbox" onclick="clickToDoCheckbox(this); document.getElementById('delbutton').blur();" id="taskCheckbox" @(false ? "checked" : "")>
@@ -474,7 +474,7 @@
  @if (mainTitle != "Önemli")
     {
         <button type="button" style="margin-left:85%;width:4%;background: none; border: none;" onclick="addTaskImportant(this)" >
-            <img src="/icons/todo/staradd.png" width="30" height="30" style="cursor: pointer;" id="logo">
+            <img src="/icons/todo/staradd.jpeg" width="30" height="30" style="cursor: pointer;" id="logo">
         </button>
     }
    
@@ -511,7 +511,7 @@
                     else {
                         var cardDiv = document.getElementById("cardpng3");
                         cardDiv.style.display = "block";
-                        var yeniArkaPlanURL = "/icons/todo/list.png"; // Yeni resmin URL'si
+                        var yeniArkaPlanURL = "/icons/todo/list.jpeg"; // Yeni resmin URL'si
 
                         // HTML elementini seçin ve arka plan resmini değiştirin
                         var container2 = document.getElementById("container2");
@@ -540,7 +540,7 @@
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
                 else {
-                    var yeniArkaPlanURL = "/icons/todo/list.png"; // Yeni resmin URL'si
+                    var yeniArkaPlanURL = "/icons/todo/list.jpeg"; // Yeni resmin URL'si
                     var container2 = document.getElementById("container2");
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
