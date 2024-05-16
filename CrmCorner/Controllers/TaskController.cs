@@ -177,6 +177,24 @@ namespace CrmCorner.Controllers
                 if (task.StatusId.HasValue && task.StatusId.Value != 0) // StatusId kontrolü
                 {
                     _context.TaskComps.Add(task); // Task'ı ekleyin
+
+                    // Outcomes Olumlu ise PostSaleInfo oluştur
+                    if (task.Outcomes == OutcomeType.Olumlu)
+                    {
+                        var postSaleInfo = new PostSaleInfo
+                        {
+                            TaskCompId = task.TaskId,
+                            // Diğer alanlar varsayılan değerlerle veya gerekli bilgilerle doldurulabilir
+                            IsFirstPaymentMade = false, // Örnek varsayılan değerler
+                            IsThereAProblem = false,
+                            ProblemDescription = "",
+                            IsContinuationConsidered = false,
+                            IsTrustpilotReviewed = false,
+                            CanUseLogo = false
+                        };
+                        _context.PostSaleInfos.Add(postSaleInfo);
+                    }
+
                     _context.SaveChanges(); // Değişiklikleri kaydedin
                     return RedirectToAction("Index"); // Başarılıysa, Index sayfasına yönlendir
                 }
@@ -195,8 +213,6 @@ namespace CrmCorner.Controllers
                     }
                 }
             }
-
-      
 
 
             ViewBag.Status = new SelectList(_context.Statuses.ToList(), "StatusId", "StatusName", task.StatusId);
@@ -278,6 +294,22 @@ namespace CrmCorner.Controllers
                 // task güncelle
                 _context.TaskComps.Update(editedTask);
                 _context.SaveChanges();
+
+                if (editedTask.Outcomes == OutcomeType.Olumlu && originalTask.Outcomes != OutcomeType.Olumlu)
+                {
+                    var postSaleInfo = new PostSaleInfo
+                    {
+                        TaskCompId = editedTask.TaskId,
+                        IsFirstPaymentMade = false, // Varsayılan olarak ödeme yapılmadı kabul edilir
+                        IsThereAProblem = false,   // Başlangıçta problem yoktur
+                        ProblemDescription = "",   // Problem açıklaması boş
+                        IsContinuationConsidered = false, // Devam etme durumu başlangıçta hayır
+                        IsTrustpilotReviewed = false, // Trustpilot değerlendirmesi henüz yapılmamış
+                        CanUseLogo = false // Logo kullanımı izni başlangıçta hayır
+                    };
+                    _context.PostSaleInfos.Add(postSaleInfo);
+                    await _context.SaveChangesAsync();
+                }
 
                 return RedirectToAction("Index");
             }
