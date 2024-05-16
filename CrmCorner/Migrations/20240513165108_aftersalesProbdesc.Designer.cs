@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20240513165108_aftersalesProbdesc")]
+    partial class aftersalesProbdesc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -383,9 +386,6 @@ namespace CrmCorner.Migrations
 
                     b.Property<int>("TaskCompId")
                         .HasColumnType("int");
-
-                    b.Property<string>("TrustPilotComment")
-                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
