@@ -90,7 +90,7 @@ namespace CrmCorner.Controllers
                                      .ToList();
 
                 // labels ve data alanlarını doldur
-                var labels = chartData.Select(data => data.Industry.ToString()).ToArray();
+                var labels = chartData.Select(data => data.Industry.GetDisplayName().ToString()).ToArray();
                 var dataValues = chartData.Select(data => data.Count).ToArray();
 
                 return Json(new { labels, data = dataValues });
