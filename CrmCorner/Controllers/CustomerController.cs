@@ -199,12 +199,29 @@ namespace CrmCorner.Controllers
             {
                 return NotFound();
             }
-            _context.CustomerNs.Remove(customer);
-            _context.SaveChanges();
 
+            // İlgili tüm taskcomps kayıtlarını alın
+            var taskComps = _context.TaskComps.Where(tc => tc.CustomerId == id).ToList();
+
+            // İlgili tüm taskcomplogs kayıtlarını alın ve sil
+            foreach (var taskComp in taskComps)
+            {
+                var taskCompLogs = _context.TaskCompLogs.Where(tcl => tcl.TaskId == taskComp.TaskId).ToList();
+                _context.TaskCompLogs.RemoveRange(taskCompLogs);
+            }
+
+            // İlgili tüm taskcomps kayıtlarını sil
+            _context.TaskComps.RemoveRange(taskComps);
+
+            // Müşteriyi sil
+            _context.CustomerNs.Remove(customer);
+
+            // Değişiklikleri kaydet
+            _context.SaveChanges();
 
             return RedirectToAction("CustomerList");
         }
+
 
     }
 }
