@@ -8,7 +8,7 @@
 }
 
 <a href="/Customer/CustomerAdd" target="_self">
-    <input type="button" class="btn btn-success" value="Add Customer">
+    <input type="button" class="btn btn-success" value="Müşteri Ekle">
 </a>
 <div>&nbsp;</div>
 
@@ -30,7 +30,7 @@
             <th scope="col">Firma Email</th>
             <th scope="col">Sektör</th>
             <th scope="col">Çalışan Sayısı</th>
-            <th scope="col">Operations</th>
+            <th scope="col">İşlemler</th>
         </tr>
     </thead>
     <tbody>
@@ -46,19 +46,8 @@
                 <td>@item.CompanyName</td>
                 <td>@item.CompanyEmail</td>
                 <td>
-                    <span class="badge bg-success">@item.Industry</span>
+                    <span class="badge bg-success">@item.Industry.GetDisplayName()</span>
                 </td>
-                @*             <td>
-            @if (item.AppUserId!=null)
-            {
-            <span class="badge bg-success">@item.AppUser!.UserName</span>
-            }
-            else
-            {
-            <span class="text-danger">Sorumlu bilgisi eklenmemiştir.</span>
-            }
-
-            </td>*@
                 <td>
                     @if (item.EmployeeCount.HasValue)
                     {

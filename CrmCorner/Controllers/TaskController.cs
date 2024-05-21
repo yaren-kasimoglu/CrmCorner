@@ -31,6 +31,7 @@ namespace CrmCorner.Controllers
             _hostingEnvironment = hostingEnvironment;
             _configuration = configuration;
         }
+
         public async Task<IActionResult> Index()
         {
             Dictionary<int, string> statusNames = new Dictionary<int, string>();
@@ -49,14 +50,31 @@ namespace CrmCorner.Controllers
 
             if (currentUser != null)
             {
-                var tasks = _context.TaskComps
-           .Include(e => e.Customer)
-           .Include(e => e.Status)
-           .Include(e => e.AppUser)
-           .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id) // AssignedUserId görevi gerçekleştiren kullanıcı için yer tutucudur
-           .ToList();
+                if (currentUser.Email == "berkay@saascorner.co" || currentUser.Email== "yaren.kkasimoglu@gmail.com") 
+                {
+                    var companyUsers = _context.Users.Where(u => u.CompanyName == currentUser.CompanyName).ToList();
+                    var companyUserIds = companyUsers.Select(u => u.Id).ToList();
 
-                return View(tasks);
+                    var tasks = _context.TaskComps
+                        .Include(e => e.Customer)
+                        .Include(e => e.Status)
+                        .Include(e => e.AppUser)
+                        .Where(e => companyUserIds.Contains(e.UserId) || companyUserIds.Contains(e.AssignedUserId))
+                        .ToList();
+
+                    return View(tasks);
+                }
+                else
+                {
+                    var tasks = _context.TaskComps
+                        .Include(e => e.Customer)
+                        .Include(e => e.Status)
+                        .Include(e => e.AppUser)
+                        .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id)
+                        .ToList();
+
+                    return View(tasks);
+                }
             }
             else
             {
@@ -64,6 +82,42 @@ namespace CrmCorner.Controllers
                 return View();
             }
         }
+
+
+        //YORUMA ALINDI 06.05.2024 GERİ AÇILACAK ROL İŞLEVLERİ YAPILINCA
+        //public async Task<IActionResult> Index()
+        //{
+        //    Dictionary<int, string> statusNames = new Dictionary<int, string>();
+        //    using (var context = new CrmCornerContext())
+        //    {
+        //        var statuses = context.Statuses.ToList();
+        //        foreach (var status in statuses)
+        //        {
+        //            statusNames.Add(status.StatusId, status.StatusName);
+        //        }
+        //    }
+        //    ViewBag.StatusNames = statusNames;
+        //    ViewBag.StatusList = statusNames;
+
+        //    var currentUser = await _userManager.GetUserAsync(User);
+
+        //    if (currentUser != null)
+        //    {
+        //        var tasks = _context.TaskComps
+        //   .Include(e => e.Customer)
+        //   .Include(e => e.Status)
+        //   .Include(e => e.AppUser)
+        //   .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id) // AssignedUserId görevi gerçekleştiren kullanıcı için yer tutucudur
+        //   .ToList();
+
+        //        return View(tasks);
+        //    }
+        //    else
+        //    {
+        //        ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
+        //        return View();
+        //    }
+        //}
 
         #region TaskEkleme
         [HttpGet]
@@ -123,6 +177,24 @@ namespace CrmCorner.Controllers
                 if (task.StatusId.HasValue && task.StatusId.Value != 0) // StatusId kontrolü
                 {
                     _context.TaskComps.Add(task); // Task'ı ekleyin
+
+                    // Outcomes Olumlu ise PostSaleInfo oluştur
+                    if (task.Outcomes == OutcomeType.Olumlu)
+                    {
+                        var postSaleInfo = new PostSaleInfo
+                        {
+                            TaskCompId = task.TaskId,
+                            // Diğer alanlar varsayılan değerlerle veya gerekli bilgilerle doldurulabilir
+                            IsFirstPaymentMade = false, // Örnek varsayılan değerler
+                            IsThereAProblem = false,
+                            ProblemDescription = "",
+                            IsContinuationConsidered = false,
+                            IsTrustpilotReviewed = false,
+                            CanUseLogo = false
+                        };
+                        _context.PostSaleInfos.Add(postSaleInfo);
+                    }
+
                     _context.SaveChanges(); // Değişiklikleri kaydedin
                     return RedirectToAction("Index"); // Başarılıysa, Index sayfasına yönlendir
                 }
@@ -141,8 +213,6 @@ namespace CrmCorner.Controllers
                     }
                 }
             }
-
-      
 
 
             ViewBag.Status = new SelectList(_context.Statuses.ToList(), "StatusId", "StatusName", task.StatusId);
@@ -224,6 +294,22 @@ namespace CrmCorner.Controllers
                 // task güncelle
                 _context.TaskComps.Update(editedTask);
                 _context.SaveChanges();
+
+                if (editedTask.Outcomes == OutcomeType.Olumlu && originalTask.Outcomes != OutcomeType.Olumlu)
+                {
+                    var postSaleInfo = new PostSaleInfo
+                    {
+                        TaskCompId = editedTask.TaskId,
+                        IsFirstPaymentMade = false, // Varsayılan olarak ödeme yapılmadı kabul edilir
+                        IsThereAProblem = false,   // Başlangıçta problem yoktur
+                        ProblemDescription = "",   // Problem açıklaması boş
+                        IsContinuationConsidered = false, // Devam etme durumu başlangıçta hayır
+                        IsTrustpilotReviewed = false, // Trustpilot değerlendirmesi henüz yapılmamış
+                        CanUseLogo = false // Logo kullanımı izni başlangıçta hayır
+                    };
+                    _context.PostSaleInfos.Add(postSaleInfo);
+                    await _context.SaveChangesAsync();
+                }
 
                 return RedirectToAction("Index");
             }

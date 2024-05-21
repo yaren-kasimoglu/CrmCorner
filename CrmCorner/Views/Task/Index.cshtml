@@ -36,8 +36,10 @@
         min-height: 100px; /* Kartın içindeki liste boşsa bile görsel bir alan sağlar */
     }
 
-
-
+    .card-body {
+        max-height: 300px; /* Kartın maksimum yüksekliği */
+        overflow-y: auto; /* Dikey kaydırma çubuğu ekle */
+    }
     .search-filter-container {
         display: flex;
         justify-content: start;
@@ -280,6 +282,7 @@
                 @{
                     var tasksInThisStatus = Model.Where(task => task.Status != null && task.Status.StatusId == status.Key).ToList();
                 }
+
                 <div class="card mb-4 @statusClass" style="border-color:@borderColor; min-height:400px;" data-statusid="@status.Key">
                     <div class="card-header">
                         <h6 class="card-title">@status.Value </h6>
@@ -294,13 +297,12 @@
                             </li>
                         </ul>
                     </div>
+
+
                     <div class="card-body">
-
-
-
                         @if (tasksInThisStatus.Any())
                         {
-                         // Görevleri listele
+                            // Görevleri listele
                             <div class="dd" data-plugin="nestable">
                                 <ol class="dd-list" data-statusid="@status.Key">
                                     @foreach (var task in tasksInThisStatus)
@@ -317,8 +319,6 @@
                                             data-assigned-user-name="@task.AssignedUser?.UserName"
                                             data-customer-name="@task.Customer?.Name @task.Customer?.Surname"
                                             data-outcome-type="@task.Outcomes.ToString()">
-
-
                                             <div class="dd-handle">
                                                 <a href="/Task/TaskDetail/@task.TaskId" class="dd-item-title">
                                                     <h6>@task.Title</h6>
@@ -346,10 +346,11 @@
                         }
                         else
                         {
-                            // Eğer bu duruma ait görev yoksa
                             <p>Görev Yok.</p>
                         }
                     </div>
+
+
                 </div>
             </div>
         }
@@ -679,5 +680,8 @@
         paginateTasks();
     });
 
+function showHiddenTasks(statusKey) {
+    $('ol.hidden-tasks[data-statusid="' + statusKey + '"]').toggle();
+}
 
 </script>

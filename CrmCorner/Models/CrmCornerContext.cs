@@ -30,7 +30,9 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
     public DbSet<TaskCompLog> TaskCompLogs { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-    public DbSet<BigeçSayfaDeneme>BigeçSayfaDenemes  { get; set; }
+    public DbSet<BigecSayfaDeneme>BigeçSayfaDenemes  { get; set; }
+
+    public DbSet<PostSaleInfo> PostSaleInfos { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -84,6 +86,18 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
 
         OnModelCreatingPartial(modelBuilder);
+        modelBuilder.Entity<AppUserRole>()
+       .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+        modelBuilder.Entity<AppUserRole>()
+            .HasOne(ur => ur.User)
+            .WithMany(u => u.UserRoles)
+            .HasForeignKey(ur => ur.UserId);
+
+        modelBuilder.Entity<AppUserRole>()
+            .HasOne(ur => ur.Role)
+            .WithMany(r => r.UserRoles)
+            .HasForeignKey(ur => ur.RoleId);
     }
 
     public Task InsertOneAsync(ChatHistory chatHistory)

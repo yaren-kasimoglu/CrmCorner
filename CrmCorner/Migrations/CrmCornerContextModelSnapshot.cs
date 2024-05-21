@@ -124,7 +124,22 @@ namespace CrmCorner.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.BigeçSayfaDeneme", b =>
+            modelBuilder.Entity("CrmCorner.Models.AppUserRole", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AppUserRole");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.BigecSayfaDeneme", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -340,6 +355,43 @@ namespace CrmCorner.Migrations
                         .IsUnique();
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CanUseLogo")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsContinuationConsidered")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsFirstPaymentMade")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsThereAProblem")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsTrustpilotReviewed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ProblemDescription")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TaskCompId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrustPilotComment")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskCompId");
+
+                    b.ToTable("PostSaleInfos");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Status", b =>
@@ -604,6 +656,25 @@ namespace CrmCorner.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.AppUserRole", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppRole", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CrmCorner.Models.AppUser", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.Calendar", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -646,6 +717,17 @@ namespace CrmCorner.Migrations
                         .HasForeignKey("CrmCorner.Models.Notification", "TaskCompId");
 
                     b.Navigation("AppUser");
+
+                    b.Navigation("TaskComp");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
+                {
+                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
+                        .WithMany()
+                        .HasForeignKey("TaskCompId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("TaskComp");
                 });
@@ -701,6 +783,11 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.AppRole", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.AppUser", b =>
                 {
                     b.Navigation("Calendars");
@@ -712,6 +799,8 @@ namespace CrmCorner.Migrations
                     b.Navigation("TaskCompLogs");
 
                     b.Navigation("TaskComps");
+
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
