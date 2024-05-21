@@ -9,5 +9,6 @@
         public string? PictureUrl { get; set; }
         public string CompanyName { get; set; }
         public string? PositionName { get; set; }
+        public string? UserId { get; set; }
     }
 }
