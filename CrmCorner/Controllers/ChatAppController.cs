@@ -36,7 +36,7 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> ChatApp(string search)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-
+            ViewBag.GetUserId = currentUser.Id;
             if (search != null)
             {
                 var searchPeople = _context.Users.
@@ -55,7 +55,7 @@ namespace CrmCorner.Controllers
             else
             {
                 var peopleName = _context.Users
-                                  //.Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id)
+                                  .Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id)
                                   .Select(u => new UserViewModel
                                   {
                                       NameSurname = u.NameSurname,
@@ -66,7 +66,33 @@ namespace CrmCorner.Controllers
                 ViewBag.UserNames = peopleName;
                 return View();
             }
+           
 
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserMessages(string userId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+
+            var messagesSent = _context.ChatHistories
+                                .Where(c => c.SenderId == currentUser.Id && c.ReceiverId == userId)
+                                .OrderByDescending(c => c.MessageTime)
+                                .ToList();
+
+            var messagesReceived = _context.ChatHistories
+                                            .Where(c => c.SenderId == userId && c.ReceiverId == currentUser.Id)
+                                            .OrderByDescending(c => c.MessageTime)
+                                            .ToList();
+
+            var allMessages = messagesSent.Concat(messagesReceived)
+                                            .OrderBy(c => c.MessageTime)
+                                            .ToList();
+
+            ViewBag.GetUserMessage = allMessages;
+            ViewBag.GetUserId = currentUser.Id;
+            return Json(new { Message = allMessages });
         }
 
     }

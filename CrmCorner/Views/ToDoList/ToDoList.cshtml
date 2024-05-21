@@ -12,6 +12,10 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Pacifico&display=swap" rel="stylesheet">
 <link href="~/css/todo.css" rel="stylesheet" />
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
 
 <div class="wrapper" style="margin-top:-10%">
@@ -38,7 +42,7 @@
                     }
                 </ul>
                 <div id="Containerlist">
-                    <input type="text" id="ekleButton2" class="addlist"  style="width: 100%;" placeholder="Liste Ekle..">
+                    <input type="text" id="ekleButton2" class="addlist" style="width: 100%;" placeholder="Liste Ekle..">
                 </div>
             </div>
             <div class="col-md-9">
@@ -46,7 +50,7 @@
                     <div class="card" style="background-color: #f4f4f4;box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); border: 2px solid #2eacb3;">
                         <div class="card-header" style=" background-color: #f4f4f4; text-align: center; font-size: 32px; font-weight: normal;color: #333; margin: 0;" id="todaymaintitle">Günüm</div>
                         <div class="card-body">
-                                <h1 class="main-title"></h1>
+                            <h1 class="main-title"></h1>
                             <div class="todo-list">
                                 <table class="table">
                                     <tr>
@@ -81,19 +85,19 @@
 
 
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
 
 
-<script>
+    <script>
     function openPopup(itemId) {
 
         $.ajax({
@@ -545,361 +549,368 @@ document.querySelector(".close").addEventListener("click", function () {
         }
     }
 
-</script>
-<style>
-    .popup-containeredit {
-        background-color: white;
-        border-radius: 10px; /* Yuvarlak kenarlar */
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Gölgeli efekt */
-        padding: 20px;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 9999;
-    }
-    .popup-content text {
-        font-size: 16px; /* Metin boyutunu ayarla (örneğin 16 piksel) */
-    }
-    .main-title {
-        text-align: center;
-        font-size: 32px;
-        font-weight: normal; /* Yazı tipi ağırlığı azaltıldı */
-        color: #333;
-        margin: 0;
-    }
-    .selected {
-        ransform: scale(1.1); /* Seçilen elemanın boyutunu artırır */
-        transition: transform 0.2s ease; /* Dönüşümün yumuşak olması için geçiş efekti ekler */
-        border: 1px solid #ccc; /* Çizgi stilini belirler */
-        border-radius: 10px;
-    }
-    .dropbtn {
-        background-color: #f1f1f1;
-        color: black;
-        padding: 10px;
-        font-size: 16px;
-        border: none;
-        cursor: pointer;
-    }
-
-    /* Açılır menü içeriği stilleri */
-        .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f1f1f1;
-        min-width: 160px;
-        z-index: 1;
-    }
-
-        /* Açılır menü içeriğini göstermek için */
-
-
-        /* Açılır menü içeriği linkleri */
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
+    </script>
+    <style>
+        .popup-containeredit {
+            background-color: white;
+            border-radius: 10px; /* Yuvarlak kenarlar */
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Gölgeli efekt */
+            padding: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
         }
 
-            /* Açılır menü içeriği linklerinin üzerine gelindiğinde */
-            .dropdown-content a:hover {
-                background-color: #ddd;
+        .popup-content text {
+            font-size: 16px; /* Metin boyutunu ayarla (örneğin 16 piksel) */
+        }
+
+        .main-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: normal; /* Yazı tipi ağırlığı azaltıldı */
+            color: #333;
+            margin: 0;
+        }
+
+        .selected {
+            ransform: scale(1.1); /* Seçilen elemanın boyutunu artırır */
+            transition: transform 0.2s ease; /* Dönüşümün yumuşak olması için geçiş efekti ekler */
+            border: 1px solid #ccc; /* Çizgi stilini belirler */
+            border-radius: 10px;
+        }
+
+        .dropbtn {
+            background-color: #f1f1f1;
+            color: black;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Açılır menü içeriği stilleri */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f1f1f1;
+            min-width: 160px;
+            z-index: 1;
+        }
+
+            /* Açılır menü içeriğini göstermek için */
+
+
+            /* Açılır menü içeriği linkleri */
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
             }
 
-    .close {
-        border: 1px solid #ccc; /* Kenar çizgisi */
-        padding: 5px 10px; /* İç boşluk */
-        background-color: #f9f9f9; /* Arka plan rengi */
-        cursor: pointer;
-        width: fit-content;
-        text-align: end;
-    }
+                /* Açılır menü içeriği linklerinin üzerine gelindiğinde */
+                .dropdown-content a:hover {
+                    background-color: #ddd;
+                }
 
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.5);
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 50%;
-    }
-
-    /* Kapatma düğmesi stilleri */
-
-    #container4 {
-        display: flex;
-        flex-direction: column; /* Öğeleri dikey olarak hizalar */
-    }
-
-    #container3 {
-        flex-direction: column;
-        margin: 7% 0px 0px -17%;
-        padding-top: 10px;
-    }
-
-    .horizontal-line {
-        border-top: 1px solid black; /* Çizgiyi siyah yapar */
-        width: 20%; /* Çizginin genişliğini ayarlar */
-        margin: 7% 0px 0px -12%;
-        display: flex; /* İstediğiniz boşluğu ayarlayabilirsiniz */
-    }
-
-    .vertical-line {
-        border-left: 1px solid #000; /* Dikey çizgi stilini ve rengini ayarla */
-        height: 100px; /* Dikey çizginin yüksekliğini ayarla */
-        margin: 0 30px; /* Dikey çizginin sol ve sağ kenarlarında boşluk bırak */
-    }
-
-    .wrapper {
-        display: flex;
-    }
-
-    #container1 {
-        display: flex;
-        align-items: flex-start;
-        margin-top: 50px;
-    }
-
-        #container1 .img {
-            margin-right: 5px; /* Resim ile etiket arasına bir boşluk ekler */
+        .close {
+            border: 1px solid #ccc; /* Kenar çizgisi */
+            padding: 5px 10px; /* İç boşluk */
+            background-color: #f9f9f9; /* Arka plan rengi */
+            cursor: pointer;
+            width: fit-content;
+            text-align: end;
         }
 
-    .logo {
-        width: 20%; /* Logo genişliği */
-        height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
-        border-radius: 50%; /* Yuvarlak kenarlar için */
-    }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
 
-    .date {
-        cursor: pointer;
-        text-align: center;
-        font-size: x-large;
-    }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+        }
 
-    .todolist {
-        cursor: pointer;
-        text-align: center;
-        font-size: x-large;
-        margin-top: -20%;
-        transition: background-color 0.3s ease; /* Geçiş efekti */
-        font-family: "Arial", sans-serif; /* Profesyonel bir yazı tipi */
-    }
-    .textContent {
-        border: none;
-        outline: none;
-        margin-left: 35px;
-        flex-grow: 1;
-        padding: 5px 10px;
-        box-sizing: border-box;
-        box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
-        overflow: auto;
-        border-bottom: 1px solid #333;
-        background-color: transparent;
-        text-align: left;
-        word-wrap: break-word;
-    }
-    .custom-table tr:hover {
-        background-color: #f0f0f0; /* Gri arka plan rengi */
-    }
+        /* Kapatma düğmesi stilleri */
 
-    .addlist {
-        border: none; /* Kenar çizgisini kaldır */
-        outline: none;
-        padding-left: 6%;
-        width: 200px; /* Genişlik */
-        height: 40px;
-    }
+        #container4 {
+            display: flex;
+            flex-direction: column; /* Öğeleri dikey olarak hizalar */
+        }
 
-        .addlist:hover {
+        #container3 {
+            flex-direction: column;
+            margin: 7% 0px 0px -17%;
+            padding-top: 10px;
+        }
+
+        .horizontal-line {
+            border-top: 1px solid black; /* Çizgiyi siyah yapar */
+            width: 20%; /* Çizginin genişliğini ayarlar */
+            margin: 7% 0px 0px -12%;
+            display: flex; /* İstediğiniz boşluğu ayarlayabilirsiniz */
+        }
+
+        .vertical-line {
+            border-left: 1px solid #000; /* Dikey çizgi stilini ve rengini ayarla */
+            height: 100px; /* Dikey çizginin yüksekliğini ayarla */
+            margin: 0 30px; /* Dikey çizginin sol ve sağ kenarlarında boşluk bırak */
+        }
+
+        .wrapper {
+            display: flex;
+        }
+
+        #container1 {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 50px;
+        }
+
+            #container1 .img {
+                margin-right: 5px; /* Resim ile etiket arasına bir boşluk ekler */
+            }
+
+        .logo {
+            width: 20%; /* Logo genişliği */
+            height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
+            border-radius: 50%; /* Yuvarlak kenarlar için */
+        }
+
+        .date {
+            cursor: pointer;
+            text-align: center;
+            font-size: x-large;
+        }
+
+        .todolist {
+            cursor: pointer;
+            text-align: center;
+            font-size: x-large;
+            margin-top: -20%;
+            transition: background-color 0.3s ease; /* Geçiş efekti */
+            font-family: "Arial", sans-serif; /* Profesyonel bir yazı tipi */
+        }
+
+        .textContent {
+            border: none;
+            outline: none;
+            margin-left: 35px;
+            flex-grow: 1;
+            padding: 5px 10px;
+            box-sizing: border-box;
+            box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
+            overflow: auto;
+            border-bottom: 1px solid #333;
+            background-color: transparent;
+            text-align: left;
+            word-wrap: break-word;
+        }
+
+        .custom-table tr:hover {
             background-color: #f0f0f0; /* Gri arka plan rengi */
         }
 
-
-    .todo-list {
-        padding: 20px;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-        .todo-list h1 {
-            font-family: 'Cursive', cursive;
-            color: #2eacb3;
-            text-align: center;
-            margin-bottom: 20px;
+        .addlist {
+            border: none; /* Kenar çizgisini kaldır */
+            outline: none;
+            padding-left: 6%;
+            width: 200px; /* Genişlik */
+            height: 40px;
         }
 
-    .task {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+            .addlist:hover {
+                background-color: #f0f0f0; /* Gri arka plan rengi */
+            }
 
-        .task input[type="checkbox"] {
-            opacity: 0;
-            position: absolute;
+
+        .todo-list {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-    .textInput2 {
-        border: none;
-        outline: none;
-        margin-left: 35px;
-        flex-grow: 1;
-        padding: 5px 10px;
-        box-sizing: border-box;
-        box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
-        overflow: auto;
-        border-bottom: 1px solid #333;
-        background-color: transparent;
-        text-align: left;
-        word-wrap: break-word;
-    }
+            .todo-list h1 {
+                font-family: 'Cursive', cursive;
+                color: #2eacb3;
+                text-align: center;
+                margin-bottom: 20px;
+            }
 
- 
-    .custom-checkbox {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        background-color: #fff;
-        border: 2px solid #333;
-        position: relative;
-        cursor: pointer;
-    }
-
-        .custom-checkbox::after {
-            content: ''; /* İçeriğini boş bırakın */
-            width: 6px; /* Tik uzunluğu */
-            height: 12px; /* Tik yüksekliği */
-            border: solid #333; /* Tik rengi */
-            border-width: 0 2px 2px 0; /* Tik şekli */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(45deg); /* Tik konumu ve dönüşü */
-            opacity: 0; /* Başlangıçta görünmez */
-            transition: opacity 0.3s ease; /* Geçiş efekti */
+        .task {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-    input[type="checkbox"]:checked + .custom-checkbox::after {
-        opacity: 1;
-    }
+            .task input[type="checkbox"] {
+                opacity: 0;
+                position: absolute;
+            }
 
-    .taskCheckbox:checked + .custom-checkbox {
-        background-color: #2eacb3; /* Checkbox seçildiğinde arka plan rengini yeşil yap */
-    }
-
-   
-    button {
-        background-color: #2eacb3;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        display: block;
-        width: 15%;
-    }
-
-    .logotable {
-        padding-left: 18%;
-        width: 40px; /* Logo genişliği */
-        height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
-        border-radius: 50%; /* Yuvarlak kenarlar için */
-    }
-
-    .container {
-        margin-top: 7%;
-    }
-
-    .custom-table {
-        width: 50%;
-    }
-
-    .logotable {
-        padding-left: 18%;
-        width: 40px;
-        height: auto;
-        border-radius: 50%;
-    }
-
-
-   
-    #inputDiv {
-        /* İlgili div'in genişlik ve yüksekliğini ayarlayın */
-        width: 300px; /* Örnek olarak 300 piksel genişlik */
-        height: 50px; /* Örnek olarak 50 piksel yükseklik */
-        /* Diğer isteğe bağlı stil özellikleri ekleyebilirsiniz */
-        display: flex; /* Öğeleri yatay düzende hizalamak için */
-        align-items: center; /* Yatay düzlemde hizalamak için */
-    }
-    .custom-checkbox {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        background-color: #fff;
-        border: 2px solid #333;
-        position: relative;
-        cursor: pointer;
-    }
-
-        .custom-checkbox::after {
-            content: '';
-            width: 6px;
-            height: 12px;
-            border: solid #333;
-            border-width: 0 2px 2px 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(45deg);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-    input[type="checkbox"]:checked + .custom-checkbox::after {
-        opacity: 1;
-    }
-
-    .taskCheckbox:checked + .custom-checkbox {
-        background-color: #2eacb3;
-    }
-
-
-    .addlist {
-        border: none;
-        outline: none;
-        padding-left: 6%;
-        width: 200px;
-        height: 40px;
-    }
-
-        .addlist:hover {
-            background-color: #f0f0f0;
+        .textInput2 {
+            border: none;
+            outline: none;
+            margin-left: 35px;
+            flex-grow: 1;
+            padding: 5px 10px;
+            box-sizing: border-box;
+            box-shadow: 0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);
+            overflow: auto;
+            border-bottom: 1px solid #333;
+            background-color: transparent;
+            text-align: left;
+            word-wrap: break-word;
         }
 
 
-    .todo-list {
-        padding: 20px;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-        .todo-list h1 {
-            font-family: 'Cursive', cursive;
-            color: #2eacb3;
-            text-align: center;
-            margin-bottom: 20px;
+        .custom-checkbox {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 2px solid #333;
+            position: relative;
+            cursor: pointer;
         }
-</style>
+
+            .custom-checkbox::after {
+                content: ''; /* İçeriğini boş bırakın */
+                width: 6px; /* Tik uzunluğu */
+                height: 12px; /* Tik yüksekliği */
+                border: solid #333; /* Tik rengi */
+                border-width: 0 2px 2px 0; /* Tik şekli */
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(45deg); /* Tik konumu ve dönüşü */
+                opacity: 0; /* Başlangıçta görünmez */
+                transition: opacity 0.3s ease; /* Geçiş efekti */
+            }
+
+        input[type="checkbox"]:checked + .custom-checkbox::after {
+            opacity: 1;
+        }
+
+        .taskCheckbox:checked + .custom-checkbox {
+            background-color: #2eacb3; /* Checkbox seçildiğinde arka plan rengini yeşil yap */
+        }
+
+
+        button {
+            background-color: #2eacb3;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 15%;
+        }
+
+        .logotable {
+            padding-left: 18%;
+            width: 40px; /* Logo genişliği */
+            height: auto; /* Logo yüksekliği otomatik olarak ayarlanacak */
+            border-radius: 50%; /* Yuvarlak kenarlar için */
+        }
+
+        .container {
+            margin-top: 7%;
+        }
+
+        .custom-table {
+            width: 50%;
+        }
+
+        .logotable {
+            padding-left: 18%;
+            width: 40px;
+            height: auto;
+            border-radius: 50%;
+        }
+
+
+
+        #inputDiv {
+            /* İlgili div'in genişlik ve yüksekliğini ayarlayın */
+            width: 300px; /* Örnek olarak 300 piksel genişlik */
+            height: 50px; /* Örnek olarak 50 piksel yükseklik */
+            /* Diğer isteğe bağlı stil özellikleri ekleyebilirsiniz */
+            display: flex; /* Öğeleri yatay düzende hizalamak için */
+            align-items: center; /* Yatay düzlemde hizalamak için */
+        }
+
+        .custom-checkbox {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 2px solid #333;
+            position: relative;
+            cursor: pointer;
+        }
+
+            .custom-checkbox::after {
+                content: '';
+                width: 6px;
+                height: 12px;
+                border: solid #333;
+                border-width: 0 2px 2px 0;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(45deg);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+        input[type="checkbox"]:checked + .custom-checkbox::after {
+            opacity: 1;
+        }
+
+        .taskCheckbox:checked + .custom-checkbox {
+            background-color: #2eacb3;
+        }
+
+
+        .addlist {
+            border: none;
+            outline: none;
+            padding-left: 6%;
+            width: 200px;
+            height: 40px;
+        }
+
+            .addlist:hover {
+                background-color: #f0f0f0;
+            }
+
+
+        .todo-list {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+            .todo-list h1 {
+                font-family: 'Cursive', cursive;
+                color: #2eacb3;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+    </style>
 

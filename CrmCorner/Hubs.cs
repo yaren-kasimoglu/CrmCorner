@@ -34,10 +34,9 @@ namespace CrmCorner.Hubs
                 {
                     await Task.CompletedTask;
                 }
-
+                AddChatHistory(message, receiverUserId);
                 var targetUserConnectionId = _connections.GetConnections(receiverUserId).First();
                 await Clients.Client(targetUserConnectionId).SendAsync("ChatChannel", message, dateTime);
-                AddChatHistory(message, receiverUserId);
 
             }
             private async Task AddChatHistory(string message, string receiverUserId)
@@ -48,7 +47,7 @@ namespace CrmCorner.Hubs
                 history.SenderId = sernderUserId;
                 history.ReceiverId = receiverUserId;
                 history.Message = message;
-                history.MessageTime = DateTime.Now.Date;
+                history.MessageTime = DateTime.Now.Date.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).AddSeconds(DateTime.Now.Second);
                 try
                 {
                     _context.ChatHistories.Add(history);
