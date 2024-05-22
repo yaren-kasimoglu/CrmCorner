@@ -23,63 +23,70 @@ namespace CrmCorner.Controllers
         #region EMPLOYEE
         public async Task<IActionResult> EmployeeList()
         {
-            // Giriş yapmış kullanıcının UserName'ini al
-            var currentUserName = User.Identity.Name;
-
-            // Giriş yapmış kullanıcının bilgilerini al
-            var currentUser = await _userManager.FindByNameAsync(currentUserName);
-
-            // Giriş yapmış kullanıcının CompanyName bilgisini al
-            var currentUserCompanyName = currentUser.CompanyName;
-
-            // Aynı CompanyName'e sahip olan kullanıcıları getir
-            var userList = await _userManager.Users
-                .Where(u => u.CompanyName == currentUserCompanyName)
-                .ToListAsync();
-
-            var dashboardEmpViewModelList = new List<DashboardEmpViewModel>();
-
-
-            foreach (var user in userList)
+            try
             {
+                // Giriş yapmış kullanıcının UserName'ini al
+                var currentUserName = User.Identity.Name;
 
-                var taskComps = _context.TaskComps
-                    .AsNoTracking()
-                    .Include(tc => tc.Status) // Status nesnesini dahil et.
-                    .Where(tc => (tc.AppUser.UserName == user.UserName || tc.AssignedUser.UserName == user.UserName) && tc.Status != null)
-                    .ToList();
+                // Giriş yapmış kullanıcının bilgilerini al
+                var currentUser = await _userManager.FindByNameAsync(currentUserName);
 
-      
-                var uniqueTaskComps = taskComps
-                    .GroupBy(tc => tc.TaskId)
-                    .Select(g => g.First())
-                    .ToList(); 
-
-                var taskStatusCounts = uniqueTaskComps
-                    .GroupBy(tc => tc.Status.StatusName) 
-                    .Select(group => new { Status = group.Key, Count = group.Count() })
-                    .ToDictionary(t => t.Status, t => t.Count);
-
-             
-
-                var dashboardEmpViewModel = new DashboardEmpViewModel
+                if (currentUser == null)
                 {
-                    User = new UserViewModel
+                    return RedirectToAction("NotFound", "Error");
+                }
+
+                // Giriş yapmış kullanıcının CompanyName bilgisini al
+                var currentUserCompanyName = currentUser.CompanyName;
+
+                // Aynı CompanyName'e sahip olan kullanıcıları getir
+                var userList = await _userManager.Users
+                    .Where(u => u.CompanyName == currentUserCompanyName)
+                    .ToListAsync();
+
+                var dashboardEmpViewModelList = new List<DashboardEmpViewModel>();
+
+                foreach (var user in userList)
+                {
+                    var taskComps = _context.TaskComps
+                        .AsNoTracking()
+                        .Include(tc => tc.Status) // Status nesnesini dahil et.
+                        .Where(tc => (tc.AppUser.UserName == user.UserName || tc.AssignedUser.UserName == user.UserName) && tc.Status != null)
+                        .ToList();
+
+                    var uniqueTaskComps = taskComps
+                        .GroupBy(tc => tc.TaskId)
+                        .Select(g => g.First())
+                        .ToList();
+
+                    var taskStatusCounts = uniqueTaskComps
+                        .GroupBy(tc => tc.Status.StatusName)
+                        .Select(group => new { Status = group.Key, Count = group.Count() })
+                        .ToDictionary(t => t.Status, t => t.Count);
+
+                    var dashboardEmpViewModel = new DashboardEmpViewModel
                     {
-                        UserName = user.UserName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        CompanyName = user.CompanyName,
-                        PositionName = user.PositionName,
-                        NameSurname = user.NameSurname
-                    },
-                    TaskStatusCountsByUser = taskStatusCounts
-                };
+                        User = new UserViewModel
+                        {
+                            UserName = user.UserName,
+                            Email = user.Email,
+                            PhoneNumber = user.PhoneNumber,
+                            CompanyName = user.CompanyName,
+                            PositionName = user.PositionName,
+                            NameSurname = user.NameSurname
+                        },
+                        TaskStatusCountsByUser = taskStatusCounts
+                    };
 
-                dashboardEmpViewModelList.Add(dashboardEmpViewModel);
+                    dashboardEmpViewModelList.Add(dashboardEmpViewModel);
+                }
+
+                return View(dashboardEmpViewModelList);
             }
-
-            return View(dashboardEmpViewModelList);
+            catch (Exception ex)
+            {
+             return RedirectToAction("NotFound", "Error");
+            }
         }
 
         #endregion

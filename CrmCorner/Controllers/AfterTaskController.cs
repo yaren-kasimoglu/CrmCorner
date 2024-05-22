@@ -21,91 +21,109 @@ namespace CrmCorner.Controllers
 
         public async Task<IActionResult> ListPositiveSales()
         {
-            var userId = _userManager.GetUserId(User); // Aktif kullanıcının UserId'sini alır
+            try
+            {
+                var userId = _userManager.GetUserId(User); // Aktif kullanıcının UserId'sini alır
 
-            var positiveSales = await _context.PostSaleInfos
-                                              .Include(psi => psi.TaskComp)
-                                              .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
-                                              .Where(psi => psi.TaskComp.Outcomes == OutcomeType.Olumlu &&
-                                                            psi.TaskComp.UserId == userId) // Satışı yapan kullanıcıya göre filtrele
-                                              .Select(psi => new SaleDTO
-                                              {
-                                                  Id = psi.Id,
-                                                  TaskCompTitle = psi.TaskComp.Title,
-                                                  IsFirstPaymentMade = psi.IsFirstPaymentMade,
-                                                  IsThereAProblem = psi.IsThereAProblem,
-                                                  ProblemDescription = psi.ProblemDescription,
-                                                  IsContinuationConsidered = psi.IsContinuationConsidered,
-                                                  IsTrustpilotReviewed = psi.IsTrustpilotReviewed,
-                                                  TrustPilotComment = psi.TrustPilotComment,
-                                                  CanUseLogo = psi.CanUseLogo
-                                              })
-                                              .ToListAsync();
+                var positiveSales = await _context.PostSaleInfos
+                                                  .Include(psi => psi.TaskComp)
+                                                  .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
+                                                  .Where(psi => psi.TaskComp.Outcomes == OutcomeType.Olumlu &&
+                                                                psi.TaskComp.UserId == userId) // Satışı yapan kullanıcıya göre filtrele
+                                                  .Select(psi => new SaleDTO
+                                                  {
+                                                      Id = psi.Id,
+                                                      TaskCompTitle = psi.TaskComp.Title,
+                                                      IsFirstPaymentMade = psi.IsFirstPaymentMade,
+                                                      IsThereAProblem = psi.IsThereAProblem,
+                                                      ProblemDescription = psi.ProblemDescription,
+                                                      IsContinuationConsidered = psi.IsContinuationConsidered,
+                                                      IsTrustpilotReviewed = psi.IsTrustpilotReviewed,
+                                                      TrustPilotComment = psi.TrustPilotComment,
+                                                      CanUseLogo = psi.CanUseLogo
+                                                  })
+                                                  .ToListAsync();
 
-            return View(positiveSales);
+                return View(positiveSales);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("NotFound", "Error");
+            }
         }
-
-
 
         public async Task<IActionResult> AfterTaskEdit(int? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-            var postSaleInfo = await _context.PostSaleInfos
-                                             .Include(psi => psi.TaskComp) // İlişkili TaskComp bilgilerini de yükle
-                                             .FirstOrDefaultAsync(m => m.Id == id);
-            if (postSaleInfo == null)
+                var postSaleInfo = await _context.PostSaleInfos
+                                                 .Include(psi => psi.TaskComp) // İlişkili TaskComp bilgilerini de yükle
+                                                 .FirstOrDefaultAsync(m => m.Id == id);
+                if (postSaleInfo == null)
+                {
+                    return NotFound();
+                }
+
+                // Gizli alan için TaskCompId'yi view modelinde veya ViewBag'de taşı
+                ViewBag.TaskCompId = postSaleInfo.TaskCompId;
+
+                return View(postSaleInfo);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return RedirectToAction("NotFound", "Error");
             }
-
-            // Gizli alan için TaskCompId'yi view modelinde veya ViewBag'de taşı
-            ViewBag.TaskCompId = postSaleInfo.TaskCompId;
-
-            return View(postSaleInfo);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AfterTaskEdit(int id, [Bind("Id,TaskCompId,IsFirstPaymentMade,IsThereAProblem,ProblemDescription,IsContinuationConsidered,IsTrustpilotReviewed,TrustPilotComment,CanUseLogo")] PostSaleInfo model)
         {
-            if (id != model.Id)
+            try
             {
-                return NotFound();
+                if (id != model.Id)
+                {
+                    return NotFound();
+                }
+
+                var postSaleInfo = await _context.PostSaleInfos
+                                                 .Include(p => p.TaskComp)
+                                                 .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (postSaleInfo == null)
+                {
+                    return NotFound();
+                }
+
+                if (ModelState.IsValid)
+                {
+                    // Güncelleme işlemi için alanları kopyala
+                    postSaleInfo.TaskCompId = model.TaskCompId;
+                    postSaleInfo.IsFirstPaymentMade = model.IsFirstPaymentMade;
+                    postSaleInfo.IsThereAProblem = model.IsThereAProblem;
+                    postSaleInfo.ProblemDescription = model.ProblemDescription;
+                    postSaleInfo.IsContinuationConsidered = model.IsContinuationConsidered;
+                    postSaleInfo.IsTrustpilotReviewed = model.IsTrustpilotReviewed;
+                    postSaleInfo.TrustPilotComment = model.TrustPilotComment;
+                    postSaleInfo.CanUseLogo = model.CanUseLogo;
+
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(ListPositiveSales));
+                }
+
+                return View(model);
             }
-
-            var postSaleInfo = await _context.PostSaleInfos
-                                             .Include(p => p.TaskComp)
-                                             .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (postSaleInfo == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return RedirectToAction("NotFound", "Error");
             }
-
-            if (ModelState.IsValid)
-            {
-                // Güncelleme işlemi için alanları kopyala
-                postSaleInfo.TaskCompId = model.TaskCompId;
-                postSaleInfo.IsFirstPaymentMade = model.IsFirstPaymentMade;
-                postSaleInfo.IsThereAProblem = model.IsThereAProblem;
-                postSaleInfo.ProblemDescription = model.ProblemDescription;
-                postSaleInfo.IsContinuationConsidered = model.IsContinuationConsidered;
-                postSaleInfo.IsTrustpilotReviewed = model.IsTrustpilotReviewed;
-                postSaleInfo.TrustPilotComment = model.TrustPilotComment;
-                postSaleInfo.CanUseLogo = model.CanUseLogo;
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(ListPositiveSales));
-            }
-
-            return View(model);
         }
-
-
+    
 
 
         private bool PostSaleInfoExists(int id)

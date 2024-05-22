@@ -27,21 +27,27 @@ namespace CrmCorner.Controllers
             _context = context;
         }
 
+
         public async Task<IActionResult> MyProfile()
         {
-
-            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
-            var userViewModel = new UserViewModel
+            try
             {
-                Email = currentUser!.Email,
-                UserName = currentUser!.UserName,
-                PhoneNumber = currentUser!.PhoneNumber,
-                PictureUrl = currentUser.Picture
-            };
+                var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+                var userViewModel = new UserViewModel
+                {
+                    Email = currentUser!.Email,
+                    UserName = currentUser!.UserName,
+                    PhoneNumber = currentUser!.PhoneNumber,
+                    PictureUrl = currentUser.Picture
+                };
 
-            return View(userViewModel);
+                return View(userViewModel);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("NotFound", "Error");
+            }
         }
-
 
         public async Task Logout()
         {
@@ -56,151 +62,177 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public async Task<IActionResult> PasswordChange(PasswordChangeViewModel request)
         {
-
-            if (!ModelState.IsValid)
+            try
             {
-                return View();
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
+
+                var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+                var checkOldPass = await _userManager.CheckPasswordAsync(currentUser!, request.PasswordOld);
+
+                if (!checkOldPass)
+                {
+                    ModelState.AddModelError(string.Empty, "Eski şifreniz yanlış.");
+                    return View();
+                }
+
+                var resultChangePassword = await _userManager.ChangePasswordAsync(currentUser, request.PasswordOld, request.PasswordNew);
+
+                if (!resultChangePassword.Succeeded)
+                {
+                    ModelState.AddModelErrorList(resultChangePassword.Errors);
+                    return View();
+                }
+
+                await _userManager.UpdateSecurityStampAsync(currentUser);
+                await _signInManager.SignOutAsync();
+                await _signInManager.PasswordSignInAsync(currentUser, request.PasswordNew, true, false);
+
+                TempData["SucceesMessage"] = "Şifre değiştirme işlemi başarıyla tamamlandı.";
+
+                return RedirectToAction("MyProfile", "Member");
             }
-
-            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
-
-            var checkOldPass = await _userManager.CheckPasswordAsync(currentUser!, request.PasswordOld);
-
-            if (!checkOldPass)
+            catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "Eski şifreniz yanlış.");
-                return View();
+                return RedirectToAction("NotFound", "Error");
             }
-
-            var resultChangePassword = await _userManager.ChangePasswordAsync(currentUser, request.PasswordOld, request.PasswordNew);
-
-            if (!resultChangePassword.Succeeded)
-            {
-                ModelState.AddModelErrorList(resultChangePassword.Errors);
-                return View();
-            }
-
-            await _userManager.UpdateSecurityStampAsync(currentUser);
-            await _signInManager.SignOutAsync();
-            await _signInManager.PasswordSignInAsync(currentUser, request.PasswordNew, true, false);
-
-
-            TempData["SucceesMessage"] = "Şifre değiştirme işlemi başarıyla tamamlandı.";
-
-
-            return RedirectToAction("MyProfile", "Member");
         }
 
         public async Task<IActionResult> UserEdit()
         {
-            ViewBag.GenderList = new SelectList(Enum.GetNames(typeof(Gender)));
-            var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
-            var userEditViewModel = new UserEditViewModel()
+            try
             {
-                UserName = currentUser.UserName!,
-                Email = currentUser.Email!,
-                Phone = currentUser.PhoneNumber!,
-                BirthDate = currentUser.BirthDate,
-                City = currentUser.City,
-                Gender = currentUser.Gender,
-                EmployeeCount = currentUser.EmployeeCount,
-                Sector = currentUser.Sector,
-
-            };
-            return View(userEditViewModel);
+                ViewBag.GenderList = new SelectList(Enum.GetNames(typeof(Gender)));
+                var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
+                var userEditViewModel = new UserEditViewModel()
+                {
+                    UserName = currentUser.UserName!,
+                    Email = currentUser.Email!,
+                    Phone = currentUser.PhoneNumber!,
+                    BirthDate = currentUser.BirthDate,
+                    City = currentUser.City,
+                    Gender = currentUser.Gender,
+                    EmployeeCount = currentUser.EmployeeCount,
+                    Sector = currentUser.Sector,
+                };
+                return View(userEditViewModel);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("NotFound", "Error");
+            }
         }
-
 
         [HttpPost]
         public async Task<IActionResult> UserEdit(UserEditViewModel request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View(request);
-            }
-
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            if (currentUser == null)
-            {
-
-                ModelState.AddModelError("", "Kullanıcı bulunamadı.");
-                return View(request);
-            }
-
-            // Kullanıcı bilgilerini güncelle
-            currentUser.UserName = request.UserName;
-            currentUser.Email = request.Email;
-            currentUser.BirthDate = request.BirthDate;
-            currentUser.City = request.City;
-            currentUser.Gender = request.Gender;
-            currentUser.PhoneNumber = request.Phone;
-            currentUser.Sector = request.Sector;
-            currentUser.EmployeeCount = request.EmployeeCount;
-
-            // Profil resmi için yol oluşturma ve kaydetme bloğu
-            if (request.Picture != null && request.Picture.Length > 0)
-            {
-                // 'wwwroot' klasörünün yolunu alın
-                var wwwrootPath = _environment.WebRootPath;
-                var userprofilepicturePath = Path.Combine(wwwrootPath, "userprofilepicture");
-
-                // Directory.Exists metodu ile klasörün var olup olmadığını kontrol et
-                if (!Directory.Exists(userprofilepicturePath))
+                if (!ModelState.IsValid)
                 {
-                    // Klasör yoksa, Directory.CreateDirectory metodu ile klasörü oluştur
-                    Directory.CreateDirectory(userprofilepicturePath);
+                    return View(request);
                 }
 
-                var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(request.Picture.FileName)}";
-                var newPicturePath = Path.Combine(userprofilepicturePath, randomFileName);
-
-                using (var stream = new FileStream(newPicturePath, FileMode.Create))
+                var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                if (currentUser == null)
                 {
-                    await request.Picture.CopyToAsync(stream);
+                    ModelState.AddModelError("", "Kullanıcı bulunamadı.");
+                    return View(request);
                 }
 
-                currentUser.Picture = randomFileName;
-            }
+                // Kullanıcı bilgilerini güncelle
+                currentUser.UserName = request.UserName;
+                currentUser.Email = request.Email;
+                currentUser.BirthDate = request.BirthDate;
+                currentUser.City = request.City;
+                currentUser.Gender = request.Gender;
+                currentUser.PhoneNumber = request.Phone;
+                currentUser.Sector = request.Sector;
+                currentUser.EmployeeCount = request.EmployeeCount;
 
-            var profilePicturePath = currentUser?.Picture ?? "/userprofilepicture/defaultpp.png";
-            ViewBag.UserProfilePicture = profilePicturePath;
-            // Kullanıcıyı güncelle
-            var updateToUserResult = await _userManager.UpdateAsync(currentUser);
-            if (!updateToUserResult.Succeeded)
-            {
-                // Hata mesajlarını ModelState'e ekle
-                foreach (var error in updateToUserResult.Errors)
+                // Profil resmi için yol oluşturma ve kaydetme bloğu
+                if (request.Picture != null && request.Picture.Length > 0)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    try
+                    {
+                        // 'wwwroot' klasörünün yolunu alın
+                        var wwwrootPath = _environment.WebRootPath;
+                        var userprofilepicturePath = Path.Combine(wwwrootPath, "userprofilepicture");
+
+                        // Directory.Exists metodu ile klasörün var olup olmadığını kontrol et
+                        if (!Directory.Exists(userprofilepicturePath))
+                        {
+                            // Klasör yoksa, Directory.CreateDirectory metodu ile klasörü oluştur
+                            Directory.CreateDirectory(userprofilepicturePath);
+                        }
+
+                        var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(request.Picture.FileName)}";
+                        var newPicturePath = Path.Combine(userprofilepicturePath, randomFileName);
+
+                        using (var stream = new FileStream(newPicturePath, FileMode.Create))
+                        {
+                            await request.Picture.CopyToAsync(stream);
+                        }
+
+                        currentUser.Picture = randomFileName;
+                    }
+                    catch (Exception ex)
+                    {
+                        return RedirectToAction("NotFound", "Error");
+                    }
                 }
-                return View(request);
+
+                var profilePicturePath = currentUser?.Picture ?? "/userprofilepicture/defaultpp.png";
+                ViewBag.UserProfilePicture = profilePicturePath;
+
+                // Kullanıcıyı güncelle
+                var updateToUserResult = await _userManager.UpdateAsync(currentUser);
+                if (!updateToUserResult.Succeeded)
+                {
+                    // Hata mesajlarını ModelState'e ekle
+                    foreach (var error in updateToUserResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return View(request);
+                }
+
+                // Güvenlik damgasını güncelle ve kullanıcıyı yeniden giriş yaptır
+                await _userManager.UpdateSecurityStampAsync(currentUser);
+                await _signInManager.SignOutAsync();
+                await _signInManager.SignInAsync(currentUser, isPersistent: true);
+
+                // Başarı mesajını TempData'ya ekle
+                TempData["SuccessMessage"] = "Bilgiler başarıyla değiştirildi.";
+
+                // Güncellenmiş kullanıcı bilgileri ile ViewModel'i doldur
+                var userEditViewModel = new UserEditViewModel
+                {
+                    UserName = currentUser.UserName,
+                    Email = currentUser.Email,
+                    Phone = currentUser.PhoneNumber,
+                    BirthDate = currentUser.BirthDate,
+                    City = currentUser.City,
+                    Gender = currentUser.Gender,
+                    Sector = request.Sector,
+                    EmployeeCount = request.EmployeeCount,
+                };
+
+                return View(userEditViewModel);
             }
-
-            // Güvenlik damgasını güncelle ve kullanıcıyı yeniden giriş yaptır
-            await _userManager.UpdateSecurityStampAsync(currentUser);
-            await _signInManager.SignOutAsync();
-            await _signInManager.SignInAsync(currentUser, isPersistent: true);
-
-            // Başarı mesajını TempData'ya ekle
-            TempData["SuccessMessage"] = "Bilgiler başarıyla değiştirildi.";
-
-            // Güncellenmiş kullanıcı bilgileri ile ViewModel'i doldur
-            var userEditViewModel = new UserEditViewModel
+            catch (Exception ex)
             {
-                UserName = currentUser.UserName,
-                Email = currentUser.Email,
-                Phone = currentUser.PhoneNumber,
-                BirthDate = currentUser.BirthDate,
-                City = currentUser.City,
-                Gender = currentUser.Gender,
-                Sector = request.Sector,
-                EmployeeCount = request.EmployeeCount,
-
-                // Picture alanını da buraya ekleyebilirsiniz.
-            };
-
-            return View(userEditViewModel);
+                return RedirectToAction("NotFound", "Error");
+            }
         }
+
+
+
+
+
+
 
 
         //public async Task<IActionResult> UserEdit(UserEditViewModel request)

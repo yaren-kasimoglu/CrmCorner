@@ -20,68 +20,81 @@ namespace CrmCorner.Controllers
             _context = context;
             _userManager = userManager;
         }
+
         public async Task<IActionResult> CustomerList()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser != null)
+            try
             {
-                var customers = _context.CustomerNs
-                    .Include(c => c.AppUser)
-                    .Where(c => c.AppUserId == currentUser.Id) // Mevcut kullanıcının Id'sine göre filtrele
-                    .ToList();
+                var currentUser = await _userManager.GetUserAsync(User);
 
-                return View(customers);
+                if (currentUser != null)
+                {
+                    var customers = _context.CustomerNs
+                        .Include(c => c.AppUser)
+                        .Where(c => c.AppUserId == currentUser.Id) // Mevcut kullanıcının Id'sine göre filtrele
+                        .ToList();
+
+                    return View(customers);
+                }
+                else
+                {
+                    ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
+                    return View();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ViewBag.ErrorMessage = "Geçerli kullanıcı bilgisi bulunamadı.";
-                return View();
+                return RedirectToAction("NotFound", "Error");
             }
-
         }
 
         [HttpGet]
         public async Task<IActionResult> CustomerAdd()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser == null)
+            try
             {
-                return View("SignIn", "Home"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                if (currentUser == null)
+                {
+                    return RedirectToAction("SignIn", "Home"); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+                }
+                var companyId = currentUser.CompanyId;
+
+                var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
+
+                var appUserItems = appUsers
+                    .Select(u => new SelectListItem
+                    {
+                        Text = u.UserName,
+                        Value = u.Id
+                    })
+                    .ToList();
+
+                // IndustryType enum'undan dropdown listesi için verileri hazırlama
+                ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+                {
+                    Text = v.GetDisplayName(), // Enum için Display Attribute'unu okuyan extension method
+                    Value = ((int)v).ToString()
+                }).ToList(), "Value", "Text");
+
+                ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
+                    .Cast<EmployeeCountRange>()
+                    .Select(e => new SelectListItem
+                    {
+                        Text = e.GetDisplayName(),
+                        Value = ((int)e).ToString()
+                    }).ToList();
+
+                ViewBag.AppUsers = appUserItems;
+                return View();
             }
-            var companyId = currentUser.CompanyId;
-
-            var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
-
-            var appUserItems = appUsers
-         .Select(u => new SelectListItem
-         {
-             Text = u.UserName,
-             Value = u.Id
-         })
-         .ToList();
-
-            // IndustryType enum'undan dropdown listesi için verileri hazırlama
-            ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+            catch (Exception ex)
             {
-                Text = v.GetDisplayName(), // Enum için Display Attribute'unu okuyan extension method
-                Value = ((int)v).ToString()
-            }).ToList(), "Value", "Text");
-
-
-            ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
-        .Cast<EmployeeCountRange>()
-        .Select(e => new SelectListItem
-        {
-            Text = e.GetDisplayName(),
-            Value = ((int)e).ToString()
-        }).ToList();
-
-
-            ViewBag.AppUsers = appUserItems;
-            return View();
+                return RedirectToAction("NotFound", "Error");
+            }
         }
+
         [HttpPost]
         public IActionResult CustomerAdd(CustomerN customer)
         {
@@ -91,7 +104,7 @@ namespace CrmCorner.Controllers
                 {
                     customer.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
 
-                    var customers = _context.CustomerNs./*Include(e => e.IdEmployeeNavigation)*/ToList();
+                    var customers = _context.CustomerNs.ToList();
 
                     _context.CustomerNs.Add(customer);
                     _context.SaveChanges();
@@ -101,127 +114,140 @@ namespace CrmCorner.Controllers
             }
             catch (Exception ex)
             {
-
-                throw;
+                return RedirectToAction("NotFound", "Error");
             }
-
 
             var appUsers = _userManager.Users.ToList();
             var appUserItems = appUsers
-         .Select(u => new SelectListItem
-         {
-             Text = u.UserName,
-             Value = u.Id
-         })
-         .ToList();
+                .Select(u => new SelectListItem
+                {
+                    Text = u.UserName,
+                    Value = u.Id
+                })
+                .ToList();
 
             ViewBag.AppUsers = appUserItems;
 
             return View(customer);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> CustomerEdit(int id)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser == null)
+            try
             {
-                return Challenge(); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                if (currentUser == null)
+                {
+                    return Challenge(); // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+                }
+                var companyId = currentUser.CompanyId;
+
+                var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
+
+                var appUserItems = appUsers
+                    .Select(u => new SelectListItem
+                    {
+                        Text = u.UserName,
+                        Value = u.Id
+                    })
+                    .ToList();
+
+                ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+                {
+                    Text = v.GetDisplayName(),
+                    Value = ((int)v).ToString()
+                }).ToList(), "Value", "Text");
+
+                ViewBag.AppUsers = appUserItems;
+
+                // id parametresini kullanarak düzenlenecek müşteriyi veritabanından al
+                CustomerN customer = _context.CustomerNs.Find(id);
+
+                ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
+                    .Cast<EmployeeCountRange>()
+                    .Select(e => new SelectListItem
+                    {
+                        Text = e.GetDisplayName(),
+                        Value = ((int)e).ToString(),
+                        Selected = e == customer.EmployeeCount // mevcut değeri işaretle
+                    }).ToList();
+
+                // Eğer müşteri bulunamazsa
+                if (customer == null)
+                {
+                    return NotFound(); // 404 Not Found dönülebilir
+                }
+
+                // Müşteriyi düzenleme sayfasına gönder
+                return View(customer);
             }
-            var companyId = currentUser.CompanyId;
-
-            var appUsers = _userManager.Users.Where(u => u.CompanyId == companyId).ToList();
-
-            var appUserItems = appUsers
-         .Select(u => new SelectListItem
-         {
-             Text = u.UserName,
-             Value = u.Id
-         })
-         .ToList();
-
-            ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+            catch (Exception ex)
             {
-                Text = v.GetDisplayName(),
-                Value = ((int)v).ToString()
-            }).ToList(), "Value", "Text");
-
-
-
-
-            ViewBag.AppUsers = appUserItems;
-            // id parametresini kullanarak düzenlenecek müşteriyi veritabanından al
-            CustomerN customer = _context.CustomerNs.Find(id);
-
-            ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
-.Cast<EmployeeCountRange>()
-.Select(e => new SelectListItem
-{
-    Text = e.GetDisplayName(),
-    Value = ((int)e).ToString(),
-    Selected = e == customer.EmployeeCount // mevcut değeri işaretle
-}).ToList();
-
-            // Eğer müşteri bulunamazsa
-            if (customer == null)
-            {
-                return NotFound(); // 404 Not Found dönülebilir
+                return RedirectToAction("NotFound", "Error");
             }
-
-            // Müşteriyi düzenleme sayfasına gönder
-            return View(customer);
         }
 
         [HttpPost]
         public IActionResult CustomerEdit(CustomerN editedCustomer)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Entry(editedCustomer).State = EntityState.Modified;
-                _context.SaveChanges();
+                if (ModelState.IsValid)
+                {
+                    _context.Entry(editedCustomer).State = EntityState.Modified;
+                    _context.SaveChanges();
 
-                return RedirectToAction("CustomerList");
+                    return RedirectToAction("CustomerList");
+                }
+                //ModelState.IsValid false ise
+                return View(editedCustomer);
             }
-            //ModelState.IsValid false ise
-            return View(editedCustomer);
+            catch (Exception ex)
+            {
+                return RedirectToAction("NotFound", "Error");
+            }
         }
-
 
         [HttpPost]
         public IActionResult CustomerDelete(int id)
         {
-            CustomerN customer = _context.CustomerNs.Find(id);
-
-            // Eğer müşteri bulunamazsa
-            if (customer == null)
+            try
             {
-                return NotFound();
+                CustomerN customer = _context.CustomerNs.Find(id);
+
+                // Eğer müşteri bulunamazsa
+                if (customer == null)
+                {
+                    return NotFound();
+                }
+
+                // İlgili tüm taskcomps kayıtlarını alın
+                var taskComps = _context.TaskComps.Where(tc => tc.CustomerId == id).ToList();
+
+                // İlgili tüm taskcomplogs kayıtlarını alın ve sil
+                foreach (var taskComp in taskComps)
+                {
+                    var taskCompLogs = _context.TaskCompLogs.Where(tcl => tcl.TaskId == taskComp.TaskId).ToList();
+                    _context.TaskCompLogs.RemoveRange(taskCompLogs);
+                }
+
+                // İlgili tüm taskcomps kayıtlarını sil
+                _context.TaskComps.RemoveRange(taskComps);
+
+                // Müşteriyi sil
+                _context.CustomerNs.Remove(customer);
+
+                // Değişiklikleri kaydet
+                _context.SaveChanges();
+
+                return RedirectToAction("CustomerList");
             }
-
-            // İlgili tüm taskcomps kayıtlarını alın
-            var taskComps = _context.TaskComps.Where(tc => tc.CustomerId == id).ToList();
-
-            // İlgili tüm taskcomplogs kayıtlarını alın ve sil
-            foreach (var taskComp in taskComps)
+            catch (Exception ex)
             {
-                var taskCompLogs = _context.TaskCompLogs.Where(tcl => tcl.TaskId == taskComp.TaskId).ToList();
-                _context.TaskCompLogs.RemoveRange(taskCompLogs);
+                return RedirectToAction("NotFound", "Error");
             }
-
-            // İlgili tüm taskcomps kayıtlarını sil
-            _context.TaskComps.RemoveRange(taskComps);
-
-            // Müşteriyi sil
-            _context.CustomerNs.Remove(customer);
-
-            // Değişiklikleri kaydet
-            _context.SaveChanges();
-
-            return RedirectToAction("CustomerList");
         }
-
-
     }
 }

@@ -24,37 +24,50 @@ namespace CrmCorner.Controllers
         }
         public IActionResult PositiveTasks()
         {
-            var positiveTasks = _context.TaskComps
-        .Include(t => t.Status)
-        .Include(t => t.AppUser)
-        .Include(t => t.AssignedUser)
-        .Include(t => t.Customer)
-        .Where(t => t.Outcomes == OutcomeType.Olumlu) // 'Olumlu' enum değerine göre filtreleme
-        .ToList();
+            try
+            {
+                var positiveTasks = _context.TaskComps
+                    .Include(t => t.Status)
+                    .Include(t => t.AppUser)
+                    .Include(t => t.AssignedUser)
+                    .Include(t => t.Customer)
+                    .Where(t => t.Outcomes == OutcomeType.Olumlu) // 'Olumlu' enum değerine göre filtreleme
+                    .ToList();
 
-
-
-            return View(positiveTasks);
+                return View(positiveTasks);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred while retrieving positive tasks: " + ex.Message;
+                return View("Error");
+            }
         }
 
         public async Task<IActionResult> NegativeTasks()
         {
+            try
+            {
+                var currentUserName = User.Identity.Name;
+                var currentUser = await _userManager.FindByNameAsync(currentUserName);
+                var currentUserCompanyName = currentUser.CompanyName;
 
-            var currentUserName = User.Identity.Name;
-            var currentUser = await _userManager.FindByNameAsync(currentUserName);
-            var currentUserCompanyName = currentUser.CompanyName;
+                var negativeTaks = _context.TaskComps
+                    .Include(t => t.Status)
+                    .Include(t => t.AppUser)
+                    .Include(t => t.AssignedUser)
+                    .Include(t => t.Customer)
+                    .Where(u => u.AppUser.CompanyName == currentUserCompanyName)
+                    .Where(t => t.Outcomes == OutcomeType.Olumsuz)
+                    .ToList();
 
-            var negativeTaks = _context.TaskComps
-                .Include(t => t.Status)
-                .Include(t => t.AppUser)
-                .Include(t => t.AssignedUser)
-                .Include(t => t.Customer)
-                .Where(u => u.AppUser.CompanyName == currentUserCompanyName)
-            .Where(t => t.Outcomes == OutcomeType.Olumsuz)
-             .ToList();
-
-
-            return View(negativeTaks);
+                return View(negativeTaks);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred while retrieving negative tasks: " + ex.Message;
+                return View("Error");
+            }
         }
+
     }
 }
