@@ -43,7 +43,7 @@
     }
 </style>
 
-@if (!User.Identity!.IsAuthenticated)
+@*@if (!User.Identity!.IsAuthenticated)
 {
     <div class="d-flex h100vh justify-content-center align-items-center">
         <div class="text-center">
@@ -64,7 +64,7 @@
     </div>
 }
 else
-{
+{*@
 
     @* <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>*@
 
@@ -159,10 +159,7 @@ else
         </div>
  
 
-
-
-
-}
+@*}*@
 <!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 

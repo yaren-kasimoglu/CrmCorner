@@ -16,7 +16,9 @@ namespace CrmCorner.Models
         public string? Sector { get; set; }
         public string? PositionName { get; set; }
 
+        public string EmailDomain { get; set; } 
         public int CompanyId { get; set; }
+
 
         public virtual ICollection<CustomerN> Customers { get; set; }
         public virtual ICollection<TaskComp> TaskComps { get; set; }

@@ -35,6 +35,10 @@
             <div class="d-flex h100vh align-items-center auth-main w-100">
                 <div class="auth-box">
                     <div class="card shadow p-lg-4">
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                        }
                         <div class="card-header">
                             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
                             </div>
