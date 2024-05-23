@@ -351,8 +351,7 @@
                                     ${message}
                                 </div>
                             </li>`);
-                $SendMessageTextArea.val("");
-                window.scrollTo(0, document.body.scrollHeight);
+                scrollToBottom();
             });
 
             $SendMessageBtn.click(function () {
@@ -385,9 +384,42 @@
                 $SendMessageTextArea.val("");
                 scrollToBottom();
 
-
-
             });
+            document.getElementById('SendMessageTextArea').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Formun gönderilmesini engelle
+                    sendMessage();
+                }
+            });
+            function sendMessage() {
+                signalRConnection.start().then(function () {
+
+                }).catch(function (err) {
+                    return console.error(err.toString());
+                });
+                var userId = document.getElementById("selectedUserId").value;
+                var message = $SendMessageTextArea.val();
+                var now = new Date();
+                var day = ("0" + now.getDate()).slice(-2);
+                var month = ("0" + (now.getMonth() + 1)).slice(-2);
+                var year = now.getFullYear(); // Yılı al
+                var hour = ("0" + now.getHours()).slice(-2);
+                var minute = ("0" + now.getMinutes()).slice(-2);
+                var dateTime = day + "." + month + "." + year + " " + hour + ":" + minute;
+
+                console.log(dateTime);
+                $MessageBox.append(`<li class="clearfix">
+                                <div class="message-data text-end mb-3 me-3">
+                                    <span class="small text-muted me-2"> ${dateTime}</span>
+                                    </div>
+                                 <div class="message other-message d-inline-block float-end">
+                                ${message}
+                                </div>
+                        </li>`);
+                signalRConnection.invoke("SendMessage", message, userId, dateTime);
+                $SendMessageTextArea.val("");
+                scrollToBottom();
+            }
             function scrollToBottom() {
                 var messageBox = document.getElementById("chat-history");
                 var scrooltop = messageBox.scrollHeight;
