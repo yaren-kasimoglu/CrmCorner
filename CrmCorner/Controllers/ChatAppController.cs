@@ -95,6 +95,27 @@ namespace CrmCorner.Controllers
             return Json(new { Message = allMessages });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> GetUserName(string userId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new { Message = "Current user not found" });
+            }
+
+            var peopleName = _context.Users
+                                     .Where(c => c.CompanyId == currentUser.CompanyId && c.Id == userId)
+                                     .FirstOrDefault();
+
+            if (peopleName == null)
+            {
+                return Json(new { Message = "User not found" });
+            }
+
+            return Json(new { Message = peopleName.NameSurname });
+        }
+
     }
 }
 
