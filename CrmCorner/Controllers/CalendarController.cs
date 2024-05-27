@@ -18,6 +18,7 @@ using Independentsoft.Graph;
 using Independentsoft.Graph.Calendars;
 using Attendee = Independentsoft.Graph.Calendars.Attendee;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 
 namespace CrmCorner.Controllers
 {
@@ -40,7 +41,7 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> Calendar()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-
+            sendEmailAsync2();
             if (currentUser != null)
             {
                 var calendars = _context.Calendars
@@ -181,6 +182,77 @@ namespace CrmCorner.Controllers
                   }).ToList();
             return Json(new { Message = true });
 
+        }
+        public async Task<ActionResult> sendEmailAsync2()
+        {
+            try
+            {
+                // Alıcı ve gönderici e-posta adresleri
+                string fromEmail = "oznurr03@gmail.com";
+
+                string toEmail = "oznurr03@hotmail.com";
+
+                // Davet bilgileri
+                string subject = "TEST";
+
+               
+                string body = "DENEME";
+
+                // Toplantı başlangıç ve bitiş zamanları
+                DateTime startTime =  DateTime.Now;
+
+                DateTime endTime = startTime.AddHours(1);
+
+                // iCalendar dosyası oluşturma
+                string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmail);
+                System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
+
+                // SMTP sunucusu bilgileri
+                SmtpClient client = new SmtpClient("oznurr03@gmail.com", 25) // 25 veya 587 olabilir
+                {
+                    // Kimlik doğrulama yok
+                    EnableSsl = false // SSL kullanılıp kullanılmayacağını belirtin
+                };
+
+                MailMessage mailMessage = new MailMessage
+                {
+                    From = new MailAddress(fromEmail),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true // HTML içeriği göndermek isterseniz
+                };
+                mailMessage.To.Add(toEmail);
+                mailMessage.Attachments.Add(calendarAttachment);
+
+                // E-posta gönderimi
+                client.Send(mailMessage);
+
+                Console.WriteLine("Toplantı daveti başarıyla gönderildi.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Toplantı daveti gönderimi sırasında bir hata oluştu: " + ex.Message);
+            }
+            return View();
+        }
+        static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmail)
+        {
+            StringBuilder ics = new StringBuilder();
+            ics.AppendLine("BEGIN:VCALENDAR");
+            ics.AppendLine("VERSION:2.0");
+            ics.AppendLine("PRODID:-//Your Company//Your Product//EN");
+            ics.AppendLine("METHOD:REQUEST");
+            ics.AppendLine("BEGIN:VEVENT");
+            ics.AppendLine($"DTSTART:{startTime:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"DTEND:{endTime:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"SUMMARY:{subject}");
+            ics.AppendLine($"DESCRIPTION:{description}");
+            ics.AppendLine($"UID:{Guid.NewGuid()}");
+            ics.AppendLine($"ATTENDEE;CN=\"{toEmail}\";RSVP=TRUE:mailto:{toEmail}");
+            ics.AppendLine($"ORGANIZER;CN=\"{fromEmail}\":mailto:{fromEmail}");
+            ics.AppendLine("END:VEVENT");
+            ics.AppendLine("END:VCALENDAR");
+            return ics.ToString();
         }
         //    public ActionResult OauthRedirect()
         //    {
