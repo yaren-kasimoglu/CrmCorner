@@ -16,6 +16,15 @@
         </tr>
     }
 </table>
+<style>
+    .hidden-section {
+        display: none;
+    }
+    .fc-event {
+        background-color: #2eacb3; /* Arka plan rengini maviye değiştir */
+        color: #2eacb3; /* Metin rengini beyaza değiştir */
+    }
+</style>
 <input type="checkbox" id="myCheckbox" name="myCheckbox" value="true">Sadece benimkileri göster
 <div class="row g-3 clearfix">
     <div class="col-lg-8">
@@ -63,14 +72,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="defaultModalLabel">Add Event</h5>
+                    <h5 class="modal-title" id="defaultModalLabel">Yeni Takvim Ekle</h5>
                 </div>
 
                 <div class="modal-body">
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                     <div class="form-group">
-                        @Html.LabelFor(model => model.Date, htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.Date,"Tarih", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
                             @Html.EditorFor(model => model.Date, "Date", new { htmlAttributes = new { @class = "form-control" } })
                             @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
@@ -78,7 +87,7 @@
                     </div>
 
                     <div class="form-group">
-                        @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.Title, "Başlık",htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
                             @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
                             @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
@@ -88,23 +97,55 @@
                     <div class="form-group">
                         <input type="hidden" id="selectedItemId" name="selectedItemId" />
 
-                        @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.Description,"Açıklama", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
                             @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
                             @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
                         </div>
                     </div>
+
                     <div class="form-group">
-                        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.EmailProperty.Email, "Mail",htmlAttributes: new { @class = "control-label" })
                         <div class="col-md-10">
-                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @id = "searchInput", @class = "form-control" } })
-                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                            @Html.EditorFor(model => model.EmailProperty.Email, new { htmlAttributes = new { @id = "searchInput", @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.EmailProperty.Email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div id="timeSelection" class="hidden-section">
+                        <div class="form-horizontal">
+                            <h4>Saat Seçimi</h4>
+                            <hr />
+                            <div class="row">
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.EmailProperty.StartDate,"Başlangıç Tarihi" ,htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Html.TextBoxFor(model => model.EmailProperty.StartDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
+                                            @Html.ValidationMessageFor(model => model.EmailProperty.StartDate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.EmailProperty.EndDate,"Bitiş Tarihi", htmlAttributes: new { @class = "control-label col-md-2" })
+                                            <div class="col-md-10">
+                                                @Html.TextBoxFor(model => model.EmailProperty.EndDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
+                                                @Html.ValidationMessageFor(model => model.EmailProperty.EndDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
+
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
-                            <input type="submit" value="Add" id="Submit" class="btn btn-default" onclick="location.href='@Url.Action("CalendarAdd", "Calendar")'" />
+                            <input type="submit" value="Ekle" id="Submit" class="btn btn-default" onclick="location.href='@Url.Action("CalendarAdd", "Calendar")'" />
                         </div>
                     </div>
                 </div>
@@ -140,7 +181,11 @@
         </div>
     </div>
 </div>
-
+<script>$(document).ready(function () {
+        $('#searchInput').on('input', function () {
+            $('#timeSelection').slideDown();
+        });
+    });</script>
 <script>let eventsArr = loadData();
 
     function loadData() {
@@ -255,22 +300,20 @@
         // Eğer tuş Enter (keyCode 13) ise veya input boş değilse aramayı gerçekleştir
         console.log("aslında girdi3");
         var isChecked = document.getElementById("myCheckbox").checked;
-            $.ajax({
-                url: "/Calendar/GetFilterCalendar/",
-                type: 'POST',
-                data: { ischecked: isChecked },
-                dataType: "json",
-                success: function (data) {
-                    $.each(data.message, function (index, item) {
-                    });
-                },
-                error: function () {
-                }
-            });
-        
-    });
+        $.ajax({
+            url: "/Calendar/GetFilterCalendar/",
+            type: 'POST',
+            data: { ischecked: isChecked },
+            dataType: "json",
+            success: function (data) {
+                $.each(data.message, function (index, item) {
+                });
+            },
+            error: function () {
+            }
+        });
 
-   </script>
+    });</script>
 
 
 <!-- core js file -->

@@ -19,6 +19,9 @@ using Independentsoft.Graph.Calendars;
 using Attendee = Independentsoft.Graph.Calendars.Attendee;
 using System.Net.Http.Headers;
 using System.Net.Mail;
+using System.Net;
+using CrmCorner.OptionsModels;
+using Microsoft.Extensions.Options;
 
 namespace CrmCorner.Controllers
 {
@@ -31,17 +34,21 @@ namespace CrmCorner.Controllers
         private const string AccessToken = "9f9f7969-0154-4719-af42-66600536dec4";
         private const string ApiBaseUrl = "https://outlook.office.com/api/v2.0/me/events";
         private readonly string calendarId;
-        public CalendarController(CrmCornerContext context, IGoogleCalendarService service, UserManager<AppUser> userManager, IConfiguration configuration)
+        private readonly EmailSettings _emailSetings;
+
+  
+
+        public CalendarController(CrmCornerContext context, IGoogleCalendarService service, UserManager<AppUser> userManager, IConfiguration configuration, IOptions<EmailSettings> options)
         {
             _context = context;
             _userManager = userManager;
             _googleCalendarService = service;
             _configuration = configuration;
+            _emailSetings = options.Value;
         }
         public async Task<IActionResult> Calendar()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            sendEmailAsync2();
             if (currentUser != null)
             {
                 var calendars = _context.Calendars
@@ -94,15 +101,11 @@ namespace CrmCorner.Controllers
                 _context.Calendars.Add(Calendar);
                 _context.SaveChanges();
 
-                //if (!String.IsNullOrEmpty(Calendar.Email.ToString()))
-                //{
-                //    var emailSend = sendEmailAsync(Calendar);
+                if (!String.IsNullOrEmpty(Calendar.EmailProperty.Email.ToString()))
+                {
+                    var emailSend = sendEmailAsync2(currentUser.Email,Calendar);
 
-                // }
-                Calendar.UserId = currentUser.Id;
-                _context.Calendars.Add(Calendar);
-                _context.SaveChanges();
-
+                }
                 return RedirectToAction("Calendar");
             }
 
@@ -183,49 +186,52 @@ namespace CrmCorner.Controllers
             return Json(new { Message = true });
 
         }
-        public async Task<ActionResult> sendEmailAsync2()
+        public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar)
         {
             try
             {
                 // Alıcı ve gönderici e-posta adresleri
-                string fromEmail = "oznurr03@gmail.com";
+                string fromEmail = from;
 
-                string toEmail = "oznurr03@hotmail.com";
+                string toEmail = calendar.EmailProperty.Email;
 
                 // Davet bilgileri
-                string subject = "TEST";
+                string subject = calendar.Title;
 
                
-                string body = "DENEME";
+                string body = "Merhaba,Yukarıda gönderilen event size "+calendar.Description+" açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
 
                 // Toplantı başlangıç ve bitiş zamanları
-                DateTime startTime =  DateTime.Now;
+                DateTime startTime = calendar.EmailProperty.StartDate;
 
-                DateTime endTime = startTime.AddHours(1);
+                DateTime endTime = calendar.EmailProperty.EndDate;
 
                 // iCalendar dosyası oluşturma
                 string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmail);
                 System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
 
                 // SMTP sunucusu bilgileri
-                SmtpClient client = new SmtpClient("oznurr03@gmail.com", 25) // 25 veya 587 olabilir
-                {
-                    // Kimlik doğrulama yok
-                    EnableSsl = false // SSL kullanılıp kullanılmayacağını belirtin
-                };
+                var smptClient = new SmtpClient();
+                smptClient.Host = _emailSetings.Host;
+                smptClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smptClient.UseDefaultCredentials = false;
+                smptClient.Port = 587;
+                smptClient.Credentials = new NetworkCredential(_emailSetings.Email, _emailSetings.Password);
+                smptClient.EnableSsl = true;
 
                 MailMessage mailMessage = new MailMessage
                 {
-                    From = new MailAddress(fromEmail),
+                    From = new MailAddress(fromEmail), // İstediğiniz "From" adresini burada belirleyin
                     Subject = subject,
                     Body = body,
-                    IsBodyHtml = true // HTML içeriği göndermek isterseniz
+                    IsBodyHtml = true
                 };
                 mailMessage.To.Add(toEmail);
                 mailMessage.Attachments.Add(calendarAttachment);
 
+
                 // E-posta gönderimi
-                client.Send(mailMessage);
+                smptClient.Send(mailMessage);
 
                 Console.WriteLine("Toplantı daveti başarıyla gönderildi.");
             }
@@ -233,7 +239,7 @@ namespace CrmCorner.Controllers
             {
                 Console.WriteLine("Toplantı daveti gönderimi sırasında bir hata oluştu: " + ex.Message);
             }
-            return View();
+            return RedirectToAction("Calendar");
         }
         static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmail)
         {
