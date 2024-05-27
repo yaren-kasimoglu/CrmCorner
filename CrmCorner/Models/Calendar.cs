@@ -22,7 +22,7 @@ public class Calendar
     public virtual AppUser? AppUser { get; set; }
 
     [NotMapped]
-    public EmailProperty Email { get; set; }
+    public EmailProperty EmailProperty { get; set; }
 
 
 
@@ -31,6 +31,11 @@ public class EmailProperty
 {
     [NotMapped]
     public string Email { get; set; }
+
+    [NotMapped]
+    public DateTime StartDate { get; set; }
+    [NotMapped]
+    public DateTime EndDate { get; set; }
     // Diğer özellikler...
 
 }
