@@ -1,10 +1,12 @@
 @model CrmCorner.Models.Calendar
+
 @{
     ViewData["Title"] = "Calendar";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
     var events = ViewBag.Calendar;
     var eventsfilter = ViewBag.CalendarFilter;
 }
+
 <table id="todoTable" style="display: none; visibility:collapse">
     @foreach (var item in events)
     {
@@ -19,10 +21,25 @@
 <style>
     .hidden-section {
         display: none;
+
     }
+
     .fc-event {
         background-color: #2eacb3; /* Arka plan rengini maviye değiştir */
         color: #2eacb3; /* Metin rengini beyaza değiştir */
+    }
+    .custom-padding {
+        padding-left: 20px; /* İstediğiniz miktarda boşluk ekleyebilirsiniz */
+    }
+    #Submit {
+        float: right; /* Sağa yaslanması için */
+        background-color: #2eacb3; /* Arka plan rengi */
+        color: white; /* Yazı rengi */
+        font-size: 16px; /* Yazı boyutu */
+        padding: 10px 20px; /* Boşluk ayarı */
+        margin-top:20px;
+        margin-bottom:10px;
+        border-radius: 5px; /* Köşe yuvarlatma */
     }
 </style>
 <input type="checkbox" id="myCheckbox" name="myCheckbox" value="true">Sadece benimkileri göster
@@ -79,7 +96,7 @@
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                     <div class="form-group">
-                        @Html.LabelFor(model => model.Date,"Tarih", htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.Date, "Tarih", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
                             @Html.EditorFor(model => model.Date, "Date", new { htmlAttributes = new { @class = "form-control" } })
                             @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
@@ -87,7 +104,7 @@
                     </div>
 
                     <div class="form-group">
-                        @Html.LabelFor(model => model.Title, "Başlık",htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.Title, "Başlık", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
                             @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
                             @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
@@ -97,64 +114,94 @@
                     <div class="form-group">
                         <input type="hidden" id="selectedItemId" name="selectedItemId" />
 
-                        @Html.LabelFor(model => model.Description,"Açıklama", htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.Description, "Açıklama", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
                             @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
                             @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
                         </div>
                     </div>
-
                     <div class="form-group">
-                        @Html.LabelFor(model => model.EmailProperty.Email, "Mail",htmlAttributes: new { @class = "control-label" })
+                        @Html.LabelFor(model => model.SelectedEmails, "Mail", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
-                            @Html.EditorFor(model => model.EmailProperty.Email, new { htmlAttributes = new { @id = "searchInput", @class = "form-control" } })
-                            @Html.ValidationMessageFor(model => model.EmailProperty.Email, "", new { @class = "text-danger" })
-                        </div>
-                    </div>
-                    <div id="timeSelection" class="hidden-section">
-                        <div class="form-horizontal">
-                            <h4>Saat Seçimi</h4>
-                            <hr />
-                            <div class="row">
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.EmailProperty.StartDate,"Başlangıç Tarihi" ,htmlAttributes: new { @class = "control-label col-md-2" })
-                                        <div class="col-md-10">
-                                            @Html.TextBoxFor(model => model.EmailProperty.StartDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
-                                            @Html.ValidationMessageFor(model => model.EmailProperty.StartDate, "", new { @class = "text-danger" })
-                                        </div>
+                            <div class="input-group">
+                                <button class="btn btn-default dropdown-toggle" style="width: 70%;" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="toggleTimeSelection()">
+                                    <span id="selectedMailText">Seçili Mail</span>
+                                </button>
+                                <div class="dropdown-menu" id="selectedMailDropdown" aria-labelledby="dropdownMenuButton">
+                                    @{
+                                        foreach (var user in (IEnumerable<SelectListItem>)ViewBag.Users)
+                                        {
+                                            <div class="dropdown-item">
+                                                <input type="checkbox" name="SelectedEmails" value="@user.Value" onchange="updateSelectedEmails()" /> @user.Text
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="checkbox" id="manualEmailCheckbox" onclick="toggleManualEmail(); toggleTimeSelection();">
+                                        <label class="form-check-label" for="manualEmailCheckbox">
+                                            <span style="font-size: smaller;">Manuel Mail</span>
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                            </div>
+                            <input type="text" class="form-control mt-2" id="manualEmailInput" placeholder="Manuel Mail Adresi Girin" style="display: none;" onblur="updateSelectedEmails();" >
+                            <small class="form-text text-muted"  style="display: none;" id="manualEmailInput2"  >* Manuel mail girişi virgülle yazmanız gerekmektedir.</small>
+                            @Html.ValidationMessageFor(model => model.SelectedEmails, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <input type="hidden" id="selectedEmails" name="SelectedEmails" />
+
+
+
+                </div>
+                <div id="timeSelection" class="hidden-section custom-padding">
+                    <div class="form-horizontal">
+                        <h4>Saat Seçimi</h4>
+                        <hr />
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.EmailProperty.StartDate, "Başlangıç Tarihi", htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.TextBoxFor(model => model.EmailProperty.StartDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
+                                        @Html.ValidationMessageFor(model => model.EmailProperty.StartDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
                                     <div class="form-group">
-                                        <div class="form-group">
-                                            @Html.LabelFor(model => model.EmailProperty.EndDate,"Bitiş Tarihi", htmlAttributes: new { @class = "control-label col-md-2" })
-                                            <div class="col-md-10">
-                                                @Html.TextBoxFor(model => model.EmailProperty.EndDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
-                                                @Html.ValidationMessageFor(model => model.EmailProperty.EndDate, "", new { @class = "text-danger" })
-                                            </div>
+                                        @Html.LabelFor(model => model.EmailProperty.EndDate, "Bitiş Tarihi", htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            @Html.TextBoxFor(model => model.EmailProperty.EndDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
+                                            @Html.ValidationMessageFor(model => model.EmailProperty.EndDate, "", new { @class = "text-danger" })
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-                    </div>
 
-
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <input type="submit" value="Ekle" id="Submit" class="btn btn-default" onclick="location.href='@Url.Action("CalendarAdd", "Calendar")'" />
-                        </div>
                     </div>
                 </div>
 
 
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Ekle" id="Submit" class="btn btn-default" onclick="location.href='@Url.Action("CalendarAdd", "Calendar")'" />
+                    </div>
+                </div>
             </div>
 
+
         </div>
+
     </div>
+
 
 }
 
@@ -185,7 +232,48 @@
         $('#searchInput').on('input', function () {
             $('#timeSelection').slideDown();
         });
-    });</script>
+    });
+
+
+
+    function toggleManualEmail() {
+        var manualEmailInput = document.getElementById("manualEmailInput");
+        var manualEmailInput2 = document.getElementById("manualEmailInput2");
+        if (manualEmailCheckbox.checked) {
+            manualEmailInput.style.display = "block";
+            manualEmailInput2.style.display = "block";
+        } else {
+            manualEmailInput.style.display = "none";
+            manualEmailInput2.style.display = "none";
+        }
+    }
+    function toggleTimeSelection() {
+        console.log("toggleTimeSelection");
+        var timeSelection = document.getElementById('timeSelection');
+            timeSelection.classList.remove('hidden-section');
+        
+    }
+function updateSelectedEmails() {
+    console.log("updateSelectedEmails");
+    var selectedEmails = [];
+    // Seçili e-posta adreslerini listeye ekle
+    var selectedCheckboxes = document.querySelectorAll('input[name="SelectedEmails"]:checked');
+    selectedCheckboxes.forEach(function (checkbox) {
+        selectedEmails.push(checkbox.value);
+    });
+    // Manuel olarak girilen e-posta adresini de listeye ekle
+    var manualEmailInput = document.getElementById('manualEmailInput');
+    if (manualEmailInput.value.trim() !== '') {
+        selectedEmails.push(manualEmailInput.value.trim());
+    }
+    // Listeyi gizli alanın değeri olarak ayarla
+    document.getElementById('selectedEmails').value = selectedEmails.join(',');
+    console.log(selectedEmails);
+}
+
+
+    </script>
+
 <script>let eventsArr = loadData();
 
     function loadData() {
@@ -321,5 +409,7 @@
 <script src="/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/fullcalendar.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
 

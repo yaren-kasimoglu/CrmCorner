@@ -22,6 +22,8 @@ using System.Net.Mail;
 using System.Net;
 using CrmCorner.OptionsModels;
 using Microsoft.Extensions.Options;
+using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CrmCorner.Controllers
 {
@@ -75,6 +77,11 @@ namespace CrmCorner.Controllers
 
                 ViewBag.Calendar = calendars;
                 ViewBag.CalendarFilter = calendarItemsFilter.Take(5);
+                ViewBag.Users = _context.Users.Select(u => new SelectListItem
+                {
+                    Value = u.Email,
+                    Text = u.UserName // veya başka bir kullanıcı adı alanı
+                }).ToList();
                 return View("Calendar");
             }
 
@@ -101,7 +108,7 @@ namespace CrmCorner.Controllers
                 _context.Calendars.Add(Calendar);
                 _context.SaveChanges();
 
-                if (!String.IsNullOrEmpty(Calendar.EmailProperty.Email.ToString()))
+                if (Calendar.SelectedEmails!=null &&Calendar.SelectedEmails.Count>0)
                 {
                     var emailSend = sendEmailAsync2(currentUser.Email,Calendar);
 
@@ -186,6 +193,7 @@ namespace CrmCorner.Controllers
             return Json(new { Message = true });
 
         }
+        
         public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar)
         {
             try
@@ -193,8 +201,7 @@ namespace CrmCorner.Controllers
                 // Alıcı ve gönderici e-posta adresleri
                 string fromEmail = from;
 
-                string toEmail = calendar.EmailProperty.Email;
-
+                // E-posta adreslerini dize olarak al
                 // Davet bilgileri
                 string subject = calendar.Title;
 
@@ -205,9 +212,17 @@ namespace CrmCorner.Controllers
                 DateTime startTime = calendar.EmailProperty.StartDate;
 
                 DateTime endTime = calendar.EmailProperty.EndDate;
+                string toEmails = null;
+                if (calendar.SelectedEmails.Any())
+                {
+                    var lastSelectedEmail = calendar.SelectedEmails.Last();
+                   toEmails = string.Join(",", lastSelectedEmail);
+                    // lastSelectedEmail'i kullan
+                }
+            
 
                 // iCalendar dosyası oluşturma
-                string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmail);
+                string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmails);
                 System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
 
                 // SMTP sunucusu bilgileri
@@ -226,7 +241,11 @@ namespace CrmCorner.Controllers
                     Body = body,
                     IsBodyHtml = true
                 };
-                mailMessage.To.Add(toEmail);
+                foreach (var email in calendar.SelectedEmails)
+                {
+                    mailMessage.To.Add(email);
+                }
+
                 mailMessage.Attachments.Add(calendarAttachment);
 
 
@@ -241,8 +260,10 @@ namespace CrmCorner.Controllers
             }
             return RedirectToAction("Calendar");
         }
-        static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmail)
+        static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails)
         {
+            string[] emailsArray = toEmails.Split(',');
+
             StringBuilder ics = new StringBuilder();
             ics.AppendLine("BEGIN:VCALENDAR");
             ics.AppendLine("VERSION:2.0");
@@ -254,242 +275,21 @@ namespace CrmCorner.Controllers
             ics.AppendLine($"SUMMARY:{subject}");
             ics.AppendLine($"DESCRIPTION:{description}");
             ics.AppendLine($"UID:{Guid.NewGuid()}");
-            ics.AppendLine($"ATTENDEE;CN=\"{toEmail}\";RSVP=TRUE:mailto:{toEmail}");
+            foreach (var toEmail in emailsArray)
+            {
+                ics.AppendLine($"ATTENDEE;CN=\"{toEmail}\";RSVP=TRUE:mailto:{toEmail}");
+            }
             ics.AppendLine($"ORGANIZER;CN=\"{fromEmail}\":mailto:{fromEmail}");
             ics.AppendLine("END:VEVENT");
             ics.AppendLine("END:VCALENDAR");
+
+
+
             return ics.ToString();
         }
-        //    public ActionResult OauthRedirect()
-        //    {
-        //        string jsonDosyaYolu = "/Users/oznurkaraburun/Documents/GitHub/CrmCorner/CrmCorner/credentials.json";
-        //        JObject tokens = JObject.Parse(System.IO.File.ReadAllText(jsonDosyaYolu));
-        //        var redirectUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?" +
-        //            "&scope" + tokens["scopes"].ToString() + "&response_type=code" +
-        //            "&response_mode=query" + "&state=themessydeveloper" +
-        //            "&redirect_uri" + tokens["redirect_url"].ToString() +
-        //            "&client_id=" + tokens["client_id"].ToString();
-        //        return Redirect(redirectUrl);
-        //    }
+       
 
-        //    public async Task<ActionResult> sendEmailAsync(Calendar calendar)
-        //    {
-
-        //        string userEmail = "oznurr03@hotmail.com";
-
-        //        string clientId = "514f1749-aa2d-4ec2-8605-424d6ecb8e21";
-        //        string clientSecret = "pPa8Q~WdI1jY6EHQmBzGYJAIGMgy2VVBJG_.aak3";
-        //        string tenantId = "d8ece3f8-f16b-4d0c-86b1-69c00f4af99b";
-        //        //var confidentialClientApplication = ConfidentialClientApplicationBuilder
-        //        //    .Create(clientId)
-        //        //    .WithClientSecret(clientSecret)
-        //        //    .WithTenantId(tenantId)
-        //        //    .Build();
-
-        //        try
-        //        {
-        //            GraphClient clienta= new GraphClient();
-
-        //            clienta.ClientId = "db2f7fd4-7abb-4052-a15f-f2ebdea3d3ba";
-        //            clienta.Tenant = "d8ece3f8-f16b-4d0c-86b1-69c00f4af99b";
-        //            clienta.ClientSecret = "e9w8Q~6y7XYLDxHbEcQF5ebS26tzBQ9LaHbRXc3K";
-
-        //            var confidentialClient = ConfidentialClientApplicationBuilder
-        //                .Create(clienta.ClientId)
-        //                .WithClientSecret(clienta.ClientSecret)
-        //                .WithAuthority(new Uri($"https://login.microsoftonline.com/{clienta.Tenant}"))
-        //                .WithRedirectUri("https://localhost")
-        //                .Build();
-        //            string[] scopess = new string[] { "https://graph.microsoft.com/.default" };
-
-        //            // Retrieve an access token for Microsoft Graph (gets a fresh token if needed).
-        //            var authResult = await confidentialClient
-        //                    .AcquireTokenForClient(scopess)
-        //                    .ExecuteAsync();
-        //            var token = authResult.AccessToken;
-        //            Console.WriteLine(token);
-        //            string accessTokens = token;
-        //            string endpoint = "https://graph.microsoft.com/v1.0/me/events";
-
-        //            var httpClient = new HttpClient();
-        //            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessTokens);
-
-        //            var requestBody = "{\"subject\": \"Meeting\",\"start\": {\"dateTime\": \"2024-03-01T12:00:00\",\"timeZone\": \"UTC\"},\"end\": {\"dateTime\": \"2024-03-01T13:00:00\",\"timeZone\": \"UTC\"}}";
-        //            var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-
-        //            var response = await httpClient.PostAsync(endpoint, content);            // Build the Microsoft Graph client. As the authentication provider, set an async lambda
-        //            // which uses the MSAL client to obtain an app-only access token to Microsoft Graph,
-        //            // and inserts this access token in the Authorization header of each API request. 
-        //            if (response.IsSuccessStatusCode)
-        //            {
-        //                Console.WriteLine("Event created successfully.");
-        //            }
-        //            else
-        //            {
-        //                var errorContent = await response.Content.ReadAsStringAsync();
-        //                Console.WriteLine($"Failed to create event. Status code: {response.StatusCode}, Error: {errorContent}");
-        //            }
-        //            Independentsoft.Graph.Calendars.Event appointment = new Independentsoft.Graph.Calendars.Event();
-        //            appointment.Subject = "Development meeting";
-        //            appointment.Body = new Independentsoft.Graph.ItemBody("Body text can be html or plain text. We set it now as a plain text.");
-        //            appointment.Start = new Independentsoft.Graph.DateTimeTimeZone(DateTime.Now);
-        //            appointment.End = new Independentsoft.Graph.DateTimeTimeZone(DateTime.Now);
-        //            //  googleCalendarEvent.Attendees = new List<EventAttendee>()
-        //            //{
-        //            //  new EventAttendee() { Email=emails }
-        //            //};
-        //            List<Attendee> attendees = new List<Attendee>();
-
-
-        //            Attendee attendee1 = new Attendee();
-        //            attendee1.EmailAddress = new Independentsoft.Graph.EmailAddress("oznurkaraburun@hotmail.com");
-        //            attendees.Add(attendee1);
-        //            appointment.Attendees.Add(attendee1);
-
-
-        //            Independentsoft.Graph.Calendars.Event createdAppointment = await clienta.CreateEvent(appointment);
-
-        //            Console.WriteLine("Id = " + createdAppointment.Id);
-
-        //            Console.Read();
-        //        }
-        //        catch (GraphException ex)
-        //        {
-        //            Console.WriteLine("Error: " + ex.Code);
-        //            Console.WriteLine("Message: " + ex.Message);
-        //            Console.Read();
-        //        }
-        //        // var t=OauthRedirect();
-        //        string jsonDosyaYolu = "/Users/oznurkaraburun/Documents/GitHub/CrmCorner/CrmCorner/credentials.json";
-        //        JObject tokens = JObject.Parse(System.IO.File.ReadAllText(jsonDosyaYolu));
-
-        //        RestClient client = new RestClient("https://graph.microsoft.com/v1.0/me/calendar/events");
-        //        RestRequest restRequest = new RestRequest();
-
-        //        restRequest.AddHeader("Authorization", "Bearer " + tokens["access_token"].ToString());
-        //        restRequest.AddHeader("Content-Type", "application/json");
-        //        restRequest.AddParameter("application/json", JsonConvert.SerializeObject(calendar)); //model yap
-
-        //        var responses = client.Post(restRequest);
-        //        if (responses.StatusCode == System.Net.HttpStatusCode.Created)
-        //            ViewBag.Success = "başarılı";
-
-
-        //        string accessToken = "YourAccessToken"; // Outlook REST API'ye erişim için alınan erişim belirtecini içerir
-        //        string calendarId = "YourCalendarId"; // Randevunun ekleneceği takvimin kimliği
-
-        //        // OutlookCalendarService sınıfını kullanarak randevu oluştur
-        //        OutlookCalendarService outlookService = new OutlookCalendarService(accessToken, calendarId);
-        //        DateTime startTime = DateTime.UtcNow; // Randevunun başlangıç zamanı (UTC)
-        //        DateTime endTime = startTime.AddHours(1); // Randevunun bitiş zamanı (1 saat sonrası)
-        //        await outlookService.AddAppointmentToOutlookAsync("Toplantı", startTime, endTime, "Ofis");            // Takvim etkinliği verilerini JSON formatına çevir
-        //        //var jsonEventData = JsonConvert.SerializeObject(eventData);
-
-        //        //// HTTP POST isteği oluştur
-        //        //var httpClient = new HttpClient();
-        //        //httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + AccessToken);
-        //        //var content = new StringContent(jsonEventData, Encoding.UTF8, "application/json");
-
-        //        //// POST isteğini gönder
-        //        //var response = await httpClient.PostAsync(ApiBaseUrl, content);
-
-        //        //// Yanıtı kontrol et
-        //        //if (response.IsSuccessStatusCode)
-        //        //{
-        //        //    Console.WriteLine("Takvim etkinliği başarıyla eklendi.");
-        //        //}
-        //        //else
-        //        //{
-        //        //    Console.WriteLine("Takvim etkinliği eklenirken bir hata oluştu. Hata kodu: " + response.StatusCode);
-        //        //}
-
-
-
-
-
-
-
-
-        //        //  string clientId = "928553971028-n6q5dv2pjg12mvnajbrj1q8g7kee6djp.apps.googleusercontent.com";
-        //        //  string clientSecret = "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";
-
-        //        //  string[] scopes = { "https://www.googleapis.com/auth/calendar" };
-
-        //        //  var credentials = GoogleWebAuthorizationBroker.AuthorizeAsync(
-        //        //      new ClientSecrets { ClientId = clientId, ClientSecret = clientSecret },
-        //        //      scopes, "user", CancellationToken.None).Result;
-
-        //        //  string date = calendar.Date;
-        //        //  //calendar.Date;
-        //        //  IFormatProvider culture = new System.Globalization.CultureInfo("en-US", true);
-        //        //  DateTime dt2 = DateTime.Parse(date, culture, System.Globalization.DateTimeStyles.AssumeLocal);
-        //        //  var service = new CalendarService(new BaseClientService.Initializer()
-        //        //  {
-        //        //      HttpClientInitializer = credentials
-        //        //  }
-        //        //  );
-
-        //        //  var googleCalendarEvent = new Event();
-
-        //        //  googleCalendarEvent.Start = new EventDateTime()
-        //        //  {
-        //        //      DateTimeDateTimeOffset = dt2
-        //        //  };
-
-        //        //  googleCalendarEvent.End = new EventDateTime()
-        //        //  {
-        //        //      DateTimeDateTimeOffset = dt2
-        //        //  };
-        //        //  var emails = Convert.ToString(calendar.Email.Email);
-        //        //  googleCalendarEvent.Summary = calendar.Title;
-        //        //  googleCalendarEvent.Description = calendar.Description;
-        //        //  googleCalendarEvent.Attendees = new List<EventAttendee>()
-        //        //{
-        //        //  new EventAttendee() { Email=emails }
-        //        //};
-
-        //        //  var calendarId = "primary";
-        //        //  Event results = await service.Events.Insert(googleCalendarEvent, calendarId).ExecuteAsync();
-
-
-
-        //private static string Base64UrlEncode(string input)
-        //    {
-        //        var inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
-        //        // Special "url-safe" base64 encode.
-        //        return Convert.ToBase64String(inputBytes)
-        //          .Replace('+', '-')
-        //          .Replace('/', '_')
-        //          .Replace("=", "");
-        //    }
-        //    [HttpPost]
-        //    public async Task<IActionResult> CalendarSearch(string email)
-        //    {
-        //        var currentUser = await _userManager.GetUserAsync(User);
-
-        //        var employess = _context.Users
-        //                   .Include(e => e.Customers)
-        //                   .Select(m => m.Email).ToList();
-        //        var filteremployes = employess.Where(word => word.Contains(email)).ToList();
-        //        ViewBag.Filteremployes = filteremployes;
-        //        if (filteremployes == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        return Json(new { Message = filteremployes });
-        //        //var employess = _context.Employees.Select(m => m.EmployeeEmail).ToList();
-        //        //var filteremployes = employess.Where(word => word.Contains(email)).ToList();
-        //        //ViewBag.Filteremployes = filteremployes;
-        //        //if (filteremployes == null)
-        //        //{
-        //        //    return NotFound();
-        //        //}
-        //        //return Json(new { Message = filteremployes });
-
-        //    }
-
-        //}
-
+       
 
 
 
