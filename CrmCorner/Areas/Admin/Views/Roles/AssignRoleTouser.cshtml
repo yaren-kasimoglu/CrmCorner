@@ -1,6 +1,7 @@
-﻿@model List<AdminModel.AssignRoleToUserVM>
+﻿@*@model List<CrmCorner.Areas.Admin.Models.AssignRoleToUserVM>
+
 @{
-    ViewData["Title"] = "AssignRoleTouser";
+    ViewData["Title"] = "Assign Role To User";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutHomePageArea.cshtml";
 }
 
@@ -11,31 +12,28 @@
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
         </div>
         <div class="card-body">
-            <form asp-area="Admin" asp-controller="Roles" asp-action="AssignRoleTouser" asp-route-userId="@ViewBag.userId" method="post">
+            <form asp-area="Admin" asp-controller="Roles" asp-action="AssignRoleToUser" asp-route-userId="@ViewBag.userId" method="post">
 
                 @for (int i = 0; i < Model.Count; i++)
-                {                   
+                {
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" asp-for="@Model[i].Exist">
                         <label class="form-check-label" for="exampleCheck1">@Model[i].Name</label>
                         <input type="hidden" asp-for="@Model[i].Name">
                         <input type="hidden" asp-for="@Model[i].Id">
                     </div>
-                    <div class="my-3">
-                        <button type="submit" class="btn btn-primary w-100 px-3 py-2 mb-2">Role Ata</button>
-                    </div>
                 }
+                <div class="my-3">
+                    <button type="submit" class="btn btn-primary w-100 px-3 py-2 mb-2">Role Ata</button>
+                </div>
             </form>
             <div>
-                <a class="btn btn-outline-primary  w-100 px-3 py-2 mb-2" asp-action="UserList" asp-controller="Home"> Kullanıcı Listesine Geri Dön </a>
+                <a class="btn btn-outline-primary w-100 px-3 py-2 mb-2" asp-action="UserList" asp-controller="Home">Kullanıcı Listesine Geri Dön</a>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-<!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+*@

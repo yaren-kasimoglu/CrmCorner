@@ -1,3 +1,19 @@
+@using Microsoft.AspNetCore.Identity
+@using CrmCorner.Models  
+@inject UserManager<AppUser> UserManager
+
+@{
+    var currentUser = UserManager.GetUserAsync(User).Result;
+    string userRole = "";
+    string userEmail = "";
+
+    if (currentUser != null)
+    {
+        var roles = UserManager.GetRolesAsync(currentUser).Result;
+        userRole = roles.Contains("Admin") ? "Admin" : "User";
+        userEmail = currentUser.Email;
+    }
+}
 <!DOCTYPE html>
 
 <html>
@@ -32,12 +48,13 @@
     <link href="~/CRMTema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
     @RenderSection("Styles", required: false)
 
+
 </head>
 <body>
     <div id="layout" class="theme-cyan">
         <div id="wrapper">
             <!-- Page Loader -->
-                       @*<div class="page-loader-wrapper text-center">
+            @*<div class="page-loader-wrapper text-center">
             <div class="loader">
             <svg class="p-3 bg-light rounded" width="120px" viewBox="0 0 85 25">
             <path d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
@@ -49,10 +66,10 @@
             V4.5h4.3c2.2,0,3.9,0.6,5.1,1.8S82.5,9.2,82.5,11.3z M80.8,11.4c0-1.8-0.5-3.2-1.4-4.1s-2.3-1.4-4.1-1.4h-2.4v11.2h2
             c1.9,0,3.4-0.5,4.4-1.4S80.8,13.3,80.8,11.4z" />
             </svg>
-              <div class="h5 fw-light mt-3">Lütfen Bekleyin</div>
-          </div>
+            <div class="h5 fw-light mt-3">Lütfen Bekleyin</div>
+            </div>
             </div>*@
-            
+
             <!-- top navbar -->
             @*<nav class="navbar navbar-fixed-top">
             <div class="container-fluid">
@@ -88,22 +105,23 @@
             <!-- Sidbar menu -->
             @if (User.Identity!.IsAuthenticated)
             {
-            <div id="left-sidebar" class="sidebar">
+       
+                <div id="left-sidebar" class="sidebar">
 
-                <partial name="_NavbarLogin" />
-               
+                    <partial name="_NavbarLogin" />
+
                     <!-- nav tab: menu list -->
                     <ul class="nav nav-tabs text-center mb-2" role="tablist">
                         <li class="nav-item flex-fill"><a class="nav-link active" id="hr_menu_nav_link" data-bs-toggle="tab" href="#hr_menu" role="tab">Menü</a></li>
-          @*              <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#project_menu" role="tab">Tab2</a></li>*@
-                       @* <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#sub_menu" role="tab"><i class="fa fa-th-large"></i></a></li>*@
-                       @* <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#setting_menu" role="tab"><i class="fa fa-cog"></i></a></li>*@
+                        @*              <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#project_menu" role="tab">Tab2</a></li>*@
+                        @* <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#sub_menu" role="tab"><i class="fa fa-th-large"></i></a></li>*@
+                        @* <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#setting_menu" role="tab"><i class="fa fa-cog"></i></a></li>*@
                     </ul>
-                
-                <!-- nav tab: content -->
-                 
-                <div class="tab-content px-0">
-                  
+
+                    <!-- nav tab: content -->
+
+                    <div class="tab-content px-0">
+
                         <div class="tab-pane fade show active" id="hr_menu" role="tabpanel">
 
 
@@ -114,10 +132,10 @@
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-home"></i>Anasayfam</a>
                                     </li>
 
-@*                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a>
-                                    </li>
-*@
+                                    @*                                    <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a>
+                                </li>
+                                *@
 
 
                                     <li>
@@ -145,23 +163,25 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i>Müşterilerim</a>
                                     </li>
-                                    @if (ViewData["UserEmail"]?.ToString() == "berkay@saascorner.co" || ViewData["UserEmail"]?.ToString() == "yaren.kkasimoglu@gmail.com")
+                                    @if (userRole == "Admin")
                                     {
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList"><i class="fa fa-briefcase"></i>Sistemde Kayıtlı Firmalar</a>
-                                    </li>
-                                }
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
+                                                <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
+                                            </a>
+                                        </li>
+                                    }
                                     <li class="nav-item">
 
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-users"></i>Çalışanlarımız</a>
 
                                     </li>
 
-                             @*       <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
-                                    </li>*@
+                                    @*       <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
+                                </li>*@
 
-                                   <li class="nav-item">
+                                    <li class="nav-item">
                                         <a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a>
                                     </li>
 
@@ -169,59 +189,59 @@
                             </nav>
 
                         </div>
-      @*             
+                        @*
                     <div class="tab-pane fade" id="project_menu" role="tabpanel">
-                        <nav class="sidebar-nav">
-                            <ul class="metismenu list-unstyled">
-                                <li><a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a></li>
-                                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a></li>
-                            </ul>
-                        </nav>
+                    <nav class="sidebar-nav">
+                    <ul class="metismenu list-unstyled">
+                    <li><a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a></li>
+                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a></li>
+                    </ul>
+                    </nav>
                     </div>*@
-                      
-@*
+
+                        @*
                     AYARLAR TEMA AYARLAMA*@
 
-         @*           <div class="tab-pane fade" id="setting_menu" role="tabpanel">
-                        <div class="px-3">
-                            <h6>Tema Seçin</h6>
-                            <ul class="choose-skin list-unstyled">
-                                <li data-theme="purple" class="mb-2"><div class="purple"></div><span>Purple</span></li>
-                                <li data-theme="blue" class="mb-2"><div class="blue"></div><span>Blue</span></li>
-                                <li data-theme="cyan" class="active mb-2"><div class="cyan"></div><span>Cyan</span></li>
-                                <li data-theme="green" class="mb-2"><div class="green"></div><span>Green</span></li>
-                                <li data-theme="orange" class="mb-2"><div class="orange"></div><span>Orange</span></li>
-                                <li data-theme="blush" class="mb-2"><div class="blush"></div><span>Blush</span></li>
-                            </ul>
-                            <hr>
-                            <h6>Görünüm Değiştirin</h6>
-                            <ul class="list-unstyled">
-                                <li class="d-flex align-items-center mb-1">
-                                    <div class="form-check form-switch theme-switch">
-                                        <input class="form-check-input" type="checkbox" id="theme-switch">
-                                        <label class="form-check-label" for="theme-switch">Enable Dark Mode!</label>
-                                    </div>
-                                </li>
-                                <li class="d-flex align-items-center mb-1">
-                                    <div class="form-check form-switch theme-high-contrast">
-                                        <input class="form-check-input" type="checkbox" id="theme-high-contrast">
-                                        <label class="form-check-label" for="theme-high-contrast">Enable High Contrast</label>
-                                    </div>
-                                </li>
-                                <li class="d-flex align-items-center mb-1">
-                                    <div class="form-check form-switch minisidebar-active">
-                                        <input class="form-check-input" type="checkbox" id="mini-active">
-                                        <label class="form-check-label" for="mini-active">Mini Sidebar</label>
-                                    </div>
-                                </li>
-                            </ul>
-                            <hr>
-                        </div>
+                        @*           <div class="tab-pane fade" id="setting_menu" role="tabpanel">
+                    <div class="px-3">
+                    <h6>Tema Seçin</h6>
+                    <ul class="choose-skin list-unstyled">
+                    <li data-theme="purple" class="mb-2"><div class="purple"></div><span>Purple</span></li>
+                    <li data-theme="blue" class="mb-2"><div class="blue"></div><span>Blue</span></li>
+                    <li data-theme="cyan" class="active mb-2"><div class="cyan"></div><span>Cyan</span></li>
+                    <li data-theme="green" class="mb-2"><div class="green"></div><span>Green</span></li>
+                    <li data-theme="orange" class="mb-2"><div class="orange"></div><span>Orange</span></li>
+                    <li data-theme="blush" class="mb-2"><div class="blush"></div><span>Blush</span></li>
+                    </ul>
+                    <hr>
+                    <h6>Görünüm Değiştirin</h6>
+                    <ul class="list-unstyled">
+                    <li class="d-flex align-items-center mb-1">
+                    <div class="form-check form-switch theme-switch">
+                    <input class="form-check-input" type="checkbox" id="theme-switch">
+                    <label class="form-check-label" for="theme-switch">Enable Dark Mode!</label>
+                    </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-1">
+                    <div class="form-check form-switch theme-high-contrast">
+                    <input class="form-check-input" type="checkbox" id="theme-high-contrast">
+                    <label class="form-check-label" for="theme-high-contrast">Enable High Contrast</label>
+                    </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-1">
+                    <div class="form-check form-switch minisidebar-active">
+                    <input class="form-check-input" type="checkbox" id="mini-active">
+                    <label class="form-check-label" for="mini-active">Mini Sidebar</label>
+                    </div>
+                    </li>
+                    </ul>
+                    <hr>
+                    </div>
                     </div>*@
+                    </div>
+
                 </div>
-               
-            </div>
-                }
+            }
             <div>&nbsp;</div>
             <div>&nbsp;</div>
             <div id="main-content">

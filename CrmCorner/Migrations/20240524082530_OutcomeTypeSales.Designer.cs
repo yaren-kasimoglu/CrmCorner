@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20240524082530_OutcomeTypeSales")]
+    partial class OutcomeTypeSales
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,7 +41,7 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.AppUser", b =>
@@ -125,7 +128,7 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.AppUserRole", b =>
@@ -599,7 +602,7 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("roleclaims", (string)null);
+                    b.ToTable("RoleClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -619,7 +622,7 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("userclaims", (string)null);
+                    b.ToTable("UserClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -638,7 +641,7 @@ namespace CrmCorner.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
 
-                    b.ToTable("userlogins", (string)null);
+                    b.ToTable("UserLogins");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -649,7 +652,7 @@ namespace CrmCorner.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
 
-                    b.ToTable("userroles", (string)null);
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -668,7 +671,7 @@ namespace CrmCorner.Migrations
                     b.Property<string>("Value")
                         .HasColumnType("longtext");
 
-                    b.ToTable("usertokens", (string)null);
+                    b.ToTable("UserTokens");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.AppUserRole", b =>

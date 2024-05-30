@@ -17,6 +17,7 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     {
     }
 
+
     public DbSet<Calendar> Calendars { get; set; }
     public DbSet<ChatHistory> ChatHistories { get; set; }
     public DbSet<CustomerN> CustomerNs { get; set; }
@@ -84,6 +85,33 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
             entity.Property(e => e.Title).HasMaxLength(200);
         });
 
+        modelBuilder.Entity<AppUser>(entity => {
+            entity.ToTable(name: "users");
+        });
+
+        modelBuilder.Entity<AppRole>(entity => {
+            entity.ToTable(name: "roles");
+        });
+
+        modelBuilder.Entity<IdentityUserRole<string>>(entity => {
+            entity.ToTable("userroles");
+        });
+
+        modelBuilder.Entity<IdentityUserClaim<string>>(entity => {
+            entity.ToTable("userclaims");
+        });
+
+        modelBuilder.Entity<IdentityUserLogin<string>>(entity => {
+            entity.ToTable("userlogins");
+        });
+
+        modelBuilder.Entity<IdentityRoleClaim<string>>(entity => {
+            entity.ToTable("roleclaims");
+        });
+
+        modelBuilder.Entity<IdentityUserToken<string>>(entity => {
+            entity.ToTable("usertokens");
+        });
 
         OnModelCreatingPartial(modelBuilder);
         modelBuilder.Entity<AppUserRole>()

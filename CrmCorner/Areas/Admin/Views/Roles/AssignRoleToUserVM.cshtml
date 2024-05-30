@@ -1,0 +1,35 @@
+﻿@model CrmCorner.Areas.Admin.Models.AssignRoleToUserVM
+@{
+    ViewData["Title"] = "AssignRoleToUserVM";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutHomePageArea.cshtml";
+}
+
+<h2>Assign Role to User</h2>
+
+<form asp-action="AssignRoleToUserVM" method="post">
+    <div class="form-group">
+        <label asp-for="UserId" class="control-label"></label>
+        <select asp-for="UserId" class="form-control" asp-items="Model.Users"></select>
+        <span asp-validation-for="UserId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="RoleName" class="control-label"></label>
+        <select asp-for="RoleName" class="form-control" asp-items="Model.Roles"></select>
+        <span asp-validation-for="RoleName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Assign" class="btn btn-primary" />
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>

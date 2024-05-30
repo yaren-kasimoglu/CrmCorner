@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Crmf;
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -52,9 +53,17 @@ namespace CrmCorner.Controllers
 
                 if (currentUser != null)
                 {
-                    if (currentUser.Email == "berkay@saascorner.co" || currentUser.Email == "yaren.kkasimoglu@gmail.com")
+                    var roles = await _userManager.GetRolesAsync(currentUser);
+
+                    bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
+
+
+                    ViewData["UserRole"] = roles.Contains("Admin") ? "Admin" : "TeamMember";
+                    ViewData["UserEmail"] = currentUser.Email;
+
+                    if (isAdminOrManager)
                     {
-                        var companyUsers = _context.Users.Where(u => u.CompanyName == currentUser.CompanyName).ToList();
+                        var companyUsers = _context.Users.Where(u => u.EmailDomain == currentUser.EmailDomain).ToList();
                         var companyUserIds = companyUsers.Select(u => u.Id).ToList();
 
                         var tasks = _context.TaskComps
@@ -193,6 +202,8 @@ namespace CrmCorner.Controllers
                     {
                         _context.TaskComps.Add(task); // Task'ı ekleyin
 
+                        _context.SaveChanges();
+
                         // Outcomes Olumlu ise PostSaleInfo oluştur
                         if (task.Outcomes == OutcomeType.Olumlu)
                         {
@@ -205,12 +216,13 @@ namespace CrmCorner.Controllers
                                 ProblemDescription = "",
                                 IsContinuationConsidered = false,
                                 IsTrustpilotReviewed = false,
+                                TrustPilotComment = "",
                                 CanUseLogo = false
                             };
                             _context.PostSaleInfos.Add(postSaleInfo);
+                            _context.SaveChanges();
                         }
 
-                        _context.SaveChanges(); // Değişiklikleri kaydedin
                         return RedirectToAction("Index"); // Başarılıysa, Index sayfasına yönlendir
                     }
                     else
@@ -310,6 +322,16 @@ namespace CrmCorner.Controllers
                     if (HttpContext.Request.Form.ContainsKey("AssignedUserId"))
                     {
                         editedTask.AssignedUserId = HttpContext.Request.Form["AssignedUserId"];
+                    }
+                    // OutcomeStatus ve Outcomes değerlerini kontrol et
+                    if (HttpContext.Request.Form.ContainsKey("OutcomeStatus"))
+                    {
+                        editedTask.OutcomeStatus = Enum.Parse<OutcomeTypeSales>(HttpContext.Request.Form["OutcomeStatus"]);
+                    }
+
+                    if (HttpContext.Request.Form.ContainsKey("Outcomes"))
+                    {
+                        editedTask.Outcomes = Enum.Parse<OutcomeType>(HttpContext.Request.Form["Outcomes"]);
                     }
 
                     // Değişiklikleri kontrol et ve log tablosuna kaydet
@@ -456,9 +478,16 @@ namespace CrmCorner.Controllers
 
                         if (property.Name == "Outcomes")
                         {
-                            fieldName = "Sonuç Durumu";
+                            fieldName = "Süreç Durumu";
                             oldValueString = Enum.GetName(typeof(OutcomeType), originalValue);
                             newValueString = Enum.GetName(typeof(OutcomeType), editedValue);
+                        }
+
+                        if (property.Name == "OutcomeStatus")
+                        {
+                            fieldName = "Sonuç Durumu";
+                            oldValueString = Enum.GetName(typeof(OutcomeTypeSales), originalValue);
+                            newValueString = Enum.GetName(typeof(OutcomeTypeSales), editedValue);
                         }
 
                         if (property.Name == "IsFinalDecisionMaker")
@@ -502,8 +531,6 @@ namespace CrmCorner.Controllers
             }
             catch (Exception ex)
             {
-                // Hata loglama işlemleri burada yapılabilir
-                // Eğer loglama işlemi sırasında bir hata olursa, bu hatayı da yönetmeniz gerekebilir.
                 throw new Exception("Değişiklikler loglanırken bir hata meydana geldi.", ex);
             }
         }
@@ -845,6 +872,11 @@ namespace CrmCorner.Controllers
                         return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'Görüşmeyi Gerçekleştiren' alanını doldurmanız gerekmektedir." });
                     }
 
+                    if (task.Outcomes == null)
+                    {
+                        return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'OutcomeType' alanını doldurmanız gerekmektedir." });
+                    }
+
                     // Olumlu Sonuç ve Satış Kapatma Tarihi kontrolü
                     if (task.Outcomes == OutcomeType.Olumlu && !task.SalesDone.HasValue)
                     {
@@ -864,14 +896,33 @@ namespace CrmCorner.Controllers
                         return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'Sözleşme / Anlaşma' dosyalarını yüklemeniz gerekmektedir. Sözleşme dosyalarınızın sisteme doğru bir şekilde yüklendiğinden emin olun." });
                     }
                 }
-
                 if (newStatusId == 6)
                 {
-                    if (task.Outcomes == OutcomeType.Olumlu)
+                    // OutcomeTypeSales kontrolü
+                    if (task.OutcomeStatus == null)
                     {
-                        if (task.FinalSalesDone == null)
+                        return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'Satış için Kazanıldı/Kaybedildi' alanını doldurmanız gerekmektedir." });
+                    }
+
+                    // OutcomeType ve OutcomeTypeSales uyumluluk kontrolü
+                    if (task.Outcomes == OutcomeType.Olumlu || task.Outcomes == OutcomeType.Surecte)
+                    {
+                        if (task.OutcomeStatus == OutcomeTypeSales.Lost)
                         {
-                            return Json(new { isValid = false, message = "Satış süreci olumlu bir şekilde tamamlanmış görünüyor. Lütfen Gerçekleşen Satış Kapatma Tarihi alanını doldurunuz." });
+                            return Json(new { isValid = false, message = "Görev durumu olumlu veya süreçte iken 'Kaybedildi' olarak işaretlenemez. Lütfen 'Olumsuz' olarak işaretleyiniz." });
+                        }
+
+                        if (task.OutcomeStatus == OutcomeTypeSales.Won && !task.FinalSalesDone.HasValue)
+                        {
+                            return Json(new { isValid = false, message = "'Kazanıldı' olarak işaretlendiğinde 'Gerçekleşen Satış Kapatma Tarihi' alanını doldurmanız gerekmektedir." });
+                        }
+                    }
+
+                    if (task.Outcomes == OutcomeType.Olumsuz || task.Outcomes == OutcomeType.Surecte)
+                    {
+                        if (task.OutcomeStatus == OutcomeTypeSales.Won)
+                        {
+                            return Json(new { isValid = false, message = "Görev durumu olumsuz veya süreçte iken 'Kazanıldı' olarak işaretlenemez. Lütfen 'Olumlu' olarak işaretleyiniz." });
                         }
                     }
                 }

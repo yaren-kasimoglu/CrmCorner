@@ -1,4 +1,5 @@
 ﻿@using CrmCorner.Models.Enums;
+@using CrmCorner.Extensions;
 @model CrmCorner.Models.TaskComp
 @{
     ViewData["Title"] = "TaskDetail";
@@ -139,6 +140,7 @@
                             <span>Sektör: @Model.Customer.Industry</span>
                             <br />
                           <span class="message"> Çalışan Sayısı: @Model.Customer.EmployeeCount</span>
+                            <span class="message">Çalışan Sayısı: @EnumExtensions.GetDisplayName(Model.Customer.EmployeeCount)</span>
                         </div>
                     </div>
                     <hr>

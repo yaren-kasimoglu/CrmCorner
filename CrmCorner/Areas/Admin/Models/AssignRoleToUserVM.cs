@@ -1,9 +1,17 @@
-﻿namespace CrmCorner.Areas.Admin.Models
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
+
+namespace CrmCorner.Areas.Admin.Models
 {
     public class AssignRoleToUserVM
     {
-        public string Id { get; set; } = null!;
-        public string Name { get; set; } = null!;
-        public bool Exist { get; set; }
+        [Required]
+        public string UserId { get; set; }
+
+        [Required]
+        public string RoleName { get; set; }
+
+        public List<SelectListItem> Users { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> Roles { get; set; } = new List<SelectListItem>();
     }
 }

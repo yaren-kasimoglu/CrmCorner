@@ -14,7 +14,7 @@ namespace CrmCorner.Controllers
         {
             _context = context;
         }
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         public IActionResult CompanyList()
         {
             try
@@ -28,6 +28,7 @@ namespace CrmCorner.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult ApproveCompany(int id)
         {
@@ -47,6 +48,7 @@ namespace CrmCorner.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult RejectCompany(int id)
         {

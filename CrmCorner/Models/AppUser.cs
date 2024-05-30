@@ -22,8 +22,8 @@ namespace CrmCorner.Models
 
         public virtual ICollection<CustomerN> Customers { get; set; }
         public virtual ICollection<TaskComp> TaskComps { get; set; }
-        public virtual ICollection<Calendar> Calendars { get; set; }
-        public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual ICollection<Calendar>? Calendars { get; set; }
+        public virtual ICollection<Notification>? Notifications { get; set; }
         public virtual ICollection<TaskCompLog> TaskCompLogs { get; set; } = new List<TaskCompLog>();
 
         public virtual ICollection<AppUserRole> UserRoles { get; set; }

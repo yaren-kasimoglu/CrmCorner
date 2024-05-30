@@ -28,8 +28,8 @@ namespace CrmCorner.Controllers
                 var positiveSales = await _context.PostSaleInfos
                                                   .Include(psi => psi.TaskComp)
                                                   .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
-                                                  .Where(psi => psi.TaskComp.Outcomes == OutcomeType.Olumlu &&
-                                                                psi.TaskComp.UserId == userId) // Satışı yapan kullanıcıya göre filtrele
+                                                  .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won &&
+                                                                psi.TaskComp.UserId == userId || psi.TaskComp.AssignedUserId == userId) // Satışı yapan kullanıcıya göre filtrele
                                                   .Select(psi => new SaleDTO
                                                   {
                                                       Id = psi.Id,

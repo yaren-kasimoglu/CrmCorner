@@ -22,16 +22,22 @@ namespace CrmCorner.Controllers
             _hostingEnvironment = hostingEnvironment;
             _configuration = configuration;
         }
-        public IActionResult PositiveTasks()
+        public async Task<IActionResult> PositiveTasks()
         {
             try
             {
+                var currentUserName = User.Identity.Name;
+                var currentUser = await _userManager.FindByNameAsync(currentUserName);
+                var currentUserEmailDomain = currentUser.EmailDomain;
+
                 var positiveTasks = _context.TaskComps
                     .Include(t => t.Status)
                     .Include(t => t.AppUser)
                     .Include(t => t.AssignedUser)
                     .Include(t => t.Customer)
-                    .Where(t => t.Outcomes == OutcomeType.Olumlu) // 'Olumlu' enum değerine göre filtreleme
+                    .Where(u => u.AppUser.EmailDomain == currentUserEmailDomain)
+                    .Where(t => t.OutcomeStatus == OutcomeTypeSales.Won)
+                    .Where(t => t.StatusId == 6)// 'Olumlu' enum değerine göre filtreleme
                     .ToList();
 
                 return View(positiveTasks);
@@ -50,14 +56,16 @@ namespace CrmCorner.Controllers
                 var currentUserName = User.Identity.Name;
                 var currentUser = await _userManager.FindByNameAsync(currentUserName);
                 var currentUserCompanyName = currentUser.CompanyName;
+                var currentUserEmailDomain = currentUser.EmailDomain;
 
                 var negativeTaks = _context.TaskComps
                     .Include(t => t.Status)
                     .Include(t => t.AppUser)
                     .Include(t => t.AssignedUser)
                     .Include(t => t.Customer)
-                    .Where(u => u.AppUser.CompanyName == currentUserCompanyName)
-                    .Where(t => t.Outcomes == OutcomeType.Olumsuz)
+                    .Where(u => u.AppUser.EmailDomain == currentUserEmailDomain)
+                    .Where(t => t.OutcomeStatus == OutcomeTypeSales.Lost)
+                    .Where(t => t.StatusId == 6)
                     .ToList();
 
                 return View(negativeTaks);
