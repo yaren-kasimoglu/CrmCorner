@@ -64,48 +64,25 @@
         #MessageBox li::marker {
             content: none;
         }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #444;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+        #notification {
+            cursor: pointer; /* Kullanıcıya tıklamaya hazır olduğunu göstermek için fare işaretçisini değiştirir */
+        }
     </style>
 </head>
 
 <body>
-    <div class="container-fluid">
-
-        @*<div class="block-header py-lg-4 py-3">
-            <div class="row g-3">
-                <div class="col-md-6 col-sm-12">
-                    <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> Chat</h2>
-                    <ul class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="index.html">Lucid</a></li>
-                        <li class="breadcrumb-item">App</li>
-                        <li class="breadcrumb-item active">Chat</li>
-                    </ul>
-                </div>
-                <div class="col-md-6 col-sm-12 text-md-end">
-                    <div class="d-inline-flex text-start">
-                        <div class="me-2">
-                            <h6 class="mb-0"><i class="fa fa-user"></i> 1,784</h6>
-                            <small>Visitors</small>
-                        </div>
-                        <span id="bh_visitors"></span>
-                    </div>ß
-                    <div class="d-inline-flex text-start ms-lg-3 me-lg-3 ms-1 me-1">
-                        <div class="me-2">
-                            <h6 class="mb-0"><i class="fa fa-globe"></i> 325</h6>
-                            <small>Visits</small>
-                        </div>
-                        <span id="bh_visits"></span>
-                    </div>
-                    <div class="d-inline-flex text-start">
-                        <div class="me-2">
-                            <h6 class="mb-0"><i class="fa fa-comments"></i> 13</h6>
-                            <small>Chats</small>
-                        </div>
-                        <span id="bh_chats"></span>
-                    </div>
-                </div>
-            </div>*@
-    </div>
-
     <div class="row clearfix">
         <div class="col-lg-12">
             <div class="card">
@@ -131,6 +108,7 @@
                             }
                         </ul>
                     </div>
+                    <div id="notification" class="notification"  onclick="hideNotification()"></div>
                     <div class="chat">
                         <div class="chat-header d-flex justify-content-between align-items-center p-3 border-bottom">
                             <div class="left d-flex" id="selectedUser">
@@ -145,11 +123,11 @@
                             <div id="selectedUserId" class="hidden"></div>
 
                             @*<div class="right d-md-block d-none text-end">
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-camera"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-video-camera"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-cog"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-question"></i></a>
-                                </div>*@
+                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-camera"></i></a>
+                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-video-camera"></i></a>
+                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-cog"></i></a>
+                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-question"></i></a>
+                </div>*@
                         </div>
                         <div class="chat-history p-3" id="chat-history">
                             <div id="MessageBox">
@@ -163,6 +141,7 @@
                                     <span class="input-group-text"><i class="fa fa-paper-plane"></i></span>
                                 </button>
                                 <input type="text" id="SendMessageTextArea" class="form-control" placeholder="Enter text here..." aria-label="Enter text here...">
+                                <input type="hidden" id="userIdHiddenInput">
 
                             </div>
                         </div>
@@ -251,11 +230,12 @@
         function selectUser(userName, userId) {
             document.getElementById("searchDiv").style.display = "block";
             document.getElementById("selectedUserId").value = userId;
-            document.getElementById("selectedUser").innerHTML = userName;
+            if (userName != "1") {
+                document.getElementById("selectedUser").innerHTML = userName;
+            }
             var test = document.getElementById("selectedUserId").value;
             var useronlyId = document.getElementById("useronlyId").value;
             var useronlyId2 = $("#useronlyId").val();
-
             //const messageElement = document.querySelector('.message.other-message');
             //messageElement.textContent = '';
             // Seçilen kullanıcının kimliğini controller action'a iletmek için form submit işlemi gerçekleştiriyoruz
@@ -308,7 +288,49 @@
             var scrooltop = messageBox.scrollHeight;
             messageBox.scrollTop = messageBox.scrollHeight;
         }
+        function showNotification(userId,message) {
+            document.getElementById("userIdHiddenInput").value = userId;
+            var notificationElement = document.getElementById("notification");
+            if (!notificationElement) {
+                console.error("Notification element not found!");
+                return;
+            }
+            var name = "";
+            var id = userId;  // userId değişkeninin doğru atandığından emin olun
+            $.ajax({
+                type: 'POST',
+                url: "/ChatApp/GetUserName/",  // URL'nin doğru olduğundan emin olun
+                data: { userId: id },  // userId'nin doğru gönderildiğinden emin olun
+                dataType: "json",
+                success: function (data) {
+                    if (data.message) {
+                        name = data.message;
+                        notificationElement.textContent = name + " " + "Kişisinden Mesajınız var";
+                        document.body.appendChild(notificationElement);
+                        notificationElement.style.display = 'block';
 
+                    } else {
+                        alert("Error: No message received.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error occurred: " + status + " " + error);
+                    alert("Error occurred while fetching user name.");
+                }
+            });
+            // Bildirimi belirli bir süre sonra gizle
+          
+        }
+
+        // Notification elementine tıklandığında kaybolmasını sağlayan bir event listener ekleyin
+        function hideNotification() {
+            console.log("aslında butona bastı");
+            var notificationElement = document.getElementById("notification");
+            notificationElement.style.display = "none";
+            var userId = document.getElementById("userIdHiddenInput").value;
+            selectUser("1", userId);
+        }
+        
         function getMessages() {
             document.getElementById("selectedUserId").value = userId;
             document.getElementById("selectedUser").innerHTML = userName;
@@ -332,6 +354,7 @@
 
     </script>
     <script>
+ 
         $(function () {
 
             var $SendMessageTextArea = $("#SendMessageTextArea");
@@ -342,8 +365,11 @@
 
             var signalRConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
             signalRConnection.on("ChatChannel", function (message, dateTime) {
+                var userId = document.getElementById("selectedUserId").value;
 
-                $MessageBox.append(`<li class="clearfix">
+                if (userId !== null && userId !== undefined) {
+
+                    $MessageBox.append(`<li class="clearfix">
                                 <div class="message-data mb-3">
                                     <span class="small text-muted me-3">${dateTime}</span>
                                 </div>
@@ -351,8 +377,12 @@
                                     ${message}
                                 </div>
                             </li>`);
-                $SendMessageTextArea.val("");
-                window.scrollTo(0, document.body.scrollHeight);
+                
+                
+                }
+                scrollToBottom();
+                showNotification( userId,message);
+
             });
 
             $SendMessageBtn.click(function () {
@@ -373,6 +403,7 @@
                 console.log("send yapmaya çalıştı");
 
                 console.log(dateTime);
+
                 $MessageBox.append(`<li class="clearfix">
                                 <div class="message-data text-end mb-3 me-3">
                                     <span class="small text-muted me-2"> ${dateTime}</span>
@@ -385,9 +416,42 @@
                 $SendMessageTextArea.val("");
                 scrollToBottom();
 
-
-
             });
+            document.getElementById('SendMessageTextArea').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Formun gönderilmesini engelle
+                    sendMessage();
+                }
+            });
+            function sendMessage() {
+                signalRConnection.start().then(function () {
+
+                }).catch(function (err) {
+                    return console.error(err.toString());
+                });
+                var userId = document.getElementById("selectedUserId").value;
+                var message = $SendMessageTextArea.val();
+                var now = new Date();
+                var day = ("0" + now.getDate()).slice(-2);
+                var month = ("0" + (now.getMonth() + 1)).slice(-2);
+                var year = now.getFullYear(); // Yılı al
+                var hour = ("0" + now.getHours()).slice(-2);
+                var minute = ("0" + now.getMinutes()).slice(-2);
+                var dateTime = day + "." + month + "." + year + " " + hour + ":" + minute;
+
+                console.log(dateTime);
+                $MessageBox.append(`<li class="clearfix">
+                                <div class="message-data text-end mb-3 me-3">
+                                    <span class="small text-muted me-2"> ${dateTime}</span>
+                                    </div>
+                                 <div class="message other-message d-inline-block float-end">
+                                ${message}
+                                </div>
+                        </li>`);
+                signalRConnection.invoke("SendMessage", message, userId, dateTime);
+                $SendMessageTextArea.val("");
+                scrollToBottom();
+            }
             function scrollToBottom() {
                 var messageBox = document.getElementById("chat-history");
                 var scrooltop = messageBox.scrollHeight;
@@ -399,6 +463,27 @@
             }).catch(function (err) {
                 return console.error(err.toString());
             });
+
+            signalRConnection.onclose(async () => {
+                console.log("SignalR bağlantısı kapandı. Yeniden bağlanılıyor...");
+                await tryReconnect();
+            });
+            setInterval(async function () {
+                if (signalRConnection.state === signalR.HubConnectionState.Disconnected) {
+                    console.log("SignalR bağlantısı kapandıss. Yeniden bağlanılıyor...");
+                    await tryReconnect();
+                }
+            }, 10000); 
+            async function tryReconnect() {
+                try {
+                    await signalRConnection.start();
+                    console.log("SignalR bağlantısı başarıyla yeniden kuruldu.");
+                } catch (err) {
+                    console.error("SignalR bağlantısı yeniden kurulamadı: " + err.toString());
+                    // Hata durumunda tekrar deneme mekanizmasını başlat
+                    setTimeout(tryReconnect, 5000); // 5 saniye sonra tekrar dene
+                }
+            }
             //setInterval(function () {
             //    console.log("SignalR bağlantısı yenileniyor...");
             //        .then(function () {

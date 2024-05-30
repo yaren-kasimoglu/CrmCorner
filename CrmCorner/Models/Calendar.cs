@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Outlook = Microsoft.Office.Interop.Outlook;
 
 namespace CrmCorner.Models;
@@ -22,7 +23,9 @@ public class Calendar
     public virtual AppUser? AppUser { get; set; }
 
     [NotMapped]
-    public EmailProperty Email { get; set; }
+    public EmailProperty EmailProperty { get; set; }
+    [NotMapped]
+    public List<string> SelectedEmails { get; set; } = new List<string>();
 
 
 
@@ -31,6 +34,12 @@ public class EmailProperty
 {
     [NotMapped]
     public string Email { get; set; }
+
+
+    [NotMapped]
+    public DateTime StartDate { get; set; }
+    [NotMapped]
+    public DateTime EndDate { get; set; }
     // Diğer özellikler...
 
 }
