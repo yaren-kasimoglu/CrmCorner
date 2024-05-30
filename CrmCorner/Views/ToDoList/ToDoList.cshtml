@@ -103,15 +103,84 @@
             bottom: 20px;
             left: 100%;
         }
+      
+        #progressBarContainer {
+            position: relative; /* Pozisyon referansını ayarla */
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /*#taskCount {
+            position: absolute;
+            top: 50%;*/ /* Üstten yarım yükseklikte */
+            /*right: -20px;*/ /* Sağa yasladıktan sonra 20px dışarı çıkar */
+            /*transform: translateY(-50%);*/ /* Yatay merkezleme */
+            /*white-space: nowrap;*/ /* Metni tek satırda tut */
+            /*color: black;*/ /* Metin rengi */
+            /*font-size: 14px;*/ /* Yazı boyutu */
+        /*}*/
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50; /* Yeşil renk */
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+            .progress-bar.done {
+                background-color: #3498db;
+            }
+
+            .progress-bar:hover {
+                filter: brightness(110%);
+            }
+            .progress2 {
+  padding: 6px;
+  border-radius: 30px;
+  background: rgba(0, 0, 0, 0.25);  
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px rgba(255, 255, 255, 0.08);
+}
+
+        .progress-bar2 {
+            height: 10px;
+            border-radius: 30px;
+            padding-left: 20px;
+            padding-bottom: 10px;
+            background-color: #2eacb3;
+            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+            transition: 0.4s linear;
+            transition-property: width, background-color;
+        }
+
+        .progress-moved .progress-bar2 {
+            background-color: #2eacb3;
+            animation: progressAnimation 6s;
+        }
+
+
+
+
+
+
     </style>
 </head>
 <body>
+
+
+  
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3">
                 <div id="hover-effect" class="d-flex align-items-center">
                     <img src="/icons/todo/sun.jpeg" alt="Logo" class="logo" style="max-width: 50px; max-height: 50px;">
                     <label onclick="clickToday()" class="date">Günüm</label>
+
+
+
                 </div>
                 <br />
                 <div class="d-flex align-items-center" id="hover-effect" style="padding-left: 1%;">
@@ -140,7 +209,7 @@
                                     </span>
                                 </div>
                                 <span id="count_@item.Id">@item.Count</span>
-                                <input type="text"  value="@item.Id" id="todoIdvalue" style="display:none"></input>
+                                <input type="text" value="@item.Id" id="todoIdvalue" style="display:none"></input>
                             </li>
                         }
                     </ul>
@@ -157,7 +226,18 @@
 
 
             </div>
+
             <div class="col-md-9">
+      
+                <div id="progressBarContainer">
+                    <div class="progress2 progress-moved">
+                        <div id="progress-bar2" class="progress-bar2">
+                            <!-- İlerleme çubuğu içeriği burada -->
+                        </div>
+                    </div>
+                    <!--<h5 id="taskCount"></h5>--> <!-- Görev sayacı -->
+                </div>
+          
                 <div class="card" id="container2" style="width: 100%; height: 700px; overflow-y: hidden; background-color: #f4f4f4; background-image: url('/icons/todo/todo3.jpeg'); background-size: cover; background-position: center; display: flex; justify-content: center; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
                     <div class="card-body" style="position: relative; z-index: 1; width: 90%; height: 90%; margin: auto;">
                         <h1 style="font-size: 28px; font-weight: normal; color: white; margin: 0px; display: block;" id="todaymaintitle">@ViewBag.TitleValue</h1>
@@ -190,14 +270,14 @@
                         </div>
                         <form id="taskForm" action="@Url.Action("ToDoListAdd", "ToDoList")" method="post">
                             <div class="containerText">
-                                    <label class="task">
-                                        <input type="text" name="textValue" class="textInput2" id="textInput" placeholder="Görev Ekle" style="font-size:14px;text-decoration: none;">
-                                    </label>
-                            
-                                    <button type="submit" id="containerbutton" class="btn btn-primary btn-sm" style="width:auto">Ekle</button>
-                             
+                                <label class="task">
+                                    <input type="text" name="textValue" class="textInput2" id="textInput" placeholder="Görev Ekle" style="font-size:14px;text-decoration: none;">
+                                </label>
+
+                                <button type="submit" id="containerbutton" class="btn btn-primary btn-sm" style="width:auto">Ekle</button>
+
                             </div>
-                         
+
 
                             <label id="todoId" style="display:none"></label>
                         </form>
@@ -216,7 +296,7 @@
         </div>
     </div>
     <script>
-        
+
 
         document.getElementById('dropdownMenuButton').addEventListener('click', function () {
             var btnPrima = document.getElementById('btn-prima');
@@ -417,10 +497,11 @@
             tooltip.style.display = "none";
         }
         document.addEventListener("DOMContentLoaded", function () {
-          
+
             var id = getParameterByName('id');
             var titleElement = document.getElementById('todaymaintitle');
             var titleValue = titleElement.textContent;
+
             var kartIcerik = `@if (taskData != null) {
   @foreach (var task in taskData)
             {
@@ -435,7 +516,7 @@
     <label class="task" style="display: flex; align-items: center;position:releative;">
         <input type="checkbox" name="taskCheckbox" class="taskCheckbox" onclick="clickToDoCheckbox(this); document.getElementById('delbutton').blur();" id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"  style="margin-top: auto;"></span>
-<input type="text" name="textContentVisible" class="textContent" style="text-decoration: none; display: inline-block;" id="textContentVisible" placeholder="Görev Ekle" value="@task">
+<input type="text" name="textContentVisible" class="textContent" style="text-decoration: line-through; display: inline-block;" id="textContentVisible" placeholder="Görev Ekle" value="@task">
 
  </label>
  @if (mainTitle != "Önemli")
@@ -544,6 +625,34 @@
 
             var btnPrima = document.getElementById('btn-prima');
             var ekleButton = document.getElementById('ekleButton2');
+
+            var taskdatacount = taskData != null ? taskData.length : 0;
+            var untaskdatacount = notTaskData != null ? notTaskData.length : 0;
+            //var taskCountElement = document.getElementById('taskCount');
+
+            // İlerleme çubuğunu güncelleyen fonksiyon
+            console.log(taskdatacount);
+            var totalCount = taskdatacount + untaskdatacount;
+            //taskCountElement.textContent = totalCount;
+
+            var progress = 0;
+
+            if (totalCount > 0) {
+                progress = (taskdatacount / totalCount) * 100;
+            }
+
+            //taskCountElement.textContent = progress;
+
+
+            var progressBar = document.getElementById('progress-bar2');
+            if (progressBar) {
+
+                progressBar.style.width = progress + '%';
+            } else {
+                console.log("progressBar elementi bulunamadı!");
+            }
+
+
 
             // Boş bir alana tıklandığında
             document.addEventListener('click', function (event) {
@@ -695,7 +804,7 @@
                 button.disabled = false;
             });
         }
-        
+
 
         function textVisibleshow() {
             var inputElement = document.getElementById("textInput");
@@ -713,14 +822,12 @@
             document.getElementById("myModal").style.display = "none";
             location.reload();
 
-        });
-       
-        </script>
+        });</script>
     <style>
-      
+
         .popup-containeredit {
-            background-color: white; f
-            border-radius: 10px; /* Yuvarlak kenarlar */
+            background-color: white;
+            f border-radius: 10px; /* Yuvarlak kenarlar */
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Gölgeli efekt */
             padding: 20px;
             position: fixed;
@@ -876,7 +983,6 @@
             background-color: rgba(255, 255, 255, 0.5);
             border-radius: 5px;
             padding: 5px 10px;
-
         }
 
         .custom-table tr:hover {
@@ -936,7 +1042,6 @@
             background-color: rgba(255, 255, 255, 0.5); /* Opak beyaz arka plan */
             border-radius: 5px; /* Kenar yumuşatma */
             padding: 5px 10px;
-
         }
 
 
