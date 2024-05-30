@@ -21,24 +21,25 @@
 <style>
     .hidden-section {
         display: none;
-
     }
 
     .fc-event {
         background-color: #2eacb3; /* Arka plan rengini maviye değiştir */
         color: #2eacb3; /* Metin rengini beyaza değiştir */
     }
+
     .custom-padding {
         padding-left: 20px; /* İstediğiniz miktarda boşluk ekleyebilirsiniz */
     }
+
     #Submit {
         float: right; /* Sağa yaslanması için */
         background-color: #2eacb3; /* Arka plan rengi */
         color: white; /* Yazı rengi */
         font-size: 16px; /* Yazı boyutu */
         padding: 10px 20px; /* Boşluk ayarı */
-        margin-top:20px;
-        margin-bottom:10px;
+        margin-top: 20px;
+        margin-bottom: 10px;
         border-radius: 5px; /* Köşe yuvarlatma */
     }
 </style>
@@ -146,8 +147,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <input type="text" class="form-control mt-2" id="manualEmailInput" placeholder="Manuel Mail Adresi Girin" style="display: none;" onblur="updateSelectedEmails();" >
-                            <small class="form-text text-muted"  style="display: none;" id="manualEmailInput2"  >* Manuel mail girişi virgülle yazmanız gerekmektedir.</small>
+                            <input type="text" class="form-control mt-2" id="manualEmailInput" placeholder="Manuel Mail Adresi Girin" style="display: none;" onblur="updateSelectedEmails();">
+                            <small class="form-text text-muted" style="display: none;" id="manualEmailInput2">* Manuel mail girişi virgülle yazmanız gerekmektedir.</small>
                             @Html.ValidationMessageFor(model => model.SelectedEmails, "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -192,7 +193,7 @@
 
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Ekle" id="Submit" class="btn btn-default" onclick="location.href='@Url.Action("CalendarAdd", "Calendar")'" />
+                        <input type="submit" value="Ekle" id="Submit" class="btn btn-default"  />
                     </div>
                 </div>
             </div>
@@ -210,25 +211,42 @@
 <div id="calendarModal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="Id" style="display:none"></h5>
-                EVENT EDİT
-                <h4 id="modalTitle" class="modal-title"></h4>
-            </div>
-            Title:
-            <input type="text" class="form-control" name="modalTitle2" id="modalTitle2" />
-            Description:
-            <input type="text" class="form-control" id="modalDescription" name="modalDescription" />
-            Start Date:
-            <input type="date" id="modalStart" class="form-control" />
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-rounded btn-success" onclick="UpdateItem();"><i class="fas fa-check-square"></i>EDİT</button>
-                <button type="submit" class="btn btn-rounded btn-danger" onclick="DeleteItem();"><i class="fas fa-check-square"></i> DELETE </button>
-            </div>
+            <form id="eventForm" method="post">
+                <div class="modal-header">
+                    <h5 id="Id" style="display:none"></h5>
+                    Takvim Düzenle
+                    <h4 id="modalTitle" class="modal-title"></h4>
+                      <input type="hidden" id="calendarId" name="Id" value="" />
+                </div>
+                Title:
+                <input type="text" class="form-control" name="Title" id="modalTitle2" required />
+                Description:
+                <input type="text" class="form-control" id="modalDescription" name="Description" required />
+                Start Date:
+                <input type="date" id="modalStart" class="form-control" name="Date" required />
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-rounded btn-success" formaction="/Calendar/Edit"><i class="fas fa-check-square"></i> EDIT</button>
+                    <button type="submit" class="btn btn-rounded btn-danger" formaction="/Calendar/Delete"><i class="fas fa-check-square"></i> DELETE</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-<script>$(document).ready(function () {
+
+<script>
+    document.getElementById("Submit").addEventListener("click", function () {
+        disableButton(this);
+        document.querySelector("form").submit();
+    });
+
+    function disableButton(button) {
+        button.disabled = true;
+        button.value = "Ekleniyor..."; // Optional: Change the button text to indicate the process is ongoing
+    }
+
+
+
+    $(document).ready(function () {
         $('#searchInput').on('input', function () {
             $('#timeSelection').slideDown();
         });
@@ -250,29 +268,26 @@
     function toggleTimeSelection() {
         console.log("toggleTimeSelection");
         var timeSelection = document.getElementById('timeSelection');
-            timeSelection.classList.remove('hidden-section');
-        
-    }
-function updateSelectedEmails() {
-    console.log("updateSelectedEmails");
-    var selectedEmails = [];
-    // Seçili e-posta adreslerini listeye ekle
-    var selectedCheckboxes = document.querySelectorAll('input[name="SelectedEmails"]:checked');
-    selectedCheckboxes.forEach(function (checkbox) {
-        selectedEmails.push(checkbox.value);
-    });
-    // Manuel olarak girilen e-posta adresini de listeye ekle
-    var manualEmailInput = document.getElementById('manualEmailInput');
-    if (manualEmailInput.value.trim() !== '') {
-        selectedEmails.push(manualEmailInput.value.trim());
-    }
-    // Listeyi gizli alanın değeri olarak ayarla
-    document.getElementById('selectedEmails').value = selectedEmails.join(',');
-    console.log(selectedEmails);
-}
+        timeSelection.classList.remove('hidden-section');
 
-
-    </script>
+    }
+    function updateSelectedEmails() {
+        console.log("updateSelectedEmails");
+        var selectedEmails = [];
+        // Seçili e-posta adreslerini listeye ekle
+        var selectedCheckboxes = document.querySelectorAll('input[name="SelectedEmails"]:checked');
+        selectedCheckboxes.forEach(function (checkbox) {
+            selectedEmails.push(checkbox.value);
+        });
+        // Manuel olarak girilen e-posta adresini de listeye ekle
+        var manualEmailInput = document.getElementById('manualEmailInput');
+        if (manualEmailInput.value.trim() !== '') {
+            selectedEmails.push(manualEmailInput.value.trim());
+        }
+        // Listeyi gizli alanın değeri olarak ayarla
+        document.getElementById('selectedEmails').value = selectedEmails.join(',');
+        console.log(selectedEmails);
+    }</script>
 
 <script>let eventsArr = loadData();
 
@@ -318,6 +333,7 @@ function updateSelectedEmails() {
                 document.getElementById("modalTitle2").value = info.event.title;
                 document.getElementById("modalStart").value = info.event.start.toJSON().slice(0, 10);
                 document.getElementById("Id").innerHTML = info.event.id;
+                document.getElementById("calendarId").value = info.event.id; // Gizli input alanına ID'yi yerleştir
                 $('#calendarModal').modal('show');
             },
         });
@@ -328,39 +344,40 @@ function updateSelectedEmails() {
         document.getElementById("modalDescription").value = data.message;
         document.getElementById("modalDescription").innerHTML = data.message;
     }
-    function DeleteItem() {
-        var event = document.getElementById("Id").innerHTML;
-        $.ajax({
-            type: 'POST',
-            url: "/Calendar/sendEmail/",
-            encode: true,
-            data: { ID: event },
-            dataType: "json",
-            success: function () {
-                $("#calendarModal").modal('hide');
-                location.reload();
-            }
-        });
+    //function DeleteItem() {
+    //    var event = document.getElementById("Id").innerHTML;
+    //    $.ajax({
+    //        type: 'POST',
+    //        url: "/Calendar/sendEmail/",
+    //        encode: true,
+    //        data: { ID: event },
+    //        dataType: "json",
+    //        success: function () {
+    //            $("#calendarModal").modal('hide');
+    //            location.reload();
+    //        }
+    //    });
 
-    }
+    //}
 
-    function UpdateItem() {
-        var eventId = document.getElementById("Id").innerHTML;
-        var eventtitle = document.getElementById('modalTitle2').value;
-        var eventdate = document.getElementById("modalStart").value;
-        $.ajax({
-            type: 'POST',
-            url: "/Calendar/CalendarUpdate/",
-            encode: true,
-            data: { ID: eventId, title: eventtitle, date: eventdate },
-            dataType: "json",
-            success: function () {
-                $("#calendarModal").modal('hide');
-                location.reload();
-            }
-        });
+    //function UpdateItem() {
+    //    var eventId = document.getElementById("Id").innerHTML;
+    //    var eventtitle = document.getElementById('modalTitle2').value;
+    //    var eventdate = document.getElementById("modalStart").value;
+    //    console.log("edit oldu");
+    //    $.ajax({
+    //        type: 'POST',
+    //        url: "/Calendar/CalendarUpdate/",
+    //        encode: true,
+    //        data: { ID: eventId, title: eventtitle, date: eventdate },
+    //        dataType: "json",
+    //        success: function () {
+    //            $("#calendarModal").modal('hide');
+    //            location.reload();
+    //        }
+    //    });
 
-    }
+    //}
 
     document.getElementById('searchInput').addEventListener('keyup', function (event) {
         // Eğer tuş Enter (keyCode 13) ise veya input boş değilse aramayı gerçekleştir
