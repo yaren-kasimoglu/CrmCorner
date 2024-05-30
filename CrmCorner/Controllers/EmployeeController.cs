@@ -38,10 +38,11 @@ namespace CrmCorner.Controllers
 
                 // Giriş yapmış kullanıcının CompanyName bilgisini al
                 var currentUserCompanyName = currentUser.CompanyName;
+                var currentUserEmailDomain = currentUser.EmailDomain;
 
-                // Aynı CompanyName'e sahip olan kullanıcıları getir
+                // Aynı EmailDomain'e sahip olan kullanıcıları getir
                 var userList = await _userManager.Users
-                    .Where(u => u.CompanyName == currentUserCompanyName)
+                    .Where(u => u.EmailDomain == currentUserEmailDomain)
                     .ToListAsync();
 
                 var dashboardEmpViewModelList = new List<DashboardEmpViewModel>();

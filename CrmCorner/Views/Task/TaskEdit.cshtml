@@ -83,6 +83,7 @@
             <!-- Olumlu/Olumsuz Seçimi -->
 
             <div class="form-group">
+                <label class="control-label"><b>Süreç Durumu</b></label>
                 <!-- Olumlu radio butonu -->
                 <div class="form-check">
                     <input class="form-check-input radio-button" type="radio" name="Outcomes" id="OlumluOutcome" value="Olumlu" @(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumlu ? "checked" : "")>
@@ -99,8 +100,6 @@
                     <label class="form-check-label" for="NegativeOutcome">Olumsuz</label>
                 </div>
 
-
-
             </div>
 
             <div class="form-group" id="NegativeReasonSection" style="@(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumsuz ? "display:block;" : "display:none;")">
@@ -108,6 +107,21 @@
                 <textarea asp-for="NegativeReason" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="NegativeReason" class="text-danger"></span>
             </div>
+
+
+            <!-- OutcomeStatus Seçimi -->
+            <div class="form-group" id="OutcomeStatusSection" style="display:none;">
+                <label class="control-label"><b>Sonuç Durumu</b></label>
+                <div class="form-check">
+                    <input class="form-check-input radio-button" type="radio" name="OutcomeStatus" id="WonStatus" value="Won" @(Model.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Won ? "checked" : "")>
+                    <label class="form-check-label" for="WonStatus">Kazanıldı</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input radio-button" type="radio" name="OutcomeStatus" id="LostStatus" value="Lost" @(Model.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Lost ? "checked" : "")>
+                    <label class="form-check-label" for="LostStatus">Kaybedildi</label>
+                </div>
+            </div>
+
         </div>
 
         <div class="col-lg-6">
@@ -171,20 +185,53 @@
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 <script>
     $(document).ready(function () {
-        // Fonksiyonu tanımla
+        function toggleOutcomeStatusSection() {
+            var selectedStatus = $("#StatusId option:selected").text();
+            if (selectedStatus === "Satış Tamamlandı") {
+                $("#OutcomeStatusSection").show();
+            } else {
+                $("#OutcomeStatusSection").hide();
+            }
+        }
+
         function toggleNegativeReasonSection() {
             var selectedOutcome = $('input[name="Outcomes"]:checked').val();
-            if (selectedOutcome === '@CrmCorner.Models.Enums.OutcomeType.Olumsuz.ToString()') {
+            if (selectedOutcome === 'Olumsuz') {
                 $('#NegativeReasonSection').show();
             } else {
                 $('#NegativeReasonSection').hide();
             }
         }
 
-        // Radio buton değişikliğinde fonksiyonu çağır
-        $('input[name="Outcomes"]').change(toggleNegativeReasonSection);
+        function validateOutcomeStatus() {
+            var selectedOutcome = $('input[name="Outcomes"]:checked').val();
+            var wonStatus = $('#WonStatus');
+            var lostStatus = $('#LostStatus');
 
-        // Sayfa yüklendiğinde fonksiyonu çağır
+            if (selectedOutcome === 'Olumsuz' || selectedOutcome === 'Surecte') {
+                wonStatus.prop('disabled', true);
+                lostStatus.prop('disabled', false);
+            } else if (selectedOutcome === 'Olumlu') {
+                wonStatus.prop('disabled', false);
+                lostStatus.prop('disabled', true);
+            } else {
+                wonStatus.prop('disabled', false);
+                lostStatus.prop('disabled', false);
+            }
+        }
+
+        // Status dropdown değişikliğinde fonksiyonları çağır
+        $("#StatusId").change(toggleOutcomeStatusSection);
+
+        // Radio buton değişikliğinde fonksiyonları çağır
+        $('input[name="Outcomes"]').change(function () {
+            toggleNegativeReasonSection();
+            validateOutcomeStatus();
+        });
+
+        // Sayfa yüklendiğinde fonksiyonları çağır
+        toggleOutcomeStatusSection();
         toggleNegativeReasonSection();
+        validateOutcomeStatus();
     });
 </script>

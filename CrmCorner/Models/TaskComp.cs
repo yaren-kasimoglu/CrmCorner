@@ -44,6 +44,8 @@ public partial class TaskComp
     public OutcomeType Outcomes { get; set; }
     public string? NegativeReason { get; set; }
 
+    public OutcomeTypeSales? OutcomeStatus { get; set; }=OutcomeTypeSales.None;
+
     // Dosya ekleri için koleksiyon
     public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
     public virtual ICollection<TaskCompLog>? TaskCompLogs { get; set; }

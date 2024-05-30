@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using CrmCorner.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CrmCorner.Areas.Admin.Controllers
 {
@@ -13,25 +14,180 @@ namespace CrmCorner.Areas.Admin.Controllers
         private readonly RoleManager<AppRole> _roleManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<RolesController> _logger;
+        private readonly CrmCornerContext _context;
 
-        public RolesController(RoleManager<AppRole> roleManager, UserManager<AppUser> userManager, ILogger<RolesController> logger)
+
+        public RolesController(RoleManager<AppRole> roleManager, UserManager<AppUser> userManager, ILogger<RolesController> logger, CrmCornerContext context)
         {
             _roleManager = roleManager;
             _userManager = userManager;
             _logger = logger;
+            _context = context;
         }
 
         public async Task<IActionResult> RoleList()
         {
-            var roles = await _roleManager.Roles.Select(x => new RoleVM()
+            var roleList = await _roleManager.Roles.ToListAsync();
+            var roleViewModelList = roleList.Select(x => new RoleVM()
             {
                 Id = x.Id,
-                Name = x.Name!
-            }).ToListAsync();
-
-
-            return View(roles);
+                Name = x.Name
+            }).ToList();
+            return View(roleViewModelList);
         }
+
+        [HttpGet]
+        public IActionResult CreateRole()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateRole(RoleCreateVM model)
+        {
+            if (ModelState.IsValid)
+            {
+                AppRole appRole = new AppRole
+                {
+                    Name = model.RoleName
+                };
+
+                IdentityResult result = await _roleManager.CreateAsync(appRole);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("RoleList");
+                }
+
+                foreach (IdentityError error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+            }
+
+            return View(model);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> AssignRoleToUserVM()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            var model = new AssignRoleToUserVM
+            {
+                Users = users.Select(u => new SelectListItem { Value = u.Id, Text = u.UserName }).ToList(),
+                Roles = roles.Select(r => new SelectListItem { Value = r.Name, Text = r.Name }).ToList()
+            };
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> AssignRoleToUserVM(AssignRoleToUserVM model)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    System.Diagnostics.Debug.WriteLine("ModelState is valid");
+
+                    var user = await _userManager.FindByIdAsync(model.UserId);
+                    if (user == null)
+                    {
+                        ModelState.AddModelError("", "User not found");
+                        System.Diagnostics.Debug.WriteLine("User not found");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"User found: {user.UserName}");
+
+                        if (string.IsNullOrEmpty(model.RoleName))
+                        {
+                            ModelState.AddModelError("", "Role name is required");
+                            System.Diagnostics.Debug.WriteLine("Role name is required");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Role name provided: {model.RoleName}");
+
+                            var role = await _roleManager.FindByNameAsync(model.RoleName);
+                            if (role == null)
+                            {
+                                ModelState.AddModelError("", "Role not found");
+                                System.Diagnostics.Debug.WriteLine("Role not found");
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Role found: {role.Name}");
+
+                                try
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Adding role {model.RoleName} to user {user.UserName}");
+                                    var result = await _userManager.AddToRoleAsync(user, model.RoleName);
+                                    if (result.Succeeded)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine("Role added successfully");
+                                        return RedirectToAction("UserList", "Home");
+                                    }
+
+                                    foreach (var error in result.Errors)
+                                    {
+                                        ModelState.AddModelError("", error.Description);
+                                        System.Diagnostics.Debug.WriteLine($"Error: {error.Description}");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Exception during AddToRoleAsync: {ex.Message}");
+                                    ModelState.AddModelError("", "An error occurred while adding the role.");
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("ModelState is not valid");
+
+                    foreach (var state in ModelState)
+                    {
+                        foreach (var error in state.Value.Errors)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Property: {state.Key} Error: {error.ErrorMessage}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
+                ModelState.AddModelError("", "An unexpected error occurred.");
+            }
+
+            model.Users = await GetUserSelectListItemsAsync();
+            model.Roles = await GetRoleSelectListItemsAsync();
+
+            return View(model);
+        }
+
+        private async Task<List<SelectListItem>> GetUserSelectListItemsAsync()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            return users.Select(u => new SelectListItem { Value = u.Id, Text = u.UserName }).ToList();
+        }
+
+        private async Task<List<SelectListItem>> GetRoleSelectListItemsAsync()
+        {
+            var roles = await _roleManager.Roles.ToListAsync();
+            return roles.Select(r => new SelectListItem { Value = r.Name, Text = r.Name }).ToList();
+        }
+
+
+
+
 
         [HttpGet]
         public IActionResult RoleCreate()
@@ -106,90 +262,95 @@ namespace CrmCorner.Areas.Admin.Controllers
         }
 
 
-        public async Task<IActionResult> AssignRoleTouser(string id)
-        {
-            var currentUser = await _userManager.FindByIdAsync(id);
-            ViewBag.userId = id;
-            var roles = await _roleManager.Roles.ToListAsync();
-            var userRoller = await _userManager.GetRolesAsync(currentUser);
-            var roleVMList = new List<AssignRoleToUserVM>();
+        //[HttpGet]
+        //public async Task<IActionResult> AssignRoleToUser(string id)
+        //{
+        //    var currentUser = await _userManager.FindByIdAsync(id);
+        //    ViewBag.userId = id;
+        //    var roles = await _roleManager.Roles.ToListAsync();
+        //    var userRoles = await _userManager.GetRolesAsync(currentUser);
+        //    var roleVMList = new List<AssignRoleToUserVM>();
 
-            foreach (var role in roles)
-            {
-                var assignRoleToUserVM = new AssignRoleToUserVM() { Id = role.Id, Name = role.Name! };
-                if (userRoller.Contains(role.Name!))
-                {
-                    assignRoleToUserVM.Exist = true;
-                }
-                roleVMList.Add(assignRoleToUserVM);
-            }
-            return View(roleVMList);
-        }
+        //    foreach (var role in roles)
+        //    {
+        //        var assignRoleToUserVM = new AssignRoleToUserVM() { Id = role.Id, Name = role.Name };
+        //        if (userRoles.Contains(role.Name))
+        //        {
+        //            assignRoleToUserVM.Exist = true;
+        //        }
+        //        roleVMList.Add(assignRoleToUserVM);
+        //    }
 
-        [HttpPost]
-        public async Task<IActionResult> AssignRoleTouser(string userId, List<AssignRoleToUserVM> requestList)
-        {
-            _logger.LogInformation("Assigning roles to user. UserID: {UserId}, RequestListCount: {Count}", userId, requestList.Count);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("User ID must not be null or empty.");
-            }
+        //    return View(roleVMList);
+        //}
 
-            if (requestList == null || requestList.Count == 0)
-            {
-                return BadRequest("Request list must not be null or empty.");
-            }
+        //[HttpPost]
+        //public async Task<IActionResult> AssignRoleToUser(string userId, List<AssignRoleToUserVM> requestList)
+        //{
+        //    _logger.LogInformation("Assigning roles to user. UserID: {UserId}, RequestListCount: {Count}", userId, requestList.Count);
+        //    if (string.IsNullOrEmpty(userId))
+        //    {
+        //        return BadRequest("User ID must not be null or empty.");
+        //    }
 
-            try
-            {
-                var userToAssignRoles = await _userManager.Users
-     .Include(u => u.UserRoles)
-     .ThenInclude(ur => ur.Role)
-     .FirstOrDefaultAsync(u => u.Id == userId);
+        //    if (requestList == null || requestList.Count == 0)
+        //    {
+        //        return BadRequest("Request list must not be null or empty.");
+        //    }
 
+        //    try
+        //    {
+        //        var userToAssignRoles = await _userManager.Users
+        //            .Include(u => u.UserRoles)
+        //            .ThenInclude(ur => ur.Role)
+        //            .FirstOrDefaultAsync(u => u.Id == userId);
 
-                if (userToAssignRoles == null)
-                {
-                    return NotFound($"User with ID {userId} not found.");
-                }
+        //        if (userToAssignRoles == null)
+        //        {
+        //            return NotFound($"User with ID {userId} not found.");
+        //        }
 
-                foreach (var role in requestList)
-                {
-                    if (role == null || string.IsNullOrEmpty(role.Name))
-                    {
-                        // Hatalı veri durumunda hata
-                        return BadRequest("Invalid role data.");
-                    }
+        //        foreach (var role in requestList)
+        //        {
+        //            if (role == null || string.IsNullOrEmpty(role.Name))
+        //            {
+        //                return BadRequest("Invalid role data.");
+        //            }
 
-                    if (role.Exist)
-                    {
-                        _logger.LogInformation("Adding user {UserId} to role {RoleName}", userToAssignRoles.Id, role.Name);
+        //            if (role.Exist)
+        //            {
+        //                if (!_userManager.IsInRoleAsync(userToAssignRoles, role.Name).Result)
+        //                {
+        //                    var addResult = await _userManager.AddToRoleAsync(userToAssignRoles, role.Name);
+        //                    if (!addResult.Succeeded)
+        //                    {
+        //                        _logger.LogError("Failed to add role. Role: {RoleName}, UserID: {UserId}, Errors: {Errors}", role.Name, userId, string.Join(", ", addResult.Errors.Select(e => e.Description)));
+        //                        return BadRequest($"Failed to add role {role.Name} to user {userId}. Errors: {string.Join(", ", addResult.Errors.Select(e => e.Description))}");
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                if (_userManager.IsInRoleAsync(userToAssignRoles, role.Name).Result)
+        //                {
+        //                    var removeResult = await _userManager.RemoveFromRoleAsync(userToAssignRoles, role.Name);
+        //                    if (!removeResult.Succeeded)
+        //                    {
+        //                        return BadRequest($"Failed to remove role {role.Name} from user {userId}. Errors: {string.Join(", ", removeResult.Errors.Select(e => e.Description))}");
+        //                    }
+        //                }
+        //            }
+        //        }
 
-                        var addResult = await _userManager.AddToRoleAsync(userToAssignRoles, role.Name);
-                        if (!addResult.Succeeded)
-                        {
-                            _logger.LogError("Failed to add role. Role: {RoleName}, UserID: {UserId}, Errors: {Errors}", role.Name, userId, string.Join(", ", addResult.Errors.Select(e => e.Description)));
-                            return BadRequest($"Failed to add role {role.Name} to user {userId}. Errors: {string.Join(", ", addResult.Errors.Select(e => e.Description))}");
-                        }
-                    }
-                    else
-                    {
-                        var removeResult = await _userManager.RemoveFromRoleAsync(userToAssignRoles, role.Name);
-
-                        if (!removeResult.Succeeded)
-                        {
-                            return BadRequest($"Failed to remove role {role.Name} from user {userId}. Errors: {string.Join(", ", removeResult.Errors.Select(e => e.Description))}");
-                        }
-                    }
-                }
-
-                return RedirectToAction(nameof(HomeController.UserList), "Home");
-            }
-            catch (Exception ex)
-            {
-                return View("Error", new ErrorViewModel { RequestId = HttpContext.TraceIdentifier, Message = ex.Message });
-            }
-        }
-
+        //        return RedirectToAction(nameof(HomeController.UserList), "Home");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error while assigning roles.");
+        //        return View("Error", new ErrorViewModel { RequestId = HttpContext.TraceIdentifier, Message = ex.Message });
+        //    }
+        //}
     }
+
 }
+

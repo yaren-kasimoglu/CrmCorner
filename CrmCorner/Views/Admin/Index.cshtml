@@ -1,0 +1,49 @@
+﻿@model IEnumerable<CrmCorner.ViewModels.UserRoleViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h1>User Management</h1>
+
+@*<p>
+    <a asp-action="CreateRole" class="btn btn-primary">Add Role</a>
+    <a asp-action="RoleList" class="btn btn-secondary">View Roles</a>
+</p>*@
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Roles</th>
+        @*    <th>Actions</th>*@
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var userRole in Model)
+        {
+            <tr>
+                <td>@userRole.User.NameSurname</td>
+                <td>@userRole.User.Email</td>
+                <td>
+                    @foreach (var role in userRole.Roles)
+                    {
+                        <span>@role</span>
+                    }
+                </td>
+
+               @* <td>
+                    <a asp-action="AssignRole" asp-route-userId="@userRole.User.Id" class="btn btn-success">Assign Role</a>
+                </td>*@
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
