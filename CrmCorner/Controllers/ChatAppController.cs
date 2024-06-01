@@ -79,6 +79,8 @@ namespace CrmCorner.Controllers
                     var currentUsers = await _userManager.FindByNameAsync(item.UserName);
                     if (currentUsers != null)
                     {
+                        bool hasUnreadMessages = _context.ChatHistories.Any(m => m.ReceiverId == currentUser.Id && !m.IsRead && m.SenderId== item.Id);
+
                         var userViewModel = new UserViewModel
                         {
                             Email = currentUsers!.Email,
@@ -86,7 +88,8 @@ namespace CrmCorner.Controllers
                             NameSurname= currentUsers!.NameSurname,
                             PhoneNumber = currentUsers!.PhoneNumber,
                             UserId = currentUsers.Id,
-                            PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png")
+                            PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png"),
+                            HasUnreadMessages = hasUnreadMessages
                         };
                         userViewModels.Add(userViewModel);
                     }
@@ -119,7 +122,30 @@ namespace CrmCorner.Controllers
             var allMessages = messagesSent.Concat(messagesReceived)
                                             .OrderBy(c => c.MessageTime)
                                             .ToList();
+            #region Update
+            var notReadMessages = allMessages.Where(m => !m.IsRead).ToList();
+            if (notReadMessages.Any())  // notReadMessages boş olup olmadığını kontrol et
+            {
+                foreach (var message in notReadMessages)
+                {
+                    message.IsRead = true;  // Mesajı okundu olarak işaretle
+                }
 
+                // Değişiklikleri veritabanına uygula
+                _context.UpdateRange(notReadMessages);
+                await _context.SaveChangesAsync();
+
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = false, // JavaScript tarafından erişilebilir yapmak için HttpOnly 'false'
+                    Expires = DateTime.Now.AddDays(1), // Çerezin geçerlilik süresi 1 gün
+                    Path = "/" // Çerezin tüm site genelinde geçerli olması
+                };
+
+                // "HasUnreadMessages" çerezini "false" olarak güncelle
+                Response.Cookies.Append("HasUnreadMessages", "false", cookieOptions);
+            }
+            #endregion Update
             ViewBag.GetUserMessage = allMessages;
             ViewBag.GetUserId = currentUser.Id;
             return Json(new { Message = allMessages });
