@@ -108,26 +108,51 @@ namespace CrmCorner.Controllers
             {
                 var userId = _userManager.GetUserId(User);
 
+        
+
                 var user = await _context.Users
                                           .Include(u => u.Customers)
                                           .FirstOrDefaultAsync(u => u.Id == userId);
+                var roles = await _userManager.GetRolesAsync(user);
+
+                bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
 
                 if (user == null)
                 {
                     return NotFound("User not found.");
                 }
 
+
+                List<CustomerN> customers;
+
+                if (isAdminOrManager)
+                {
+                    // Admin veya Manager ise, aynı email domainine sahip kullanıcıların müşterilerini getir
+                    var emailDomain = user.EmailDomain;
+                    var companyUsers = await _context.Users
+                                                     .Where(u => u.EmailDomain == emailDomain)
+                                                     .Include(u => u.Customers)
+                                                     .ToListAsync();
+                    customers = companyUsers.SelectMany(u => u.Customers).ToList();
+                }
+                else
+                {
+                    // Değilse, sadece kullanıcının kendi müşterilerini getir
+                    customers = user.Customers.ToList();
+                }
+
                 // Sektörleri gruplayıp sayılarına göre chart verisi oluşturma
-                var chartData = user.Customers
-                                     .GroupBy(c => c.Industry)
-                                     .Select(group => new { Industry = group.Key, Count = group.Count() })
-                                     .ToList();
+                var chartData = customers
+                                 .GroupBy(c => c.Industry)
+                                 .Select(group => new { Industry = group.Key, Count = group.Count(), CustomerNames = group.Select(c => c.Name).ToList() })
+                                 .ToList();
 
                 // labels ve data alanlarını doldur
                 var labels = chartData.Select(data => data.Industry.GetDisplayName().ToString()).ToArray();
                 var dataValues = chartData.Select(data => data.Count).ToArray();
+                var customerNames = chartData.Select(data => data.CustomerNames).ToArray();
 
-                return Json(new { labels, data = dataValues });
+                return Json(new { labels, data = dataValues, customerNames });
             }
             catch (Exception ex)
             {
@@ -139,77 +164,97 @@ namespace CrmCorner.Controllers
             }
         }
 
+
+
+
         [Authorize]
-        public async Task<IActionResult> IsFinalDesicionMaker()
+        public async Task<IActionResult> IsFinalDecisionMaker()
         {
             var userId = _userManager.GetUserId(User);
 
-            var userTaskComps = await _context.Users
-                                                 .Where(u => u.Id == userId)
-                                                 .SelectMany(u => u.TaskComps)
-                                                 .ToListAsync();
+            // Kullanıcının AppUser veya AssignedUser olduğu görevleri bul
+            var userTaskComps = await _context.TaskComps
+                                              .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
+                                              .ToListAsync();
 
             if (userTaskComps == null || !userTaskComps.Any())
             {
                 return NotFound();
             }
 
-            var isFinalDesicionMaker = userTaskComps.Count(tc => tc.IsFinalDecisionMaker);
-            var IsNotFinalDesicionMaker = userTaskComps.Count(tc => !tc.IsFinalDecisionMaker);
+            // Görevleri benzersiz olarak saymak için filtre uygula
+            var distinctTasks = userTaskComps.GroupBy(tc => tc.TaskId).Select(group => group.First()).ToList();
+
+            var finalDecisionMakerTasks = distinctTasks.Where(tc => tc.IsFinalDecisionMaker).Select(tc => tc.Title).Distinct().ToList();
+            var notFinalDecisionMakerTasks = distinctTasks.Where(tc => !tc.IsFinalDecisionMaker).Select(tc => tc.Title).Distinct().ToList();
 
             var chartData = new
             {
                 labels = new[] { "Evet", "Hayır" },
-                data = new[] { isFinalDesicionMaker, IsNotFinalDesicionMaker },
+                data = new[] { finalDecisionMakerTasks.Count, notFinalDecisionMakerTasks.Count },
+                taskNames = new[] { finalDecisionMakerTasks, notFinalDecisionMakerTasks }
             };
-
 
             return Json(chartData);
         }
+
 
         [Authorize]
         public async Task<IActionResult> OutcomeStatusChart()
         {
             var userId = _userManager.GetUserId(User);
 
-            // AppUser olarak atanan TaskComps'ı bul
-            var appUserTasks = await _context.TaskComps
-                                              .Where(tc => tc.UserId == userId)
+            // AppUser ve AssignedUser olarak atanan TaskComps'ı bul ve birleşik bir liste oluştur
+            var combinedTasks = await _context.TaskComps
+                                              .Include(tc => tc.Status)
+                                              .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
                                               .ToListAsync();
 
-            // AssignedUser olarak atanan TaskComps'ı bul
-            var assignedUserTasks = await _context.TaskComps
-                                                   .Where(tc => tc.AssignedUserId == userId)
-                                                   .ToListAsync();
+            // Görevleri benzersiz olarak saymak için filtre uygula
+            var distinctTasks = combinedTasks.GroupBy(tc => tc.TaskId).Select(group => group.First()).ToList();
 
-            // İki listeyi birleştir
-            var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
-
-            if (!combinedTasks.Any())
+            if (!distinctTasks.Any())
             {
                 return NotFound();
             }
 
-
-            var outcomeCounts = combinedTasks.GroupBy(tc => tc.Outcomes)
-                                     .ToDictionary(g => g.Key.ToString(), g => g.Count());
+            var outcomeGroups = distinctTasks.GroupBy(tc => tc.Outcomes)
+                                             .Select(group => new {
+                                                 Outcome = group.Key.ToString(),
+                                                 Count = group.Count(),
+                                                 TaskNames = group.Select(tc => tc.Title).Distinct().ToList()
+                                             }).ToList();
 
             // Tüm olası enum değerlerini döngü ile işle
             var labels = Enum.GetNames(typeof(OutcomeType)).ToList();
             var data = new List<int>();
+            var taskNames = new List<List<string>>();
+
             foreach (var label in labels)
             {
-                outcomeCounts.TryGetValue(label, out var count);
-                data.Add(count);
+                var group = outcomeGroups.FirstOrDefault(g => g.Outcome == label);
+                if (group != null)
+                {
+                    data.Add(group.Count);
+                    taskNames.Add(group.TaskNames);
+                }
+                else
+                {
+                    data.Add(0);
+                    taskNames.Add(new List<string>());
+                }
             }
 
             var chartData = new
             {
                 labels = labels.ToArray(),
                 data = data.ToArray(),
+                taskNames = taskNames
             };
+
             return Json(chartData);
         }
+
         [Authorize]
         public async Task<IActionResult> UserTaskStatusChart()
         {
@@ -228,17 +273,22 @@ namespace CrmCorner.Controllers
                                                    .Where(tc => tc.AssignedUserId == userId)
                                                    .ToListAsync();
 
-            // İki listeyi birleştir
-            var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
+            // İki listeyi birleştir ve belirli kullanıcılar için filtre uygula
+            var combinedTasks = appUserTasks.Concat(assignedUserTasks)
+                                            .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
+                                            .ToList();
 
-            var chartData = new
-            {
-                labels = combinedTasks.Select(tc => tc.Status.StatusName).Distinct(),
-                data = combinedTasks.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
-            };
+            var chartData = combinedTasks.GroupBy(tc => tc.Status.StatusName)
+                                         .Select(group => new {
+                                             StatusName = group.Key,
+                                             TaskNames = group.Select(tc => tc.Title).Distinct().ToList(), // Görev isimlerini ayırt et
+                                             Count = group.Select(tc => tc.Title).Distinct().Count() // Görev isimlerini ayırt et ve sayısını al
+                                         }).ToList();
 
             return Json(chartData);
         }
+
+
         #endregion
 
         public IActionResult Giris()
@@ -298,9 +348,11 @@ namespace CrmCorner.Controllers
             }
             catch (Exception ex)
             {
-                return RedirectToAction("NotFound", "Error");
+                ModelState.AddModelError(string.Empty, $"Bir hata oluştu: {ex.Message}");
+                return View();
             }
         }
+
 
         #endregion
 

@@ -1,4 +1,13 @@
-﻿SECURITY STAMP NEDİR? (Identity ile gelen bir özellik. Identity den gelen methodları kullanarak bu özelliği aktifleştirip kullanabiliriz.)
+﻿db name u1613932_db877
+db user u1613932_user877
+db password @TOSf4:8c8@Wb6n:
+host localhost
+
+94.73.148.165
+
+
+
+SECURITY STAMP NEDİR? (Identity ile gelen bir özellik. Identity den gelen methodları kullanarak bu özelliği aktifleştirip kullanabiliriz.)
 
 kullanıcının otomatik çıkış yapabilmesini sağlar.
 dbdeki security stamp ile cookidekini 30 dk da bir karşılaştırıp aynı olmadığı anda otomatik çıkış yapılır.  Güvenlik sebebi ile yapılır.

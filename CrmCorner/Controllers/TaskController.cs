@@ -74,6 +74,8 @@ namespace CrmCorner.Controllers
                             .Where(e => companyUserIds.Contains(e.UserId) || companyUserIds.Contains(e.AssignedUserId))
                             .ToList();
 
+                        ViewBag.Users = companyUsers;
+
                         return View(tasks);
                     }
                     else
@@ -84,7 +86,6 @@ namespace CrmCorner.Controllers
                             .Include(e => e.AppUser)
                             .Where(e => e.UserId == currentUser.Id || e.AssignedUserId == currentUser.Id)
                             .ToList();
-
                         return View(tasks);
                     }
                 }

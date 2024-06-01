@@ -31,11 +31,23 @@ namespace CrmCorner.Controllers
 
                 if (currentUser != null)
                 {
-                    var customers = _context.CustomerNs
+                    var customersQuery = _context.CustomerNs
                         .Include(c => c.AppUser)
-                        .Where(c => c.AppUserId == currentUser.Id) // Mevcut kullanıcının Id'sine göre filtrele
-                        .ToList();
+                        .AsQueryable();
 
+                    var roles = await _userManager.GetRolesAsync(currentUser);
+                    if (roles.Contains("Admin"))
+                    {
+                        // Admin ise, aynı şirketteki tüm kullanıcıların müşterilerini getir
+                        customersQuery = customersQuery.Where(c => c.AppUser.CompanyId == currentUser.CompanyId);
+                    }
+                    else
+                    {
+                        // Admin değil ise, sadece kendi müşterilerini getir
+                        customersQuery = customersQuery.Where(c => c.AppUserId == currentUser.Id);
+                    }
+
+                    var customers = await customersQuery.ToListAsync();
                     return View(customers);
                 }
                 else
@@ -49,6 +61,7 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
 
         [HttpGet]
         public async Task<IActionResult> CustomerAdd()
