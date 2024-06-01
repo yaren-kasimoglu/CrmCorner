@@ -51,6 +51,8 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> Calendar()
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             if (currentUser != null)
             {
                 var calendars = _context.Calendars

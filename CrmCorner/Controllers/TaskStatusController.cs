@@ -29,6 +29,7 @@ namespace CrmCorner.Controllers
                 var currentUserName = User.Identity.Name;
                 var currentUser = await _userManager.FindByNameAsync(currentUserName);
                 var currentUserEmailDomain = currentUser.EmailDomain;
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
                 var positiveTasks = _context.TaskComps
                     .Include(t => t.Status)
@@ -55,6 +56,7 @@ namespace CrmCorner.Controllers
             {
                 var currentUserName = User.Identity.Name;
                 var currentUser = await _userManager.FindByNameAsync(currentUserName);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
                 var currentUserCompanyName = currentUser.CompanyName;
                 var currentUserEmailDomain = currentUser.EmailDomain;
 

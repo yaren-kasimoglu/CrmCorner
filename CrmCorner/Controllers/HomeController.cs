@@ -3,6 +3,7 @@ using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.Services;
 using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,8 @@ namespace CrmCorner.Controllers
                         TaskComps = taskComps // ViewModel'e TaskComps ekleyin
                     };
                     ViewData["UserEmail"] = email;
+                    ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
 
                     return View(viewModel);
                 }

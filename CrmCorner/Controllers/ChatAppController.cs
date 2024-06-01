@@ -20,6 +20,8 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> ChatApp()
         {
             var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             var userViewModel = new UserViewModel
             {
                 Email = currentUser!.Email,
@@ -34,6 +36,7 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> ChatApp(string search)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             ViewBag.GetUserId = currentUser.Id;
             if (search != null)
             {
