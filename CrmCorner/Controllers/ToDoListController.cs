@@ -29,6 +29,8 @@ namespace CrmCorner.Controllers
         {
             string[] dataArray;
             var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             if (id.HasValue && id > 0)
             {
                 GetToDoList(id.Value);

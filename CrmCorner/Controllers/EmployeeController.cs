@@ -30,6 +30,7 @@ namespace CrmCorner.Controllers
 
                 // Giriş yapmış kullanıcının bilgilerini al
                 var currentUser = await _userManager.FindByNameAsync(currentUserName);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
                 if (currentUser == null)
                 {

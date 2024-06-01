@@ -33,6 +33,8 @@ namespace CrmCorner.Controllers
             try
             {
                 var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
                 var userViewModel = new UserViewModel
                 {
                     Email = currentUser!.Email,
