@@ -14,4 +14,7 @@ public partial class ChatHistory
     public string Message { get; set; }
 
     public DateTime MessageTime { get; set; }
+
+    public bool IsRead { get; set; }
+
 }

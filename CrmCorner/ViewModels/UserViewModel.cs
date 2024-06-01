@@ -10,5 +10,6 @@
         public string CompanyName { get; set; }
         public string? PositionName { get; set; }
         public string? UserId { get; set; }
+        public bool HasUnreadMessages { get; set; }
     }
 }
