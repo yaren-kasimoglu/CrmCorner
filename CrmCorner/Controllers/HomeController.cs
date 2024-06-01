@@ -3,6 +3,7 @@ using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.Services;
 using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,17 @@ namespace CrmCorner.Controllers
                         TaskComps = taskComps // ViewModel'e TaskComps ekleyin
                     };
                     ViewData["UserEmail"] = email;
+                    ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
+                    bool hasUnreadMessages = _context.ChatHistories.Any(m => m.ReceiverId == currentUser.Id && !m.IsRead);
+
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = false, // JavaScript tarafından erişilebilir yapmak için HttpOnly 'false' olmalı
+                        Expires = DateTime.Now.AddDays(1), // Çerezin geçerlilik süresi 1 gün
+                        Path = "/" // Çerezin tüm site genelinde geçerli olması
+                    };
+                    Response.Cookies.Append("HasUnreadMessages", hasUnreadMessages.ToString(), cookieOptions);
 
                     return View(viewModel);
                 }

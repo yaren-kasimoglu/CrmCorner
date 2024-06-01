@@ -50,6 +50,7 @@ namespace CrmCorner.Controllers
                 ViewBag.StatusList = statusNames;
 
                 var currentUser = await _userManager.GetUserAsync(User);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
                 if (currentUser != null)
                 {

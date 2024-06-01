@@ -19,7 +19,6 @@ namespace CrmCorner.Models
 
         public string? NotDoneList { get; set; }
 
-
         public DateTime SystemDate { get; set; }
 
         public string? UserId { get; set; }

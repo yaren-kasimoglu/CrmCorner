@@ -32,14 +32,19 @@ namespace CrmCorner.Hubs
             {
                 if (_connections.GetConnections(receiverUserId).Count() <= 0)
                 {
-                    await Task.CompletedTask;
+                    AddChatHistory(message, receiverUserId,false);
+
                 }
-                AddChatHistory(message, receiverUserId);
+                else
+                {
+                    AddChatHistory(message, receiverUserId,true);
+
+                }
                 var targetUserConnectionId = _connections.GetConnections(receiverUserId).First();
                 await Clients.Client(targetUserConnectionId).SendAsync("ChatChannel", message, dateTime);
 
             }
-            private async Task AddChatHistory(string message, string receiverUserId)
+            private async Task AddChatHistory(string message, string receiverUserId,bool state)
             {
                 var claims = Context.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
                 var sernderUserId = claims.Value;
@@ -47,6 +52,7 @@ namespace CrmCorner.Hubs
                 history.SenderId = sernderUserId;
                 history.ReceiverId = receiverUserId;
                 history.Message = message;
+                history.IsRead = state;
                 history.MessageTime = DateTime.Now.Date.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).AddSeconds(DateTime.Now.Second);
                 try
                 {

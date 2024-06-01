@@ -79,6 +79,7 @@
         #notification {
             cursor: pointer; /* Kullanıcıya tıklamaya hazır olduğunu göstermek için fare işaretçisini değiştirir */
         }
+      
     </style>
 </head>
 
@@ -100,7 +101,16 @@
                                     <li class="d-flex align-items-center py-2 px-3" onclick="selectUser('@userName.NameSurname','@userName.UserId')">
                                         <img class="avatar rounded" src="@userName.PictureUrl" alt="avatar" />
                                         <div class="about ps-3">
-                                            <div class="fs-6">@userName.NameSurname</div>
+                                            @if (@userName.HasUnreadMessages)
+                                            {
+                                                <div style=" box-shadow: 0 0 5px 2px #2eacb3; /* Yeşil bir gölge ekler */ border: 1px solid #2eacb3; " class="fs-6">@userName.NameSurname</div>
+                                                <!-- Okunmamış mesajları için bir nokta ekleyin -->
+                                            }
+                                            else
+                                            {
+                                                <div class="fs-6">@userName.NameSurname</div>
+
+                                            }
                                             @*<div class="small text-muted"><i class="fa fa-circle me-2"></i>left 7 mins ago</div>*@
                                         </div>
                                     </li>
@@ -206,6 +216,17 @@
 
             // Controller'a git
             window.location.href = "/ChatApp/ChatApp?search=" + searchText;
+        });
+
+        document.getElementById("searchInput").addEventListener("keypress", function (event) {
+            // Enter tuşuna basıldığında işlem yap
+            if (event.key === "Enter") {
+                var searchText = document.getElementById("searchInput").value;
+                var searchText = this.value; // Input alanından arama metnini al
+
+                // Aynı URL yönlendirme işlemi
+                window.location.href = "/ChatApp/ChatApp?search=" + encodeURIComponent(searchText);
+            }
         });
         const selectedUserElement = document.getElementById("selectedUser");
         console.log(selectedUserElement.value);

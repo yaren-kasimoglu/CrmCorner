@@ -51,6 +51,8 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> Calendar()
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             if (currentUser != null)
             {
                 var calendars = _context.Calendars
@@ -108,7 +110,7 @@ namespace CrmCorner.Controllers
                 _context.Calendars.Add(Calendar);
                 _context.SaveChanges();
 
-                if (Calendar.SelectedEmails!=null &&Calendar.SelectedEmails.Count>0)
+                if (Calendar.SelectedEmails!=null &&Calendar.SelectedEmails.Count>0 && Calendar.SelectedEmails[0]!=null)
                 {
                     var emailSend = sendEmailAsync2(currentUser.Email,Calendar);
 
@@ -120,12 +122,41 @@ namespace CrmCorner.Controllers
 
         }
 
-
         [HttpPost]
-        public IActionResult CalendarUpdate(int? ID, string title, string date)
+        public async Task<IActionResult> Edit(Calendar model)
         {
-            var htmlAttributes = ViewBag.Id;
-            Calendar calendar = new Calendar { Id = ID.Value, Title = title, Date = date };
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            var eventToUpdate = await _context.Set<Calendar>().FindAsync(model.Id);
+                if (eventToUpdate != null)
+                {
+                    eventToUpdate.Title = model.Title;
+                    eventToUpdate.Description = model.Description;
+                    eventToUpdate.Date = model.Date;
+                    eventToUpdate.UserId = currentUser.Id;
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+                }
+            return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var eventToDelete = await _context.Set<Calendar>().FindAsync(id);
+            if (eventToDelete != null)
+            {
+                _context.Set<Calendar>().Remove(eventToDelete);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+            }
+            return NotFound(); // Event bulunamazsa
+        }
+        [HttpPost]
+        public async Task<IActionResult> CalendarUpdate(int? ID, string title,string description, string date)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            Calendar calendar = new Calendar { Id = ID.Value, Title = title, Date = date ,UserId= currentUser.Id,Description=description};
             if (ModelState.IsValid)
             {
                 _context.Calendars.Update(calendar);

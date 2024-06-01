@@ -27,6 +27,8 @@ namespace CrmCorner.Controllers
             {
                 var currentUser = await _userManager.GetUserAsync(User);
 
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
                 if (currentUser != null)
                 {
                     var customersQuery = _context.CustomerNs
