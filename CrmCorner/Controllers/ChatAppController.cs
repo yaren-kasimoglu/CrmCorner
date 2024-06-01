@@ -19,17 +19,15 @@ namespace CrmCorner.Controllers
 
         public async Task<IActionResult> ChatApp()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            var peopleName = _context.Users
-                                 //.Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id)
-                                 .Select(u => new UserViewModel
-                                 {
-                                     NameSurname = u.NameSurname,
-                                     UserId = u.Id,
-                                     PictureUrl = u.Picture ?? "/userprofilepicture/defaultpp.png"
-                                 })
-                                .ToList();
-            ViewBag.UserNames = peopleName;
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            var userViewModel = new UserViewModel
+            {
+                Email = currentUser!.Email,
+                UserName = currentUser!.UserName,
+                PhoneNumber = currentUser!.PhoneNumber,
+                PictureUrl = currentUser.Picture
+            };
+            ViewBag.UserNames = userViewModel;
             return View();
         }
         [HttpGet]
@@ -41,29 +39,58 @@ namespace CrmCorner.Controllers
             {
                 var searchPeople = _context.Users.
                 Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id && c.NameSurname.Contains(search))
-                      .Select(u => new UserViewModel
-                      {
-                          NameSurname = u.NameSurname,
-                          UserId = u.Id,
-                          PictureUrl = u.Picture ?? "/userprofilepicture/defaultpp.png"
-                      })
-                                .ToList();
-                ViewBag.UserNames = searchPeople;
+                .ToList();
+
+                List<UserViewModel> userViewModels = new List<UserViewModel>();
+                foreach (var item in searchPeople)
+                {
+                    var currentUsers = await _userManager.FindByNameAsync(item.UserName);
+                    if (currentUsers != null)
+                    {
+                        var userViewModel = new UserViewModel
+                        {
+                            Email = currentUsers!.Email,
+                            UserName = currentUsers!.UserName,
+                            NameSurname = currentUsers!.NameSurname,
+                            PhoneNumber = currentUsers!.PhoneNumber,
+                            UserId=currentUsers.Id,
+                            PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png")
+                        };
+                        userViewModels.Add(userViewModel);
+                    }
+                }
+
+                ViewBag.UserNames = userViewModels;
+
                 return View();
 
             }
             else
             {
-                var peopleName = _context.Users
-                                  .Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id)
-                                  .Select(u => new UserViewModel
-                                  {
-                                      NameSurname = u.NameSurname,
-                                      UserId = u.Id,
-                                      PictureUrl = u.Picture ?? "/userprofilepicture/defaultpp.png"
-                                  })
-                                 .ToList();
-                ViewBag.UserNames = peopleName;
+                var searchPeople = _context.Users.
+               Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id)
+                  .ToList();
+                List<UserViewModel> userViewModels = new List<UserViewModel>();
+                foreach (var item in searchPeople)
+                {
+                    var currentUsers = await _userManager.FindByNameAsync(item.UserName);
+                    if (currentUsers != null)
+                    {
+                        var userViewModel = new UserViewModel
+                        {
+                            Email = currentUsers!.Email,
+                            UserName = currentUsers!.UserName,
+                            NameSurname= currentUsers!.NameSurname,
+                            PhoneNumber = currentUsers!.PhoneNumber,
+                            UserId = currentUsers.Id,
+                            PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png")
+                        };
+                        userViewModels.Add(userViewModel);
+                    }
+                }
+
+                ViewBag.UserNames = userViewModels;
+                               
                 return View();
             }
            
