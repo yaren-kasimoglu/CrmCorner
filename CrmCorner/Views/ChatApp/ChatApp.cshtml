@@ -207,6 +207,17 @@
             // Controller'a git
             window.location.href = "/ChatApp/ChatApp?search=" + searchText;
         });
+
+        document.getElementById("searchInput").addEventListener("keypress", function (event) {
+            // Enter tuşuna basıldığında işlem yap
+            if (event.key === "Enter") {
+                var searchText = document.getElementById("searchInput").value;
+                var searchText = this.value; // Input alanından arama metnini al
+
+                // Aynı URL yönlendirme işlemi
+                window.location.href = "/ChatApp/ChatApp?search=" + encodeURIComponent(searchText);
+            }
+        });
         const selectedUserElement = document.getElementById("selectedUser");
         console.log(selectedUserElement.value);
         // selectedUser elementi null ise "Hello" mesajını ekleyelim
