@@ -24,6 +24,7 @@
 
 @section Styles{
     <style>
+
         /*        <link rel="stylesheet" href="~/CCThema/bootstrap5/dist/assets/vendor/dropify/css/dropify.min.css" >*/
         .highlight {
             background-color: #f8f9fa;
@@ -102,7 +103,7 @@
                     <h6 class="card-title mb-4">Detaylar/Notlar</h6>
                     <p>@Model.Description</p>
                     <span class="buyukYazi @GetOutcomeClass(Model.Outcomes)">
-                        @Model.Outcomes.ToString()
+                        @EnumExtensions.GetDisplayName(Model.Outcomes).ToString()
                     </span>
 
                     <div class="progress-container progress-info">
@@ -239,7 +240,7 @@
         <div class="col-lg-8 col-md-12">
             <div class="card mb-2">
                 <div class="card-body">
-
+                    <a href="@Url.Action("TaskEdit", "Task", new { id = Model.TaskId })" class="btn btn-primary mb-3">Görevi Düzenle</a>
                     @if (Model.TaskCompLogs != null && Model.TaskCompLogs.Any())
                     {
 

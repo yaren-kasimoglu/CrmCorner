@@ -30,6 +30,7 @@
             <th scope="col">Firma Email</th>
             <th scope="col">Sektör</th>
             <th scope="col">Çalışan Sayısı</th>
+            <th scope="col">Atanmış Kullanıcı</th> <!-- Yeni sütun -->
             <th scope="col">İşlemler</th>
         </tr>
     </thead>
@@ -37,7 +38,6 @@
         @foreach (var item in Model)
         {
             <tr>
-
                 <td>@item.Name</td>
                 <td>@item.Surname</td>
                 <td>@item.CustomerEmail</td>
@@ -46,7 +46,14 @@
                 <td>@item.CompanyName</td>
                 <td>@item.CompanyEmail</td>
                 <td>
-                    <span class="badge bg-success">@item.Industry.GetDisplayName()</span>
+                    @if (item.Industry != null)
+                    {
+                        <span class="badge bg-success">@item.Industry.GetDisplayName()</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger">Bilinmiyor</span>
+                    }
                 </td>
                 <td>
                     @if (item.EmployeeCount.HasValue)
@@ -58,6 +65,7 @@
                         <span class="text-danger">Bilinmiyor</span>
                     }
                 </td>
+                <td>@item.AppUser.UserName</td> <!-- Yeni sütun -->
                 <td>
                     <a href="/Customer/CustomerEdit/@item.Id" target="_self">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
@@ -68,27 +76,19 @@
                         <i class="fa fa-trash-o"></i>
                     </button>
                 </td>
-
             </tr>
         }
     </tbody>
 </table>
 
-
-
-<!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-<!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     function confirmDelete(button) {
-        // Kullanıcıya silme işlemini onaylamasını sor
-        if (confirm('Are you sure you want to dele te this customer?')) {
+        if (confirm('Are you sure you want to delete this customer?')) {
             var customerId = button.getAttribute('data-customerid');
             var form = document.createElement('form');
             form.action = '/Customer/CustomerDelete/' + customerId;
@@ -100,15 +100,14 @@
 </script>
 <script>
     $(document).ready(function () {
-        $('#customer_List')
-            .dataTable({
-                responsive: true,
-                columnDefs: [
-                    {
-                        orderable: false,
-                        targets: [0]
-                    }
-                ]
-            });
+        $('#customer_List').dataTable({
+            responsive: true,
+            columnDefs: [
+                {
+                    orderable: false,
+                    targets: [0]
+                }
+            ]
+        });
     });
 </script>

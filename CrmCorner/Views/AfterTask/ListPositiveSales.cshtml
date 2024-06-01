@@ -40,7 +40,8 @@
                                     <td>
                                         @if (sale.IsThereAProblem)
                                         {
-                                            <i class="fa fa-exclamation text-warning" title="@sale.ProblemDescription.Substring(0, 255)"></i>
+                                            var tooltipText = sale.ProblemDescription.Length > 255 ? sale.ProblemDescription.Substring(0, 255) + "..." : sale.ProblemDescription;
+                                            <i class="fa fa-exclamation text-warning" title="@tooltipText"></i>
                                         }
                                         else
                                         {

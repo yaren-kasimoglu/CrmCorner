@@ -14,6 +14,11 @@ using static CrmCorner.Hubs.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Hata günlüğü ayarları
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 // Google Calendar servisini ekleyin
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 

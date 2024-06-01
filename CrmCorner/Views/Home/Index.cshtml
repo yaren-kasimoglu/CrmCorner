@@ -137,14 +137,16 @@ else
                     </div>
                 </div>
 
-                <div class="card-body text-center">
-                    <div class="col-6">
-                        <h6>Son Karar Mercii İle Görüşme Durumları</h6>
-                        <div style="width: 60%;">
-                            <canvas id="isFinalDesicionMaker"></canvas>
-                        </div>
+            <div class="card-body text-center">
+                <div class="col-6">
+                    <h6>Son Karar Mercii İle Görüşme Durumları</h6>
+                    <div style="width: 60%;">
+                        <canvas id="isFinalDecisionMaker"></canvas>
                     </div>
                 </div>
+            </div>
+
+
             </div>
         </div>
     </div>
@@ -170,35 +172,57 @@ else
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="text/javascript">
-    $(document).ready(function () {
 
+    $(document).ready(function () {
         $.ajax({
             type: "GET",
             url: "/Home/UserTaskStatusChart",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
                 var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
+
+                // Gelen veri yapısına göre haritalama yapalım
+                var labels = data.map(item => item.statusName);
+                var dataValues = data.map(item => item.count);
+                var taskNames = data.map(item => item.taskNames);
+
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: data.labels,
+                        labels: labels,
                         datasets: [{
-                            data: data.data,
+                            data: dataValues,
                             backgroundColor: colors,
                             borderWidth: 1
                         }]
                     },
-
+                    options: {
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var tasks = taskNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             },
             error: function (error) {
                 console.error('Error fetching data:', error);
             }
         });
-
     });
+
     $(document).ready(function () {
         $.ajax({
             type: "GET",
@@ -206,29 +230,42 @@ else
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('outcomeStatusChart').getContext('2d');
                 var colors = ['#FED049', '#2D6187', '#89BEB3'];
+
+                var labels = data.labels;
+                var dataValues = data.data;
+                var taskNames = data.taskNames;
+
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: data.labels,
+                        labels: labels,
                         datasets: [{
                             label: 'Görev Durumu',
-                            data: data.data,
+                            data: dataValues,
                             backgroundColor: colors,
                             borderWidth: 2,
                             barThickness: 30,
                         }]
                     },
-                    //options: {
-                    //    scales: {
-                    //        yAxes: [{
-                    //            ticks: {
-                    //                beginAtZero: true
-                    //            }
-                    //        }]
-                    //    }
-                    //},
+                    options: {
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var tasks = taskNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             },
             error: function (error) {
@@ -237,27 +274,50 @@ else
         });
     });
 
+
     $(document).ready(function () {
         $.ajax({
             type: "GET",
-            url: "/Home/IsFinalDesicionMaker",
+            url: "/Home/IsFinalDecisionMaker",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
-                var ctx = document.getElementById('isFinalDesicionMaker').getContext('2d');
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
+                var ctx = document.getElementById('isFinalDecisionMaker').getContext('2d');
                 var colors = ['#2eacb3', '#FED049'];
+
+                var labels = data.labels;
+                var dataValues = data.data;
+                var taskNames = data.taskNames;
+
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: data.labels,
+                        labels: labels,
                         datasets: [{
                             label: '',
-                            data: data.data,
+                            data: dataValues,
                             backgroundColor: colors,
                             borderWidth: 2,
                             barThickness: 30,
                         }]
                     },
+                    options: {
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var tasks = taskNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             },
             error: function (error) {
@@ -265,6 +325,9 @@ else
             }
         });
     });
+
+
+
 </script>
 <script>
     $(document).ready(function () {
@@ -274,26 +337,48 @@ else
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('industuryChart').getContext('2d');
                 // Dinamik olarak renk seçimi
                 var colors = generateColors(data.labels.length);
+
+                var labels = data.labels;
+                var dataValues = data.data;
+                var customerNames = data.customerNames;
+
                 new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels: data.labels,
+                        labels: labels,
                         datasets: [{
-                            data: data.data,
+                            data: dataValues,
                             backgroundColor: colors,
                             borderWidth: 1
                         }]
                     },
+                    options: {
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var customers = customerNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(customers); // Müşteri isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             },
             error: function (xhr, status, error) {
                 // Hata durumunda kullanıcıya bildirim
-                var errorMessage = xhr.status + ': ' + xhr.statusText
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
                 console.error('Error - ' + errorMessage);
-          //     alert('Failed to fetch data. Error: ' + errorMessage);
+                // alert('Failed to fetch data. Error: ' + errorMessage);
             }
         });
 
@@ -307,7 +392,8 @@ else
             }
             return colors;
         }
-
     });
+
+
 
 </script>

@@ -40,6 +40,7 @@
         max-height: 300px; /* Kartın maksimum yüksekliği */
         overflow-y: auto; /* Dikey kaydırma çubuğu ekle */
     }
+
     .search-filter-container {
         display: flex;
         justify-content: start;
@@ -104,7 +105,9 @@
         appearance: none;
     }
 
-
+    .selected-status {
+        order: -1; /* Bu, seçilen statü kutusunun öncelikli olarak sola hizalanmasını sağlar */
+    }
     .final-decision-filter {
         display: flex;
         align-items: center;
@@ -143,6 +146,10 @@
             padding-right: 30px;
         }
 
+    .selected-status {
+        /* Burada seçilen karta özel stil tanımlayabilirsiniz */
+        border: 2px solid #000; /* Örnek: kalın siyah kenarlık */
+    }
 
             /* Hover efektleri */
             .search-box input[type="text"]:hover,
@@ -316,6 +323,7 @@
                                             data-is-final-decision-maker="@task.IsFinalDecisionMaker"
                                             data-negative-reason="@task.NegativeReason"
                                             data-user-name="@task.AppUser?.UserName"
+                                            data-user-id="@task.AppUser?.Id"
                                             data-assigned-user-name="@task.AssignedUser?.UserName"
                                             data-customer-name="@task.Customer?.Name @task.Customer?.Surname"
                                             data-outcome-type="@task.Outcomes.ToString()">
@@ -393,9 +401,12 @@
 
 
 <script>
+
+
     function performSearch() {
 
         var searchTerm = document.getElementById('searchTasks').value.toLowerCase();
+
 
         var tasks = document.querySelectorAll('.dd-item');
 
@@ -415,6 +426,7 @@
             var userName = task.getAttribute('data-user-name') ? task.getAttribute('data-user-name').toLowerCase() : '';
             var assignedUserName = task.getAttribute('data-assigned-user-name') ? task.getAttribute('data-assigned-user-name').toLowerCase() : '';
             var customerName = task.getAttribute('data-customer-name') ? task.getAttribute('data-customer-name').toLowerCase() : '';
+
 
             isFinalDecisionMaker = isFinalDecisionMaker === 'true' ? 'evet' : (isFinalDecisionMaker === 'false' ? 'hayır' : '');
 
@@ -447,20 +459,42 @@
 
     function filterByStatus() {
         var selectedStatus = document.getElementById('statusFilter').value;
-        var cards = document.querySelectorAll('.card');
 
-        cards.forEach(function (card) {
-            var cardStatus = card.getAttribute('data-statusid');
-            if (selectedStatus === "" || cardStatus === selectedStatus) {
-                card.style.display = ''; // Seçilen durumla eşleşen kartları göster
-            } else {
-                card.style.display = 'none'; // Eşleşmeyen kartları gizle
+        if (selectedStatus === "") {
+            // Tüm Durumlar seçildiyse sayfayı yenile
+            location.reload();
+        } else {
+            var cards = document.querySelectorAll('.card');
+
+            // Tüm kartlardan selected-status sınıfını kaldır
+            cards.forEach(function (card) {
+                card.classList.remove('selected-status');
+            });
+
+            var container = document.querySelector('.row.g-3');
+
+            // Belirli bir durum seçildiyse, sadece ilgili kartları göster
+            cards.forEach(function (card) {
+                var cardStatus = card.getAttribute('data-statusid');
+                if (cardStatus === selectedStatus) {
+                    card.style.display = '';
+                    card.classList.add('selected-status');
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Seçilen kartı ilk pozisyona taşı
+            var selectedCard = document.querySelector('.card.selected-status');
+            if (selectedCard) {
+                container.prepend(selectedCard);
             }
-        });
+        }
     }
 
     // Dropdown'da bir seçim yapıldığında filterByStatus fonksiyonunu çağır
     document.getElementById('statusFilter').addEventListener('change', filterByStatus);
+
 
 
 
@@ -680,8 +714,8 @@
         paginateTasks();
     });
 
-function showHiddenTasks(statusKey) {
-    $('ol.hidden-tasks[data-statusid="' + statusKey + '"]').toggle();
-}
+    function showHiddenTasks(statusKey) {
+        $('ol.hidden-tasks[data-statusid="' + statusKey + '"]').toggle();
+    }
 
 </script>

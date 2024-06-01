@@ -46,6 +46,7 @@
                         </div>
                         <div class="card-body">
                             <form asp-action="SignIn" asp-controller="Home" asp-route-returnUrl="@Context.Request.Query["returnUrl"]" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                <div asp-validation-summary="All" class="text-danger"></div>
                                 <div class="form-floating">
                                     <input asp-for="Email" class="form-control">
                                     <label asp-for="Email"></label>
