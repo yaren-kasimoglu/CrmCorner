@@ -59,9 +59,22 @@
         }
 </style>
 
-<form asp-action="TaskEdit" asp-controller="Task" method="post">
+<form asp-action="TaskEdit" asp-controller="Task" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="TaskId" />
     <div class="row">
+
+        @if (ViewBag.ErrorMessages != null && ViewBag.ErrorMessages.Count > 0)
+        {
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach (var error in ViewBag.ErrorMessages)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+
         <div class="col-lg-6">
             <!-- Başlık, Değer Teklifi, Açıklama -->
             <div class="form-group">
@@ -172,14 +185,55 @@
                 <label asp-for="IsFinalDecisionMaker" class="control-label">Son Karar Mercii İle Görüşüldü</label>
                 <span asp-validation-for="IsFinalDecisionMaker" class="text-danger"></span>
             </div>
+        </div>
 
-
+        <div class="col-lg-12">
+            <div class="form-group">
+                <label for="file">Dosya Yükle</label>
+                <input type="file" class="form-control" name="file" id="file" />
+            </div>
         </div>
     </div>
     <div class="form-group">
         <input type="submit" value="GÜNCELLE" class="btn btn-primary" />
     </div>
 </form>
+
+<!-- Mevcut dosyaları listeleme -->
+<div class="card mb-2">
+    <div class="card-header">
+        <h6 class="card-title">Yüklenmiş Dosyalar</h6>
+    </div>
+    <div class="card-body">
+        @if (Model.FileAttachments != null && Model.FileAttachments.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Dosya Adı</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var file in Model.FileAttachments)
+                    {
+                        <tr>
+                            <td><div class="ellipsis" title="@file.FileName">@file.FileName</div></td>
+                            <td>
+                                <a href="@Url.Action("DownloadFile", "Task", new { fileAttachmentId = file.FileAttachmentId })"><span class="badge bg-success">İndir</span></a>
+                                <a href="@Url.Action("DeleteFile", "Task", new { fileAttachmentId = file.FileAttachmentId })"><span class="badge bg-danger">Sil</span></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>Yüklenmiş dosya bulunmamaktadır.</p>
+        }
+    </div>
+</div>
 
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
