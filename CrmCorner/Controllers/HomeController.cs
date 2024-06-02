@@ -21,22 +21,24 @@ namespace CrmCorner.Controllers
         private readonly CrmCornerContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly RoleManager<AppRole> _roleManager;
         private readonly IEmailServices _emailServices;
+
 
         //deneme yorum
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context, RoleManager<AppRole> roleManager)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailServices = emailServices;
             _context = context;
+            _roleManager = roleManager;
         }
 
         public async Task<IActionResult> Index()
-        
         {
             try
             {
@@ -55,23 +57,49 @@ namespace CrmCorner.Controllers
                 try
                 {
                     currentUser = await _context.Users
-                                        .Include(u => u.Customers)
-                                        .Include(u => u.TaskComps)
-                                        .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+                                            .Include(u => u.Customers)
+                                            .Include(u => u.TaskComps)
+                                            .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
 
                     var companyUsers = await _context.Users
-                                                     .Where(u => u.CompanyId == currentUser.CompanyId)
+                                                     .Where(u => u.EmailDomain == currentUser.EmailDomain)
+                                                     .Include(u => u.Customers)
                                                      .ToListAsync();
 
                     var taskComps = await _context.TaskComps.ToListAsync(); // Bu satırı görevleri yüklemek için ekledim
                     var email = currentUser?.Email;
 
+                    List<CustomerN> customers;
+
+                    if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                    {
+                        // Admin veya Manager ise aynı email domainine sahip tüm kullanıcıların müşterilerini getir
+                        customers = companyUsers
+                                    .Where(u => u.Customers != null)
+                                    .SelectMany(u => u.Customers)
+                                    .ToList();
+                    }
+                    else
+                    {
+                        // Değilse, sadece kullanıcının kendi müşterilerini getir
+                        customers = currentUser.Customers.ToList();
+                    }
+
+
+                    // Kullanıcının sahip olduğu müşterilerde kaç farklı sektör olduğunu hesapla
+                    var sectorCount = customers
+                                      .Select(c => c.Industry)
+                                      .Distinct()
+                                      .Count();
+
                     var viewModel = new CompanyUsersViewModel
                     {
                         CurrentUser = currentUser,
                         CompanyUsers = companyUsers,
-                        TaskComps = taskComps // ViewModel'e TaskComps ekleyin
+                        TaskComps = taskComps, // ViewModel'e TaskComps ekleyin
+                        SectorCount = sectorCount // Sektör sayısını ViewModel'e ekleyin
                     };
+
                     ViewData["UserEmail"] = email;
                     ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
@@ -89,14 +117,18 @@ namespace CrmCorner.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Error in Index action.");
                     return RedirectToAction("NotFound", "Error");
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in Index action.");
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
 
 
         #region CHARTS
@@ -417,6 +449,7 @@ namespace CrmCorner.Controllers
 
                     if (identityResult.Succeeded)
                     {
+
                         TempData["SuccessMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
                         return RedirectToAction("SignIn", "Home");
                     }

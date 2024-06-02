@@ -41,6 +41,15 @@ namespace CrmCorner.Controllers
                         // Admin ise, aynı şirketteki tüm kullanıcıların müşterilerini getir
                         customersQuery = customersQuery.Where(c => c.AppUser.CompanyId == currentUser.CompanyId);
                     }
+                    else if (roles.Contains("TeamLeader"))
+                    {
+                        // TeamLeader ise, kendi ve TeamMember rolündeki kullanıcıların müşterilerini getir
+                        var teamMembers = await _userManager.GetUsersInRoleAsync("TeamMember");
+                        var teamMemberIds = teamMembers.Where(u => u.CompanyId == currentUser.CompanyId).Select(u => u.Id).ToList();
+                        teamMemberIds.Add(currentUser.Id); 
+
+                        customersQuery = customersQuery.Where(c => teamMemberIds.Contains(c.AppUserId));
+                    }
                     else
                     {
                         // Admin değil ise, sadece kendi müşterilerini getir

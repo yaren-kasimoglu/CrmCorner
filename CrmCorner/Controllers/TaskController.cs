@@ -57,6 +57,7 @@ namespace CrmCorner.Controllers
                     var roles = await _userManager.GetRolesAsync(currentUser);
 
                     bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
+                    bool isTeamLeader = roles.Contains("TeamLeader");
 
 
                     ViewData["UserRole"] = roles.Contains("Admin") ? "Admin" : "TeamMember";
@@ -75,6 +76,23 @@ namespace CrmCorner.Controllers
                             .ToList();
 
                         ViewBag.Users = companyUsers;
+
+                        return View(tasks);
+                    }
+                    else if (isTeamLeader)
+                    {
+                        var teamMembers = await _userManager.GetUsersInRoleAsync("TeamMember");
+                        var teamMemberIds = teamMembers.Select(u => u.Id).ToList();
+                        teamMemberIds.Add(currentUser.Id); // Add the current TeamLeader's ID to the list
+
+                        var tasks = _context.TaskComps
+                            .Include(e => e.Customer)
+                            .Include(e => e.Status)
+                            .Include(e => e.AppUser)
+                            .Where(e => teamMemberIds.Contains(e.UserId) || teamMemberIds.Contains(e.AssignedUserId))
+                            .ToList();
+
+                        ViewBag.Users = teamMembers;
 
                         return View(tasks);
                     }
@@ -264,7 +282,9 @@ namespace CrmCorner.Controllers
         {
             try
             {
-                TaskComp task = _context.TaskComps.Find(id);
+                TaskComp task = _context.TaskComps
+                    .Include(t => t.FileAttachments)
+                    .FirstOrDefault(t => t.TaskId == id);
                 if (task == null)
                 {
                     return NotFound();
@@ -309,7 +329,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> TaskEdit(TaskComp editedTask)
+        public async Task<IActionResult> TaskEdit(TaskComp editedTask, IFormFile file)
         {
             try
             {
@@ -317,7 +337,10 @@ namespace CrmCorner.Controllers
                 {
                     editedTask.ModifiedDate = DateTime.Now;
 
-                    var originalTask = _context.TaskComps.AsNoTracking().FirstOrDefault(t => t.TaskId == editedTask.TaskId);
+                    var originalTask = _context.TaskComps
+                        .Include(t => t.FileAttachments) // Include FileAttachments
+                        .AsNoTracking()
+                        .FirstOrDefault(t => t.TaskId == editedTask.TaskId);
 
                     editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
 
@@ -336,12 +359,53 @@ namespace CrmCorner.Controllers
                         editedTask.Outcomes = Enum.Parse<OutcomeType>(HttpContext.Request.Form["Outcomes"]);
                     }
 
+                    // Dosya yükleme işlemi
+                    if (file != null && file.Length > 0)
+                    {
+                        var originalFileName = Path.GetFileName(file.FileName);
+                        var uniqueFileName = $"{Guid.NewGuid()}_{originalFileName}";
+
+                        // Yükleme klasörü
+                        var uploadFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads");
+                        var filePath = Path.Combine(uploadFolderPath, uniqueFileName);
+
+                        // Klasör yoksa oluştur
+                        if (!Directory.Exists(uploadFolderPath))
+                        {
+                            Directory.CreateDirectory(uploadFolderPath);
+                        }
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+
+                        var fileAttachment = new FileAttachment
+                        {
+                            FileName = originalFileName,
+                            FilePath = "/uploads/" + uniqueFileName,
+                            FileSize = file.Length,
+                            FileType = file.ContentType,
+                            UploadedDate = DateTime.Now,
+                            TaskId = editedTask.TaskId
+                        };
+
+                        _context.FileAttachments.Add(fileAttachment);
+
+                        // FileAttachments koleksiyonunu başlat
+                        if (editedTask.FileAttachments == null)
+                        {
+                            editedTask.FileAttachments = new List<FileAttachment>();
+                        }
+                        editedTask.FileAttachments.Add(fileAttachment); // Add file to the task
+                    }
+
                     // Değişiklikleri kontrol et ve log tablosuna kaydet
                     await LogChanges(originalTask, editedTask);
 
                     // task güncelle
                     _context.TaskComps.Update(editedTask);
-                    _context.SaveChanges();
+                    await _context.SaveChangesAsync();
 
                     if (editedTask.Outcomes == OutcomeType.Olumlu && originalTask.Outcomes != OutcomeType.Olumlu)
                     {
@@ -363,7 +427,10 @@ namespace CrmCorner.Controllers
                 }
                 else
                 {
-                    return View("ErrorView", editedTask);
+                    // ModelState hatalarını topla ve görünümde göster
+                    var errorMessages = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                    ViewBag.ErrorMessages = errorMessages;
+                    return View(editedTask);
                 }
             }
             catch (Exception ex)
@@ -371,6 +438,11 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
+
+
+
 
         private string GetCustomerNameById(int? customerId)
         {
@@ -515,6 +587,48 @@ namespace CrmCorner.Controllers
                         {
                             fieldName = "Olumsuz Olma Nedeni";
                         }
+                        if (property.Name == "FileAttachments")
+                        {
+                            var originalFiles = originalValue as ICollection<FileAttachment>;
+                            var editedFiles = editedValue as ICollection<FileAttachment>;
+
+                            if (originalFiles != null && editedFiles != null)
+                            {
+                                var addedFiles = editedFiles.Except(originalFiles).ToList();
+                                var removedFiles = originalFiles.Except(editedFiles).ToList();
+
+                                foreach (var file in addedFiles)
+                                {
+                                    TaskCompLog addedFileLog = new TaskCompLog
+                                    {
+                                        TaskId = editedTask.TaskId,
+                                        UpdatedField = "Dosya Eklendi",
+                                        OldValue = string.Empty,
+                                        NewValue = $"{file.FileName}",
+                                        UpdatedById = _userManager.GetUserId(User),
+                                        UpdatedAt = DateTime.Now
+                                    };
+                                    _context.TaskCompLogs.Add(addedFileLog);
+                                }
+
+                                foreach (var file in removedFiles)
+                                {
+                                    TaskCompLog removedFileLog = new TaskCompLog
+                                    {
+                                        TaskId = editedTask.TaskId,
+                                        UpdatedField = "Dosya Silindi",
+                                        OldValue = $"{file.FileName}",
+                                        NewValue = string.Empty,
+                                        UpdatedById = _userManager.GetUserId(User),
+                                        UpdatedAt = DateTime.Now
+                                    };
+                                    _context.TaskCompLogs.Add(removedFileLog);
+                                }
+                            }
+
+                            continue; // Diğer log işlemlerine geçmeden devam et
+                        }
+
 
                         TaskCompLog log = new TaskCompLog
                         {

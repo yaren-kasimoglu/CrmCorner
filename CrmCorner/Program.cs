@@ -44,6 +44,7 @@ builder.Services.Configure<FormOptions>(x =>
 
 // MySQL veritabanı bağlantısını ekleyin
 var connectionString = builder.Configuration.GetConnectionString("CrmConnection");
+
 builder.Services.AddDbContext<CrmCornerContext>(options =>
 {
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)))
