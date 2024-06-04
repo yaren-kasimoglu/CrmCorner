@@ -24,7 +24,8 @@ namespace CrmCorner.Models
         public string? UserId { get; set; }
 
         public virtual AppUser? AppUser { get; set; }
-    
-	}
+        public DateTime? CreatedDate { get; set; }
+
+    }
 }
 

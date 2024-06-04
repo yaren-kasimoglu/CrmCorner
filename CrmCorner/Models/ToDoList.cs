@@ -25,7 +25,7 @@ namespace CrmCorner.Models
         [NotMapped]
         public int Count { get; set; }
 
-
+        public DateTime? CreatedDate { get; set; }
         //public virtual AppUser? AppUser { get; set; }
 
     }

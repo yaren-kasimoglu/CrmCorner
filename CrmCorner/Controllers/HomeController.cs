@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NuGet.Common;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Claims;
 
 namespace CrmCorner.Controllers
@@ -112,6 +113,21 @@ namespace CrmCorner.Controllers
                         Path = "/" // Çerezin tüm site genelinde geçerli olması
                     };
                     Response.Cookies.Append("HasUnreadMessages", hasUnreadMessages.ToString(), cookieOptions);
+                    var todoList = _context.ToDoList
+                         .Where(e => e.UserId == currentUser.Id  )
+                        .Select(e => new ToDo { Id = e.Id, CreatedDate = e.CreatedDate,NotDoneList=e.NotDoneList })
+     .                   ToList();
+                   var todoListToday = _context.ToDos
+                        .Where(e => e.UserId == currentUser.Id)
+                        .ToList();
+
+                    var combinedData = todoList.Concat(todoListToday)
+                        .OrderBy(data => (data.CreatedDate - DateTime.Now))
+                        .Take(5)
+                        .ToList();
+
+                    ViewBag.ToDoList = combinedData;
+
 
                     return View(viewModel);
                 }
