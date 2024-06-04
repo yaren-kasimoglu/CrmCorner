@@ -93,10 +93,11 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ToDoListAdd(string textValue, bool isChecked, int id)
+        public async Task<IActionResult> ToDoListAdd(string textValue, bool isChecked, int id,DateTime selectedDate)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var today = DateTime.Today;
+            selectedDate= selectedDate == default(DateTime)? DateTime.Today: selectedDate;
             if (id == 0)
             {
                 ToDo toDo = new ToDo();
@@ -123,6 +124,7 @@ namespace CrmCorner.Controllers
                 toDo.UserId = currentUser.Id;
                 toDo.MainGoalTitle = "";
                 toDo.Title = "Günüm";
+                toDo.CreatedDate = selectedDate;
                 if (currentUser != null)
                 {
 
@@ -164,6 +166,8 @@ namespace CrmCorner.Controllers
                 toDo.UserId = currentUser.Id;
                 toDo.MainGoalTitle = "";
                 toDo.Title = toDoValue.Title;
+                toDo.CreatedDate = selectedDate;
+
                 if (currentUser != null)
                 {
                     if (toDoValue.Id == 0)
