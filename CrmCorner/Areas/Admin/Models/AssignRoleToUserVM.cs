@@ -5,11 +5,11 @@ namespace CrmCorner.Areas.Admin.Models
 {
     public class AssignRoleToUserVM
     {
-        [Required]
+        [Required(ErrorMessage = "UserId is required.")]
         public string UserId { get; set; }
 
-        [Required]
-        public string RoleName { get; set; }
+        [Required(ErrorMessage = "RoleId is required.")]
+        public string RoleId { get; set; }
 
         public List<SelectListItem> Users { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Roles { get; set; } = new List<SelectListItem>();

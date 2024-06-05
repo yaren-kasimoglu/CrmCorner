@@ -86,9 +86,9 @@
 <script src="~/CRMTema/bootstrap5/js/pages/profile.js"></script>
 @section Scripts {
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    @*      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>*@
 
     <script>
         var triggerTabList = [].slice.call(document.querySelectorAll('.nav-tabs a'))
@@ -104,77 +104,151 @@
     </script>
 
     <script type="text/javascript">
+            $(document).ready(function () {
+                $.ajax({
+                    type: "GET",
+                    url: "/Home/UserTaskStatusChart",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
+                        var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
+                        var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
+
+                        // Gelen veri yapısına göre haritalama yapalım
+                        var labels = data.map(item => item.statusName);
+                        var dataValues = data.map(item => item.count);
+                        var taskNames = data.map(item => item.taskNames);
+
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    data: dataValues,
+                                    backgroundColor: colors,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                var index = context.dataIndex;
+                                                var count = dataValues[index];
+                                                var tasks = taskNames[index];
+                                                var label = labels[index] + ': ' + count;
+                                                var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                                return lines;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            });
+    </script>
+
+    <script type="text/javascript">
         $(document).ready(function () {
-
-
-
             $.ajax({
                 type: "GET",
                 url: "/Home/UserTaskStatusChart",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
+                    console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
+                    var ctx = document.getElementById('userTaskStatusChart1').getContext('2d');
                     var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
+
+                    var labels = data.map(item => item.statusName);
+                    var dataValues = data.map(item => item.count);
+                    var taskNames = data.map(item => item.taskNames);
+
                     new Chart(ctx, {
-                        type: 'doughnut',
+                        type: 'bar',
                         data: {
-                            labels: data.labels,
+                            labels: labels,
                             datasets: [{
-                                data: data.data,
+                                label: 'Görev Sayısı ve Durumu',
+                                data: dataValues,
                                 backgroundColor: colors,
                                 borderWidth: 1
                             }]
                         },
-
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            var index = context.dataIndex;
+                                            var count = dataValues[index];
+                                            var tasks = taskNames[index];
+                                            var label = labels[index] + ': ' + count;
+                                            var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                            return lines;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     });
                 },
                 error: function (error) {
                     console.error('Error fetching data:', error);
                 }
             });
-
         });
     </script>
 }
 
 
-
-<script type="text/javascript">
-    $(document).ready(function () {
-        $.ajax({
-            type: "GET",
-            url: "/Home/UserTaskStatusChart",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                var ctx = document.getElementById('userTaskStatusChart1').getContext('2d');
-                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
-                new Chart(ctx, {
-                    type: 'bar', 
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Görev Sayısı',
-                            data: data.data,
-                            backgroundColor: colors,
-                            borderWidth: 1
-                        }]
-                    },
-                    //options: {
-                    //    scales: {
-                    //        yAxes: [{
-                    //            ticks: {
-                    //                beginAtZero: true
-                    //            }
-                    //        }]
-                    //    }
-                    //}
-                });
-            },
-            error: function (error) {
-                console.error('Error fetching data:', error);
-            }
-        });
-    });
-</script>
+//@*<script type="text/javascript">
+//    $(document).ready(function () {
+//        $.ajax({
+//            type: "GET",
+//            url: "/Home/UserTaskStatusChart",
+//            contentType: "application/json; charset=utf-8",
+//            dataType: "json",
+//            success: function (data) {
+//                var ctx = document.getElementById('userTaskStatusChart1').getContext('2d');
+//                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
+//                new Chart(ctx, {
+//                    type: 'bar', 
+//                    data: {
+//                        labels: data.labels,
+//                        datasets: [{
+//                            label: 'Görev Sayısı',
+//                            data: data.data,
+//                            backgroundColor: colors,
+//                            borderWidth: 1
+//                        }]
+//                    },
+//                    //options: {
+//                    //    scales: {
+//                    //        yAxes: [{
+//                    //            ticks: {
+//                    //                beginAtZero: true
+//                    //            }
+//                    //        }]
+//                    //    }
+//                    //}
+//                });
+//            },
+//            error: function (error) {
+//                console.error('Error fetching data:', error);
+//            }
+//        });
+//    });
+//</script>*@

@@ -53,6 +53,8 @@ builder.Services.AddDbContext<CrmCornerContext>(options =>
 });
 
 // E-posta ayarlarını yapılandırın
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddSingleton<EmailService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 // Identity servislerini ve cookie yapılandırmasını ekleyin
