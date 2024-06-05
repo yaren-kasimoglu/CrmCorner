@@ -3,6 +3,7 @@ using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.Services;
 using CrmCorner.ViewModels;
+using Google.Apis.Gmail.v1;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -24,12 +25,13 @@ namespace CrmCorner.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IEmailServices _emailServices;
+        private readonly EmailService _emailService;
 
 
         //deneme yorum
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context, RoleManager<AppRole> roleManager)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context, RoleManager<AppRole> roleManager, EmailService emailService)
         {
             _logger = logger;
             _userManager = userManager;
@@ -37,6 +39,7 @@ namespace CrmCorner.Controllers
             _emailServices = emailServices;
             _context = context;
             _roleManager = roleManager;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index()
@@ -213,8 +216,6 @@ namespace CrmCorner.Controllers
         }
 
 
-
-
         [Authorize]
         public async Task<IActionResult> IsFinalDecisionMaker()
         {
@@ -305,7 +306,7 @@ namespace CrmCorner.Controllers
 
         [Authorize]
         public async Task<IActionResult> UserTaskStatusChart()
-        {
+       {
             // Aktif kullanıcının ID'sini al
             var userId = _userManager.GetUserId(User);
 
@@ -506,7 +507,8 @@ namespace CrmCorner.Controllers
         //}
         #endregion
 
-        #region ŞİFRE İŞLEMLERİ
+
+
         public IActionResult ForgetPassword()
         {
             return View();
@@ -520,14 +522,16 @@ namespace CrmCorner.Controllers
                 var hasUser = await _userManager.FindByEmailAsync(request.Email);
                 if (hasUser == null)
                 {
-                    ModelState.AddModelError(String.Empty, "Bu email adresine sahip kullanıcı bulunamamıştır.");
+                    ModelState.AddModelError(string.Empty, "Bu email adresine sahip kullanıcı bulunamamıştır.");
                     return View();
                 }
 
                 string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
                 var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
 
-                await _emailServices.SendResetPasswordEmail(passwordResetLink!, hasUser.Email!);
+                _emailService.SendEmail(hasUser.Email, "Şifre sıfırlama linki",
+                    $"<h4>Şifrenizi yenilemek için aşağıdaki linke tıklayınız.</h4><p><a href='{passwordResetLink}'>şifre yenileme link</a></p>");
+
                 TempData["SuccessMessage"] = "Şifre yenileme linki, e-posta adresinize gönderilmiştir.";
             }
             catch (Exception ex)
@@ -567,7 +571,7 @@ namespace CrmCorner.Controllers
                 var hasUser = await _userManager.FindByIdAsync(userId.ToString()!);
                 if (hasUser == null)
                 {
-                    ModelState.AddModelError(String.Empty, "Kullanıcı bulunamamıştır.");
+                    ModelState.AddModelError(string.Empty, "Kullanıcı bulunamamıştır.");
                     return View();
                 }
 
@@ -588,7 +592,92 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
-        #endregion
+
+
+
+        //#region ŞİFRE İŞLEMLERİ
+        //public IActionResult ForgetPassword()
+        //{
+        //    return View();
+        //}
+
+        //[HttpPost]
+        //public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
+        //{
+        //    try
+        //    {
+        //        var hasUser = await _userManager.FindByEmailAsync(request.Email);
+        //        if (hasUser == null)
+        //        {
+        //            ModelState.AddModelError(String.Empty, "Bu email adresine sahip kullanıcı bulunamamıştır.");
+        //            return View();
+        //        }
+
+        //        string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
+        //        var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
+
+        //        await _emailServices.SendResetPasswordEmail(passwordResetLink!, hasUser.Email!);
+        //        TempData["SuccessMessage"] = "Şifre yenileme linki, e-posta adresinize gönderilmiştir.";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return RedirectToAction("NotFound", "Error");
+        //    }
+
+        //    return RedirectToAction(nameof(ForgetPassword));
+        //}
+
+        //public IActionResult ResetPassword(string userId, string token)
+        //{
+        //    try
+        //    {
+        //        TempData["userId"] = userId;
+        //        TempData["token"] = token;
+        //        return View();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return RedirectToAction("NotFound", "Error");
+        //    }
+        //}
+
+        //[HttpPost]
+        //public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
+        //{
+        //    try
+        //    {
+        //        var userId = TempData["userId"];
+        //        var token = TempData["token"];
+        //        if (userId == null || token == null)
+        //        {
+        //            throw new Exception("Bir hata meydana geldi.");
+        //        }
+
+        //        var hasUser = await _userManager.FindByIdAsync(userId.ToString()!);
+        //        if (hasUser == null)
+        //        {
+        //            ModelState.AddModelError(String.Empty, "Kullanıcı bulunamamıştır.");
+        //            return View();
+        //        }
+
+        //        IdentityResult result = await _userManager.ResetPasswordAsync(hasUser, token.ToString()!, request.Password);
+        //        if (result.Succeeded)
+        //        {
+        //            TempData["SuccessMessage"] = "Şifreniz başarıyla yenilenmiştir.";
+        //            return RedirectToAction("SignIn", "Home");
+        //        }
+        //        else
+        //        {
+        //            ModelState.AddModelErrorList(result.Errors.Select(x => x.Description).ToList());
+        //            return View();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return RedirectToAction("NotFound", "Error");
+        //    }
+        //}
+        //#endregion
 
         public IActionResult Privacy()
         {

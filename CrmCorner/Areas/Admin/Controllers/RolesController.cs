@@ -69,6 +69,7 @@ namespace CrmCorner.Areas.Admin.Controllers
         }
 
 
+
         [HttpGet]
         public async Task<IActionResult> AssignRoleToUserVM()
         {
@@ -78,93 +79,35 @@ namespace CrmCorner.Areas.Admin.Controllers
             var model = new AssignRoleToUserVM
             {
                 Users = users.Select(u => new SelectListItem { Value = u.Id, Text = u.UserName }).ToList(),
-                Roles = roles.Select(r => new SelectListItem { Value = r.Name, Text = r.Name }).ToList()
+                Roles = roles.Select(r => new SelectListItem { Value = r.Id, Text = r.Name }).ToList()
             };
 
             return View(model);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> AssignRoleToUserVM(AssignRoleToUserVM model)
         {
-            try
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                try
                 {
-                    System.Diagnostics.Debug.WriteLine("ModelState is valid");
-
-                    var user = await _userManager.FindByIdAsync(model.UserId);
-                    if (user == null)
+                    var userRole = new IdentityUserRole<string>
                     {
-                        ModelState.AddModelError("", "User not found");
-                        System.Diagnostics.Debug.WriteLine("User not found");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"User found: {user.UserName}");
+                        UserId = model.UserId,
+                        RoleId = model.RoleId
+                    };
 
-                        if (string.IsNullOrEmpty(model.RoleName))
-                        {
-                            ModelState.AddModelError("", "Role name is required");
-                            System.Diagnostics.Debug.WriteLine("Role name is required");
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Role name provided: {model.RoleName}");
+                    _context.UserRoles.Add(userRole);
+                    await _context.SaveChangesAsync();
 
-                            var role = await _roleManager.FindByNameAsync(model.RoleName);
-                            if (role == null)
-                            {
-                                ModelState.AddModelError("", "Role not found");
-                                System.Diagnostics.Debug.WriteLine("Role not found");
-                            }
-                            else
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Role found: {role.Name}");
-
-                                try
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"Adding role {model.RoleName} to user {user.UserName}");
-                                    var result = await _userManager.AddToRoleAsync(user, model.RoleName);
-                                    if (result.Succeeded)
-                                    {
-                                        System.Diagnostics.Debug.WriteLine("Role added successfully");
-                                        return RedirectToAction("UserList", "Home");
-                                    }
-
-                                    foreach (var error in result.Errors)
-                                    {
-                                        ModelState.AddModelError("", error.Description);
-                                        System.Diagnostics.Debug.WriteLine($"Error: {error.Description}");
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"Exception during AddToRoleAsync: {ex.Message}");
-                                    ModelState.AddModelError("", "An error occurred while adding the role.");
-                                }
-                            }
-                        }
-                    }
+                    return RedirectToAction("UserList", "Home");
                 }
-                else
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("ModelState is not valid");
-
-                    foreach (var state in ModelState)
-                    {
-                        foreach (var error in state.Value.Errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Property: {state.Key} Error: {error.ErrorMessage}");
-                        }
-                    }
+                    System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
+                    ModelState.AddModelError("", "An error occurred while adding the role.");
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
-                ModelState.AddModelError("", "An unexpected error occurred.");
             }
 
             model.Users = await GetUserSelectListItemsAsync();
@@ -182,8 +125,10 @@ namespace CrmCorner.Areas.Admin.Controllers
         private async Task<List<SelectListItem>> GetRoleSelectListItemsAsync()
         {
             var roles = await _roleManager.Roles.ToListAsync();
-            return roles.Select(r => new SelectListItem { Value = r.Name, Text = r.Name }).ToList();
+            return roles.Select(r => new SelectListItem { Value = r.Id, Text = r.Name }).ToList();
         }
+
+
 
 
 

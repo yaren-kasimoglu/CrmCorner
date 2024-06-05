@@ -35,6 +35,8 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
     public DbSet<PostSaleInfo> PostSaleInfos { get; set; }
 
+    public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
+
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
