@@ -25,6 +25,8 @@ namespace CrmCorner.Models
 
         public virtual AppUser? AppUser { get; set; }
         public DateTime? CreatedDate { get; set; }
+        public DateTime? UpdateSystemDate { get; set; }
+        
 
     }
 }

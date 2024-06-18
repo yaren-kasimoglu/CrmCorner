@@ -26,6 +26,8 @@ namespace CrmCorner.Models
         public int Count { get; set; }
 
         public DateTime? CreatedDate { get; set; }
+        public DateTime? UpdateSystemDate { get; set; }
+
         //public virtual AppUser? AppUser { get; set; }
 
     }
