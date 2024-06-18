@@ -4,6 +4,7 @@
     string[] taskData = ViewBag.TaskData;
     string[] notTaskData = ViewBag.NotTaskData;
     string mainTitle = ViewBag.TitleValue;
+    //string assigment = ViewBag.Assigment;
 }
 @{
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
@@ -173,22 +174,22 @@
 <body>
 
     <input type="hidden" id="hiddenDate" value="@ViewBag.Date" />
-
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3">
                 <div id="hover-effect" class="d-flex align-items-center">
                     <img src="/icons/todo/sun.jpeg" alt="Logo" class="logo" style="max-width: 50px; max-height: 50px;">
                     <label onclick="clickToday()" class="date">Günüm</label>
-
-
-
                 </div>
-                <br />
                 <div class="d-flex align-items-center" id="hover-effect" style="padding-left: 1%;">
-                    <i class="fa fa-star-o" style="font-size:45px;max-width: 50px; max-height: 50px; margin-right: 5px;"></i>
-                    <span onclick="clickImportant()" style="font-size: x-large; margin-right: 5px; cursor: pointer;">Önemli</span>
+                    <i class="fa fa-star-o" style="font-size:45px;max-width: 50px; max-height: 50px; margin-right: 5px;margin-top:5px;"></i>
+                    <span onclick="clickImportant()" style="font-size: x-large; margin-right: 5px; cursor: pointer;margin-left:5px;">Önemli</span>
                     <span id="ImportantId" style="display: none;">@ViewBag.ImportantId</span>
+                </div>
+                  <div class="d-flex align-items-center" id="hover-effect" style="padding-left: 1%; margin-top:5px;">
+                    <i class="fa fa-user-o" style="font-size:45px;max-width: 50px; max-height: 50px; margin-right: 5px;"></i>
+                    <span  onclick="clickAssign()" style="font-size: x-large; margin-right: 5px; cursor: pointer; margin-left: 10px;">Bana Atananlar</span>
+                    <span id="AssignListId" style="display: none;">@ViewBag.AssignListId</span>
                 </div>
                 <hr class="horizontal-line">
                 <div class="btn-group" style="width: -webkit-fill-available;">
@@ -271,6 +272,13 @@
                                 </div>
                                 <h2 style="font-size: 20px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">@ViewBag.TitleValue listenize odaklanın</h2>
                                 <h2 style="font-size: 18px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">@ViewBag.TitleValue listesiyle işlerinizi tamamlayın.</h2>
+                            </div>
+                             <div class="card" id="cardpng4" style="display:none;background-color: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                                <div style="text-align: center;">
+                                    <img src="/icons/todo/assignment.jpeg" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
+                                </div>
+                                <h2 style="font-size: 20px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">Bana Atananlar listenize odaklanın</h2>
+                                <h2 style="font-size: 18px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">To Do da size atananlar burada görünür</h2>
                             </div>
                         </div>
                         <div class="taskcontainer" id="kartContainer2">
@@ -360,8 +368,8 @@
 
 
 
-        var baseUrl = "https://crmcorner.co/";
-       // var baseUrl = "https://localhost:7145/";
+       var baseUrl = "https://crmcorner.co/";
+       //var baseUrl = "https://localhost:7145/";
 
         document.querySelectorAll('.link-item').forEach(item => {
             item.addEventListener('click', event => {
@@ -395,6 +403,17 @@
             var ImportantIdValue = ImportantId.innerHTML;
 
             newUrl = baseUrl + "ToDoList/ToDoList/" + ImportantIdValue;
+            window.location.href = newUrl;
+
+            // Arka plan resminin URL'sini belirleyin
+
+        }
+        function clickAssign() {
+            var newUrl = "";
+            var AssignId = document.getElementById("AssignListId");
+            var AssignIdValue = AssignId.innerHTML;
+
+            newUrl = baseUrl + "ToDoList/ToDoList/" + AssignIdValue;
             window.location.href = newUrl;
 
             // Arka plan resminin URL'sini belirleyin
@@ -588,7 +607,6 @@
         <input type="checkbox" name="taskCheckbox" class="taskCheckbox" onclick="clickToDoCheckbox(this); document.getElementById('delbutton').blur();" id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"  style="margin-top: auto;"></span>
 <input type="text" name="textContentVisible" class="textContent" style="text-decoration: line-through; display: inline-block;" id="textContentVisible" placeholder="Görev Ekle" value="@task">
-
  </label>
  @if (mainTitle != "Önemli")
     {
@@ -596,12 +614,15 @@
             <img src="/icons/todo/staradd.jpeg" width="35" height="35" style="cursor: pointer;" id="logo">
         </button>
     }
-
-<button type="button" onclick="openPopupPeople('@task')" style="border: none; background: none; width: 0px;margin-left:22px;">
+<button type="button" id="assigment" onclick="openPopupPeople('@task')" style="border: none; background: none; width: 0px;margin-left:22px;">
         <img src="/icons/todo/person-fill-add.svg" width="30" height="30" style="cursor: pointer;">
     </button>
 </form>
         }
+     @*@if (mainTitle == "Bana Atananlar")
+{
+ <span style="font-style: italic; font-size: 12px;">tarafından size atandı</span>
+}*@
     }`;
 
             var kartIcerik2 = `@if (notTaskData != null) {
@@ -617,7 +638,6 @@
         <input type="checkbox" name="taskCheckbox" class="taskCheckbox" onclick="clickToDoCheckbox(this); document.getElementById('delbutton').blur();" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox" style="margin-top: auto;"></span>
 <input type="text" name="textContentVisible" class="textContent" style="text-decoration: none;display: inline-block;" id="textContentVisible" placeholder="Görev Ekle" value="@task2">
-
  </label>
  @if (mainTitle != "Önemli")
     {
@@ -626,16 +646,19 @@
         </button>
     }
 
-<button type="button" onclick="openPopupPeople('@task2')" style="border: none; background: none; width: 0px;margin-left:22px;">
+<button type="button" id="assigment" onclick="openPopupPeople('@task2')" style="border: none; background: none; width: 0px;margin-left:22px;">
         <img src="/icons/todo/person-fill-add.svg" width="30" height="30" style="cursor: pointer;">
     </button>
 
 </form>
 
             }
+ @*@if (mainTitle == "Bana Atananlar")
+{
+ <span style="font-style: italic; font-size: 12px;">assigment +tarafından size atandı</span>
+}*@
 
-                    }
-            `;
+    }`;
 
 
 
@@ -643,6 +666,9 @@
             $('#kartContainer2').append(toplam);
     var taskData = @Json.Serialize(ViewBag.TaskData);
             var notTaskData = @Json.Serialize(ViewBag.NotTaskData);
+            var formvisible = document.getElementById("taskForm");
+            var assigmentvisible = document.getElementById("assigment");
+            formvisible.style.display = "block";
             if (taskData == null && notTaskData == null) {
                 if (id == 0 || id == null) {
                     var cardDiv = document.getElementById("cardpng");
@@ -653,6 +679,19 @@
                         var cardDiv = document.getElementById("cardpng2");
                         cardDiv.style.display = "block";
                         var yeniArkaPlanURL = "/icons/todo/important.jpeg"; // Yeni resmin URL'si
+
+                        // HTML elementini seçin ve arka plan resmini değiştirin
+                        var container2 = document.getElementById("container2");
+                        container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
+                    }
+                    else if (titleValue == "Bana Atananlar") {
+                        var cardDiv = document.getElementById("cardpng4");
+                        cardDiv.style.display = "block";
+                        formvisible.style.display = "none";
+                        assigmentvisible.style.display = "none";
+                        var yeniArkaPlanURL = "/icons/todo/color.jpeg"; // Yeni resmin URL'si
+                        var textContentStyle = document.getElementById("textContentVisible");
+                        textContentStyle.style.color = "black";
 
                         // HTML elementini seçin ve arka plan resmini değiştirin
                         var container2 = document.getElementById("container2");
@@ -671,17 +710,18 @@
 
             }
             else {
-                console.log("aslında data var");
+                console.log("aslında data var" + titleValue);
                 var cardDiv = document.getElementById("cardpng");
                 cardDiv.style.display = "none";
                 var cardDiv = document.getElementById("cardpng2");
                 cardDiv.style.display = "none";
                 var cardDiv = document.getElementById("cardpng3");
                 cardDiv.style.display = "none";
+                var cardDiv = document.getElementById("cardpng4");
+                cardDiv.style.display = "none";
                 if (titleValue == "Önemli") {
                     var yeniArkaPlanURL = "/icons/todo/important.jpeg"; // Yeni resmin URL'si
                     var container2 = document.getElementById("container2");
-
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
                 else if (titleValue == "Günüm") {
@@ -689,11 +729,22 @@
                     var container2 = document.getElementById("container2");
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
+                else if (titleValue == "Bana Atananlar") {
+                    var yeniArkaPlanURL = "/icons/todo/color.jpeg"; // Yeni resmin URL'si
+                    var container2 = document.getElementById("container2");
+                    var textContentStyle = document.getElementById("textContentVisible");
+                    textContentStyle.style.color = "black";
+                    formvisible.style.display = "none";
+                    assigmentvisible.style.display = "none";
+                    container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
+                }
                 else {
                     var yeniArkaPlanURL = "/icons/todo/list.jpeg"; // Yeni resmin URL'si
                     var container2 = document.getElementById("container2");
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
+                console.log("aslında data var" + yeniArkaPlanURL);
+
             }
 
             var btnPrima = document.getElementById('btn-prima');
@@ -1174,6 +1225,7 @@
             cursor: pointer;
             text-align: center;
             font-size: x-large;
+            margin-left:10px;
         }
 
         .todolist {

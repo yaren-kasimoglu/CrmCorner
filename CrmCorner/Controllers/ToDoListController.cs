@@ -45,7 +45,7 @@ namespace CrmCorner.Controllers
             }
 
             var todoList = _context.ToDoList
-             .Where(e => e.UserId == currentUser.Id && e.Title != "Önemli")
+             .Where(e => e.UserId == currentUser.Id && e.Title != "Önemli" && e.Title!="Bana Atananlar")
              .ToList();
             int titleCounts = 0;
 
@@ -73,6 +73,7 @@ namespace CrmCorner.Controllers
                 dataArray = null;
             }
             ViewBag.ToDoList = todoList;
+            #region Önemli listesi
             var importantlistId = _context.ToDoList.AsNoTracking()
               .Where(e => e.UserId == currentUser.Id && e.Title == "Önemli")
               .OrderByDescending(e => e.SystemDate).Select(e => e.Id).FirstOrDefault();
@@ -90,7 +91,26 @@ namespace CrmCorner.Controllers
                 _context.ToDoList.Add(toDolist);
                 _context.SaveChanges();
             }
+            #endregion
+            #region Önemli listesi
+            var assignlistId = _context.ToDoList.AsNoTracking()
+              .Where(e => e.UserId == currentUser.Id && e.Title == "Bana Atananlar")
+              .OrderByDescending(e => e.SystemDate).Select(e => e.Id).FirstOrDefault();
 
+            if (assignlistId != null && assignlistId > 0)
+            {
+                ViewBag.AssignListId = assignlistId;
+            }
+            else
+            {
+                ToDoList toDolist = new ToDoList();
+                toDolist.SystemDate = DateTime.Today;
+                toDolist.UserId = currentUser.Id;
+                toDolist.Title = "Bana Atananlar";
+                _context.ToDoList.Add(toDolist);
+                _context.SaveChanges();
+            }
+            #endregion
             return View();
 
             // Eğer istek AJAX isteği değilse, yönlendirme gerçekleştir
@@ -134,12 +154,13 @@ namespace CrmCorner.Controllers
 
                     if (toDoValue == null || toDoValue.Id == 0)
                     {
-                        toDo.CreatedDate = today;
+                        toDo.SystemDate = today;
                         _context.ToDos.Add(toDo);
                         _context.SaveChanges();
                     }
                     else
                     {
+                        toDo.SystemDate = toDoValue.SystemDate;
                         toDo.Id = toDoValue.Id;
                         _context.ToDos.Update(toDo);
                         _context.SaveChanges();
@@ -177,13 +198,14 @@ namespace CrmCorner.Controllers
                 {
                     if (toDoValue.Id == 0)
                     {
-                        toDo.CreatedDate = today;
+                        toDo.SystemDate = today;
                         _context.ToDoList.Add(toDo);
                         _context.SaveChanges();
                     }
                     else
                     {
                         toDo.Id = id;
+                        toDo.SystemDate = toDoValue.SystemDate;
                         _context.ToDoList.Update(toDo);
                         _context.SaveChanges();
                     }
@@ -264,6 +286,7 @@ namespace CrmCorner.Controllers
                 {
                     var selected = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.DoneList;
                     var unselected = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.NotDoneList;
+                    //var assigment = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.AssigmentTo;
                     if (selected != null)
                     {
                         dataArray = selected.Split(',');
@@ -274,6 +297,10 @@ namespace CrmCorner.Controllers
                         dataArrays = unselected.Split(',');
                         ViewBag.NotTaskData = dataArrays;
                     }
+                    //if (assigment != null)
+                    //{
+                    //    ViewBag.Assigment = assigment;
+                    //}
                     ViewBag.TitleValue = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.Title;
                     ViewBag.Date = todo.FirstOrDefault(e => e.UserId == currentUser.Id)?.SystemDate.ToString();
                 }
@@ -283,6 +310,7 @@ namespace CrmCorner.Controllers
                     TaskData = ViewBag.TaskData,
                     NotTaskData = ViewBag.NotTaskData,
                     Count = todo.Count,
+                   // Assigment= ViewBag.Assigment,
                 };
                 return Json(new { Message = jsonData });
 
@@ -743,7 +771,7 @@ namespace CrmCorner.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var searchPeople = _context.Users.
-                Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id)
+                Where(c => c.CompanyId == currentUser.CompanyId)
                    .ToList();
             List<UserViewModel> userViewModels = new List<UserViewModel>();
             foreach (var item in searchPeople)
@@ -771,13 +799,13 @@ namespace CrmCorner.Controllers
         {
           
                 // person JSON formatında geliyor, isteğinize göre deserialize edebilirsiniz
-                var currentUsers = await _userManager.FindByNameAsync(person);
-            ToDo toDo = new ToDo();
+            var currentUsers = await _userManager.FindByNameAsync(person);
+            var currentUser = await _userManager.GetUserAsync(User);
+            ToDoList toDo = new ToDoList();
             toDo.UpdateSystemDate = DateTime.Today;
             toDo.SystemDate = DateTime.Today;
-            var toDoValue = _context.ToDos.AsNoTracking()
-                  .Include(e => e.AppUser)
-                  .Where(e => e.UserId == currentUsers.Id && e.SystemDate == DateTime.Today)
+            var toDoValue = _context.ToDoList.AsNoTracking()
+                 .Where(e => e.UserId == currentUser.Id && e.Title == "Bana Atananlar")
                   .FirstOrDefault();
             string originalString = "";
                 originalString = toDoValue != null ? toDoValue.NotDoneList : null;
@@ -787,21 +815,22 @@ namespace CrmCorner.Controllers
 
             toDo.UserId = currentUsers.Id;
             toDo.MainGoalTitle = "";
-            toDo.Title = "Günüm";
+            toDo.Title = "Bana Atananlar";
             toDo.CreatedDate = DateTime.Today;
+            //toDo.AssigmentTo = currentUser.NameSurname;
             if (currentUsers != null)
             {
 
                 if (toDoValue == null || toDoValue.Id == 0)
                 {
                     toDo.CreatedDate = DateTime.Today;
-                    _context.ToDos.Add(toDo);
+                    _context.ToDoList.Add(toDo);
                     _context.SaveChanges();
                 }
                 else
                 {
                     toDo.Id = toDoValue.Id;
-                    _context.ToDos.Update(toDo);
+                    _context.ToDoList.Update(toDo);
                     _context.SaveChanges();
                 }
             }
