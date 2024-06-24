@@ -38,7 +38,9 @@ namespace CrmCorner.Controllers
                     .Include(t => t.Customer)
                     .Where(u => u.AppUser.EmailDomain == currentUserEmailDomain)
                     .Where(t => t.OutcomeStatus == OutcomeTypeSales.Won)
-                    .Where(t => t.StatusId == 6)// 'Olumlu' enum değerine göre filtreleme
+                    .Where(t => t.StatusId == 6) // 'Olumlu' enum değerine göre filtreleme
+                    .GroupBy(t => t.TaskId) // Id alanına göre gruplama yapılıyor
+                    .Select(g => g.First()) // Her gruptan ilk öğe seçiliyor
                     .ToList();
 
                 return View(positiveTasks);
@@ -49,6 +51,7 @@ namespace CrmCorner.Controllers
                 return View("Error");
             }
         }
+
 
         public async Task<IActionResult> NegativeTasks()
         {

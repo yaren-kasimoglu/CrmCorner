@@ -148,7 +148,7 @@
                                 </div>
                             </div>
                             <input type="text" class="form-control mt-2" id="manualEmailInput" placeholder="Manuel Mail Adresi Girin" style="display: none;" onblur="updateSelectedEmails();">
-                            <small class="form-text text-muted" style="display: none;" id="manualEmailInput2">* Manuel mail girişi virgülle yazmanız gerekmektedir.</small>
+                            <small class="form-text text-muted" style="display: none;" id="manualEmailInput2">* Manuel mail girişi için eğer birden fazla mail adresi girecekseniz virgülle yazmanız gerekmektedir.</small>
                             @Html.ValidationMessageFor(model => model.SelectedEmails, "", new { @class = "text-danger" })
                         </div>
                     </div>

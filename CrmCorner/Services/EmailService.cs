@@ -34,5 +34,16 @@ namespace CrmCorner.Services
 
             client.Send(mailMessage);
         }
+
+        public void SendEmailCalendar(MailMessage mailMessage)
+        {
+            var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
+            {
+                Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password),
+                EnableSsl = _smtpSettings.EnableSsl
+            };
+
+            client.Send(mailMessage);
+        }
     }
 }

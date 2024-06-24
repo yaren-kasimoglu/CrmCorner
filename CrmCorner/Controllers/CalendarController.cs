@@ -24,7 +24,9 @@ using CrmCorner.OptionsModels;
 using Microsoft.Extensions.Options;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+
 using Humanizer;
+
 
 namespace CrmCorner.Controllers
 {
@@ -37,17 +39,21 @@ namespace CrmCorner.Controllers
         private const string AccessToken = "9f9f7969-0154-4719-af42-66600536dec4";
         private const string ApiBaseUrl = "https://outlook.office.com/api/v2.0/me/events";
         private readonly string calendarId;
+
         private readonly SmtpSettings _smtpSettings;
 
 
 
         public CalendarController(CrmCornerContext context, IGoogleCalendarService service, UserManager<AppUser> userManager, IConfiguration configuration, IOptions<SmtpSettings> options)
+
         {
             _context = context;
             _userManager = userManager;
             _googleCalendarService = service;
             _configuration = configuration;
+
             _smtpSettings = options.Value;
+
         }
         public async Task<IActionResult> Calendar()
         {
@@ -97,9 +103,6 @@ namespace CrmCorner.Controllers
             }
 
         }
-
-
-
 
         [HttpPost]
         public async Task<IActionResult> CalendarAdd(Calendar Calendar)
@@ -225,8 +228,9 @@ namespace CrmCorner.Controllers
             return Json(new { Message = true });
 
         }
-        
-        public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar)
+
+
+        public async Task<ActionResult> sendEmailAsync2(string from, Calendar calendar)
         {
             try
             {
@@ -236,26 +240,22 @@ namespace CrmCorner.Controllers
                 // E-posta adreslerini dize olarak al
                 // Davet bilgileri
                 string subject = calendar.Title;
-
-               
-                string body = "Merhaba,Yukarıda gönderilen event size "+calendar.Description+" açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
+                string body = "Merhaba,Yukarıda gönderilen event size " + calendar.Description + " açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.";
 
                 // Toplantı başlangıç ve bitiş zamanları
                 DateTime startTime = calendar.EmailProperty.StartDate;
-
                 DateTime endTime = calendar.EmailProperty.EndDate;
                 string toEmails = null;
                 if (calendar.SelectedEmails.Any())
                 {
                     var lastSelectedEmail = calendar.SelectedEmails.Last();
-                   toEmails = string.Join(",", lastSelectedEmail);
-                    // lastSelectedEmail'i kullan
+                    toEmails = string.Join(",", lastSelectedEmail);
                 }
-            
 
                 // iCalendar dosyası oluşturma
                 string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmails);
                 System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
+
 
                 // SMTP sunucusu bilgileri
                 var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
@@ -265,6 +265,7 @@ namespace CrmCorner.Controllers
                 };
 
                 var mailMessage = new MailMessage
+
                 {
                     From = new MailAddress(_smtpSettings.Username),
                     Subject = subject,
@@ -283,7 +284,6 @@ namespace CrmCorner.Controllers
                 {
                     mailMessage.To.Add(email);
                 }
-
                 mailMessage.Attachments.Add(calendarAttachment);
 
                 mailMessage.To.Add(fromEmail);
@@ -298,6 +298,75 @@ namespace CrmCorner.Controllers
             }
             return RedirectToAction("Calendar");
         }
+
+
+
+        //public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar)
+        //{
+        //    try
+        //    {
+        //        // Alıcı ve gönderici e-posta adresleri
+        //        string fromEmail = from;
+
+        //        // E-posta adreslerini dize olarak al
+        //        // Davet bilgileri
+        //        string subject = calendar.Title;
+
+
+        //        string body = "Merhaba,Yukarıda gönderilen event size "+calendar.Description+" açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
+
+        //        // Toplantı başlangıç ve bitiş zamanları
+        //        DateTime startTime = calendar.EmailProperty.StartDate;
+
+        //        DateTime endTime = calendar.EmailProperty.EndDate;
+        //        string toEmails = null;
+        //        if (calendar.SelectedEmails.Any())
+        //        {
+        //            var lastSelectedEmail = calendar.SelectedEmails.Last();
+        //           toEmails = string.Join(",", lastSelectedEmail);
+        //            // lastSelectedEmail'i kullan
+        //        }
+
+
+        //        // iCalendar dosyası oluşturma
+        //        string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmails);
+        //        System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
+
+        //        // SMTP sunucusu bilgileri
+        //        var smptClient = new SmtpClient();
+        //        smptClient.Host = _emailSetings.Host;
+        //        smptClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+        //        smptClient.UseDefaultCredentials = false;
+        //        smptClient.Port = 587;
+        //        smptClient.Credentials = new NetworkCredential(_emailSetings.Email, _emailSetings.Password);
+        //        smptClient.EnableSsl = true;
+
+        //        MailMessage mailMessage = new MailMessage
+        //        {
+        //            From = new MailAddress(fromEmail), // İstediğiniz "From" adresini burada belirleyin
+        //            Subject = subject,
+        //            Body = body,
+        //            IsBodyHtml = true
+        //        };
+        //        foreach (var email in calendar.SelectedEmails)
+        //        {
+        //            mailMessage.To.Add(email);
+        //        }
+
+        //        mailMessage.Attachments.Add(calendarAttachment);
+
+
+        //        // E-posta gönderimi
+        //        smptClient.Send(mailMessage);
+
+        //        Console.WriteLine("Toplantı daveti başarıyla gönderildi.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Toplantı daveti gönderimi sırasında bir hata oluştu: " + ex.Message);
+        //    }
+        //    return RedirectToAction("Calendar");
+        //}
         static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails)
         {
             string[] emailsArray = toEmails.Split(',');

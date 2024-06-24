@@ -133,16 +133,16 @@
         console.log(sale);  // Bu satırı ekleyerek sale objesini konsola yazdırabilirsiniz
         var modalBody = document.querySelector('#detailModal .modal-body');
         modalBody.innerHTML = `
-                <p>İlk ödeme yapıldı mı? ${sale.isFirstPaymentMade ? 'Evet' : 'Hayır'}</p>
-                <p>Bir problem var mı? ${sale.isThereAProblem ? 'Evet' : 'Hayır'}</p>
-                ${sale.isThereAProblem && sale.problemDescription ?
+                    <p>İlk ödeme yapıldı mı? ${sale.isFirstPaymentMade ? 'Evet' : 'Hayır'}</p>
+                    <p>Bir problem var mı? ${sale.isThereAProblem ? 'Evet' : 'Hayır'}</p>
+                    ${sale.isThereAProblem && sale.problemDescription ?
                 '<div class="alert alert-warning" role="alert" title="' + sale.problemDescription.substring(0, 255) + '"><strong>Problem Açıklaması:</strong> ' + sale.problemDescription + '</div>' : ''}
-                <p>Devam etmeyi düşünüyorlar mı? ${sale.isContinuationConsidered ? 'Evet' : 'Hayır'}</p>
-                <p>Trustpilot yorumu yapıldı mı? ${sale.isTrustpilotReviewed ? 'Evet' : 'Hayır'}</p>
-                ${sale.isTrustpilotReviewed && sale.trustPilotComment ?
+                    <p>Devam etmeyi düşünüyorlar mı? ${sale.isContinuationConsidered ? 'Evet' : 'Hayır'}</p>
+                    <p>Trustpilot yorumu yapıldı mı? ${sale.isTrustpilotReviewed ? 'Evet' : 'Hayır'}</p>
+                    ${sale.isTrustpilotReviewed && sale.trustPilotComment ?
                 '<div class="alert alert-info" role="alert"><strong>Trustpilot Yorumu:</strong> ' + sale.trustPilotComment + '</div>' : ''}
-                <p>Logolarını kullanabilir miyiz? ${sale.canUseLogo ? 'Evet' : 'Hayır'}</p>
-            `;
+                    <p>Logolarını kullanabilir miyiz? ${sale.canUseLogo ? 'Evet' : 'Hayır'}</p>
+                `;
     }
 </script>
 
