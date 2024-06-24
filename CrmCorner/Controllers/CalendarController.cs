@@ -24,7 +24,9 @@ using CrmCorner.OptionsModels;
 using Microsoft.Extensions.Options;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using CrmCorner.Services;
+
+using Humanizer;
+
 
 namespace CrmCorner.Controllers
 {
@@ -37,19 +39,21 @@ namespace CrmCorner.Controllers
         private const string AccessToken = "9f9f7969-0154-4719-af42-66600536dec4";
         private const string ApiBaseUrl = "https://outlook.office.com/api/v2.0/me/events";
         private readonly string calendarId;
-        private readonly EmailSettings _emailSetings;
-        private readonly EmailService _emailService;
+
+        private readonly SmtpSettings _smtpSettings;
 
 
 
-        public CalendarController(CrmCornerContext context, IGoogleCalendarService service, UserManager<AppUser> userManager, IConfiguration configuration, IOptions<EmailSettings> options, EmailService emailService)
+        public CalendarController(CrmCornerContext context, IGoogleCalendarService service, UserManager<AppUser> userManager, IConfiguration configuration, IOptions<SmtpSettings> options)
+
         {
             _context = context;
             _userManager = userManager;
             _googleCalendarService = service;
             _configuration = configuration;
-            _emailSetings = options.Value;
-            _emailService = emailService;
+
+            _smtpSettings = options.Value;
+
         }
         public async Task<IActionResult> Calendar()
         {
@@ -252,22 +256,40 @@ namespace CrmCorner.Controllers
                 string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmails);
                 System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
 
-                // MailMessage oluşturma
-                MailMessage mailMessage = new MailMessage
+
+                // SMTP sunucusu bilgileri
+                var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
                 {
-                    From = new MailAddress(fromEmail), // İstediğiniz "From" adresini burada belirleyin
+                    Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password),
+                    EnableSsl = _smtpSettings.EnableSsl
+                };
+
+                var mailMessage = new MailMessage
+
+                {
+                    From = new MailAddress(_smtpSettings.Username),
                     Subject = subject,
                     Body = body,
-                    IsBodyHtml = true
+                    IsBodyHtml = true,
                 };
+
+                //MailMessage mailMessage = new MailMessage
+                //{
+                //    From = new MailAddress(fromEmail), // İstediğiniz "From" adresini burada belirleyin
+                //    Subject = subject,
+                //    Body = body,
+                //    IsBodyHtml = true
+                //};
                 foreach (var email in calendar.SelectedEmails)
                 {
                     mailMessage.To.Add(email);
                 }
                 mailMessage.Attachments.Add(calendarAttachment);
 
-                // EmailService kullanarak e-posta gönderimi
-                _emailService.SendEmailCalendar(mailMessage);
+                mailMessage.To.Add(fromEmail);
+                // E-posta gönderimi
+                client.Send(mailMessage);
+
                 Console.WriteLine("Toplantı daveti başarıyla gönderildi.");
             }
             catch (Exception ex)
@@ -362,7 +384,7 @@ namespace CrmCorner.Controllers
             ics.AppendLine($"UID:{Guid.NewGuid()}");
             foreach (var toEmail in emailsArray)
             {
-                ics.AppendLine($"ATTENDEE;CN=\"{toEmail}\";RSVP=TRUE:mailto:{toEmail}");
+                ics.AppendLine($"ATTENDEE;CN=\"Takvim\";RSVP=TRUE:mailto:{toEmail}");
             }
             ics.AppendLine($"ORGANIZER;CN=\"{fromEmail}\":mailto:{fromEmail}");
             ics.AppendLine("END:VEVENT");
