@@ -24,6 +24,7 @@ using CrmCorner.OptionsModels;
 using Microsoft.Extensions.Options;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Humanizer;
 
 namespace CrmCorner.Controllers
 {
@@ -36,17 +37,17 @@ namespace CrmCorner.Controllers
         private const string AccessToken = "9f9f7969-0154-4719-af42-66600536dec4";
         private const string ApiBaseUrl = "https://outlook.office.com/api/v2.0/me/events";
         private readonly string calendarId;
-        private readonly EmailSettings _emailSetings;
+        private readonly SmtpSettings _smtpSettings;
 
-  
 
-        public CalendarController(CrmCornerContext context, IGoogleCalendarService service, UserManager<AppUser> userManager, IConfiguration configuration, IOptions<EmailSettings> options)
+
+        public CalendarController(CrmCornerContext context, IGoogleCalendarService service, UserManager<AppUser> userManager, IConfiguration configuration, IOptions<SmtpSettings> options)
         {
             _context = context;
             _userManager = userManager;
             _googleCalendarService = service;
             _configuration = configuration;
-            _emailSetings = options.Value;
+            _smtpSettings = options.Value;
         }
         public async Task<IActionResult> Calendar()
         {
@@ -110,9 +111,9 @@ namespace CrmCorner.Controllers
                 _context.Calendars.Add(Calendar);
                 _context.SaveChanges();
 
-                if (Calendar.SelectedEmails!=null &&Calendar.SelectedEmails.Count>0 && Calendar.SelectedEmails[0]!=null)
+                if (Calendar.SelectedEmails != null && Calendar.SelectedEmails.Count > 0 && Calendar.SelectedEmails[0] != null)
                 {
-                    var emailSend = sendEmailAsync2(currentUser.Email,Calendar);
+                    var emailSend = sendEmailAsync2(currentUser.Email, Calendar);
 
                 }
                 return RedirectToAction("Calendar");
@@ -128,15 +129,15 @@ namespace CrmCorner.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
 
             var eventToUpdate = await _context.Set<Calendar>().FindAsync(model.Id);
-                if (eventToUpdate != null)
-                {
-                    eventToUpdate.Title = model.Title;
-                    eventToUpdate.Description = model.Description;
-                    eventToUpdate.Date = model.Date;
-                    eventToUpdate.UserId = currentUser.Id;
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
-                }
+            if (eventToUpdate != null)
+            {
+                eventToUpdate.Title = model.Title;
+                eventToUpdate.Description = model.Description;
+                eventToUpdate.Date = model.Date;
+                eventToUpdate.UserId = currentUser.Id;
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+            }
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
 
         }
@@ -153,10 +154,10 @@ namespace CrmCorner.Controllers
             return NotFound(); // Event bulunamazsa
         }
         [HttpPost]
-        public async Task<IActionResult> CalendarUpdate(int? ID, string title,string description, string date)
+        public async Task<IActionResult> CalendarUpdate(int? ID, string title, string description, string date)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            Calendar calendar = new Calendar { Id = ID.Value, Title = title, Date = date ,UserId= currentUser.Id,Description=description};
+            Calendar calendar = new Calendar { Id = ID.Value, Title = title, Date = date, UserId = currentUser.Id, Description = description };
             if (ModelState.IsValid)
             {
                 _context.Calendars.Update(calendar);
@@ -224,8 +225,8 @@ namespace CrmCorner.Controllers
             return Json(new { Message = true });
 
         }
-        
-        public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar)
+
+        public async Task<ActionResult> sendEmailAsync2(string from, Calendar calendar)
         {
             try
             {
@@ -236,8 +237,8 @@ namespace CrmCorner.Controllers
                 // Davet bilgileri
                 string subject = calendar.Title;
 
-               
-                string body = "Merhaba,Yukarıda gönderilen event size "+calendar.Description+" açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
+
+                string body = "Merhaba,Yukarıda gönderilen event size " + calendar.Description + " açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
 
                 // Toplantı başlangıç ve bitiş zamanları
                 DateTime startTime = calendar.EmailProperty.StartDate;
@@ -247,31 +248,37 @@ namespace CrmCorner.Controllers
                 if (calendar.SelectedEmails.Any())
                 {
                     var lastSelectedEmail = calendar.SelectedEmails.Last();
-                   toEmails = string.Join(",", lastSelectedEmail);
+                    toEmails = string.Join(",", lastSelectedEmail);
                     // lastSelectedEmail'i kullan
                 }
-            
+
 
                 // iCalendar dosyası oluşturma
                 string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmails);
                 System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
 
                 // SMTP sunucusu bilgileri
-                var smptClient = new SmtpClient();
-                smptClient.Host = _emailSetings.Host;
-                smptClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-                smptClient.UseDefaultCredentials = false;
-                smptClient.Port = 587;
-                smptClient.Credentials = new NetworkCredential(_emailSetings.Email, _emailSetings.Password);
-                smptClient.EnableSsl = true;
-
-                MailMessage mailMessage = new MailMessage
+                var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
                 {
-                    From = new MailAddress(fromEmail), // İstediğiniz "From" adresini burada belirleyin
+                    Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password),
+                    EnableSsl = _smtpSettings.EnableSsl
+                };
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(_smtpSettings.Username),
                     Subject = subject,
                     Body = body,
-                    IsBodyHtml = true
+                    IsBodyHtml = true,
                 };
+
+                //MailMessage mailMessage = new MailMessage
+                //{
+                //    From = new MailAddress(fromEmail), // İstediğiniz "From" adresini burada belirleyin
+                //    Subject = subject,
+                //    Body = body,
+                //    IsBodyHtml = true
+                //};
                 foreach (var email in calendar.SelectedEmails)
                 {
                     mailMessage.To.Add(email);
@@ -279,9 +286,9 @@ namespace CrmCorner.Controllers
 
                 mailMessage.Attachments.Add(calendarAttachment);
 
-
+                mailMessage.To.Add(fromEmail);
                 // E-posta gönderimi
-                smptClient.Send(mailMessage);
+                client.Send(mailMessage);
 
                 Console.WriteLine("Toplantı daveti başarıyla gönderildi.");
             }
@@ -308,7 +315,7 @@ namespace CrmCorner.Controllers
             ics.AppendLine($"UID:{Guid.NewGuid()}");
             foreach (var toEmail in emailsArray)
             {
-                ics.AppendLine($"ATTENDEE;CN=\"{toEmail}\";RSVP=TRUE:mailto:{toEmail}");
+                ics.AppendLine($"ATTENDEE;CN=\"Takvim\";RSVP=TRUE:mailto:{toEmail}");
             }
             ics.AppendLine($"ORGANIZER;CN=\"{fromEmail}\":mailto:{fromEmail}");
             ics.AppendLine("END:VEVENT");
@@ -318,14 +325,6 @@ namespace CrmCorner.Controllers
 
             return ics.ToString();
         }
-       
-
-       
-
-
 
     }
 }
-
-
-
