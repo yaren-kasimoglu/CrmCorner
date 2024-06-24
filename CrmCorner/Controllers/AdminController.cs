@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+
     public class AdminController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
