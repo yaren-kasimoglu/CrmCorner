@@ -104,8 +104,8 @@
             </div>
             <div class="col-lg-12 col-md-6">
                 <label class="form-label">Güncel Durum</label>
-                <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example" required>
-                    <option value="">Lütfen seçiniz</option>
+                <select asp-for="StatusId" asp-items="ViewBag.Status" class="form-select select2" aria-label="Default select example" required disabled>
+                    <option value="1" selected>İlk Temas</option>
                 </select>
                 <span asp-validation-for="StatusId" class="text-danger"></span>
             </div>
@@ -122,8 +122,6 @@
                 <label asp-for="IsFinalDecisionMaker" class="control-label">Son Karar Mercii İle Görüşüldü</label>
                 <span asp-validation-for="IsFinalDecisionMaker" class="text-danger"></span>
             </div>
-
-
         </div>
     </div>
     <br>

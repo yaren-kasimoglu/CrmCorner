@@ -32,8 +32,8 @@
     }
 
     .card {
-        /* Kartlara bir minimum yükseklik verildi */
-        min-height: 100px; /* Kartın içindeki liste boşsa bile görsel bir alan sağlar */
+        position: relative;
+        padding-bottom: 40px; /* Scroll arrow için yer açmak için */
     }
 
     .card-body {
@@ -175,6 +175,24 @@
             border-radius: 4px; /* Hafif yuvarlatılmış köşeler için */
         }
     }
+
+
+    .scroll-arrow {
+        text-align: center;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 18px;
+        color: #333;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background-color: #f9f9f9;
+        display: none; /* Başlangıçta gizli */
+    }
+
+        .scroll-arrow:hover {
+            color: #006400;
+        }
 </style>
 
 
@@ -357,7 +375,9 @@
                             <p>Görev Yok.</p>
                         }
                     </div>
-
+                    <div class="scroll-arrow" onclick="scrollTasks(this)">
+                        <i class="fa fa-arrow-down"></i>
+                    </div>
 
                 </div>
             </div>
@@ -401,6 +421,31 @@
 
 
 <script>
+
+    function scrollTasks(element) {
+        var cardBody = $(element).prev('.card-body');
+        var scrollStep = cardBody.find('.dd-item').first().outerHeight();
+        cardBody.animate({
+            scrollTop: cardBody.scrollTop() + scrollStep
+        }, 300);
+    }
+
+    function checkTaskCount() {
+        $('.card-body').each(function () {
+            var taskCount = $(this).find('.dd-item').length;
+            if (taskCount > 3) {
+                $(this).next('.scroll-arrow').show(); // 3'ten fazla görev varsa oku göster
+            } else {
+                $(this).next('.scroll-arrow').hide(); // 3 veya daha az görev varsa oku gizle
+            }
+        });
+    }
+
+    // Sayfa yüklendiğinde ve görev listesi değiştiğinde görev sayısını kontrol et
+    $(document).ready(function () {
+        checkTaskCount();
+    });
+
 
 
     function performSearch() {

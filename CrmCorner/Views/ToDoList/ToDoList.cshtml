@@ -4,7 +4,7 @@
     string[] taskData = ViewBag.TaskData;
     string[] notTaskData = ViewBag.NotTaskData;
     string mainTitle = ViewBag.TitleValue;
-
+    //string assigment = ViewBag.Assigment;
 }
 @{
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
@@ -22,7 +22,6 @@
     <!-- page js file -->
     <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
     <link href="~/CRMTema/bootstrap4/dark/assets/css/content.css" rel="stylesheet" />
-
     <style>
         .card {
             background-color: #f4f4f4;
@@ -63,7 +62,7 @@
 
 
         .btn-secondary {
-            background-color: antiquewhite;
+            background-color: #2eacb3;
             color: #212529; /* Metin rengi */
             border-color: #6c757d; /* Kenarlık rengi */
         }
@@ -90,20 +89,20 @@
         }
 
         .containerText {
-            position: absolute; /* Formun konumunu mutlak olarak ayarlar */
-            bottom: 0; /* Sayfanın en altına sabitler */
-            left: 0; /* Sayfanın soluna sabitler */
-            width: 93%; /* Sayfa genişliğini kaplar */
-            z-index: 1000; /* Diğer öğelerin üzerinde olmasını sağlar */
-            padding: 10px; /* İstenilen boşlukları ayarlar */
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 93%;
+            z-index: 1000;
+            padding: 10px;
         }
 
         #containerbutton {
             position: absolute;
-            bottom: 20px;
-            left: 100%;
+            bottom: 15px;
+            left: 99%;
         }
-      
+
         #progressBarContainer {
             position: relative; /* Pozisyon referansını ayarla */
             width: 100%;
@@ -115,15 +114,15 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        /*#taskCount {
-            position: absolute;
-            top: 50%;*/ /* Üstten yarım yükseklikte */
-            /*right: -20px;*/ /* Sağa yasladıktan sonra 20px dışarı çıkar */
-            /*transform: translateY(-50%);*/ /* Yatay merkezleme */
-            /*white-space: nowrap;*/ /* Metni tek satırda tut */
-            /*color: black;*/ /* Metin rengi */
-            /*font-size: 14px;*/ /* Yazı boyutu */
-        /*}*/
+        /*            #taskCount {
+                position: absolute;
+                top: 50%;
+                right: -20px;
+                transform: translateY(-50%);
+                white-space: nowrap;
+                color: black;
+                font-size: 14px;
+            }*/
         .progress-bar {
             height: 100%;
             background-color: #4CAF50; /* Yeşil renk */
@@ -138,12 +137,13 @@
             .progress-bar:hover {
                 filter: brightness(110%);
             }
-            .progress2 {
-  padding: 6px;
-  border-radius: 30px;
-  background: rgba(0, 0, 0, 0.25);  
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px rgba(255, 255, 255, 0.08);
-}
+
+        .progress2 {
+            padding: 6px;
+            border-radius: 30px;
+            background: rgba(0, 0, 0, 0.25);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px rgba(255, 255, 255, 0.08);
+        }
 
         .progress-bar2 {
             height: 10px;
@@ -161,32 +161,35 @@
             animation: progressAnimation 6s;
         }
 
-
-
-
-
-
+        .progress-percentage {
+            position: absolute;
+            /*top: 20px;*/ /* Yukarıdan 20px uzaklık */
+            /*            left:90%;*/
+            right: 0;
+            font-size: 14px;
+            color: #777;
+        }
     </style>
 </head>
 <body>
 
-
-
+    <input type="hidden" id="hiddenDate" value="@ViewBag.Date" />
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3">
                 <div id="hover-effect" class="d-flex align-items-center">
                     <img src="/icons/todo/sun.jpeg" alt="Logo" class="logo" style="max-width: 50px; max-height: 50px;">
                     <label onclick="clickToday()" class="date">Günüm</label>
-
-
-
                 </div>
-                <br />
                 <div class="d-flex align-items-center" id="hover-effect" style="padding-left: 1%;">
-                    <i class="fa fa-star-o" style="font-size:45px;max-width: 50px; max-height: 50px; margin-right: 5px;"></i>
-                    <span onclick="clickImportant()" style="font-size: x-large; margin-right: 5px; cursor: pointer;">Önemli</span>
+                    <i class="fa fa-star-o" style="font-size:45px;max-width: 50px; max-height: 50px; margin-right: 5px;margin-top:5px;"></i>
+                    <span onclick="clickImportant()" style="font-size: x-large; margin-right: 5px; cursor: pointer;margin-left:5px;">Önemli</span>
                     <span id="ImportantId" style="display: none;">@ViewBag.ImportantId</span>
+                </div>
+                  <div class="d-flex align-items-center" id="hover-effect" style="padding-left: 1%; margin-top:5px;">
+                    <i class="fa fa-user-o" style="font-size:45px;max-width: 50px; max-height: 50px; margin-right: 5px;"></i>
+                    <span  onclick="clickAssign()" style="font-size: x-large; margin-right: 5px; cursor: pointer; margin-left: 10px;">Bana Atananlar</span>
+                    <span id="AssignListId" style="display: none;">@ViewBag.AssignListId</span>
                 </div>
                 <hr class="horizontal-line">
                 <div class="btn-group" style="width: -webkit-fill-available;">
@@ -232,15 +235,18 @@
             <div class="col-md-9">
 
                 <div id="progressBarContainer">
+                    <div id="progressPercentage" class="progress-percentage">
+                        <!-- İlerleme yüzdesi burada gösterilecek -->
+                    </div>
                     <div class="progress2 progress-moved">
                         <div id="progress-bar2" class="progress-bar2">
                             <!-- İlerleme çubuğu içeriği burada -->
                         </div>
                     </div>
-                    <!--<h5 id="taskCount"></h5>--> <!-- Görev sayacı -->
+
                 </div>
 
-                <div class="card" id="container2" style="width: 100%; height: 700px; overflow-y: hidden; background-color: #f4f4f4; background-image: url('/icons/todo/todo3.jpeg'); background-size: cover; background-position: center; display: flex; justify-content: center; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+                <div class="card" id="container2" style="width: 100%; height: 700px; background-color: #f4f4f4; background-image: url('/icons/todo/todo3.jpeg'); background-size: cover; background-position: center; display: flex; justify-content: center; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
                     <div class="card-body" style="position: relative; z-index: 1; ">
                         <h1 style="font-size: 28px; font-weight: normal; color: white; margin: 0px; display: block;" id="todaymaintitle">@ViewBag.TitleValue</h1>
                         <h3 style="font-size: 18px; font-weight: normal; color: white; margin: 0px; display: block; margin-bottom: 2%"> <span id="currentDate"></span></h3>
@@ -267,17 +273,24 @@
                                 <h2 style="font-size: 20px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">@ViewBag.TitleValue listenize odaklanın</h2>
                                 <h2 style="font-size: 18px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">@ViewBag.TitleValue listesiyle işlerinizi tamamlayın.</h2>
                             </div>
+                             <div class="card" id="cardpng4" style="display:none;background-color: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                                <div style="text-align: center;">
+                                    <img src="/icons/todo/assignment.jpeg" alt="Your Image" class="img-fluid" style="max-width: 50%; max-height: 50px; margin-bottom: 10px;">
+                                </div>
+                                <h2 style="font-size: 20px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">Bana Atananlar listenize odaklanın</h2>
+                                <h2 style="font-size: 18px; font-weight: bold; color: rgba(221, 221, 221, 0.7);">To Do da size atananlar burada görünür</h2>
+                            </div>
                         </div>
                         <div class="taskcontainer" id="kartContainer2">
                         </div>
                         <form id="taskForm" action="@Url.Action("ToDoListAdd", "ToDoList")" method="post">
                             @*<div class="containerText">
-                            <label class="task" style="display: flex; align-items: center;">
-                                <input type="date" id="selectedDate" name="selectedDate" style="margin-left: 40px; width: 22px; background-color: transparent;">
-                                <input type="text" name="textValue" class="textInput2" id="textInput" placeholder="Görev Ekle" style="font-size:14px; text-decoration: none; margin-left: 10px;">
-                            </label>
-                            <button type="submit" id="containerbutton" class="btn btn-primary btn-sm">Ekle</button>
-                        </div>*@
+                                    <label class="task" style="display: flex; align-items: center;">
+                                        <input type="date" id="selectedDate" name="selectedDate" style="margin-left: 40px; width: 22px; background-color: transparent;">
+                                        <input type="text" name="textValue" class="textInput2" id="textInput" placeholder="Görev Ekle" style="font-size:14px; text-decoration: none; margin-left: 10px;">
+                                    </label>
+                                    <button type="submit" id="containerbutton" class="btn btn-primary btn-sm">Ekle</button>
+                                </div>*@
                             <div class="containerText">
                                 <label class="task" style="display: flex; align-items: center;">
 
@@ -326,7 +339,6 @@
     </div>
     <script>
 
-
         document.getElementById('dropdownMenuButton').addEventListener('click', function () {
             var btnPrima = document.getElementById('btn-prima');
             btnPrima.style.display = 'none';
@@ -356,8 +368,8 @@
 
 
 
-        var baseUrl = "https://crmcorner.co/";
-        //var baseUrl = "https://localhost:7145/";
+       var baseUrl = "https://crmcorner.co/";
+       //var baseUrl = "https://localhost:7145/";
 
         document.querySelectorAll('.link-item').forEach(item => {
             item.addEventListener('click', event => {
@@ -391,6 +403,17 @@
             var ImportantIdValue = ImportantId.innerHTML;
 
             newUrl = baseUrl + "ToDoList/ToDoList/" + ImportantIdValue;
+            window.location.href = newUrl;
+
+            // Arka plan resminin URL'sini belirleyin
+
+        }
+        function clickAssign() {
+            var newUrl = "";
+            var AssignId = document.getElementById("AssignListId");
+            var AssignIdValue = AssignId.innerHTML;
+
+            newUrl = baseUrl + "ToDoList/ToDoList/" + AssignIdValue;
             window.location.href = newUrl;
 
             // Arka plan resminin URL'sini belirleyin
@@ -540,7 +563,35 @@
             var id = getParameterByName('id');
             var titleElement = document.getElementById('todaymaintitle');
             var titleValue = titleElement.textContent;
+            if (titleValue == "Günüm") {
+                var today = new Date();
+                var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                var formattedDate = today.toLocaleDateString('tr-TR', options);
+                document.getElementById('currentDate').textContent = formattedDate;
+            }
+            else {
+                var hiddenDateValue = document.getElementById('hiddenDate').value;
+                var dateTimeParts = hiddenDateValue.split(' ');
+                var dateParts = dateTimeParts[0].split('.');
+                var year = parseInt(dateParts[2], 10); // Yıl
+                var month = parseInt(dateParts[1], 10) - 1; // Ay (0-11 arası)
+                var day = parseInt(dateParts[0], 10); // Gün
+                var dateObject = new Date(year, month, day);
+                var options = {
+                    weekday: 'long', // Haftanın günü uzun adı (örn. Salı)
+                    day: 'numeric', // Günün sayısal değeri (örn. 17)
+                    month: 'long', // Ayın uzun adı (örn. Haziran)
+                    year: 'numeric' // Yıl (örn. 2024)
+                };
 
+                var formattedDate = dateObject.toLocaleDateString('tr-TR', options);
+                if (hiddenDateValue) {
+                    var currentDateElement = document.getElementById('currentDate');
+                    if (currentDateElement) {
+                        currentDateElement.textContent = formattedDate;
+                    }
+                }
+            }
             var kartIcerik = `@if (taskData != null) {
   @foreach (var task in taskData)
             {
@@ -556,7 +607,6 @@
         <input type="checkbox" name="taskCheckbox" class="taskCheckbox" onclick="clickToDoCheckbox(this); document.getElementById('delbutton').blur();" id="taskCheckbox" @(true ? "checked" : "")>
         <span class="custom-checkbox"  style="margin-top: auto;"></span>
 <input type="text" name="textContentVisible" class="textContent" style="text-decoration: line-through; display: inline-block;" id="textContentVisible" placeholder="Görev Ekle" value="@task">
-
  </label>
  @if (mainTitle != "Önemli")
     {
@@ -564,10 +614,15 @@
             <img src="/icons/todo/staradd.jpeg" width="35" height="35" style="cursor: pointer;" id="logo">
         </button>
     }
-
-
+<button type="button" id="assigment" onclick="openPopupPeople('@task')" style="border: none; background: none; width: 0px;margin-left:22px;">
+        <img src="/icons/todo/person-fill-add.svg" width="30" height="30" style="cursor: pointer;">
+    </button>
 </form>
         }
+     @*@if (mainTitle == "Bana Atananlar")
+{
+ <span style="font-style: italic; font-size: 12px;">tarafından size atandı</span>
+}*@
     }`;
 
             var kartIcerik2 = `@if (notTaskData != null) {
@@ -583,7 +638,6 @@
         <input type="checkbox" name="taskCheckbox" class="taskCheckbox" onclick="clickToDoCheckbox(this); document.getElementById('delbutton').blur();" id="taskCheckbox" @(false ? "checked" : "")>
         <span class="custom-checkbox" style="margin-top: auto;"></span>
 <input type="text" name="textContentVisible" class="textContent" style="text-decoration: none;display: inline-block;" id="textContentVisible" placeholder="Görev Ekle" value="@task2">
-
  </label>
  @if (mainTitle != "Önemli")
     {
@@ -592,14 +646,19 @@
         </button>
     }
 
-
+<button type="button" id="assigment" onclick="openPopupPeople('@task2')" style="border: none; background: none; width: 0px;margin-left:22px;">
+        <img src="/icons/todo/person-fill-add.svg" width="30" height="30" style="cursor: pointer;">
+    </button>
 
 </form>
 
             }
+ @*@if (mainTitle == "Bana Atananlar")
+{
+ <span style="font-style: italic; font-size: 12px;">assigment +tarafından size atandı</span>
+}*@
 
-                    }
-            `;
+    }`;
 
 
 
@@ -607,6 +666,9 @@
             $('#kartContainer2').append(toplam);
     var taskData = @Json.Serialize(ViewBag.TaskData);
             var notTaskData = @Json.Serialize(ViewBag.NotTaskData);
+            var formvisible = document.getElementById("taskForm");
+            var assigmentvisible = document.getElementById("assigment");
+            formvisible.style.display = "block";
             if (taskData == null && notTaskData == null) {
                 if (id == 0 || id == null) {
                     var cardDiv = document.getElementById("cardpng");
@@ -617,6 +679,19 @@
                         var cardDiv = document.getElementById("cardpng2");
                         cardDiv.style.display = "block";
                         var yeniArkaPlanURL = "/icons/todo/important.jpeg"; // Yeni resmin URL'si
+
+                        // HTML elementini seçin ve arka plan resmini değiştirin
+                        var container2 = document.getElementById("container2");
+                        container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
+                    }
+                    else if (titleValue == "Bana Atananlar") {
+                        var cardDiv = document.getElementById("cardpng4");
+                        cardDiv.style.display = "block";
+                        formvisible.style.display = "none";
+                        assigmentvisible.style.display = "none";
+                        var yeniArkaPlanURL = "/icons/todo/color.jpeg"; // Yeni resmin URL'si
+                        var textContentStyle = document.getElementById("textContentVisible");
+                        textContentStyle.style.color = "black";
 
                         // HTML elementini seçin ve arka plan resmini değiştirin
                         var container2 = document.getElementById("container2");
@@ -635,17 +710,18 @@
 
             }
             else {
-                console.log("aslında data var");
+                console.log("aslında data var" + titleValue);
                 var cardDiv = document.getElementById("cardpng");
                 cardDiv.style.display = "none";
                 var cardDiv = document.getElementById("cardpng2");
                 cardDiv.style.display = "none";
                 var cardDiv = document.getElementById("cardpng3");
                 cardDiv.style.display = "none";
+                var cardDiv = document.getElementById("cardpng4");
+                cardDiv.style.display = "none";
                 if (titleValue == "Önemli") {
                     var yeniArkaPlanURL = "/icons/todo/important.jpeg"; // Yeni resmin URL'si
                     var container2 = document.getElementById("container2");
-
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
                 else if (titleValue == "Günüm") {
@@ -653,11 +729,22 @@
                     var container2 = document.getElementById("container2");
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
+                else if (titleValue == "Bana Atananlar") {
+                    var yeniArkaPlanURL = "/icons/todo/color.jpeg"; // Yeni resmin URL'si
+                    var container2 = document.getElementById("container2");
+                    var textContentStyle = document.getElementById("textContentVisible");
+                    textContentStyle.style.color = "black";
+                    formvisible.style.display = "none";
+                    assigmentvisible.style.display = "none";
+                    container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
+                }
                 else {
                     var yeniArkaPlanURL = "/icons/todo/list.jpeg"; // Yeni resmin URL'si
                     var container2 = document.getElementById("container2");
                     container2.style.backgroundImage = "url('" + yeniArkaPlanURL + "')";
                 }
+                console.log("aslında data var" + yeniArkaPlanURL);
+
             }
 
             var btnPrima = document.getElementById('btn-prima');
@@ -689,7 +776,12 @@
                 console.log("progressBar elementi bulunamadı!");
             }
 
-
+            var progressPercentage = document.getElementById('progressPercentage');
+            if (progressPercentage) {
+                progressPercentage.textContent = progress.toFixed(2) + '%';
+            } else {
+                console.log("progressPercentage elementi bulunamadı!");
+            }
 
             // Boş bir alana tıklandığında
             document.addEventListener('click', function (event) {
@@ -749,11 +841,7 @@
         }
 
     </script>
-    <script>var today = new Date();
-        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        var formattedDate = today.toLocaleDateString('tr-TR', options);
-        document.getElementById('currentDate').textContent = formattedDate;
-        function toggleAltMenu(item) {
+    <script>function toggleAltMenu(item) {
             var altMenu = item.querySelector('.alt-menu');
             altMenu.classList.toggle('goster'); // Alt menünün görünürlüğünü değiştirir
         }
@@ -860,17 +948,153 @@
             location.reload();
 
         });
+        $('#peopleSelect').selectpicker({
+            liveSearch: true,
+            liveSearchNormalize: true,
+            liveSearchStyle: 'contains',
+            dropdownSubmenu: true
+        });
+        // Fonksiyon: Popup modalı açma
+        async function openPopupPeople(selectedtext) {
+            console.log(selectedtext)
+            // AJAX isteği yap
+            try {
+                // AJAX isteği yap
+                const response = await fetch('/ToDoList/GetPerson'); // Controller ve action yolunu doğru şekilde güncelleyin
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
 
+                // Modal içeriğini oluştur
+                var modalContent = '<div class="modal fade" id="peopleModal" tabindex="-1" aria-labelledby="peopleModalLabel" aria-hidden="true"> \
+                                <div class="modal-dialog"> \
+                                    <div class="modal-content"> \
+                                        <div class="modal-header"> \
+                                            <h5 class="modal-title" id="peopleModalLabel">Kişi Seçimi</h5> \
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> \
+                                        </div> \
+                                        <div class="modal-body"> \
+                                            <div class="dropdown"> \
+                                                <button style="width: auto;" class="btn btn-secondary dropdown-toggle" type="button" id="peopleDropdown" data-bs-toggle="dropdown" aria-expanded="false"> \
+                                                    Seçiniz \
+                                                </button> \
+                                                <ul class="dropdown-menu" aria-labelledby="peopleDropdown">';
 
-      
+                // AJAX ile gelen verilere göre dropdown menüsünü oluştur
+                data.message.forEach(function (user) {
+                    modalContent += '<li><a class="dropdown-item" href="#" onclick="selectPerson(\'' + user.userName + '\')">' + user.nameSurname + '</a></li>';
+                });
 
+                modalContent += '</ul> \
+                                    </div> \
+                                </div> \
+                                <div class="modal-footer"> \
+                                    <button style="width: auto;" type="button" class="btn btn-secondary" onclick="assignPerson(\'' + selectedtext + '\')">Kişiye Ata</button> \                                </div> \
+                            </div> \
+                        </div> \
+                    </div>';
 
-        </script>
+                // Modal içeriğini body içine ekle
+                document.body.innerHTML += modalContent;
+
+                // Modalı göster
+                var modal = new bootstrap.Modal(document.getElementById('peopleModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                // Hata durumunda kullanıcıya bildirim yapabilirsiniz
+            }
+        }
+
+        // Seçilen kişiyi atama fonksiyonu
+        function selectPerson(person) {
+            document.getElementById('peopleDropdown').innerHTML = person;
+        }
+        function assignPerson(selectedtext) {
+            console.log("assssss" + selectedtext);
+            try {
+                var selectedPerson = document.getElementById('peopleDropdown').innerHTML;
+
+                // POST isteği yap
+                $.ajax({
+                    type: 'POST',
+                    url: '/ToDoList/AssignPerson/',
+                    data: { person: selectedPerson, text: selectedtext },
+                    success: function (response) {
+                        window.location.reload();
+                        // Başarılı bir şekilde eklendiğinde yapılacak işlemler buraya gelebilir
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Görev eklenirken bir hata oluştu: " + error);
+                        // Hata durumunda yapılacak işlemler buraya gelebilir
+                    }
+                });
+
+                // Modalı kapat (isteğe bağlı)
+                var modalElement = document.getElementById('peopleModal');
+                var modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                // Hata durumunda kullanıcıya bildirim yapabilirsiniz
+            }
+        }
+        // Fonksiyon: Popup modalı açma
+        //function openPopupPeople() {
+        //    // Modal içeriğini oluştur
+        //    var modalContent = '<div class="modal fade" id="peopleModal" tabindex="-1" aria-labelledby="peopleModalLabel" aria-hidden="true"> \
+        //                    <div class="modal-dialog"> \
+        //                        <div class="modal-content"> \
+        //                            <div class="modal-header"> \
+        //                                <h5 class="modal-title" id="peopleModalLabel">Kişi Seçimi</h5> \
+        //                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> \
+        //                            </div> \
+        //                            <div class="modal-body"> \
+        //                                <div class="dropdown"> \
+        //                                    <button style="width: auto;" class="btn btn-secondary dropdown-toggle" type="button" id="peopleDropdown" data-bs-toggle="dropdown" aria-expanded="false"> \
+        //                                        Seçiniz \
+        //                                    </button> \
+        //                                    <ul class="dropdown-menu" aria-labelledby="peopleDropdown"> \
+        //                                        <li><a class="dropdown-item" href="#" onclick="selectPerson(\'Person 1\')">Person 1</a></li> \
+        //                                        <li><a class="dropdown-item" href="#" onclick="selectPerson(\'Person 1\')">Person 2</a></li> \
+        //                                    </ul> \
+        //                                </div> \
+        //                            </div> \
+        //                            <div class="modal-footer"> \
+        //                                <button  style="width: auto;"type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kişiye Ata</button> \
+        //                            </div> \
+        //                        </div> \
+        //                    </div> \
+        //                </div>';
+
+        //    // Modal içeriğini body içine ekle
+        //    document.body.innerHTML += modalContent;
+
+        //    // Modalı göster
+        //    var modal = new bootstrap.Modal(document.getElementById('peopleModal'));
+        //    modal.show();
+            
+        //}
+
+        //function selectPerson(person) {
+        //    document.getElementById('peopleDropdown').innerHTML = person;
+        //}
+
+    </script>
     <style>
+        #peopleModal {
+            z-index: 1050; /* Modal için yüksek z-index değeri */
+        }
 
+        .modal-backdrop {
+            z-index: 1040; /* Modal backdrop için biraz daha düşük z-index değeri */
+        }
+     
         .popup-containeredit {
             background-color: white;
-            f border-radius: 10px; /* Yuvarlak kenarlar */
+            border-radius: 10px; /* Yuvarlak kenarlar */
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Gölgeli efekt */
             padding: 20px;
             position: fixed;
@@ -1001,6 +1225,7 @@
             cursor: pointer;
             text-align: center;
             font-size: x-large;
+            margin-left:10px;
         }
 
         .todolist {
@@ -1058,17 +1283,17 @@
                 margin-bottom: 20px;
             }
 
-        .task {
+        /*        .task {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
             padding-left: 1%
-        }
+        }*/
 
-            .task input[type="checkbox"] {
-                opacity: 0;
-                position: absolute;
-            }
+        .task input[type="checkbox"] {
+            opacity: 0;
+            position: absolute;
+        }
 
         .textInput2 {
             border: none;

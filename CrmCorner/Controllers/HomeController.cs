@@ -26,12 +26,13 @@ namespace CrmCorner.Controllers
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IEmailServices _emailServices;
         private readonly EmailService _emailService;
-
-
+        private Timer _timer;
         //deneme yorum
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailServices emailServices, CrmCornerContext context, RoleManager<AppRole> roleManager, EmailService emailService)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
+            IEmailServices emailServices, CrmCornerContext context, RoleManager<AppRole> roleManager, EmailService emailService
+           )
         {
             _logger = logger;
             _userManager = userManager;
@@ -40,8 +41,9 @@ namespace CrmCorner.Controllers
             _context = context;
             _roleManager = roleManager;
             _emailService = emailService;
-        }
 
+        }
+     
         public async Task<IActionResult> Index()
         {
             try
@@ -106,16 +108,16 @@ namespace CrmCorner.Controllers
 
                     ViewData["UserEmail"] = email;
                     ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+                   // ViewData["HasNotifications"] = true;
+                    //bool hasUnreadMessages = _context.ChatHistories.Any(m => m.ReceiverId == currentUser.Id && !m.IsRead);
 
-                    bool hasUnreadMessages = _context.ChatHistories.Any(m => m.ReceiverId == currentUser.Id && !m.IsRead);
-
-                    var cookieOptions = new CookieOptions
-                    {
-                        HttpOnly = false, // JavaScript tarafından erişilebilir yapmak için HttpOnly 'false' olmalı
-                        Expires = DateTime.Now.AddDays(1), // Çerezin geçerlilik süresi 1 gün
-                        Path = "/" // Çerezin tüm site genelinde geçerli olması
-                    };
-                    Response.Cookies.Append("HasUnreadMessages", hasUnreadMessages.ToString(), cookieOptions);
+                    //var cookieOptions = new CookieOptions
+                    //{
+                    //    HttpOnly = false, // JavaScript tarafından erişilebilir yapmak için HttpOnly 'false' olmalı
+                    //    Expires = DateTime.Now.AddDays(1), // Çerezin geçerlilik süresi 1 gün
+                    //    Path = "/" // Çerezin tüm site genelinde geçerli olması
+                    //};
+                    //Response.Cookies.Append("HasUnreadMessages", hasUnreadMessages.ToString(), cookieOptions);
                     var todoList = _context.ToDoList
                          .Where(e => e.UserId == currentUser.Id  )
                         .Select(e => new ToDo { Id = e.Id, CreatedDate = e.CreatedDate,NotDoneList=e.NotDoneList })
@@ -130,7 +132,6 @@ namespace CrmCorner.Controllers
                         .ToList();
 
                     ViewBag.ToDoList = combinedData;
-
 
                     return View(viewModel);
                 }
@@ -591,6 +592,26 @@ namespace CrmCorner.Controllers
             {
                 return RedirectToAction("NotFound", "Error");
             }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetNotificationsStatus()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            bool hasUnreadMessages = _context.ChatHistories.Any(m => m.ReceiverId == currentUser.Id && !m.IsRead);
+            var unreadMessages = _context.ChatHistories
+                                    .Where(m => m.ReceiverId == currentUser.Id && !m.IsRead)
+                                    .ToList();
+            var distinctSenderIdsCount = unreadMessages
+                                        .Select(m => m.SenderId)
+                                        .Distinct()
+                                        .Count();
+            var jsonData = new
+            {
+                HasUnreadMessages = hasUnreadMessages,
+                DistinctSenderIdsCount= distinctSenderIdsCount
+            };
+
+            return Json(new { Message = jsonData });
         }
 
 

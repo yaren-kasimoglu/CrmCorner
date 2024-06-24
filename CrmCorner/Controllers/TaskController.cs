@@ -329,25 +329,42 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> TaskEdit(TaskComp editedTask, IFormFile file)
+        public async Task<IActionResult> TaskEdit(TaskComp editedTask)
         {
             try
             {
+                var originalTask = _context.TaskComps
+                    .Include(t => t.FileAttachments) // Include FileAttachments
+                    .FirstOrDefault(t => t.TaskId == editedTask.TaskId);
+
+                if (originalTask == null)
+                {
+                    return NotFound();
+                }
+
+                editedTask.ModifiedDate = DateTime.Now;
+                editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
+
+                // Mevcut dosya varsa ve yeni dosya yüklenmediyse, dosya zorunluluğunu kaldır
+                if (originalTask.FileAttachments.Any())
+                {
+                    ModelState.Remove("file");
+                }
+
+                // Dosya zorunluluğunu sadece belirli durumlarda kontrol et
+                var status = _context.Statuses.FirstOrDefault(s => s.StatusId == editedTask.StatusId);
+                if ((status?.StatusName == "Sözleşme Aşamasında" || status?.StatusName == "Teklif Gönderildi" || status?.StatusName == "Satış Tamamlandı") && !originalTask.FileAttachments.Any())
+                {
+                    ModelState.AddModelError("file", "Dosya yüklemesi zorunludur.");
+                }
+
                 if (ModelState.IsValid)
                 {
-                    editedTask.ModifiedDate = DateTime.Now;
-
-                    var originalTask = _context.TaskComps
-                        .Include(t => t.FileAttachments) // Include FileAttachments
-                        .AsNoTracking()
-                        .FirstOrDefault(t => t.TaskId == editedTask.TaskId);
-
-                    editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
-
                     if (HttpContext.Request.Form.ContainsKey("AssignedUserId"))
                     {
                         editedTask.AssignedUserId = HttpContext.Request.Form["AssignedUserId"];
                     }
+
                     // OutcomeStatus ve Outcomes değerlerini kontrol et
                     if (HttpContext.Request.Form.ContainsKey("OutcomeStatus"))
                     {
@@ -359,52 +376,11 @@ namespace CrmCorner.Controllers
                         editedTask.Outcomes = Enum.Parse<OutcomeType>(HttpContext.Request.Form["Outcomes"]);
                     }
 
-                    // Dosya yükleme işlemi
-                    if (file != null && file.Length > 0)
-                    {
-                        var originalFileName = Path.GetFileName(file.FileName);
-                        var uniqueFileName = $"{Guid.NewGuid()}_{originalFileName}";
-
-                        // Yükleme klasörü
-                        var uploadFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "uploads");
-                        var filePath = Path.Combine(uploadFolderPath, uniqueFileName);
-
-                        // Klasör yoksa oluştur
-                        if (!Directory.Exists(uploadFolderPath))
-                        {
-                            Directory.CreateDirectory(uploadFolderPath);
-                        }
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-
-                        var fileAttachment = new FileAttachment
-                        {
-                            FileName = originalFileName,
-                            FilePath = "/uploads/" + uniqueFileName,
-                            FileSize = file.Length,
-                            FileType = file.ContentType,
-                            UploadedDate = DateTime.Now,
-                            TaskId = editedTask.TaskId
-                        };
-
-                        _context.FileAttachments.Add(fileAttachment);
-
-                        // FileAttachments koleksiyonunu başlat
-                        if (editedTask.FileAttachments == null)
-                        {
-                            editedTask.FileAttachments = new List<FileAttachment>();
-                        }
-                        editedTask.FileAttachments.Add(fileAttachment); // Add file to the task
-                    }
-
                     // Değişiklikleri kontrol et ve log tablosuna kaydet
                     await LogChanges(originalTask, editedTask);
 
-                    // task güncelle
-                    _context.TaskComps.Update(editedTask);
+                    // orijinal task veritabanından çekildiği için EF Core izliyor, tekrar eklemeye çalışmak yerine sadece güncelleme yapılmalı
+                    _context.Entry(originalTask).CurrentValues.SetValues(editedTask);
                     await _context.SaveChangesAsync();
 
                     if (editedTask.Outcomes == OutcomeType.Olumlu && originalTask.Outcomes != OutcomeType.Olumlu)
@@ -430,6 +406,37 @@ namespace CrmCorner.Controllers
                     // ModelState hatalarını topla ve görünümde göster
                     var errorMessages = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                     ViewBag.ErrorMessages = errorMessages;
+
+                    var statusList = _context.Statuses.ToList();
+                    List<SelectListItem> statusItems = statusList
+                        .Select(d => new SelectListItem
+                        {
+                            Text = d.StatusName,
+                            Value = d.StatusId.ToString()
+                        }).ToList();
+
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    var currentUserCompanyId = currentUser?.CompanyId;
+
+                    var users = _context.Users.Where(u => u.CompanyId == currentUserCompanyId!.Value).ToList();
+                    var userItems = users.Select(u => new SelectListItem
+                    {
+                        Text = u.UserName,
+                        Value = u.Id.ToString()
+                    }).ToList();
+
+                    var customer = _context.CustomerNs.Where(c => c.AppUserId == currentUser.Id).ToList();
+                    List<SelectListItem> customerItems = customer
+                        .Select(d => new SelectListItem
+                        {
+                            Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
+                            Value = d.Id.ToString()
+                        }).ToList();
+
+                    ViewBag.Users = userItems;
+                    ViewBag.Status = statusItems;
+                    ViewBag.Customer = customerItems;
+
                     return View(editedTask);
                 }
             }
