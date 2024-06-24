@@ -23,26 +23,36 @@ namespace CrmCorner.Controllers
         {
             try
             {
-                var userId = _userManager.GetUserId(User); // Aktif kullanıcının UserId'sini alır
+                var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
+                var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
 
-                var positiveSales = await _context.PostSaleInfos
-                                                  .Include(psi => psi.TaskComp)
-                                                  .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
-                                                  .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won &&
-                                                                psi.TaskComp.UserId == userId || psi.TaskComp.AssignedUserId == userId) // Satışı yapan kullanıcıya göre filtrele
-                                                  .Select(psi => new SaleDTO
-                                                  {
-                                                      Id = psi.Id,
-                                                      TaskCompTitle = psi.TaskComp.Title,
-                                                      IsFirstPaymentMade = psi.IsFirstPaymentMade,
-                                                      IsThereAProblem = psi.IsThereAProblem,
-                                                      ProblemDescription = psi.ProblemDescription,
-                                                      IsContinuationConsidered = psi.IsContinuationConsidered,
-                                                      IsTrustpilotReviewed = psi.IsTrustpilotReviewed,
-                                                      TrustPilotComment = psi.TrustPilotComment,
-                                                      CanUseLogo = psi.CanUseLogo
-                                                  })
-                                                  .ToListAsync();
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var positiveSalesQuery = _context.PostSaleInfos
+                                                 .Include(psi => psi.TaskComp)
+                                                 .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
+                                                 .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won)
+                                                 .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)); // E-posta domainine göre filtrele
+
+                if (!roles.Contains("Admin"))
+                {
+                    positiveSalesQuery = positiveSalesQuery.Where(psi => psi.TaskComp.UserId == user.Id || psi.TaskComp.AssignedUserId == user.Id);
+                }
+
+                var positiveSales = await positiveSalesQuery
+                                            .Select(psi => new SaleDTO
+                                            {
+                                                Id = psi.Id,
+                                                TaskCompTitle = psi.TaskComp.Title,
+                                                IsFirstPaymentMade = psi.IsFirstPaymentMade,
+                                                IsThereAProblem = psi.IsThereAProblem,
+                                                ProblemDescription = psi.ProblemDescription,
+                                                IsContinuationConsidered = psi.IsContinuationConsidered,
+                                                IsTrustpilotReviewed = psi.IsTrustpilotReviewed,
+                                                TrustPilotComment = psi.TrustPilotComment,
+                                                CanUseLogo = psi.CanUseLogo
+                                            })
+                                            .ToListAsync();
 
                 return View(positiveSales);
             }
@@ -51,6 +61,8 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
 
         public async Task<IActionResult> AfterTaskEdit(int? id)
         {
@@ -61,9 +73,14 @@ namespace CrmCorner.Controllers
                     return NotFound();
                 }
 
+                var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
+                var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
+
                 var postSaleInfo = await _context.PostSaleInfos
                                                  .Include(psi => psi.TaskComp) // İlişkili TaskComp bilgilerini de yükle
+                                                 .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)) // E-posta domainine göre filtrele
                                                  .FirstOrDefaultAsync(m => m.Id == id);
+
                 if (postSaleInfo == null)
                 {
                     return NotFound();
@@ -80,6 +97,9 @@ namespace CrmCorner.Controllers
             }
         }
 
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AfterTaskEdit(int id, [Bind("Id,TaskCompId,IsFirstPaymentMade,IsThereAProblem,ProblemDescription,IsContinuationConsidered,IsTrustpilotReviewed,TrustPilotComment,CanUseLogo")] PostSaleInfo model)
@@ -91,8 +111,12 @@ namespace CrmCorner.Controllers
                     return NotFound();
                 }
 
+                var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
+                var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
+
                 var postSaleInfo = await _context.PostSaleInfos
                                                  .Include(p => p.TaskComp)
+                                                 .Where(p => p.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || p.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)) // E-posta domainine göre filtrele
                                                  .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (postSaleInfo == null)
@@ -123,7 +147,8 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
-    
+
+
 
 
         private bool PostSaleInfoExists(int id)
