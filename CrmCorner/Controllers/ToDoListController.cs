@@ -805,7 +805,7 @@ namespace CrmCorner.Controllers
             toDo.UpdateSystemDate = DateTime.Today;
             toDo.SystemDate = DateTime.Today;
             var toDoValue = _context.ToDoList.AsNoTracking()
-                 .Where(e => e.UserId == currentUser.Id && e.Title == "Bana Atananlar")
+                 .Where(e => e.UserId == currentUsers.Id && e.Title == "Bana Atananlar")
                   .FirstOrDefault();
             string originalString = "";
                 originalString = toDoValue != null ? toDoValue.NotDoneList : null;
