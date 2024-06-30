@@ -108,16 +108,7 @@ namespace CrmCorner.Controllers
 
                     ViewData["UserEmail"] = email;
                     ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-                   // ViewData["HasNotifications"] = true;
-                    //bool hasUnreadMessages = _context.ChatHistories.Any(m => m.ReceiverId == currentUser.Id && !m.IsRead);
 
-                    //var cookieOptions = new CookieOptions
-                    //{
-                    //    HttpOnly = false, // JavaScript tarafından erişilebilir yapmak için HttpOnly 'false' olmalı
-                    //    Expires = DateTime.Now.AddDays(1), // Çerezin geçerlilik süresi 1 gün
-                    //    Path = "/" // Çerezin tüm site genelinde geçerli olması
-                    //};
-                    //Response.Cookies.Append("HasUnreadMessages", hasUnreadMessages.ToString(), cookieOptions);
                     var todoList = _context.ToDoList
                          .Where(e => e.UserId == currentUser.Id  )
                         .Select(e => new ToDo { Id = e.Id, CreatedDate = e.CreatedDate,NotDoneList=e.NotDoneList })
@@ -130,8 +121,27 @@ namespace CrmCorner.Controllers
                         .OrderBy(data => (data.CreatedDate - DateTime.Now))
                         .Take(5)
                         .ToList();
+                    List<string> updatedList = new List<string>();
+                    for (var item = 0; item < combinedData.Count; item++)
+                    {
+                        if (combinedData[item].NotDoneList!=null &&combinedData[item].NotDoneList.Contains(','))
+                        {
+                            updatedList.AddRange(combinedData[item].NotDoneList.Split(','));
+                            if (updatedList.Count > 5)
+                                break;
+                        }
+                        else
+                        {
+                            updatedList.Add(combinedData[item].NotDoneList);
+                            if (updatedList.Count > 5)
+                                break;
+                        }
+                    }
+                    if (updatedList.Count > 5)
+                    {
 
-                    ViewBag.ToDoList = combinedData;
+                    }
+                    ViewBag.ToDoList = updatedList;
 
                     return View(viewModel);
                 }

@@ -1,4 +1,5 @@
 ﻿@model CompanyUsersViewModel
+@using System.Linq
 
 @{
     ViewData["Title"] = "Index";
@@ -153,32 +154,38 @@
 
 
 <div class="row">
-<div class="col-6">
-    <div class="chart-title">Müşterilerin sektörel dağılımları</div>
-    <div class="custom-card" style="width: 60%;">
-        <canvas id="industuryChart"></canvas>
-    </div>
-</div>
-
-
-<div class="col-6">
-    <div class="card">
-        <div class="card-header">
-            <h6 class="card-title">Yapılacaklar</h6>
-            <small>Yaklaşan Yapılacaklar Listesi</small>
+    <div class="col-6">
+        <div class="chart-title">Müşterilerin sektörel dağılımları</div>
+        <div class="custom-card" style="width: 60%;">
+            <canvas id="industuryChart"></canvas>
         </div>
-        <div class="card-body todo_list">
-            @foreach (var task in ViewBag.ToDoList)
-            {
-                <div class="d-flex justify-content-between mb-3">
-                    <div class="form-check">
-                        <label class="form-check-label" for="@task"><i class="fa fa-calendar me-2"></i>@task.NotDoneList</label>
-                    </div>
+    </div>
+
+
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title">Yapılacaklar</h6>
+                <small>Yaklaşan Yapılacaklar Listesi</small>
+            </div>
+            <div class="card-body todo_list">
+                @if (ViewBag.ToDoList != null)
+                {
+                        var todoList = ViewBag.ToDoList as List<string>;
+                    
+                    @for (int i = 0; i < Math.Min(5, todoList.Count); i++)
+                    {
+                        var task = todoList[i];
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="form-check">
+                                <label class="form-check-label" for="@task"><i class="fa fa-calendar me-2"></i>@task</label>
+                            </div>
+                        </div>
+                    }
+                 }
                 </div>
-            }
         </div>
     </div>
-</div>
 
 </div>
 @*}*@
@@ -405,8 +412,4 @@
             }
             return colors;
         }
-    });
-
-
-
-</script>
+    });</script>
