@@ -344,40 +344,7 @@
         document.getElementById("modalDescription").value = data.message;
         document.getElementById("modalDescription").innerHTML = data.message;
     }
-    //function DeleteItem() {
-    //    var event = document.getElementById("Id").innerHTML;
-    //    $.ajax({
-    //        type: 'POST',
-    //        url: "/Calendar/sendEmail/",
-    //        encode: true,
-    //        data: { ID: event },
-    //        dataType: "json",
-    //        success: function () {
-    //            $("#calendarModal").modal('hide');
-    //            location.reload();
-    //        }
-    //    });
 
-    //}
-
-    //function UpdateItem() {
-    //    var eventId = document.getElementById("Id").innerHTML;
-    //    var eventtitle = document.getElementById('modalTitle2').value;
-    //    var eventdate = document.getElementById("modalStart").value;
-    //    console.log("edit oldu");
-    //    $.ajax({
-    //        type: 'POST',
-    //        url: "/Calendar/CalendarUpdate/",
-    //        encode: true,
-    //        data: { ID: eventId, title: eventtitle, date: eventdate },
-    //        dataType: "json",
-    //        success: function () {
-    //            $("#calendarModal").modal('hide');
-    //            location.reload();
-    //        }
-    //    });
-
-    //}
 
     document.getElementById('searchInput').addEventListener('keyup', function (event) {
         // Eğer tuş Enter (keyCode 13) ise veya input boş değilse aramayı gerçekleştir
