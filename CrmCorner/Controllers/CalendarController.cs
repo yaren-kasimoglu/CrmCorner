@@ -25,6 +25,7 @@ using Microsoft.Extensions.Options;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Humanizer;
+using Microsoft.Office.Interop.Outlook;
 
 namespace CrmCorner.Controllers
 {
@@ -80,7 +81,9 @@ namespace CrmCorner.Controllers
 
                 ViewBag.Calendar = calendars;
                 ViewBag.CalendarFilter = calendarItemsFilter.Take(5);
-                ViewBag.Users = _context.Users.Select(u => new SelectListItem
+                ViewBag.Users = _context.Users
+                    .Where(u=>u.Id!=currentUser.Id)
+                    .Select(u => new SelectListItem
                 {
                     Value = u.Email,
                     Text = u.UserName // veya başka bir kullanıcı adı alanı
@@ -113,6 +116,20 @@ namespace CrmCorner.Controllers
 
                 if (Calendar.SelectedEmails!=null &&Calendar.SelectedEmails.Count>0 && Calendar.SelectedEmails[0]!=null)
                 {
+                    string lastEmailString = Calendar.SelectedEmails[Calendar.SelectedEmails.Count - 1];
+                    string[] emailArray = lastEmailString.Split(',');
+                    foreach (string email in emailArray)
+                    {
+                        var currentUsers = await _userManager.FindByEmailAsync(email);
+                        if (currentUsers != null)
+                        {
+                            Calendar.UserId = currentUsers.Id;
+                            Calendar.Id = 0;
+                            _context.Calendars.Add(Calendar);
+                            _context.SaveChanges();
+                        }
+                    }
+                   
                     var emailSend = sendEmailAsync2(currentUser.Email,Calendar);
 
                 }
@@ -230,6 +247,7 @@ namespace CrmCorner.Controllers
         {
             try
             {
+                
                 // Alıcı ve gönderici e-posta adresleri
                 string fromEmail = from;
 
@@ -292,7 +310,7 @@ namespace CrmCorner.Controllers
 
                 Console.WriteLine("Toplantı daveti başarıyla gönderildi.");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 Console.WriteLine("Toplantı daveti gönderimi sırasında bir hata oluştu: " + ex.Message);
             }
