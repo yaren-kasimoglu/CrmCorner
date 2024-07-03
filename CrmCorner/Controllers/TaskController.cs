@@ -301,20 +301,54 @@ namespace CrmCorner.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 var currentUserCompanyId = currentUser?.CompanyId;
 
+                var roles = await _userManager.GetRolesAsync(currentUser);
+                bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
+                bool isTeamLeader = roles.Contains("TeamLeader");
+
+                List<SelectListItem> customerItems;
+
+                if (isAdminOrManager)
+                {
+                    customerItems = _context.CustomerNs.ToList()
+                        .Select(d => new SelectListItem
+                        {
+                            Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
+                            Value = d.Id.ToString()
+                        }).ToList();
+                }
+                else if (isTeamLeader)
+                {
+                    var teamMembers = await _userManager.GetUsersInRoleAsync("TeamMember");
+                    var teamMemberIds = teamMembers.Select(u => u.Id).ToList();
+                    teamMemberIds.Add(currentUser.Id); // Add the current TeamLeader's ID to the list
+
+                    customerItems = _context.CustomerNs
+                        .Where(c => teamMemberIds.Contains(c.AppUserId) || c.AppUserId == currentUser.Id)
+                        .ToList()
+                        .Select(d => new SelectListItem
+                        {
+                            Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
+                            Value = d.Id.ToString()
+                        }).ToList();
+                }
+                else
+                {
+                    customerItems = _context.CustomerNs
+                        .Where(c => c.AppUserId == currentUser.Id)
+                        .ToList()
+                        .Select(d => new SelectListItem
+                        {
+                            Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
+                            Value = d.Id.ToString()
+                        }).ToList();
+                }
+
                 var users = _context.Users.Where(u => u.CompanyId == currentUserCompanyId!.Value).ToList();
                 var userItems = users.Select(u => new SelectListItem
                 {
                     Text = u.UserName,
                     Value = u.Id.ToString()
                 }).ToList();
-
-                var customer = _context.CustomerNs.Where(c => c.AppUserId == currentUser.Id).ToList();
-                List<SelectListItem> customerItems = customer
-                    .Select(d => new SelectListItem
-                    {
-                        Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
-                        Value = d.Id.ToString()
-                    }).ToList();
 
                 ViewBag.Users = userItems;
                 ViewBag.Status = statusItems;
@@ -327,6 +361,8 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> TaskEdit(TaskComp editedTask)
