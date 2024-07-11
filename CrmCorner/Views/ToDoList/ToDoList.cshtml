@@ -192,31 +192,31 @@
                     <span id="AssignListId" style="display: none;">@ViewBag.AssignListId</span>
                 </div>
                 <hr class="horizontal-line">
-                <div class="btn-group" style="width: -webkit-fill-available;">
-                    <button type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="height:50px; font-size: 18px; width: -webkit-fill-available; text-align: left;">
-                        <img src="/icons/todo/deneme.jpeg" alt="Logo" style="max-width: 20px; margin-right: 5px;">
-                        Listelerim
-                        <i class="fa fa-caret-down" style="font-size: 30px; float: right;"></i>
-                    </button>
+               <div class="btn-group" style="width: -webkit-fill-available;">
+    <button type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="height:50px; font-size: 18px; width: -webkit-fill-available; text-align: left;">
+        <img src="/icons/todo/deneme.jpeg" alt="Logo" style="max-width: 20px; margin-right: 5px;">
+        Listelerim
+        <i class="fa fa-caret-down" style="font-size: 30px; float: right;"></i>
+    </button>
 
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width: 100%">
-                        @foreach (var item in ViewBag.ToDoList)
-                        {
-                            <li class="list-group-item" onclick="toggleAltMenu(this)">
-                                <div class="d-flex align-items-center">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="openPopup('@item.Id'); disableOtherButtons(this);">
-                                        <img src="/icons/todo/düzenle.jpeg" alt="Düzenle" style="max-width: 20px;">
-                                    </button>
-                                    <span style="font-size: 14px; margin-right: 10px;">
-                                        <a href="#" style="margin-left: 8px;" class="link-item" data-id="@item.Id">@item.Title</a>
-                                    </span>
-                                </div>
-                                <span id="count_@item.Id">@item.Count</span>
-                                <input type="text" value="@item.Id" id="todoIdvalue" style="display:none"></input>
-                            </li>
-                        }
-                    </ul>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="min-width: 100%">
+        @foreach (var item in ViewBag.ToDoList)
+        {
+            <li class="list-group-item" style="cursor: pointer;" onclick="handleListItemClick('@item.Id')">
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="openPopup('@item.Id'); disableOtherButtons(this); event.stopPropagation();">
+                        <img src="/icons/todo/düzenle.jpeg" alt="Düzenle" style="max-width: 20px;">
+                    </button>
+                    <span style="font-size: 14px; margin-right: 10px;">
+                        <a href="#" style="margin-left: 8px;" class="link-item" data-id="@item.Id">@item.Title</a>
+                    </span>
                 </div>
+                <span id="count_@item.Id">@item.Count</span>
+                <input type="text" value="@item.Id" id="todoIdvalue" style="display:none"></input>
+            </li>
+        }
+    </ul>
+</div>
 
 
                 <form action="/ToDoList/ToDoListAddList/" method="post" class="add-task-formlist">
@@ -419,6 +419,10 @@
 
        var baseUrl = "https://crmcorner.co/";
        //var baseUrl = "https://localhost:7145/";
+        function handleListItemClick(id) {
+            newUrl = baseUrl + "ToDoList/ToDoList/" + AssignIdValue;
+            window.location.href = id;
+        }
 
         document.querySelectorAll('.link-item').forEach(item => {
             item.addEventListener('click', event => {
