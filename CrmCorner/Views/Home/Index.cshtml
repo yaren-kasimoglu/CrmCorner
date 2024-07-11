@@ -171,14 +171,16 @@
             <div class="card-body todo_list">
                 @if (ViewBag.ToDoList != null)
                 {
-                        var todoList = ViewBag.ToDoList as List<string>;
+                        var todoList = ViewBag.ToDoList as List<Tuple<string,string>>;
                     
                     @for (int i = 0; i < Math.Min(5, todoList.Count); i++)
-                    {
-                        var task = todoList[i];
+                        {
+                            var task = todoList[i].Item1;
+                            var url = todoList[i].Item2;
+
                         <div class="d-flex justify-content-between mb-3">
                             <div class="form-check">
-                                <label class="form-check-label" for="@task"><i class="fa fa-calendar me-2"></i>@task</label>
+                                <a href="@url" class="form-check-label" style=" color: black;" id="@task"><i class="fa fa-calendar me-2"></i>@task</a>
                             </div>
                         </div>
                     }

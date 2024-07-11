@@ -79,6 +79,24 @@
         #notification {
             cursor: pointer; /* Kullanıcıya tıklamaya hazır olduğunu göstermek için fare işaretçisini değiştirir */
         }
+        .file-upload-label {
+            cursor: pointer;
+            padding: 0.5rem 0.75rem; /* Yatay ve dikey padding değerlerini artırdım */
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            background-color: #f8f9fa;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .file-upload-label i {
+                font-size: 1.5rem; /* Simge boyutunu artırdım */
+            }
+
+            .file-upload-label:hover {
+                background-color: #e2e6ea;
+            }
       
     </style>
 </head>
@@ -152,7 +170,14 @@
                                 </button>
                                 <input type="text" id="SendMessageTextArea" class="form-control" placeholder="Enter text here..." aria-label="Enter text here...">
                                 <input type="hidden" id="userIdHiddenInput">
-
+                                @*< <form id="uploadForm" class="d-inline">
+                                    <label for="fileInput" class="file-upload-label">
+                                        <i class="fa fa-paperclip"></i>
+                                    </label>
+                                    input type="file" id="fileInput" style="display: none;" />
+        <button type="button" onclick="uploadFile()" style="display: none;">Upload</button>
+                                </form>
+                                *@
                             </div>
                         </div>
                     </div>
@@ -405,7 +430,40 @@
                 showNotification( userId,message);
 
             });
+   
+            function uploadFile() {
+                console.log("1uploadfile çağrıldı")
+                const fileInput = document.getElementById('fileInput');
+                const file = fileInput.files[0];
+                console.log("formdata" + girdi);
 
+                if (!file) {
+                    alert("Please select a file.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("file", file);
+
+                console.log("formdata" + formData);
+                $.ajax({
+                    url: '/api/fileupload',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        console.log("File uploaded successfully:", data);
+                        // SignalR üzerinden dosya bilgilerini gönderme
+                        signalRConnection.invoke("SendFile", "User", data.fileName, new Uint8Array(file));
+                    },
+                    error: function (error) {
+                        console.error("Error uploading file:", error);
+                        console.log("formdataerror" + error);
+
+                    }
+                    });
+                 }
             $SendMessageBtn.click(function () {
                 signalRConnection.start().then(function () {
 
@@ -517,9 +575,12 @@
             //            console.error("SignalR bağlantısı yenilenemedi: " + err);
             //        });
             //}, 120000);
-
+           
         })
+     
 
+      
+      
     </script>
     <!-- core js file -->
     <script src="assets/bundles/libscripts.bundle.js"></script>

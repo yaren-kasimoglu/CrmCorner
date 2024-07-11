@@ -65,6 +65,13 @@ namespace CrmCorner.Hubs
                     Console.Write(EX.Message);
                 }
             }
+            public async Task SendFile(string user, string fileName, byte[] fileData)
+            {
+                // Dosya işlemleri burada yapılabilir, örneğin dosyayı bir yere kaydetme
+                // await File.WriteAllBytesAsync(Path.Combine("uploads", fileName), fileData);
+
+                await Clients.All.SendAsync("ReceiveFile", user, fileName, fileData);
+            }
 
         }
     }
