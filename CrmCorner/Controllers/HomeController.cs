@@ -110,36 +110,39 @@ namespace CrmCorner.Controllers
                     ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
                     var todoList = _context.ToDoList
-                         .Where(e => e.UserId == currentUser.Id  )
+                         .Where(e => e.UserId == currentUser.Id && e.NotDoneList!=null )
                         .Select(e => new ToDo { Id = e.Id, CreatedDate = e.CreatedDate,NotDoneList=e.NotDoneList })
      .                   ToList();
                    var todoListToday = _context.ToDos
-                        .Where(e => e.UserId == currentUser.Id)
+                        .Where(e => e.UserId == currentUser.Id && e.NotDoneList != null)
                         .ToList();
 
                     var combinedData = todoList.Concat(todoListToday)
                         .OrderBy(data => (data.CreatedDate - DateTime.Now))
                         .Take(5)
                         .ToList();
-                    List<string> updatedList = new List<string>();
+                    List<Tuple<string, string>> updatedList = new List<Tuple<string, string>>();
                     for (var item = 0; item < combinedData.Count; item++)
                     {
-                        if (combinedData[item].NotDoneList!=null &&combinedData[item].NotDoneList.Contains(','))
+                        var url = "https://crmcorner.co/ToDoList/ToDoList/"+ combinedData[item].Id.ToString();
+                        if (combinedData[item].NotDoneList != null && combinedData[item].NotDoneList.Contains(','))
                         {
-                            updatedList.AddRange(combinedData[item].NotDoneList.Split(','));
-                            if (updatedList.Count > 5)
-                                break;
+                            var parts = combinedData[item].NotDoneList.Split(',');
+                            foreach (var part in parts)
+                            {
+                                updatedList.Add(Tuple.Create(part, url)); // İkinci eleman için boş bir değer ekledim, gerekirse değiştirebilirsiniz
+                                if (updatedList.Count > 5)
+                                    break;
+                            }
                         }
                         else
                         {
-                            updatedList.Add(combinedData[item].NotDoneList);
+                            updatedList.Add(Tuple.Create(combinedData[item].NotDoneList, combinedData[item].Id.ToString())); // İkinci eleman için boş bir değer ekledim, gerekirse değiştirebilirsiniz
                             if (updatedList.Count > 5)
                                 break;
                         }
-                    }
-                    if (updatedList.Count > 5)
-                    {
-
+                        if (updatedList.Count > 5)
+                            break;
                     }
                     ViewBag.ToDoList = updatedList;
 
