@@ -420,8 +420,8 @@
        var baseUrl = "https://crmcorner.co/";
        //var baseUrl = "https://localhost:7145/";
         function handleListItemClick(id) {
-            newUrl = baseUrl + "ToDoList/ToDoList/" + AssignIdValue;
-            window.location.href = id;
+            newUrl = baseUrl + "ToDoList/ToDoList/" + id;
+            window.location.href = newUrl;
         }
 
         document.querySelectorAll('.link-item').forEach(item => {
