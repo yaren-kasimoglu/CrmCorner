@@ -59,6 +59,29 @@
             font-size: 12px;
             font-weight: bold;
         }
+        #messageDropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 200px; /* Genişlik ayarlanabilir */
+}
+
+#messageDropdown li {
+    padding: 8px 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+#messageDropdown li:hover {
+    background-color: #f1f1f1;
+}
+
 
     </style>
     <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon">
@@ -103,14 +126,16 @@
                         <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
                             <li class="d-none d-sm-block"><a href="/Calendar/Calendar" class="icon-menu"><i class="fa fa-calendar"></i></a></li>
                             <li id="messageIcon" class="d-none d-sm-block" style="position: relative;">
-                                <a href="/ChatApp/ChatApp" class="icon-menu"><i class="fa fa-comments"></i></a>
+                                <a href="javascript:void(0);" class="icon-menu" id="messageIconLink" onclick="toggleDropdown(event)"><i class="fa fa-comments"></i></a>
                                 <span id="notificationCount" class="notification-count"></span>
+                                <ul id="messageDropdown" class="dropdown-menu"></ul>
                             </li>
+
 
                             <!-- Notification Dot için kullanılacak li -->
                             @*<li id="notificationDot" class="d-none d-sm-block">
-                    <a href="app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a>
-                </li>*@
+            <a href="app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a>
+        </li>*@
                             <!-- more link -->
                             <li><a class="icon-menu" asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout"><i class="fa fa-sign-out"></i></a></li>
                         </ul>
@@ -291,18 +316,46 @@
     </div>
 
     @RenderSection("Scripts", required: false)
-<script>$(document).ready(function () {
+<script>
+    let unreadMessagesHtml = ''; 
+    function toggleDropdown(event) {
+        event.stopPropagation();
+        $('#messageDropdown').toggle();
+
+    }
+
+    function hideDropdown() {
+        $('#messageDropdown').hide();
+    }
+
+
+    $(document).ready(function () {
+    
         // Her 2 saniyede bir bildirim durumunu kontrol etmek için bir fonksiyon tanımlayalım
         setInterval(function () {
             $.get('/Home/GetNotificationsStatus', function (data) {
                 var hasUnreadMessages = data.message.hasUnreadMessages;
                 var unreadSenderCount = data.message.distinctSenderIdsCount;
+                console.log(data.message.unreadMessages);
                 if (hasUnreadMessages) {
 
                     // Bildirim varsa yapılacak işlemler
                     // Örneğin, bir div'in arka plan rengini yeşil yapabiliriz
                     showNotificationDot();
                     $('#notificationCount').text(unreadSenderCount);
+                    //var unreadMessagesHtml = '';
+                    //data.message.unreadMessages.forEach(function (message) {
+                    //    unreadMessagesHtml += '<li>' + message.senderId + '</li>';
+                    //});
+                    console.log("buraya girdi");
+                    let newUnreadMessagesHtml = '';
+                    data.message.unreadMessages.forEach(function (message) {
+                        newUnreadMessagesHtml += `<li><a href="javascript:void(0);" onclick="redirectToUserMessages('${message.senderId}')">${message.senderName}</a></li>`;
+                    });
+                    if (newUnreadMessagesHtml !== unreadMessagesHtml) {
+                        unreadMessagesHtml = newUnreadMessagesHtml;
+                        $('#messageDropdown').html(unreadMessagesHtml);
+                    }
                 } else {
                     // Bildirim yoksa yapılacak işlemler
                     // Örneğin, bir div'in arka plan rengini varsayılan hale getirebiliriz
@@ -311,6 +364,9 @@
             });
         }, 1000); // 2 saniyede bir çağıralım
     });
+    function redirectToUserMessages(userId) {
+        window.location.href = '/ChatApp/ChatApp';
+    }
         document.addEventListener('DOMContentLoaded', function () {
              var messageIconElement = document.getElementById("messageIcon");
             messageIconElement.classList.add("pink-light"); 
