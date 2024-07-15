@@ -610,22 +610,33 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> GetNotificationsStatus()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            bool hasUnreadMessages = _context.ChatHistories.Any(m => m.ReceiverId == currentUser.Id && !m.IsRead);
             var unreadMessages = _context.ChatHistories
-                                    .Where(m => m.ReceiverId == currentUser.Id && !m.IsRead)
-                                    .ToList();
-            var distinctSenderIdsCount = unreadMessages
-                                        .Select(m => m.SenderId)
-                                        .Distinct()
-                                        .Count();
+                                        .Where(m => m.ReceiverId == currentUser.Id && !m.IsRead)
+                                        .Select(m => new { m.SenderId })
+                                        .ToList();
+
+            var senderIds = unreadMessages.Select(m => m.SenderId).Distinct().ToList();
+            var senders = await _userManager.Users
+                                .Where(u => senderIds.Contains(u.Id))
+                                .Select(u => new { u.Id, u.UserName })
+                                .ToListAsync();
+
+            var senderDetails = senders.Select(s => new
+            {
+                SenderId = s.Id,
+                SenderName = s.UserName
+            }).ToList();
+
             var jsonData = new
             {
-                HasUnreadMessages = hasUnreadMessages,
-                DistinctSenderIdsCount= distinctSenderIdsCount
+                HasUnreadMessages = unreadMessages.Any(),
+                DistinctSenderIdsCount = senderDetails.Count,
+                UnreadMessages = senderDetails
             };
 
             return Json(new { Message = jsonData });
         }
+
 
 
 
