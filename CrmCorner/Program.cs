@@ -68,14 +68,17 @@ builder.Services.ConfigureApplicationCookie(opt =>
 {
     var cookieBuilder = new CookieBuilder
     {
-        Name = "CrmAppCookie"
+        Name = "CrmAppCookie",
+
+         HttpOnly = true,
+        IsEssential = true,
     };
 
     opt.LoginPath = new PathString("/Home/SignIn");
     opt.LogoutPath = new PathString("/Member/Logout");
     opt.AccessDeniedPath = new PathString("/Member/AccessDenied");
     opt.Cookie = cookieBuilder;
-    opt.ExpireTimeSpan = TimeSpan.FromDays(60); // Cookie ömrü
+    opt.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie ömrü
     opt.SlidingExpiration = true; // Cookie'nin süresini uzat
 });
 

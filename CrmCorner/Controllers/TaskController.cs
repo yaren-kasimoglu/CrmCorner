@@ -24,6 +24,7 @@ namespace CrmCorner.Controllers
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IConfiguration _configuration;
 
+
         public TaskController(CrmCornerContext context, UserManager<AppUser> userManager, IWebHostEnvironment environment, IWebHostEnvironment hostingEnvironment, IConfiguration configuration)
         {
             _context = context;
@@ -162,13 +163,15 @@ namespace CrmCorner.Controllers
         {
             try
             {
-                var status = _context.Statuses.ToList();
-                List<SelectListItem> statusItems = status
-                    .Select(d => new SelectListItem
-                    {
-                        Text = d.StatusName,
-                        Value = d.StatusId.ToString()
-                    }).ToList();
+                var statusItems = new List<SelectListItem>
+        {
+            new SelectListItem
+            {
+                Text = "İlk Temas",
+                Value = "1", // "İlk Temas" durumunun ID'sini burada kullanın.
+                Selected = true
+            }
+        };
 
                 var currentUser = await _userManager.GetUserAsync(User);
 
@@ -261,7 +264,7 @@ namespace CrmCorner.Controllers
                     }
                 }
 
-                ViewBag.Status = new SelectList(_context.Statuses.ToList(), "StatusId", "StatusName", task.StatusId);
+                ViewBag.Status = new SelectList(new List<SelectListItem> { new SelectListItem { Text = "İlk Temas", Value = "1", Selected = true } }, "Value", "Text");
                 ViewBag.Users = new SelectList(_context.Users.ToList(), "Id", "UserName", task.UserId);
                 ViewBag.Customer = new SelectList(_context.CustomerNs.ToList(), "Id", "Name", task.CustomerId);
                 return View(task); // Formu ModelState hataları ile geri gönder
@@ -272,6 +275,7 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
 
         #endregion
 
@@ -301,49 +305,27 @@ namespace CrmCorner.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 var currentUserCompanyId = currentUser?.CompanyId;
 
-                var roles = await _userManager.GetRolesAsync(currentUser);
-                bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
-                bool isTeamLeader = roles.Contains("TeamLeader");
-
-                List<SelectListItem> customerItems;
-
-                if (isAdminOrManager)
+                if (currentUserCompanyId == null)
                 {
-                    customerItems = _context.CustomerNs.ToList()
-                        .Select(d => new SelectListItem
-                        {
-                            Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
-                            Value = d.Id.ToString()
-                        }).ToList();
-                }
-                else if (isTeamLeader)
-                {
-                    var teamMembers = await _userManager.GetUsersInRoleAsync("TeamMember");
-                    var teamMemberIds = teamMembers.Select(u => u.Id).ToList();
-                    teamMemberIds.Add(currentUser.Id); // Add the current TeamLeader's ID to the list
-
-                    customerItems = _context.CustomerNs
-                        .Where(c => teamMemberIds.Contains(c.AppUserId) || c.AppUserId == currentUser.Id)
-                        .ToList()
-                        .Select(d => new SelectListItem
-                        {
-                            Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
-                            Value = d.Id.ToString()
-                        }).ToList();
-                }
-                else
-                {
-                    customerItems = _context.CustomerNs
-                        .Where(c => c.AppUserId == currentUser.Id)
-                        .ToList()
-                        .Select(d => new SelectListItem
-                        {
-                            Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
-                            Value = d.Id.ToString()
-                        }).ToList();
+                    return RedirectToAction("AccessDenied", "Error");
                 }
 
-                var users = _context.Users.Where(u => u.CompanyId == currentUserCompanyId!.Value).ToList();
+                // Aynı firmada oldukları kişilerin tüm müşterilerini görmeleri için sorgu
+                var companyUserIds = _context.Users
+                    .Where(u => u.CompanyId == currentUserCompanyId)
+                    .Select(u => u.Id)
+                    .ToList();
+
+                var customerItems = _context.CustomerNs
+                    .Where(c => companyUserIds.Contains(c.AppUserId))
+                    .ToList()
+                    .Select(d => new SelectListItem
+                    {
+                        Text = d.Name + " " + d.Surname + " / " + d.CompanyName,
+                        Value = d.Id.ToString()
+                    }).ToList();
+
+                var users = _context.Users.Where(u => u.CompanyId == currentUserCompanyId).ToList();
                 var userItems = users.Select(u => new SelectListItem
                 {
                     Text = u.UserName,
@@ -364,8 +346,9 @@ namespace CrmCorner.Controllers
 
 
 
+
         [HttpPost]
-        public async Task<IActionResult> TaskEdit(TaskComp editedTask)
+        public async Task<IActionResult> TaskEdit(TaskComp editedTask, IFormFile file)
         {
             try
             {
@@ -381,12 +364,33 @@ namespace CrmCorner.Controllers
                 editedTask.ModifiedDate = DateTime.Now;
                 editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
 
+                // Dosya yükleme işlemi
+                if (file != null && file.Length > 0)
+                {
+                    var fileName = Path.GetFileName(file.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", fileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+
+                    var fileAttachment = new FileAttachment
+                    {
+                        TaskId = editedTask.TaskId,
+                        FileName = fileName,
+                        FilePath = filePath,
+                        UploadedDate = DateTime.Now
+                    };
+
+                    _context.FileAttachments.Add(fileAttachment);
+                }
+
                 // Mevcut dosya varsa ve yeni dosya yüklenmediyse, dosya zorunluluğunu kaldır
-                if (originalTask.FileAttachments.Any())
+                if (originalTask.FileAttachments.Any() || (file == null || file?.Length == 0))
                 {
                     ModelState.Remove("file");
                 }
-
                 // Dosya zorunluluğunu sadece belirli durumlarda kontrol et
                 var status = _context.Statuses.FirstOrDefault(s => s.StatusId == editedTask.StatusId);
                 if ((status?.StatusName == "Sözleşme Aşamasında" || status?.StatusName == "Teklif Gönderildi" || status?.StatusName == "Satış Tamamlandı") && !originalTask.FileAttachments.Any())
@@ -481,9 +485,6 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
-
-
-
 
 
 
@@ -829,6 +830,63 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+        public async Task<IActionResult> UploadFileEditPage(IFormFile file, int taskId)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return RedirectToAction("SignIn", "Home");
+                }
+                var userId = _userManager.GetUserId(User);
+
+                if (file != null && file.Length > 0)
+                {
+                    var originalFileName = Path.GetFileName(file.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}_{originalFileName}";
+
+                    // Yapılandırma ayarlarından yükleme yolu alınır
+                    var uploadFolderPath = _configuration.GetValue<string>("FileUploadOptions:UploadFolderPath");
+                    var relativePath = Path.Combine(uploadFolderPath, uniqueFileName);
+                    var absolutePath = Path.Combine(_hostingEnvironment.WebRootPath, relativePath);
+
+                    // Klasör yoksa oluştur
+                    var directoryPath = Path.GetDirectoryName(absolutePath);
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    using (var stream = new FileStream(absolutePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    var fileAttachment = new FileAttachment
+                    {
+                        FileName = originalFileName, // Kullanıcıya gösterilecek orijinal dosya adını saklayın
+                        FilePath = "/" + relativePath, // Göreli dosya yolu
+                        FileSize = file.Length,
+                        FileType = file.ContentType,
+                        UploadedDate = DateTime.Now,
+                        TaskId = taskId
+                    };
+
+                    _context.FileAttachments.Add(fileAttachment);
+                    await _context.SaveChangesAsync();
+
+                    await LogFileAttachmentChange(null, fileAttachment, userId);
+                    return RedirectToAction("TaskEdit", new { id = taskId });
+                }
+
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("NotFound", "Error");
+            }
+        }
 
         public async Task<IActionResult> DownloadFile(int fileAttachmentId)
         {
@@ -941,6 +999,49 @@ namespace CrmCorner.Controllers
 
                 await LogFileAttachmentChange(fileAttachment, userId);
                 return RedirectToAction("TaskDetail", new { id = fileAttachment.TaskId });
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("NotFound", "Error");
+            }
+        }
+        public async Task<IActionResult> DeleteFileEditPage(int fileAttachmentId)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    // Kullanıcı doğrulanamazsa, oturum açma sayfasına yönlendir veya hata dön
+                    return RedirectToAction("Login");
+                }
+                var userId = _userManager.GetUserId(User);
+
+                // Veritabanından dosya bilgisini al
+                var fileAttachment = await _context.FileAttachments
+                    .FirstOrDefaultAsync(f => f.FileAttachmentId == fileAttachmentId);
+
+                if (fileAttachment == null)
+                {
+                    return NotFound(); // Dosya bulunamazsa 404 döndür
+                }
+
+                // Dosyanın tam yolunu oluştur
+                var filePath = Path.Combine(_hostingEnvironment.WebRootPath, fileAttachment.FilePath.TrimStart('/'));
+
+                // Dosyanın var olup olmadığını kontrol et
+                if (System.IO.File.Exists(filePath))
+                {
+                    // Dosyayı sil
+                    System.IO.File.Delete(filePath);
+                }
+
+                // Dosya bilgisini veritabanından sil
+                _context.FileAttachments.Remove(fileAttachment);
+                await _context.SaveChangesAsync();
+
+                await LogFileAttachmentChange(fileAttachment, userId);
+                return RedirectToAction("TaskEdit", new { id = fileAttachment.TaskId });
             }
             catch (Exception ex)
             {

@@ -60,6 +60,14 @@
             font-weight: bold;
         }
 
+        .always-open > ul {
+            display: block !important;
+        }
+
+        .always-open > a {
+            cursor: default;
+            pointer-events: none; /* Tıklanabilirliği tamamen kaldırır */
+        }
     </style>
     <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon">
     <!-- MAIN CSS -->
@@ -172,10 +180,8 @@
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a>
                                         </li>
                                     *@
-
-
-                                    <li>
-                                        <a href="#Tasks" class="has-arrow"><i class="fa fa-users"></i><span>Satış</span></a>
+                                    <li class="always-open">
+                                        <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
                                         <ul class="list-unstyled">
                                             <li class="nav-item">
                                                 <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Tümü</a>
@@ -188,6 +194,8 @@
                                             </li>
                                         </ul>
                                     </li>
+
+
 
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="AfterTask" asp-action="ListPositiveSales"><i class="fa fa-tag"></i>Satış Sonrası Takibasyon</a>
@@ -329,6 +337,8 @@
             messageIconElement.classList.add("pink-light"); // pink-light sınıfını ekle
         
     }</script>
+
+
 
 
     <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
