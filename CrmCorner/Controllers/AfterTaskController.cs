@@ -26,6 +26,8 @@ namespace CrmCorner.Controllers
                 var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
                 var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
 
+                ViewBag.PictureUrl = "/userprofilepicture/" + (user.Picture ?? "defaultpp.png");
+
                 var roles = await _userManager.GetRolesAsync(user);
 
                 var positiveSalesQuery = _context.PostSaleInfos

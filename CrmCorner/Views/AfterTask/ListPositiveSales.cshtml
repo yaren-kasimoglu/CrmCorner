@@ -41,7 +41,9 @@
                                         @if (sale.IsThereAProblem)
                                         {
                                             var tooltipText = sale.ProblemDescription.Length > 255 ? sale.ProblemDescription.Substring(0, 255) + "..." : sale.ProblemDescription;
-                                            <i class="fa fa-exclamation text-warning" title="@tooltipText"></i>
+                                            <a href="#" onclick='showProblemDescription("@tooltipText", "@sale.ProblemDescription")'>
+                                                <i class="fa fa-exclamation text-warning" title="@tooltipText"></i>
+                                            </a>
                                         }
                                         else
                                         {
@@ -61,7 +63,10 @@
                                     <td>
                                         @if (sale.IsTrustpilotReviewed)
                                         {
-                                            <i class="fa fa-check"></i>
+                                            var trustpilotTooltip = sale.TrustPilotComment?.Length > 255 ? sale.TrustPilotComment.Substring(0, 255) + "..." : sale.TrustPilotComment;
+                                            <a href="#" onclick='showTrustpilotComment("@trustpilotTooltip", "@sale.TrustPilotComment")'>
+                                                <i class="fa fa-check"></i>
+                                            </a>
                                         }
                                         else
                                         {
@@ -99,7 +104,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Detay Modal -->
 <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -119,6 +124,36 @@
     </div>
 </div>
 
+<!-- Problem Açıklaması Modal -->
+<div class="modal fade" id="problemDescriptionModal" tabindex="-1" aria-labelledby="problemDescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="problemDescriptionModalLabel">Problem Açıklaması</h5>
+            </div>
+            <div class="modal-body">
+                <!-- Problem açıklaması dinamik olarak buraya yüklenecek -->
+            </div>
+        
+        </div>
+    </div>
+</div>
+
+<!-- Trustpilot Yorumu Modal -->
+<div class="modal fade" id="trustpilotCommentModal" tabindex="-1" aria-labelledby="trustpilotCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trustpilotCommentModalLabel">Trustpilot Yorumu</h5>
+            </div>
+            <div class="modal-body">
+                <!-- Trustpilot yorumu dinamik olarak buraya yüklenecek -->
+            </div>
+     
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
@@ -130,19 +165,30 @@
 <!-- JavaScript -->
 <script>
     function showDetails(sale) {
-        console.log(sale);  // Bu satırı ekleyerek sale objesini konsola yazdırabilirsiniz
         var modalBody = document.querySelector('#detailModal .modal-body');
         modalBody.innerHTML = `
-                    <p>İlk ödeme yapıldı mı? ${sale.isFirstPaymentMade ? 'Evet' : 'Hayır'}</p>
-                    <p>Bir problem var mı? ${sale.isThereAProblem ? 'Evet' : 'Hayır'}</p>
-                    ${sale.isThereAProblem && sale.problemDescription ?
+                        <p>İlk ödeme yapıldı mı? ${sale.isFirstPaymentMade ? 'Evet' : 'Hayır'}</p>
+                        <p>Bir problem var mı? ${sale.isThereAProblem ? 'Evet' : 'Hayır'}</p>
+                        ${sale.isThereAProblem && sale.problemDescription ?
                 '<div class="alert alert-warning" role="alert" title="' + sale.problemDescription.substring(0, 255) + '"><strong>Problem Açıklaması:</strong> ' + sale.problemDescription + '</div>' : ''}
-                    <p>Devam etmeyi düşünüyorlar mı? ${sale.isContinuationConsidered ? 'Evet' : 'Hayır'}</p>
-                    <p>Trustpilot yorumu yapıldı mı? ${sale.isTrustpilotReviewed ? 'Evet' : 'Hayır'}</p>
-                    ${sale.isTrustpilotReviewed && sale.trustPilotComment ?
+                        <p>Devam etmeyi düşünüyorlar mı? ${sale.isContinuationConsidered ? 'Evet' : 'Hayır'}</p>
+                        <p>Trustpilot yorumu yapıldı mı? ${sale.isTrustpilotReviewed ? 'Evet' : 'Hayır'}</p>
+                        ${sale.isTrustpilotReviewed && sale.trustPilotComment ?
                 '<div class="alert alert-info" role="alert"><strong>Trustpilot Yorumu:</strong> ' + sale.trustPilotComment + '</div>' : ''}
-                    <p>Logolarını kullanabilir miyiz? ${sale.canUseLogo ? 'Evet' : 'Hayır'}</p>
-                `;
+                        <p>Logolarını kullanabilir miyiz? ${sale.canUseLogo ? 'Evet' : 'Hayır'}</p>
+                    `;
+    }
+
+    function showProblemDescription(tooltip, fullDescription) {
+        var modalBody = document.querySelector('#problemDescriptionModal .modal-body');
+        modalBody.innerHTML = `<p>${fullDescription}</p>`;
+        $('#problemDescriptionModal').modal('show');
+    }
+
+    function showTrustpilotComment(tooltip, fullComment) {
+        var modalBody = document.querySelector('#trustpilotCommentModal .modal-body');
+        modalBody.innerHTML = `<p>${fullComment}</p>`;
+        $('#trustpilotCommentModal').modal('show');
     }
 </script>
 

@@ -144,7 +144,13 @@
         <div class="col-lg-6">
             <div class="col-lg-12 col-md-6">
                 <label class="form-label">Müşteri</label>
-                <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select select2" aria-label="Default select example"> <option value="">Lütfen seçiniz</option></select>
+                <select id="customerDropdown" asp-for="CustomerId" class="form-select" aria-label="Default select example">
+                    <option value="">Lütfen seçiniz</option>
+                    @foreach (var item in ViewBag.Customer)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
                 <span asp-validation-for="CustomerId" class="text-danger"></span>
             </div>
             <div class="col-lg-12 col-md-6">
@@ -182,7 +188,6 @@
                 </div>
             </div>
 
-
             </br>
             <div class="form-group">
                 <input asp-for="IsFinalDecisionMaker" class="form-check-input" />
@@ -190,13 +195,6 @@
                 <span asp-validation-for="IsFinalDecisionMaker" class="text-danger"></span>
             </div>
         </div>
-@*
-        <div class="col-lg-12">
-            <div class="form-group">
-                <label for="file">Dosya Yükle</label>
-                <input type="file" class="form-control" name="file" id="file" />
-            </div>
-        </div>*@
     </div>
     <div class="form-group">
         <input type="submit" value="GÜNCELLE" class="btn btn-primary" />
@@ -209,6 +207,22 @@
         <h6 class="card-title">Yüklenmiş Dosyalar</h6>
     </div>
     <div class="card-body">
+        <div class="card-header">
+            <h6 class="card-title">Dosyalar & Belgeler & Sözleşmeler</h6>
+            <br />
+            @using (Html.BeginForm("UploadFileEditPage", "Task", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="form-group">
+                    <input type="file" name="file" />
+                    <input type="hidden" name="taskId" value="@Model.TaskId" />
+                </div>
+                <hr>
+                <div class="form-group">
+                    <input type="submit" value="Yükle" class="btn btn-primary" />
+                </div>
+            }
+
+        </div>
         @if (Model.FileAttachments != null && Model.FileAttachments.Any())
         {
             <table class="table">
@@ -225,7 +239,7 @@
                             <td><div class="ellipsis" title="@file.FileName">@file.FileName</div></td>
                             <td>
                                 <a href="@Url.Action("DownloadFile", "Task", new { fileAttachmentId = file.FileAttachmentId })"><span class="badge bg-success">İndir</span></a>
-                                <a href="@Url.Action("DeleteFile", "Task", new { fileAttachmentId = file.FileAttachmentId })"><span class="badge bg-danger">Sil</span></a>
+                                <a href="@Url.Action("DeleteFileEditPage", "Task", new { fileAttachmentId = file.FileAttachmentId })"><span class="badge bg-danger">Sil</span></a>
                             </td>
                         </tr>
                     }
