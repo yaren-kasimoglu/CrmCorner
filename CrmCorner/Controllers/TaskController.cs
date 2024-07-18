@@ -174,7 +174,7 @@ namespace CrmCorner.Controllers
         };
 
                 var currentUser = await _userManager.GetUserAsync(User);
-
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
                 var currentUserCompanyId = currentUser?.CompanyId;
 
                 var users = _context.Users.Where(u => u.CompanyId == currentUserCompanyId!.Value).ToList();
@@ -303,6 +303,7 @@ namespace CrmCorner.Controllers
                     }).ToList();
 
                 var currentUser = await _userManager.GetUserAsync(User);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
                 var currentUserCompanyId = currentUser?.CompanyId;
 
                 if (currentUserCompanyId == null)
@@ -350,6 +351,8 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public async Task<IActionResult> TaskEdit(TaskComp editedTask, IFormFile file)
         {
+            var currentUsers = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png");
             try
             {
                 var originalTask = _context.TaskComps
@@ -702,6 +705,9 @@ namespace CrmCorner.Controllers
         #region Taskdetail
         public async Task<IActionResult> TaskDetail(int id)
         {
+            var currentUsers = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png");
+
             try
             {
                 var status = _context.Statuses.ToList();

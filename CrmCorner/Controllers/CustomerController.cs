@@ -78,6 +78,7 @@ namespace CrmCorner.Controllers
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
                 if (currentUser == null)
                 {
@@ -161,6 +162,7 @@ namespace CrmCorner.Controllers
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
                 if (currentUser == null)
                 {

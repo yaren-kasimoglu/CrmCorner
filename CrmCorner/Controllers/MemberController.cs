@@ -56,9 +56,13 @@ namespace CrmCorner.Controllers
             await _signInManager.SignOutAsync();
         }
 
-        public IActionResult PasswordChange()
+        public async Task<IActionResult> PasswordChange()
         {
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             return View();
+
         }
 
         [HttpPost]
@@ -72,6 +76,8 @@ namespace CrmCorner.Controllers
                 }
 
                 var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
                 var checkOldPass = await _userManager.CheckPasswordAsync(currentUser!, request.PasswordOld);
 
                 if (!checkOldPass)
@@ -108,6 +114,8 @@ namespace CrmCorner.Controllers
             {
                 ViewBag.GenderList = new SelectList(Enum.GetNames(typeof(Gender)));
                 var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
                 var userEditViewModel = new UserEditViewModel()
                 {
                     UserName = currentUser.UserName!,
@@ -138,6 +146,8 @@ namespace CrmCorner.Controllers
                 }
 
                 var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
                 if (currentUser == null)
                 {
                     ModelState.AddModelError("", "Kullanıcı bulunamadı.");
