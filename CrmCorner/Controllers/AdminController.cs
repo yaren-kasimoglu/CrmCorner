@@ -32,6 +32,8 @@ namespace CrmCorner.Controllers
                 User = u,
                 Roles = _userManager.GetRolesAsync(u).Result.ToList()
             }).ToList();
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
             return View(model);
         }
