@@ -140,9 +140,7 @@
                                 <br />
                                 <span>E-Posta: @Model.Customer.CompanyEmail</span>
                                 <br />
-                                <span>Sektör: @Model.Customer.Industry</span>
-                                <br />
-                                <span class="message">Çalışan Sayısı: @Model.Customer.EmployeeCount</span>
+                                <span>Sektör: @EnumExtensions.GetDisplayName(Model.Customer.Industry)</span>                  
                                 <br />
                                 <span class="message">Çalışan Sayısı: @EnumExtensions.GetDisplayName(Model.Customer.EmployeeCount)</span>
                             </div>

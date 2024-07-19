@@ -70,7 +70,7 @@ namespace CrmCorner.Controllers
                     .Include(t => t.Customer)
                     .Where(u => u.AppUser.EmailDomain == currentUserEmailDomain)
                     .Where(t => t.OutcomeStatus == OutcomeTypeSales.Lost)
-                    .Where(t => t.StatusId == 6)
+                 //   .Where(t => t.StatusId == 6)
                     .ToList();
 
                 return View(negativeTaks);
