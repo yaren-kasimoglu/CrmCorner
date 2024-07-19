@@ -62,6 +62,7 @@
     .form-group {
         margin-bottom: 15px;
     }
+   
 </style>
 
 <form asp-action="TaskEdit" asp-controller="Task" method="post" enctype="multipart/form-data">
@@ -79,67 +80,75 @@
             </div>
         }
 
-        <div class="col-lg-6">
-            <!-- Başlık, Değer Teklifi, Açıklama -->
-            <div class="form-group">
-                <label asp-for="Title" class="control-label">Başlık</label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ValueOrOffer" class="control-label">Değer Teklifi</label>
+    <div class="col-lg-6">
+        <!-- Başlık, Değer Teklifi, Açıklama -->
+        <div class="form-group">
+            <label asp-for="Title" class="control-label">Başlık</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ValueOrOffer" class="control-label">Değer Teklifi</label>
+            <div class="input-group">
                 <input asp-for="ValueOrOffer" class="form-control" />
-                <span asp-validation-for="ValueOrOffer" class="text-danger"></span>
+                <select class="form-control custom-select-size" style="max-width:20%;" id="selectedCurrency" name="SelectedCurrency">
+                    <option value="$">$</option>
+                    <option value="£">£</option>
+                    <option value="€">€</option>
+                    <option value="₺">₺</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label">Açıklama</label>
-                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
+            <span asp-validation-for="ValueOrOffer" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Description" class="control-label">Açıklama</label>
+            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        </br>
+        <!-- Olumlu/Olumsuz Seçimi -->
+
+        <div class="form-group">
+            <label class="control-label"><b>Süreç Durumu</b></label>
+            <!-- Olumlu radio butonu -->
+            <div class="form-check">
+                <input class="form-check-input radio-button" type="radio" name="Outcomes" id="OlumluOutcome" value="Olumlu" @(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumlu ? "checked" : "")>
+                <label class="form-check-label" for="OlumluOutcome">Olumlu</label>
             </div>
-            </br>
-            <!-- Olumlu/Olumsuz Seçimi -->
-
-            <div class="form-group">
-                <label class="control-label"><b>Süreç Durumu</b></label>
-                <!-- Olumlu radio butonu -->
-                <div class="form-check">
-                    <input class="form-check-input radio-button" type="radio" name="Outcomes" id="OlumluOutcome" value="Olumlu" @(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumlu ? "checked" : "")>
-                    <label class="form-check-label" for="OlumluOutcome">Olumlu</label>
-                </div>
-                <!-- Süreçte radio butonu -->
-                <div class="form-check">
-                    <input class="form-check-input radio-button" type="radio" name="Outcomes" id="SurecteOutcome" value="Surecte" @(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Surecte ? "checked" : "")>
-                    <label class="form-check-label" for="SurecteOutcome">Süreçte</label>
-                </div>
-                <!-- Olumsuz radio butonu -->
-                <div class="form-check">
-                    <input class="form-check-input radio-button" type="radio" name="Outcomes" id="NegativeOutcome" value="Olumsuz" @(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumsuz ? "checked" : "")>
-                    <label class="form-check-label" for="NegativeOutcome">Olumsuz</label>
-                </div>
-
+            <!-- Süreçte radio butonu -->
+            <div class="form-check">
+                <input class="form-check-input radio-button" type="radio" name="Outcomes" id="SurecteOutcome" value="Surecte" @(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Surecte ? "checked" : "")>
+                <label class="form-check-label" for="SurecteOutcome">Süreçte</label>
             </div>
-
-            <div class="form-group" id="NegativeReasonSection" style="@(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumsuz ? "display:block;" : "display:none;")">
-                <label asp-for="NegativeReason" class="control-label">Olumsuz Nedeni</label>
-                <textarea asp-for="NegativeReason" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="NegativeReason" class="text-danger"></span>
-            </div>
-
-
-            <!-- OutcomeStatus Seçimi -->
-            <div class="form-group" id="OutcomeStatusSection" style="display:none;">
-                <label class="control-label"><b>Sonuç Durumu</b></label>
-                <div class="form-check">
-                    <input class="form-check-input radio-button" type="radio" name="OutcomeStatus" id="WonStatus" value="Won" @(Model.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Won ? "checked" : "")>
-                    <label class="form-check-label" for="WonStatus">Kazanıldı</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input radio-button" type="radio" name="OutcomeStatus" id="LostStatus" value="Lost" @(Model.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Lost ? "checked" : "")>
-                    <label class="form-check-label" for="LostStatus">Kaybedildi</label>
-                </div>
+            <!-- Olumsuz radio butonu -->
+            <div class="form-check">
+                <input class="form-check-input radio-button" type="radio" name="Outcomes" id="NegativeOutcome" value="Olumsuz" @(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumsuz ? "checked" : "")>
+                <label class="form-check-label" for="NegativeOutcome">Olumsuz</label>
             </div>
 
         </div>
+
+        <div class="form-group" id="NegativeReasonSection" style="@(Model.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumsuz ? "display:block;" : "display:none;")">
+            <label asp-for="NegativeReason" class="control-label">Olumsuz Nedeni</label>
+            <textarea asp-for="NegativeReason" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="NegativeReason" class="text-danger"></span>
+        </div>
+
+
+        <!-- OutcomeStatus Seçimi -->
+        <div class="form-group" id="OutcomeStatusSection" style="display:none;">
+            <label class="control-label"><b>Sonuç Durumu</b></label>
+            <div class="form-check">
+                <input class="form-check-input radio-button" type="radio" name="OutcomeStatus" id="WonStatus" value="Won" @(Model.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Won ? "checked" : "")>
+                <label class="form-check-label" for="WonStatus">Kazanıldı</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input radio-button" type="radio" name="OutcomeStatus" id="LostStatus" value="Lost" @(Model.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Lost ? "checked" : "")>
+                <label class="form-check-label" for="LostStatus">Kaybedildi</label>
+            </div>
+        </div>
+
+    </div>
 
         <div class="col-lg-6">
             <div class="col-lg-12 col-md-6">
@@ -265,7 +274,7 @@
                 $("#OutcomeStatusSection").hide();
             }
         }
-
+        
         function toggleNegativeReasonSection() {
             var selectedOutcome = $('input[name="Outcomes"]:checked').val();
             if (selectedOutcome === 'Olumsuz') {
@@ -320,4 +329,5 @@
         validateOutcomeStatus();
         toggleFileUpload(); // Sayfa yüklendiğinde dosya yükleme durumu kontrolü
     });
+  
 </script>

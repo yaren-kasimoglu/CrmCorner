@@ -355,6 +355,7 @@ namespace CrmCorner.Controllers
         {
             var currentUsers = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png");
+            string selectedCurrency = editedTask.SelectedCurrency;
             try
             {
                 var originalTask = _context.TaskComps
