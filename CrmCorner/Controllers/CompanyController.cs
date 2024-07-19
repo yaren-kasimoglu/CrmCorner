@@ -11,16 +11,23 @@ namespace CrmCorner.Controllers
     public class CompanyController : Controller
     {
         private readonly CrmCornerContext _context;
-        public CompanyController(CrmCornerContext context)
+        private readonly UserManager<AppUser> _userManager;
+        public CompanyController(CrmCornerContext context,UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
+    
         [Authorize(Roles ="Admin")]
-        public IActionResult CompanyList()
+        public async Task<IActionResult> CompanyList()
         {
             try
             {
-                var Companys = _context.Companies.ToList();
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
+            var Companys = _context.Companies.ToList();
                 return View(Companys);
             }
             catch (Exception ex)
