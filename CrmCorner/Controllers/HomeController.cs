@@ -137,7 +137,8 @@ namespace CrmCorner.Controllers
                         }
                         else
                         {
-                            updatedList.Add(Tuple.Create(combinedData[item].NotDoneList, combinedData[item].Id.ToString())); // İkinci eleman için boş bir değer ekledim, gerekirse değiştirebilirsiniz
+                            var urlt = "https://crmcorner.co/ToDoList/ToDoList/" + combinedData[item].Id.ToString();
+                            updatedList.Add(Tuple.Create(combinedData[item].NotDoneList, urlt)); // İkinci eleman için boş bir değer ekledim, gerekirse değiştirebilirsiniz
                             if (updatedList.Count > 5)
                                 break;
                         }
