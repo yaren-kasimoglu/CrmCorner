@@ -355,7 +355,8 @@ namespace CrmCorner.Controllers
         {
             var currentUsers = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUsers.Picture ?? "defaultpp.png");
-            string selectedCurrency = editedTask.SelectedCurrency;
+            string selectedCurrency = editedTask.SelectedCurrency; // Bu satırı kontrol edeceğiz.
+
             try
             {
                 var originalTask = _context.TaskComps
@@ -426,6 +427,9 @@ namespace CrmCorner.Controllers
                             editedTask.OutcomeStatus = OutcomeTypeSales.Lost;
                         }
                     }
+
+                    // selectedCurrency değerini kontrol ediyoruz
+                    originalTask.SelectedCurrency = editedTask.SelectedCurrency;
 
                     await LogChanges(originalTask, editedTask);
 

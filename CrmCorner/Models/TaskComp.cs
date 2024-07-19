@@ -51,7 +51,7 @@ public partial class TaskComp
     public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
     public virtual ICollection<TaskCompLog>? TaskCompLogs { get; set; }
     public virtual Notification? Notification { get; set; }
-    [NotMapped]
+  
     public string? SelectedCurrency { get; set; } 
 
 
