@@ -1,5 +1,6 @@
 ﻿using CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using CrmCorner.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,15 +24,17 @@ namespace CrmCorner.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IConfiguration _configuration;
+        private readonly EmailService _emailService;
 
 
-        public TaskController(CrmCornerContext context, UserManager<AppUser> userManager, IWebHostEnvironment environment, IWebHostEnvironment hostingEnvironment, IConfiguration configuration)
+        public TaskController(CrmCornerContext context, UserManager<AppUser> userManager, IWebHostEnvironment environment, IWebHostEnvironment hostingEnvironment, IConfiguration configuration, EmailService emailService = null)
         {
             _context = context;
             _userManager = userManager;
             _environment = environment;
             _hostingEnvironment = hostingEnvironment;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index()
@@ -165,12 +168,12 @@ namespace CrmCorner.Controllers
             {
                 var statusItems = new List<SelectListItem>
         {
-            new SelectListItem
-            {
-                Text = "İlk Temas",
-                Value = "1", // "İlk Temas" durumunun ID'sini burada kullanın.
-                Selected = true
-            }
+            new SelectListItem { Text = "İlk Temas", Value = "1", Selected = true },
+            new SelectListItem { Text = "Görüşme Ayarlandı", Value = "2" },
+            new SelectListItem { Text = "Görüşme Gerçekleşti", Value = "3" },
+            new SelectListItem { Text = "Teklif Gönderildi", Value = "4" },
+            new SelectListItem { Text = "Sözleşme Aşamasında", Value = "5" },
+            new SelectListItem { Text = "Satış Tamamlandı", Value = "6" }
         };
 
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -346,14 +349,14 @@ namespace CrmCorner.Controllers
 
 
 
-
         [HttpPost]
         public async Task<IActionResult> TaskEdit(TaskComp editedTask, IFormFile file)
         {
             try
             {
                 var originalTask = _context.TaskComps
-                    .Include(t => t.FileAttachments) // Include FileAttachments
+                    .Include(t => t.FileAttachments)
+                    .Include(t => t.Customer)
                     .FirstOrDefault(t => t.TaskId == editedTask.TaskId);
 
                 if (originalTask == null)
@@ -362,7 +365,7 @@ namespace CrmCorner.Controllers
                 }
 
                 editedTask.ModifiedDate = DateTime.Now;
-                editedTask.CreatedDate = originalTask.CreatedDate; // createdDate değerini orijinal değeri ile güncelleme
+                editedTask.CreatedDate = originalTask.CreatedDate;
 
                 // Dosya yükleme işlemi
                 if (file != null && file.Length > 0)
@@ -386,12 +389,11 @@ namespace CrmCorner.Controllers
                     _context.FileAttachments.Add(fileAttachment);
                 }
 
-                // Mevcut dosya varsa ve yeni dosya yüklenmediyse, dosya zorunluluğunu kaldır
                 if (originalTask.FileAttachments.Any() || (file == null || file?.Length == 0))
                 {
                     ModelState.Remove("file");
                 }
-                // Dosya zorunluluğunu sadece belirli durumlarda kontrol et
+
                 var status = _context.Statuses.FirstOrDefault(s => s.StatusId == editedTask.StatusId);
                 if ((status?.StatusName == "Sözleşme Aşamasında" || status?.StatusName == "Teklif Gönderildi" || status?.StatusName == "Satış Tamamlandı") && !originalTask.FileAttachments.Any())
                 {
@@ -405,7 +407,6 @@ namespace CrmCorner.Controllers
                         editedTask.AssignedUserId = HttpContext.Request.Form["AssignedUserId"];
                     }
 
-                    // OutcomeStatus ve Outcomes değerlerini kontrol et
                     if (HttpContext.Request.Form.ContainsKey("OutcomeStatus"))
                     {
                         editedTask.OutcomeStatus = Enum.Parse<OutcomeTypeSales>(HttpContext.Request.Form["OutcomeStatus"]);
@@ -414,12 +415,16 @@ namespace CrmCorner.Controllers
                     if (HttpContext.Request.Form.ContainsKey("Outcomes"))
                     {
                         editedTask.Outcomes = Enum.Parse<OutcomeType>(HttpContext.Request.Form["Outcomes"]);
+
+                        // Eğer OutcomeType 'Olumsuz' ise OutcomeStatus 'Lost' olarak ayarlanır
+                        if (editedTask.Outcomes == OutcomeType.Olumsuz)
+                        {
+                            editedTask.OutcomeStatus = OutcomeTypeSales.Lost;
+                        }
                     }
 
-                    // Değişiklikleri kontrol et ve log tablosuna kaydet
                     await LogChanges(originalTask, editedTask);
 
-                    // orijinal task veritabanından çekildiği için EF Core izliyor, tekrar eklemeye çalışmak yerine sadece güncelleme yapılmalı
                     _context.Entry(originalTask).CurrentValues.SetValues(editedTask);
                     await _context.SaveChangesAsync();
 
@@ -428,22 +433,41 @@ namespace CrmCorner.Controllers
                         var postSaleInfo = new PostSaleInfo
                         {
                             TaskCompId = editedTask.TaskId,
-                            IsFirstPaymentMade = false, // Varsayılan olarak ödeme yapılmadı kabul edilir
-                            IsThereAProblem = false,   // Başlangıçta problem yoktur
-                            ProblemDescription = "",   // Problem açıklaması boş
-                            IsContinuationConsidered = false, // Devam etme durumu başlangıçta hayır
-                            IsTrustpilotReviewed = false, // Trustpilot değerlendirmesi henüz yapılmamış
-                            CanUseLogo = false // Logo kullanımı izni başlangıçta hayır
+                            IsFirstPaymentMade = false,
+                            IsThereAProblem = false,
+                            ProblemDescription = "",
+                            IsContinuationConsidered = false,
+                            IsTrustpilotReviewed = false,
+                            CanUseLogo = false
                         };
                         _context.PostSaleInfos.Add(postSaleInfo);
                         await _context.SaveChangesAsync();
+                    }
+
+                    // E-posta gönderme işlemi
+                    if (editedTask.OutcomeStatus == OutcomeTypeSales.Won)
+                    {
+                        var appUser = _context.Users.FirstOrDefault(u => u.Id == editedTask.UserId);
+                        var assignedUser = _context.Users.FirstOrDefault(u => u.Id == editedTask.AssignedUserId);
+
+                        string subject = "Tebrikler! Satışınız Gerçekleşti!";
+                        string message = $"Tebrikler {originalTask.Customer.CompanyName} firmasıyla yaptığınız başarılı görüşmeler sonucunda satışınız gerçekleşmiştir.\nŞimdi satış sonrası takibasyon süreci!\nBaşarılar.";
+
+                        if (appUser != null)
+                        {
+                            await _emailService.SendEmailAsync(appUser.Email, subject, message);
+                        }
+
+                        if (assignedUser != null)
+                        {
+                            await _emailService.SendEmailAsync(assignedUser.Email, subject, message);
+                        }
                     }
 
                     return RedirectToAction("Index");
                 }
                 else
                 {
-                    // ModelState hatalarını topla ve görünümde göster
                     var errorMessages = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                     ViewBag.ErrorMessages = errorMessages;
 
@@ -485,6 +509,7 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
 
 
 

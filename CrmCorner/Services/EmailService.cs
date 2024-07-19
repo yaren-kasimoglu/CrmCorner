@@ -13,8 +13,7 @@ namespace CrmCorner.Services
         {
             _smtpSettings = smtpSettings.Value;
         }
-
-        public void SendEmail(string to, string subject, string body)
+        public async Task SendEmailAsync(string to, string subject, string body)
         {
             var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
             {
@@ -32,10 +31,10 @@ namespace CrmCorner.Services
 
             mailMessage.To.Add(to);
 
-            client.Send(mailMessage);
+            await client.SendMailAsync(mailMessage);
         }
 
-        public void SendEmailCalendar(MailMessage mailMessage)
+        public async Task SendEmailCalendarAsync(MailMessage mailMessage)
         {
             var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
             {
@@ -43,7 +42,8 @@ namespace CrmCorner.Services
                 EnableSsl = _smtpSettings.EnableSsl
             };
 
-            client.Send(mailMessage);
+            await client.SendMailAsync(mailMessage);
         }
+
     }
 }

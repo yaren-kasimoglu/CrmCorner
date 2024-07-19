@@ -270,6 +270,7 @@
             var selectedOutcome = $('input[name="Outcomes"]:checked').val();
             if (selectedOutcome === 'Olumsuz') {
                 $('#NegativeReasonSection').show();
+                $('#LostStatus').prop('checked', true); // OutcomeTypeSales alanını otomatik olarak 'Kaybedildi' olarak işaretle
             } else {
                 $('#NegativeReasonSection').hide();
             }

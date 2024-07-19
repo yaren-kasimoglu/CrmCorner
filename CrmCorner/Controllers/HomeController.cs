@@ -209,7 +209,7 @@ namespace CrmCorner.Controllers
                 // Sektörleri gruplayıp sayılarına göre chart verisi oluşturma
                 var chartData = customers
                                  .GroupBy(c => c.Industry)
-                                 .Select(group => new { Industry = group.Key, Count = group.Count(), CustomerNames = group.Select(c => c.Name).ToList() })
+                                 .Select(group => new { Industry = group.Key, Count = group.Count(), CustomerNames = group.Select(c => c.CompanyName).ToList() })
                                  .ToList();
 
                 // labels ve data alanlarını doldur
@@ -543,7 +543,7 @@ namespace CrmCorner.Controllers
                 string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
                 var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
 
-                _emailService.SendEmail(hasUser.Email, "Şifre sıfırlama linki",
+                 _emailService.SendEmailAsync(hasUser.Email, "Şifre sıfırlama linki",
                     $"<h4>Şifrenizi yenilemek için aşağıdaki linke tıklayınız.</h4><p><a href='{passwordResetLink}'>şifre yenileme link</a></p>");
 
                 TempData["SuccessMessage"] = "Şifre yenileme linki, e-posta adresinize gönderilmiştir.";
