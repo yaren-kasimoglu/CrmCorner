@@ -91,7 +91,7 @@
             <label asp-for="ValueOrOffer" class="control-label">Değer Teklifi</label>
             <div class="input-group">
                 <input asp-for="ValueOrOffer" class="form-control" />
-                <select class="form-control custom-select-size" style="max-width:20%;" id="selectedCurrency" name="SelectedCurrency">
+                <select  asp-for="SelectedCurrency"  class="form-control custom-select-size" style="max-width:20%;" id="selectedCurrency" name="SelectedCurrency">
                     <option value="$">$</option>
                     <option value="£">£</option>
                     <option value="€">€</option>
