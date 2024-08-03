@@ -167,9 +167,66 @@ namespace CrmCorner.Controllers
 
         #region CHARTS
 
+        [Authorize]
+     public async Task<IActionResult> ValueOfferChart()
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var user = await _context.Users
+                                         .Include(u => u.TaskComps)
+                                         .FirstOrDefaultAsync(u => u.Id == userId);
 
+                if (user == null)
+                {
+                    return NotFound("Kullanıcı bulunamadı.");
+                }
 
+                // Kullanıcının AppUser ve AssignedUser olduğu görevleri birleştirelim
+                var taskCompsAsAppUser = await _context.TaskComps.Where(tc => tc.UserId == userId && tc.ValueOrOffer.HasValue).ToListAsync();
+                var taskCompsAsAssignedUser = await _context.TaskComps.Where(tc => tc.AssignedUserId == userId && tc.ValueOrOffer.HasValue).ToListAsync();
+                var allTaskComps = taskCompsAsAppUser.Concat(taskCompsAsAssignedUser).Distinct().ToList();
 
+                var ranges = new[]
+                {
+            new { Min = 0m, Max = 1000m, Label = "0-1000" },
+            new { Min = 1000m, Max = 2000m, Label = "1000-2000" },
+            new { Min = 2000m, Max = 3000m, Label = "2000-3000" },
+            new { Min = 3000m, Max = 4000m, Label = "3000-4000" },
+            new { Min = 4000m, Max = 5000m, Label = "4000-5000" },
+            new { Min = 5000m, Max = 6000m, Label = "5000-6000" },
+            new { Min = 6000m, Max = 7000m, Label = "6000-7000" },
+            new { Min = 7000m, Max = 100000m, Label = "7000-100000" }
+        };
+
+                var chartData = ranges.Select(range => new
+                {
+                    range.Label,
+                    Count = allTaskComps
+                                .Where(tc => tc.ValueOrOffer.HasValue &&
+                                             tc.ValueOrOffer.Value >= range.Min &&
+                                             tc.ValueOrOffer.Value < range.Max)
+                                .Count(),
+                    TaskNames = allTaskComps
+                                .Where(tc => tc.ValueOrOffer.HasValue &&
+                                             tc.ValueOrOffer.Value >= range.Min &&
+                                             tc.ValueOrOffer.Value < range.Max)
+                                .Select(tc => tc.Title)
+                                .ToList()
+                }).ToList();
+
+                var labels = chartData.Select(data => data.Label).ToArray();
+                var dataValues = chartData.Select(data => data.Count).ToArray();
+                var taskNames = chartData.Select(data => data.TaskNames).ToArray();
+
+                return Json(new { labels, data = dataValues, taskNames });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ValueOffer chart verileri getirilirken bir hata oluştu.");
+                return StatusCode(500, "İşleminiz sırasında bir hata oluştu.");
+            }
+        }
 
 
         [Authorize]

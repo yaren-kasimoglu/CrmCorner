@@ -209,6 +209,10 @@
 </div>
 
 
+<div class="chart-container" style="position: relative; height:40vh; width:80vw">
+    <canvas id="valueOfferChart"></canvas>
+</div>
+
 
 
 
@@ -537,3 +541,82 @@
         }
     });</script>
 
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Home/ValueOfferChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için konsola yazdır
+                var ctx = document.getElementById('valueOfferChart').getContext('2d');
+                var colors = generateColors(data.labels.length);
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Değer Teklifi',
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.raw;
+
+                                        var index = context.dataIndex;
+                                        var taskNames = data.taskNames[index];
+                                        var lines = [label].concat(taskNames);
+                                        //label += '\n' + taskNames.join('\n');
+
+                                        return lines;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Veri getirilirken hata oluştu:', error);
+            }
+        });
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var predefinedColors = [
+                '#A3D9A5',
+                '#FFDAC1',
+                '#BAFFB3',
+                '#C2C2F0', // Pastel lavanta
+                '#B3F3D0',
+                '#BAE1FF',
+                '#FFB3BA', // Pastel pembe
+                '#FFDFBA', // Pastel şeftali
+                '#FFFFBA', // Pastel sarı
+                '#D5AAFF', // Pastel mor
+                '#FFB3E6', // Pastel fuşya
+
+            ];
+
+            // Renklerin sayısına göre döndür
+            return predefinedColors.slice(0, count);
+        }
+    });
+</script>
