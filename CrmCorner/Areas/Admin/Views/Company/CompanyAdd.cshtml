@@ -1,0 +1,44 @@
+﻿@*@model CrmCorner.Models.Company
+@{
+    ViewData["Title"] = "CompanyAdd";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<form asp-action="CompanyAdd" method="post">
+
+    <div class="form-group">
+        <label asp-for="CompanyName" class="control-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CompanyEmail" class="control-label"></label>
+        <input asp-for="CompanyEmail" class="form-control" />
+        <span asp-validation-for="CompanyEmail" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="StatusId" class="control-label">Status</label>
+        <select asp-for="StatusId" asp-items="@(new SelectList(ViewBag.Status, "Value", "Text"))" class="form-control">
+            <option value="">Seçiniz</option>
+        </select>
+        <span asp-validation-for="StatusId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="IdEmployee" class="control-label">Responsible</label>
+        @Html.DropDownListFor(m=>m.IdEmployee,(List<SelectListItem>) ViewBag.Employees,"Seçiniz",new {@class="form-select", aria_label="IdEmployee",@id="IdEmployee", @required="required"})
+        <span asp-validation-for="IdEmployee" class="text-danger"></span>
+    </div>
+    <br />
+    <div class="form-group">
+        <input type="submit" value="Add Company" class="btn btn-primary" />
+    </div>
+</form>
+
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+*@

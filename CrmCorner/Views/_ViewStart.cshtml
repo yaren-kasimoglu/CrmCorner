@@ -1,3 +1,11 @@
 ﻿@{
-    Layout = "_LayoutHomePage";
+    var layout = ViewData["Layout"]?.ToString();
+    if (!string.IsNullOrEmpty(layout))
+    {
+        Layout = layout;
+    }
+    else
+    {
+        Layout = "_LayoutHomePage";
+    }
 }

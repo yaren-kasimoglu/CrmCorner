@@ -1,0 +1,45 @@
+﻿@model CrmCorner.Models.PostSaleInfo
+@{
+    ViewData["Title"] = "AddPostSaleInfo";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutHomePageArea.cshtml";
+}
+
+<form asp-action="AddPostSaleInfo" method="post">
+    <input type="hidden" asp-for="TaskCompId" />
+
+    <div>
+        <label asp-for="IsFirstPaymentMade">İlk ödeme yapıldı mı?</label>
+        <select asp-for="IsFirstPaymentMade">
+            <option value="true">Evet</option>
+            <option value="false">Hayır</option>
+        </select>
+    </div>
+
+    <div>
+        <label asp-for="IsThereAProblem">Bir problem var mı?</label>
+        <input type="checkbox" asp-for="IsThereAProblem" />
+    </div>
+
+    <div>
+        <label asp-for="ProblemDescription">Problem Açıklaması</label>
+        <textarea asp-for="ProblemDescription"></textarea>
+    </div>
+
+    <div>
+        <label asp-for="IsContinuationConsidered">Devam etmeyi düşünüyorlar mı?</label>
+        <input type="checkbox" asp-for="IsContinuationConsidered" />
+    </div>
+
+    <div>
+        <label asp-for="IsTrustpilotReviewed">Trustpilot yorumu yapıldı mı?</label>
+        <input type="checkbox" asp-for="IsTrustpilotReviewed" />
+    </div>
+
+    <div>
+        <label asp-for="CanUseLogo">Logolarını kullanabilir miyiz?</label>
+        <input type="checkbox" asp-for="CanUseLogo" />
+    </div>
+
+    <button type="submit">Kaydet</button>
+</form>
+

@@ -13,6 +13,7 @@
         userRole = roles.Contains("Admin") ? "Admin" : "User";
         userEmail = currentUser.Email;
     }
+    string layoutTheme = userRole == "Admin" ? "theme-purple" : "theme-cyan";
 
 }
 <!DOCTYPE html>
@@ -99,8 +100,10 @@
 
 
 </head>
+
 <body>
-    <div id="layout" class="theme-cyan">
+        <div id="layout" class="@layoutTheme">
+      
         <div id="wrapper">
             <!-- Page Loader -->
             @*<div class="page-loader-wrapper text-center">
@@ -220,7 +223,14 @@
                                         </ul>
                                     </li>
 
-
+                                    @if (userRole == "Admin")
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
+                                                <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
+                                            </a>
+                                        </li>
+                                    }
 
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="AfterTask" asp-action="ListPositiveSales"><i class="fa fa-tag"></i>Satış Sonrası Takibasyon</a>
@@ -232,14 +242,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i>Müşterilerim</a>
                                     </li>
-                                  @if (userRole == "Admin")
-                                    {
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
-                                                <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
-                                            </a>
-                                        </li>
-                             }
+              
                                     <li class="nav-item">
 
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-users"></i>Çalışanlarımız</a>
