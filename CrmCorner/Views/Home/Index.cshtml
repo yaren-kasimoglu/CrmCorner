@@ -6,19 +6,24 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 <style>
-    .chart-title {
-        margin-bottom: 10px; /* Başlık ile grafiği ayırmak için alt boşluk ekler */
-        font-size: 20px; /* Başlık font boyutunu ayarlar */
-        /* Daha fazla stil özelleştirmesi yapabilirsiniz */
-    }
-
     .custom-card {
-        background-color: #fff; /* Gri tonunda bir arka plan rengi */
-        border-radius: 3px; /* Hafif yuvarlak köşeler */
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Hafif bir gölge */
-        margin-bottom: 30px;
+        background-color: #fff; /* Beyaz arka plan */
+        border-radius: 10px; /* Köşe yuvarlama */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+        padding: 20px; /* İç boşluk */
+        margin: 10px; /* Dış boşluk */
+        border: 1px solid #ddd; /* İnce border */
     }
 
+    .chart-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px; /* Başlık altı boşluk */
+    }
+
+    .card-body {
+        padding: 10px; /* İç boşluk */
+    }
 
 
     /* Responsive grid ayarları */
@@ -112,10 +117,10 @@
     }
 
 
-    <div class="col-xl-8 col-lg-12 col-md-12">
+    <div class="col-xl-8 col-lg-12 col-md-6">
         <div class="col-12">
-            <div class="custom-card" style="width: 50%;">
-                <div class="chart-title">Görevlerim</div>
+            <div class="custom-card" style="width: 55%;">
+                <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
                 <div class="card-body">
                     <canvas id="userTaskStatusChart"></canvas>
                 </div>
@@ -124,45 +129,57 @@
     </div>
 
 </div>
-
-
-<div class="custom-card">
-    <div class="row g-2 clearfix row-deck">
-        <div class="col-12">
-            <div class="card-body text-center">
-                <div class="col-6">
-                    <h6>Görevlerin Durumlarına Göre Dağılımları</h6>
-                    <div style="width: 60%;">
-                        <canvas id="outcomeStatusChart"></canvas>
-                    </div>
+<div class="container">
+    <div class="row no-gutters">
+        <div class="col-xl-4 col-lg-4 col-md-12">
+            <div class="custom-card">
+                <div class="chart-title">Görevlerin Durumlarına Göre Dağılımları</div>
+                <div class="card-body">
+                    <canvas id="outcomeStatusChart"></canvas>
                 </div>
             </div>
-
-            <div class="card-body text-center">
-                <div class="col-6">
-                    <h6>Son Karar Mercii İle Görüşme Durumları</h6>
-                    <div style="width: 60%;">
-                        <canvas id="isFinalDecisionMaker"></canvas>
-                    </div>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-12">
+            <div class="custom-card">
+                <div class="chart-title">Son Karar Mercii İle Görüşme Durumları</div>
+                <div class="card-body">
+                    <canvas id="isFinalDecisionMaker"></canvas>
                 </div>
             </div>
-
-
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-12">
+            <div class="custom-card"style="width: 94%;">
+                <div class="chart-title">Müşterilerin Sektörel Dağılımları</div>
+                <div class="card-body">
+                    <canvas id="industuryChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+<!--<div class="custom-card">
+    <div class="row g-2 clearfix row-deck">-->
+        <!-- Flex container for charts -->
+        <!--<div class="chart-container d-flex justify-content-between">
+            <div class="chart-item">
+                <h6>Görevlerin Durumlarına Göre Dağılımları</h6>
+                <div style="width: 100%;">
+                    <canvas id="outcomeStatusChart"></canvas>
+                </div>
+            </div>
 
-
-<div class="row">
-    <div class="col-6">
-        <div class="chart-title">Müşterilerin sektörel dağılımları</div>
-        <div class="custom-card" style="width: 60%;">
-            <canvas id="industuryChart"></canvas>
+            <div class="chart-item">
+                <h6>Son Karar Mercii İle Görüşme Durumları</h6>
+                <div style="width: 100%;">
+                    <canvas id="isFinalDecisionMaker"></canvas>
+                </div>
+            </div>
         </div>
     </div>
+</div>-->
 
-
-    <div class="col-6">
+<div class="row">
+    <div class="col-12">
         <div class="card">
             <div class="card-header">
                 <h6 class="card-title">Yapılacaklar</h6>
@@ -171,12 +188,12 @@
             <div class="card-body todo_list">
                 @if (ViewBag.ToDoList != null)
                 {
-                        var todoList = ViewBag.ToDoList as List<Tuple<string,string>>;
-                    
+                    var todoList = ViewBag.ToDoList as List<Tuple<string, string>>;
+
                     @for (int i = 0; i < Math.Min(5, todoList.Count); i++)
-                        {
-                            var task = todoList[i].Item1;
-                            var url = todoList[i].Item2;
+                    {
+                        var task = todoList[i].Item1;
+                        var url = todoList[i].Item2;
 
                         <div class="d-flex justify-content-between mb-3">
                             <div class="form-check">
@@ -184,8 +201,8 @@
                             </div>
                         </div>
                     }
-                 }
-                </div>
+                }
+            </div>
         </div>
     </div>
 
@@ -209,7 +226,14 @@
             success: function (data) {
                 console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
-                var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
+                //var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
+                var colors = [
+                    '#d0e9f5', // En açık mavi
+                    '#a0c4e3', // Açık mavi
+                    '#6baed6', // Orta mavi
+                    '#3182bd'  // Koyu mavi
+                ];
+
 
                 // Gelen veri yapısına göre haritalama yapalım
                 var labels = data.map(item => item.statusName);
@@ -227,7 +251,26 @@
                         }]
                     },
                     options: {
+                        layout: {
+                            padding: {
+                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                bottom: 0
+                            }
+                        },
                         plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function (context) {
@@ -243,6 +286,7 @@
                         }
                     }
                 });
+
             },
             error: function (error) {
                 console.error('Error fetching data:', error);
@@ -259,26 +303,47 @@
             success: function (data) {
                 console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('outcomeStatusChart').getContext('2d');
-                var colors = ['#FED049', '#2D6187', '#89BEB3'];
+                var colors = [
+                    '#f3e6f6', // En açık mor
+                    '#e1a7e8', // Açık mor
+                    '#b76cd0', // Orta mor
+                    '#8a2c77'  // Koyu mor
+                ];
 
                 var labels = data.labels;
                 var dataValues = data.data;
                 var taskNames = data.taskNames;
-
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Görev Durumu',
                             data: dataValues,
                             backgroundColor: colors,
-                            borderWidth: 2,
-                            barThickness: 30,
+                            borderWidth: 1
                         }]
                     },
                     options: {
+                        layout: {
+                            padding: {
+                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                bottom: 0
+                            }
+                        },
                         plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function (context) {
@@ -291,9 +356,11 @@
                                     }
                                 }
                             }
+
                         }
                     }
                 });
+                
             },
             error: function (error) {
                 console.error('Error fetching data:', error);
@@ -311,7 +378,10 @@
             success: function (data) {
                 console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('isFinalDecisionMaker').getContext('2d');
-                var colors = ['#2eacb3', '#FED049'];
+                var colors = [
+                    '#FFE0B2', // En açık turuncu
+                    '#FF6F00'  // Koyu turuncu
+                ];
 
                 var labels = data.labels;
                 var dataValues = data.data;
@@ -322,15 +392,32 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: '',
                             data: dataValues,
                             backgroundColor: colors,
-                            borderWidth: 2,
-                            barThickness: 30,
+                            borderWidth: 1
                         }]
                     },
                     options: {
+                        layout: {
+                            padding: {
+                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                bottom: 0
+                            }
+                        },
                         plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function (context) {
@@ -338,7 +425,7 @@
                                         var count = dataValues[index];
                                         var tasks = taskNames[index];
                                         var label = labels[index] + ': ' + count;
-                                        var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                        var lines = [label].concat(tasks);
                                         return lines;
                                     }
                                 }
@@ -379,7 +466,26 @@
                         }]
                     },
                     options: {
+                        layout: {
+                            padding: {
+                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                bottom: 0
+                            }
+                        },
                         plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 10,
+                                    padding: 5,
+                                    font: {
+                                        size: 10, // Yazı boyutunu 12px olarak ayarladım
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function (context) {
@@ -406,12 +512,22 @@
 
         // Dinamik renk üretimi
         function generateColors(count) {
-            var colors = [];
-            for (var i = 0; i < count; i++) {
-                // Rastgele renk üretme (örneğin)
-                var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-                colors.push(color);
-            }
-            return colors;
+            var predefinedColors = [
+                '#A3D9A5',
+                '#FFDAC1',
+                '#BAFFB3',
+                '#C2C2F0', // Pastel lavanta
+                '#B3F3D0', 
+                '#BAE1FF',
+                '#FFB3BA', // Pastel pembe
+                '#FFDFBA', // Pastel şeftali
+                '#FFFFBA', // Pastel sarı
+                '#D5AAFF', // Pastel mor
+                '#FFB3E6', // Pastel fuşya
+          
+            ];
+
+            // Renklerin sayısına göre döndür
+            return predefinedColors.slice(0, count);
         }
     });</script>

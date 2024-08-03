@@ -328,6 +328,7 @@ namespace CrmCorner.Controllers
             // AppUser olarak atanan TaskComps'ı bul
             var appUserTasks = await _context.TaskComps
                                               .Include(tc => tc.Status)
+                                              .OrderBy(tc=>tc.StatusId)
                                               .Where(tc => tc.UserId == userId)
                                               .ToListAsync();
 
@@ -335,11 +336,13 @@ namespace CrmCorner.Controllers
             var assignedUserTasks = await _context.TaskComps
                                                    .Include(tc => tc.Status)
                                                    .Where(tc => tc.AssignedUserId == userId)
+                                                   .OrderBy(tc => tc.StatusId)
                                                    .ToListAsync();
 
             // İki listeyi birleştir ve belirli kullanıcılar için filtre uygula
             var combinedTasks = appUserTasks.Concat(assignedUserTasks)
                                             .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
+                                            .OrderBy(tc => tc.StatusId)
                                             .ToList();
 
             var chartData = combinedTasks.GroupBy(tc => tc.Status.StatusName)
