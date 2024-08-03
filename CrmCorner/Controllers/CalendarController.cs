@@ -82,7 +82,7 @@ namespace CrmCorner.Controllers
                 ViewBag.Calendar = calendars;
                 ViewBag.CalendarFilter = calendarItemsFilter.Take(5);
                 ViewBag.Users = _context.Users
-                    .Where(u=>u.Id!=currentUser.Id)
+                    .Where(u=>u.Id!=currentUser.Id && u.CompanyId==currentUser.CompanyId)
                     .Select(u => new SelectListItem
                 {
                     Value = u.Email,
