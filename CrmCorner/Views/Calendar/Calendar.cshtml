@@ -99,7 +99,7 @@
                     <div class="form-group">
                         @Html.LabelFor(model => model.Date, "Tarih", htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="col-md-10">
-                            @Html.EditorFor(model => model.Date, "Date", new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.EditorFor(model => model.Date, "Date", new { htmlAttributes = new { @class = "form-control" , id = "modelDate" } })
                             @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -250,9 +250,14 @@
         $('#searchInput').on('input', function () {
             $('#timeSelection').slideDown();
         });
+      
     });
 
-
+    //$('#my_calendar').on('click', function () {
+    //    var selectedDate = $(this).data('date');
+    //    var modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+    //    modal.show();
+    //});
 
     function toggleManualEmail() {
         var manualEmailInput = document.getElementById("manualEmailInput");
@@ -336,6 +341,13 @@
                 document.getElementById("calendarId").value = info.event.id; // Gizli input alanına ID'yi yerleştir
                 $('#calendarModal').modal('show');
             },
+            dateClick: function (info) {
+                // Tıklanan tarihi almak
+                var clickedDate = info.dateStr;
+                document.getElementById('modelDate').value = clickedDate;
+                var modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+                modal.show();
+            }
         });
         calendar.render();
     });
