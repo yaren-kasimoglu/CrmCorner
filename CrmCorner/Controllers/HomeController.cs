@@ -167,6 +167,11 @@ namespace CrmCorner.Controllers
 
         #region CHARTS
 
+
+
+
+
+
         [Authorize]
         public async Task<IActionResult> IndustryChart()
         {
