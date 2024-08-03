@@ -28,6 +28,10 @@ builder.Services.AddSignalR();
 
 // Razor runtime derlemesini ekleyin
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<AdminLayoutFilter>();
+});
 
 // Fiziksel dosya sağlayıcısını ekleyin
 builder.Services.AddSingleton<IFileProvider>(

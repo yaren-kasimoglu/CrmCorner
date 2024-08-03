@@ -18,7 +18,7 @@ using System.Security.Claims;
 
 namespace CrmCorner.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly CrmCornerContext _context;
         private readonly UserManager<AppUser> _userManager;
@@ -32,7 +32,7 @@ namespace CrmCorner.Controllers
 
         public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
             IEmailServices emailServices, CrmCornerContext context, RoleManager<AppRole> roleManager, EmailService emailService
-           )
+           ) : base(userManager)
         {
             _logger = logger;
             _userManager = userManager;
@@ -46,6 +46,7 @@ namespace CrmCorner.Controllers
      
         public async Task<IActionResult> Index()
         {
+            await SetLayout();//areadamı değilmi onu  nalayıp layout set ediyor
             try
             {
                 if (!User.Identity!.IsAuthenticated)
@@ -58,6 +59,12 @@ namespace CrmCorner.Controllers
                 if (currentUser == null)
                 {
                     return View();
+                }
+
+                var roles = await _userManager.GetRolesAsync(currentUser);
+                if (roles.Contains("Admin"))//areaya yönlendiriyorum
+                {
+                    return RedirectToAction("Index", "Home", new { area = "Admin" });
                 }
 
                 try
@@ -462,17 +469,24 @@ namespace CrmCorner.Controllers
 
                 if (signInresult.Succeeded)
                 {
+                    var roles = await _userManager.GetRolesAsync(hasUser);
+                    bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
+
+                    if (isAdminOrManager)
+                    {
+                        return RedirectToAction("Index", "Home", new { area = "Admin" });
+                    }
+
                     return Redirect(returnUrl);
                 }
 
                 if (signInresult.IsLockedOut)
                 {
-                    ModelState.AddModelErrorList(new List<string>() { "3 dakika boyunca giriş yapamazsınız." });
+                    ModelState.AddModelError(string.Empty, "3 dakika boyunca giriş yapamazsınız.");
                     return View();
                 }
 
-                ModelState.AddModelErrorList(new List<string>() { $"Email veya şifre hatalı.", $"(Başarısız giriş sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)})" });
-
+                ModelState.AddModelError(string.Empty, $"Email veya şifre hatalı. (Başarısız giriş sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)})");
                 return View();
             }
             catch (Exception ex)

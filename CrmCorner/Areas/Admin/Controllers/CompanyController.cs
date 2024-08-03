@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace CrmCorner.Controllers
+namespace CrmCorner.Areas.Admin.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
+    [Area("Admin")]
     public class CompanyController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -18,21 +19,14 @@ namespace CrmCorner.Controllers
             _userManager = userManager;
         }
     
-        [Authorize(Roles ="Admin")]
+
         public async Task<IActionResult> CompanyList()
         {
             try
             {
             var currentUser = await _userManager.GetUserAsync(User);
 
-                var roles = await _userManager.GetRolesAsync(currentUser);
-
-                if (roles.Contains("Admin"))//areaya yönlendiriyorum
-                {
-                    return RedirectToAction("CompanyList", "Company", new { area = "Admin" });
-                }
-
-                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
             var Companys = _context.Companies.ToList();
                 return View(Companys);
@@ -43,27 +37,18 @@ namespace CrmCorner.Controllers
             }
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> ApproveCompany(int id)
+        public IActionResult ApproveCompany(int id)
         {
             try
             {
-                var currentUser = await _userManager.GetUserAsync(User); // Async olarak currentUser'ı al
-                var roles = await _userManager.GetRolesAsync(currentUser);
-
-                if (roles.Contains("Admin"))
-                {
-                    // Admin kullanıcıyı Admin alanına yönlendirme
-                    return RedirectToAction("ApproveCompany", "Company", new { area = "Admin" });
-                }
-
-                var company = await _context.Companies.FindAsync(id); // Async olarak şirketi bul
+                var company = _context.Companies.Find(id);
                 if (company != null)
                 {
                     company.IsApproved = true;  // Onaylama işlemi
-                    await _context.SaveChangesAsync(); // Async olarak değişiklikleri kaydet
+                    _context.SaveChanges();
                 }
-
                 return RedirectToAction("CompanyList");
             }
             catch (Exception ex)
@@ -72,20 +57,12 @@ namespace CrmCorner.Controllers
             }
         }
 
-
+  
         [HttpPost]
-        public async Task<IActionResult> RejectCompany(int id)
+        public IActionResult RejectCompany(int id)
         {
             try
             {
-                var currentUser = await _userManager.GetUserAsync(User); // Async olarak currentUser'ı al
-                var roles = await _userManager.GetRolesAsync(currentUser);
-
-                if (roles.Contains("Admin"))
-                {
-                    // Admin kullanıcıyı Admin alanına yönlendirme
-                    return RedirectToAction("RejectCompany", "Company", new { area = "Admin" });
-                }
                 var company = _context.Companies.Find(id);
                 if (company != null)
                 {

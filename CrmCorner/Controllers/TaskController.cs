@@ -400,7 +400,7 @@ namespace CrmCorner.Controllers
                 }
 
                 var status = _context.Statuses.FirstOrDefault(s => s.StatusId == editedTask.StatusId);
-                if ((status?.StatusName == "Sözleşme Aşamasında" || status?.StatusName == "Teklif Gönderildi" || status?.StatusName == "Satış Tamamlandı") && !originalTask.FileAttachments.Any())
+                if ((status?.StatusName == "Sözleşme Aşamasında" || status?.StatusName == "Satış Tamamlandı") && !originalTask.FileAttachments.Any())
                 {
                     ModelState.AddModelError("file", "Dosya yüklemesi zorunludur.");
                 }

@@ -1,4 +1,5 @@
-﻿using CrmCorner.Models;
+﻿using CrmCorner.Controllers;
+using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -6,9 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CrmCorner.Controllers
+namespace CrmCorner.Areas.Admin.Controllers
 {
     [Authorize]
+    [Area("Admin")]
     public class AfterTaskController : BaseController
     {
         private readonly UserManager<AppUser> _userManager;
@@ -19,12 +21,13 @@ namespace CrmCorner.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> ListPositiveSales()
+        public async Task<IActionResult> ListPositiveSalesAdmin()
         {
             await SetLayout();
             try
             {
                 var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
+
                 var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
 
                 ViewBag.PictureUrl = "/userprofilepicture/" + (user.Picture ?? "defaultpp.png");
@@ -37,11 +40,8 @@ namespace CrmCorner.Controllers
                                                  .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won)
                                                  .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)); // E-posta domainine göre filtrele
 
-                if (roles.Contains("Admin"))//areaya yönlendiriyorum
-                {
-                    return RedirectToAction("ListPositiveSalesAdmin", "AfterTask", new { area = "Admin" });
-                }
 
+          
                 if (!roles.Contains("Admin"))
                 {
                     positiveSalesQuery = positiveSalesQuery.Where(psi => psi.TaskComp.UserId == user.Id || psi.TaskComp.AssignedUserId == user.Id);
@@ -74,7 +74,6 @@ namespace CrmCorner.Controllers
 
         public async Task<IActionResult> AfterTaskEdit(int? id)
         {
-
             try
             {
                 if (id == null)
@@ -91,13 +90,6 @@ namespace CrmCorner.Controllers
                                                  .Include(psi => psi.TaskComp) // İlişkili TaskComp bilgilerini de yükle
                                                  .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)) // E-posta domainine göre filtrele
                                                  .FirstOrDefaultAsync(m => m.Id == id);
-
-                var roles = await _userManager.GetRolesAsync(user);
-
-                if (roles.Contains("Admin"))//areaya yönlendiriyorum
-                {
-                    return RedirectToAction("AfterTaskEdit", "AfterTask", new { area = "Admin" });
-                }
 
                 if (postSaleInfo == null)
                 {
@@ -157,7 +149,7 @@ namespace CrmCorner.Controllers
                     postSaleInfo.CanUseLogo = model.CanUseLogo;
 
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(ListPositiveSales));
+                    return RedirectToAction(nameof(ListPositiveSalesAdmin));
                 }
 
                 return View(model);
