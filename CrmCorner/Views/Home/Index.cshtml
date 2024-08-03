@@ -148,7 +148,7 @@
             </div>
         </div>
         <div class="col-xl-4 col-lg-4 col-md-12">
-            <div class="custom-card"style="width: 94%;">
+            <div class="custom-card">
                 <div class="chart-title">Müşterilerin Sektörel Dağılımları</div>
                 <div class="card-body">
                     <canvas id="industuryChart"></canvas>
@@ -159,8 +159,8 @@
 </div>
 <!--<div class="custom-card">
     <div class="row g-2 clearfix row-deck">-->
-        <!-- Flex container for charts -->
-        <!--<div class="chart-container d-flex justify-content-between">
+<!-- Flex container for charts -->
+<!--<div class="chart-container d-flex justify-content-between">
             <div class="chart-item">
                 <h6>Görevlerin Durumlarına Göre Dağılımları</h6>
                 <div style="width: 100%;">
@@ -291,9 +291,26 @@
                                         return lines;
                                     }
                                 }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8// Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
                             }
+
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels]
                 });
 
             },
@@ -335,7 +352,7 @@
                     options: {
                         layout: {
                             padding: {
-                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                top: 10,
                                 bottom: 0
                             }
                         },
@@ -347,7 +364,7 @@
                                     boxWidth: 20,
                                     padding: 8,
                                     font: {
-                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
+                                        size: 11,
                                         family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
                                         style: 'normal'
                                     }
@@ -360,16 +377,31 @@
                                         var count = dataValues[index];
                                         var tasks = taskNames[index];
                                         var label = labels[index] + ': ' + count;
-                                        var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                        var lines = [label].concat(tasks);
                                         return lines;
                                     }
                                 }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8 // Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
                             }
-
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels]
                 });
-                
+
             },
             error: function (error) {
                 console.error('Error fetching data:', error);
@@ -438,9 +470,26 @@
                                         return lines;
                                     }
                                 }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8// Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
                             }
+
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels]
                 });
             },
             error: function (error) {
@@ -506,10 +555,28 @@
                                         return lines;
                                     }
                                 }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8// Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
                             }
+
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels] // ChartDataLabels plugin'ini kullanın
                 });
+
             },
             error: function (xhr, status, error) {
                 // Hata durumunda kullanıcıya bildirim
@@ -526,20 +593,22 @@
                 '#FFDAC1',
                 '#BAFFB3',
                 '#C2C2F0', // Pastel lavanta
-                '#B3F3D0', 
+                '#B3F3D0',
                 '#BAE1FF',
                 '#FFB3BA', // Pastel pembe
                 '#FFDFBA', // Pastel şeftali
                 '#FFFFBA', // Pastel sarı
                 '#D5AAFF', // Pastel mor
                 '#FFB3E6', // Pastel fuşya
-          
+
             ];
 
             // Renklerin sayısına göre döndür
             return predefinedColors.slice(0, count);
         }
     });</script>
+
+
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -620,3 +689,7 @@
         }
     });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
