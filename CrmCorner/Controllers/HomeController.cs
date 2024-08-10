@@ -698,13 +698,14 @@ namespace CrmCorner.Controllers
             var senderIds = unreadMessages.Select(m => m.SenderId).Distinct().ToList();
             var senders = await _userManager.Users
                                 .Where(u => senderIds.Contains(u.Id))
-                                .Select(u => new { u.Id, u.UserName })
+                                .Select(u => new { u.Id, u.UserName,u.NameSurname })
                                 .ToListAsync();
 
             var senderDetails = senders.Select(s => new
             {
                 SenderId = s.Id,
-                SenderName = s.UserName
+                SenderName = s.UserName,
+                Name=s.NameSurname
             }).ToList();
 
             var jsonData = new

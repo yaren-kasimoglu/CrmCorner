@@ -19,7 +19,7 @@
 <!DOCTYPE html>
 
 <html>
-<head>
+<head>x
     <meta name="viewport" content="width=device-width" />
     <meta charset="utf-8">
     <title>CRM CORNER</title>
@@ -347,7 +347,6 @@
             $.get('/Home/GetNotificationsStatus', function (data) {
                 var hasUnreadMessages = data.message.hasUnreadMessages;
                 var unreadSenderCount = data.message.distinctSenderIdsCount;
-                console.log(data.message.unreadMessages);
                 if (hasUnreadMessages) {
 
                     // Bildirim varsa yapılacak işlemler
@@ -358,10 +357,9 @@
                     //data.message.unreadMessages.forEach(function (message) {
                     //    unreadMessagesHtml += '<li>' + message.senderId + '</li>';
                     //});
-                    console.log("buraya girdi");
                     let newUnreadMessagesHtml = '';
                     data.message.unreadMessages.forEach(function (message) {
-                        newUnreadMessagesHtml += `<li><a href="javascript:void(0);" onclick="redirectToUserMessages('${message.senderId}')">${message.senderName}</a></li>`;
+                        newUnreadMessagesHtml += `<li><a href="javascript:void(0);" onclick="redirectToUserMessages('${message.senderId}','${message.name}')">${message.senderName}</a></li>`;
                     });
                     if (newUnreadMessagesHtml !== unreadMessagesHtml) {
                         unreadMessagesHtml = newUnreadMessagesHtml;
@@ -375,8 +373,13 @@
             });
         }, 1000); // 2 saniyede bir çağıralım
     });
-    function redirectToUserMessages(userId) {
-        window.location.href = '/ChatApp/ChatApp';
+    function redirectToUserMessages(userId,name) {
+            // userId'yi localStorage'da sakla
+            localStorage.setItem('selectedUserId', userId);
+            localStorage.setItem('selectedUserName', name);
+            // Sayfayı ChatApp sayfasına yönlendir
+            window.location.href = "/ChatApp/ChatApp";
+
     }
         document.addEventListener('DOMContentLoaded', function () {
              var messageIconElement = document.getElementById("messageIcon");

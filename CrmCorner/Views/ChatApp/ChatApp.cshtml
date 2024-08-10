@@ -224,12 +224,23 @@
 
 
         document.addEventListener("DOMContentLoaded", function () {
-            var userId = document.getElementById("selectedUserId").value;
-            var userName = document.getElementById("selectedUser").innerHTML;
-            
-            if (userId && userName) {
-                document.getElementById("searchDiv").style.display = "block";
+            var userIsd = localStorage.getItem('selectedUserId');
+            var userNames = localStorage.getItem('selectedUserName');
+            console.log("userNames" + userNames);
+            if (userIsd) {
+                selectUser(userNames, userIsd);
+                localStorage.removeItem('selectedUserId');
+                localStorage.removeItem('selectedUserName');
             }
+            else {
+                var userId = document.getElementById("selectedUserId").value;
+                var userName = document.getElementById("selectedUser").innerHTML;
+
+                if (userId && userName) {
+                    document.getElementById("searchDiv").style.display = "block";
+                }
+            }
+
         });
 
 
@@ -251,7 +262,6 @@
             }
         });
         const selectedUserElement = document.getElementById("selectedUser");
-        console.log(selectedUserElement.value);
         // selectedUser elementi null ise "Hello" mesajını ekleyelim
         if (selectedUserElement.value === undefined) {
             const messageElement = document.querySelector('.message.other-message');
@@ -270,6 +280,8 @@
             };
             return date.toLocaleString('tr-TR', options).replace(',', '');
         }
+     
+
         function selectUser(userName, userId) {
             document.getElementById("searchDiv").style.display = "block";
             document.getElementById("selectedUserId").value = userId;
@@ -290,12 +302,9 @@
                     var $MessageBox = $("#MessageBox");
                     $MessageBox.empty();
                     // Başarılı bir şekilde veri alındığında yapılacak işlemler
-                    console.log("Veri alındı:", response.message);
-                    console.log(useronlyId);
                     response.message.forEach(function (item) {
                         const formattedMessageTime = formatDateTime(item.messageTime);
                         if (item.senderId != useronlyId) {
-                            console.log(item.senderId);
                             $MessageBox.append(`<li class="clearfix">
                                             <div class="message-data mb-3">
                                                 <span class="small text-muted me-3">${formattedMessageTime}</span>
@@ -367,7 +376,6 @@
 
         // Notification elementine tıklandığında kaybolmasını sağlayan bir event listener ekleyin
         function hideNotification() {
-            console.log("aslında butona bastı");
             var notificationElement = document.getElementById("notification");
             notificationElement.style.display = "none";
             var userId = document.getElementById("userIdHiddenInput").value;
@@ -429,10 +437,8 @@
             });
    
             function uploadFile() {
-                console.log("1uploadfile çağrıldı")
                 const fileInput = document.getElementById('fileInput');
                 const file = fileInput.files[0];
-                console.log("formdata" + girdi);
 
                 if (!file) {
                     alert("Please select a file.");
@@ -442,7 +448,6 @@
                 const formData = new FormData();
                 formData.append("file", file);
 
-                console.log("formdata" + formData);
                 $.ajax({
                     url: '/api/fileupload',
                     type: 'POST',
@@ -476,9 +481,7 @@
                 var hour = ("0" + now.getHours()).slice(-2);
                 var minute = ("0" + now.getMinutes()).slice(-2);
                 var dateTime = day + "." + month + "." + year + " " + hour + ":" + minute;
-                console.log("send yapmaya çalıştı");
 
-                console.log(dateTime);
 
                 $MessageBox.append(`<li class="clearfix">
                                 <div class="message-data text-end mb-3 me-3">
