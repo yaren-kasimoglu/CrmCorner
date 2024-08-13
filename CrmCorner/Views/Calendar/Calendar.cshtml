@@ -169,22 +169,25 @@
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.EmailProperty.StartDate, "Başlangıç Tarihi", htmlAttributes: new { @class = "control-label col-md-2" })
                                     <div class="col-md-10">
-                                        @Html.TextBoxFor(model => model.EmailProperty.StartDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
+                                        <select class="form-control" id="StartDate" name="EmailProperty.StartDate">
+                                            <!-- Javascript ile buraya seçenekler eklenecek -->
+                                        </select>
                                         @Html.ValidationMessageFor(model => model.EmailProperty.StartDate, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <div class="form-group">
-                                        @Html.LabelFor(model => model.EmailProperty.EndDate, "Bitiş Tarihi", htmlAttributes: new { @class = "control-label col-md-2" })
-                                        <div class="col-md-10">
-                                            @Html.TextBoxFor(model => model.EmailProperty.EndDate, new { @id = "timeInput", @class = "form-control", @type = "time" })
-                                            @Html.ValidationMessageFor(model => model.EmailProperty.EndDate, "", new { @class = "text-danger" })
-                                        </div>
+                                    @Html.LabelFor(model => model.EmailProperty.EndDate, "Bitiş Tarihi", htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        <select class="form-control" id="EndDate" name="EmailProperty.EndDate">
+                                            <!-- Javascript ile buraya seçenekler eklenecek -->
+                                        </select>
+                                        @Html.ValidationMessageFor(model => model.EmailProperty.EndDate, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
                             </div>
+
                         </div>
 
                     </div>
@@ -316,6 +319,24 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        let startTimePicker = document.getElementById('StartDate');
+        let endTimePicker = document.getElementById('EndDate');
+
+        for (let hour = 0; hour < 24; hour++) {
+            for (let minute = 0; minute < 60; minute += 15) {
+                let timeValue = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+                let startOption = document.createElement('option');
+                startOption.value = timeValue;
+                startOption.textContent = timeValue;
+                startTimePicker.appendChild(startOption);
+
+                let endOption = document.createElement('option');
+                endOption.value = timeValue;
+                endOption.textContent = timeValue;
+                endTimePicker.appendChild(endOption);
+            }
+        }
         var calendarEl = document.getElementById('my_calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             timeZone: 'UTC',
