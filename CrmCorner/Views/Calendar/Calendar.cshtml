@@ -219,14 +219,41 @@
                     <h5 id="Id" style="display:none"></h5>
                     Takvim Düzenle
                     <h4 id="modalTitle" class="modal-title"></h4>
-                      <input type="hidden" id="calendarId" name="Id" value="" />
+                    <input type="hidden" id="calendarId" name="Id" value="" />
                 </div>
-                Title:
-                <input type="text" class="form-control" name="Title" id="modalTitle2" required />
-                Description:
-                <input type="text" class="form-control" id="modalDescription" name="Description" required />
-                Start Date:
+                Tarih:
                 <input type="date" id="modalStart" class="form-control" name="Date" required />
+
+                Başlık:
+                <input type="text" class="form-control" name="Title" id="modalTitle2" required />
+                Açıklama:
+                <input type="text" class="form-control" id="modalDescription" name="Description" required />
+                <h4>Saat Seçimi</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.Label("StartTime", "Başlangıç Saati", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                <select class="form-control" id="StartDates" name="EmailProperty.StartDate">
+                                    <!-- Javascript ile buraya seçenekler eklenecek -->
+                                </select>
+                                @Html.ValidationMessage("StartTime", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.Label("EndTime", "Bitiş Saati", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                <select class="form-control" id="EndDates" name="EmailProperty.EndDate">
+                                    <!-- Javascript ile buraya seçenekler eklenecek -->
+                                </select>
+                                @Html.ValidationMessageFor(model => model.EmailProperty.EndDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-rounded btn-success" formaction="/Calendar/Edit"><i class="fas fa-check-square"></i> EDIT</button>
                     <button type="submit" class="btn btn-rounded btn-danger" formaction="/Calendar/Delete"><i class="fas fa-check-square"></i> DELETE</button>
@@ -321,6 +348,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         let startTimePicker = document.getElementById('StartDate');
         let endTimePicker = document.getElementById('EndDate');
+        let startTimePickers = document.getElementById('StartDates');
+        let endTimePickers = document.getElementById('EndDates');
+
 
         for (let hour = 0; hour < 24; hour++) {
             for (let minute = 0; minute < 60; minute += 15) {
@@ -335,6 +365,16 @@
                 endOption.value = timeValue;
                 endOption.textContent = timeValue;
                 endTimePicker.appendChild(endOption);
+
+                let startOptions = document.createElement('option');
+                startOptions.value = timeValue;
+                startOptions.textContent = timeValue;
+                startTimePickers.appendChild(startOptions);
+
+                let endOptions = document.createElement('option');
+                endOptions.value = timeValue;
+                endOptions.textContent = timeValue;
+                endTimePickers.appendChild(endOptions);
             }
         }
         var calendarEl = document.getElementById('my_calendar');
@@ -374,8 +414,33 @@
     });
     function someFunction(data) {
         console.log(data.message);
-        document.getElementById("modalDescription").value = data.message;
-        document.getElementById("modalDescription").innerHTML = data.message;
+        document.getElementById("modalDescription").value = data.message.description;
+        document.getElementById("modalDescription").innerHTML = data.message.description;
+        console.log("fsfsf" + data.message.startDate);
+        if (data.message.startDate != null && data.message.endDate!=null) {
+            const startDateTime = new Date(data.message.startDate);
+            const hours = startDateTime.getHours().toString().padStart(2, '0');
+            const minutes = startDateTime.getMinutes().toString().padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            const selectElement = document.getElementById("StartDates");
+            selectElement.value = timeString;
+
+            const endDateTime = new Date(data.message.endDate);
+            const hourss = endDateTime.getHours().toString().padStart(2, '0');
+            const minutess = endDateTime.getMinutes().toString().padStart(2, '0');
+            const timeStrings = `${hourss}:${minutess}`;
+            const selectElemenst = document.getElementById("EndDates");
+            selectElemenst.value = timeStrings;
+        }
+        else {
+            console.log("kanka buraya girdi");
+            const selectElement = document.getElementById("StartDates");
+            selectElement.value = "00:00";
+            const selectElemenst = document.getElementById("EndDates");
+            selectElemenst.value = "00:00";
+
+        }
+
     }
 
 

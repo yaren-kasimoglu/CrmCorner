@@ -21,6 +21,10 @@ public class Calendar
 
     public string? UserId { get; set; }
     public virtual AppUser? AppUser { get; set; }
+    public string? Email { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+
 
     [NotMapped]
     public EmailProperty EmailProperty { get; set; }
