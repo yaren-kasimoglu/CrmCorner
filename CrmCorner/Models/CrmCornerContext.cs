@@ -89,6 +89,10 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
             entity.Property(e => e.Date).HasMaxLength(50);
             entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.Email).HasMaxLength(500);
+            entity.Property(e => e.StartDate).HasMaxLength(50);
+            entity.Property(e => e.EndDate).HasMaxLength(50);
+
         });
 
         modelBuilder.Entity<AppUser>(entity => {
