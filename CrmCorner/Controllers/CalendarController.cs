@@ -28,6 +28,7 @@ using Humanizer;
 using Microsoft.Office.Interop.Outlook;
 using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.VisualBasic;
+using static Google.Protobuf.Reflection.UninterpretedOption.Types;
 
 namespace CrmCorner.Controllers
 {
@@ -112,7 +113,7 @@ namespace CrmCorner.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
-
+                
                 string[] emailArray = null;
                 var dateFormat = "yyyy-MM-dd";
                 List<string> validEmails = new List<string>();
@@ -154,7 +155,11 @@ namespace CrmCorner.Controllers
 
                             _context.Calendars.Add(newCalendar);
                             _context.SaveChanges();//
-                             
+                        
+                            validEmails.Add(email);
+                        }
+                        else
+                        {
                             validEmails.Add(email);
                         }
                     }
@@ -168,11 +173,49 @@ namespace CrmCorner.Controllers
                         }
                     }
                 }
+                string mail = null;
+                if (validEmails.Count > 0){
+                    mail = string.Join(",", validEmails);
 
+                }
+                Calendar newCalendars = new Calendar
+                {
+                    UserId = currentUser.Id,
+                    Title = Calendar.Title,
+                    Description = Calendar.Description,
+                    Date = Calendar.Date,
+                    EmailProperty = Calendar.EmailProperty,
+                    Email = mail!=null?mail:"bos",
+                };
+
+
+                DateTime dateParts = DateTime.ParseExact(Calendar.Date, dateFormat, null);
+                DateTime emailPropertyDateTimes = Calendar.EmailProperty.StartDate;
+                DateTime emailPropertyDateTimeEnds = Calendar.EmailProperty.EndDate;
+
+                newCalendars.StartDate = new DateTime(
+                    dateParts.Year, dateParts.Month, dateParts.Day,
+                    emailPropertyDateTimes.Hour, emailPropertyDateTimes.Minute, emailPropertyDateTimes.Second
+                );
+                newCalendars.EndDate = new DateTime(
+                    dateParts.Year, dateParts.Month, dateParts.Day,
+                    emailPropertyDateTimeEnds.Hour, emailPropertyDateTimeEnds.Minute, emailPropertyDateTimeEnds.Second
+                );
+
+                AddCompany(newCalendars);
                 return RedirectToAction("Calendar");
             }
 
             return Json(new { Message = true });
+        }
+
+        [HttpPost]
+        public bool AddCompany(Calendar model)
+        {
+            
+            _context.Calendars.Add(model);
+            _context.SaveChanges();
+            return true;
         }
         [HttpPost]
         public async Task<IActionResult> Edit(Calendar model)
@@ -425,6 +468,9 @@ namespace CrmCorner.Controllers
         }
         static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails)
         {
+            TimeSpan gmtPlus3 = TimeSpan.FromHours(3);
+            DateTime startTimeUtc = startTime - gmtPlus3;
+            DateTime endTimeUtc = endTime - gmtPlus3;
             string[] emailsArray = toEmails.Split(',');
 
             StringBuilder ics = new StringBuilder();
@@ -433,8 +479,8 @@ namespace CrmCorner.Controllers
             ics.AppendLine("PRODID:-//Your Company//Your Product//EN");
             ics.AppendLine("METHOD:REQUEST");
             ics.AppendLine("BEGIN:VEVENT");
-            ics.AppendLine($"DTSTART:{startTime:yyyyMMddTHHmmssZ}");
-            ics.AppendLine($"DTEND:{endTime:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"DTSTART:{startTimeUtc:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"DTEND:{endTimeUtc:yyyyMMddTHHmmssZ}");
             ics.AppendLine($"SUMMARY:{subject}");
             ics.AppendLine($"DESCRIPTION:{description}");
             ics.AppendLine($"UID:{Guid.NewGuid()}");
