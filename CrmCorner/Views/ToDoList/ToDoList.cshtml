@@ -204,7 +204,7 @@
         {
             <li class="list-group-item" style="cursor: pointer;" onclick="handleListItemClick('@item.Id')">
                 <div class="d-flex align-items-center">
-                    <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="openPopup('@item.Id'); disableOtherButtons(this); event.stopPropagation();">
+                    <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="event.stopPropagation();openPopup('@item.Id');">
                         <img src="/icons/todo/düzenle.jpeg" alt="Düzenle" style="max-width: 20px;">
                     </button>
                     <span style="font-size: 14px; margin-right: 10px;">
@@ -418,7 +418,7 @@
 
 
        var baseUrl = "https://crmcorner.co/";
-       //var baseUrl = "https://localhost:7145/";
+      // var baseUrl = "https://localhost:7145/";
         function handleListItemClick(id) {
             newUrl = baseUrl + "ToDoList/ToDoList/" + id;
             window.location.href = newUrl;
@@ -885,6 +885,7 @@
 
         function openPopup(itemId) {
             var id = itemId;
+            console.log("openPopup"+id);
             $.ajax({
                 type: 'GET',
                 url: '/ToDoList/GetTitle/',
@@ -899,7 +900,7 @@
                         '<input type="text" value="' + title + '" id="editInput" style="outline:none;border-bottom:1px solid #333;box-shadow:0px 0.3px 0.9px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1);border:none;font-size:x-large;border: outset;width:-webkit-fill-available">' +
                         '<div style="display: flex; justify-content: flex-end;">' +
                         '<button type="submit" class="btn btn-danger btn-sm" style="margin-left: 5px;">Listeyi Sil</button>' +
-                        '<button type="button" class="btn btn-info btn-sm" style="width:auto; margin-left: 5px;" onclick="updateTitle(this)">Düzenle</button>' +
+                        '<button type="button" class="btn btn-info btn-sm" style="width:auto; margin-left: 5px;" onclick="updateTitle(' + id + ')">Düzenle</button>' +
                         '</div>' +
                         '</form>';
                     var popupDiv = document.createElement('div');
@@ -952,7 +953,7 @@
                 type: 'POST',
                 url: "/ToDoList/UpdateTitle/",
                 encode: true,
-                data: { itemId: id, newtitle: newTitle },
+                data: { itemId: itemId, newtitle: newTitle },
                 dataType: "json",
                 success: function () {
                     window.location.reload();

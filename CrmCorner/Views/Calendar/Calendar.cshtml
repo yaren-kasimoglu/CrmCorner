@@ -228,6 +228,38 @@
                 <input type="text" class="form-control" name="Title" id="modalTitle2" required />
                 Açıklama:
                 <input type="text" class="form-control" id="modalDescription" name="Description" required />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SelectedEmails, "Mail", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="input-group">
+                            <button class="btn btn-default dropdown-toggle" style="width: 70%;" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="toggleTimeSelection()">
+                                <span id="selectedMailText">Seçili Mail</span>
+                            </button>
+                            <div class="dropdown-menu" id="selectedMailDropdown2" aria-labelledby="dropdownMenuButton">
+                                @{
+                                    foreach (var user in (IEnumerable<SelectListItem>)ViewBag.Users)
+                                    {
+                                        <div class="dropdown-item">
+                                            <input type="checkbox" name="SelectedEmails" value="@user.Value" onchange="updateSelectedEmails()" /> @user.Text
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" id="manualEmailCheckbox2" onclick="toggleManualEmail(); toggleTimeSelection();">
+                                    <label class="form-check-label" for="manualEmailCheckbox">
+                                        <span style="font-size: smaller;">Manuel Mail</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="text" name="SelectedEmails" class="form-control mt-2" id="manualEmailInput3" placeholder="Manuel Mail Adresi Girin" style="display: none;" onblur="updateSelectedEmails();">
+                        <small class="form-text text-muted" style="display: none;" id="manualEmailInput4">* Manuel mail girişi için eğer birden fazla mail adresi girecekseniz virgülle yazmanız gerekmektedir.</small>
+                        @Html.ValidationMessageFor(model => model.SelectedEmails, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
                 <h4>Saat Seçimi</h4>
                 <div class="row">
                     <div class="col-md-6">
@@ -292,22 +324,28 @@
     function toggleManualEmail() {
         var manualEmailInput = document.getElementById("manualEmailInput");
         var manualEmailInput2 = document.getElementById("manualEmailInput2");
-        if (manualEmailCheckbox.checked) {
+        var manualEmailCheckbox = document.getElementById("manualEmailCheckbox"); 
+        var manualEmailCheckbox2 = document.getElementById("manualEmailCheckbox2"); 
+
+        if (manualEmailCheckbox.checked || manualEmailCheckbox2.checked) {
             manualEmailInput.style.display = "block";
             manualEmailInput2.style.display = "block";
+            manualEmailInput3.style.display = "block";
+            manualEmailInput4.style.display = "block";    
         } else {
             manualEmailInput.style.display = "none";
             manualEmailInput2.style.display = "none";
+            manualEmailInput3.style.display = "none";
+            manualEmailInput4.style.display = "block";    
+
         }
     }
     function toggleTimeSelection() {
-        console.log("toggleTimeSelection");
         var timeSelection = document.getElementById('timeSelection');
         timeSelection.classList.remove('hidden-section');
 
     }
     function updateSelectedEmails() {
-        console.log("updateSelectedEmails");
         var selectedEmails = [];
         // Seçili e-posta adreslerini listeye ekle
         var selectedCheckboxes = document.querySelectorAll('input[name="SelectedEmails"]:checked');
@@ -413,10 +451,9 @@
         calendar.render();
     });
     function someFunction(data) {
-        console.log(data.message);
         document.getElementById("modalDescription").value = data.message.description;
         document.getElementById("modalDescription").innerHTML = data.message.description;
-        console.log("fsfsf" + data.message.startDate);
+        document.getElementById("modalDescription").innerHTML = data.message.email;
         if (data.message.startDate != null && data.message.endDate!=null) {
             const startDateTime = new Date(data.message.startDate);
             const hours = startDateTime.getHours().toString().padStart(2, '0');
@@ -433,14 +470,47 @@
             selectElemenst.value = timeStrings;
         }
         else {
-            console.log("kanka buraya girdi");
             const selectElement = document.getElementById("StartDates");
             selectElement.value = "00:00";
             const selectElemenst = document.getElementById("EndDates");
             selectElemenst.value = "00:00";
 
         }
+        var manualEmailCheckbox2 = document.getElementById("manualEmailCheckbox2");
+        var manualEmailInput = document.getElementById("manualEmailInput3");
+        var manualEmailInput2 = document.getElementById("manualEmailInput4");
+        manualEmailCheckbox2.checked = false;
+        manualEmailInput.style.display = "none";
+        manualEmailInput2.style.display = "none";
+        document.getElementById("manualEmailInput3").value = null;
+        document.getElementById("manualEmailInput3").innerHTML = null;
 
+        if (data.message.notEmail != null && data.message.notEmail != "") {
+            manualEmailCheckbox2.checked = true;
+            manualEmailInput.style.display = "block";
+            manualEmailInput2.style.display = "block";
+            document.getElementById("manualEmailInput3").value = data.message.notEmail;
+            document.getElementById("manualEmailInput3").innerHTML = data.message.notEmail;
+        }
+
+
+
+        const selectElemensta = document.getElementById("SelectedEmails2");
+        var checkboxes = document.querySelectorAll('#selectedMailDropdown2 input[type="checkbox"]');
+        var emailString = data.message.email;
+        var emailArray = emailString.split(',').map(email => email.trim());
+
+        // Seçili e-posta adresleri dizisini döngüye al
+        emailArray.forEach(function (email) {
+            checkboxes.forEach(function (checkbox) {
+                // Eğer checkbox'ın değeri seçili e-posta ile eşleşiyorsa, checkbox'ı işaretle
+                if (checkbox.value === email) {
+                    checkbox.checked = true;
+                }
+            });
+        });
+
+        
     }
 
 

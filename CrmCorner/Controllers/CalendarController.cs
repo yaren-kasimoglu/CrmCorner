@@ -168,6 +168,7 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> Edit(Calendar model)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            string[] emailArray = null;
 
             var eventToUpdate = await _context.Set<Calendar>().FindAsync(model.Id);
                 if (eventToUpdate != null)
@@ -199,8 +200,30 @@ namespace CrmCorner.Controllers
                 );
                 eventToUpdate.StartDate = model.StartDate;
                 eventToUpdate.EndDate= model.EndDate;
+            
+                if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
+                {
+                    var filteredEmails = model.SelectedEmails
+                                    .Where(email => !string.IsNullOrWhiteSpace(email) && email!= "bos")
+                                  .ToList();
+                    model.SelectedEmails = filteredEmails;
+                    foreach (string email in filteredEmails)
+                    {
+                        var currentUsers = await _userManager.FindByEmailAsync(email);
+                        if (currentUsers != null)
+                        {
+                            model.UserId = currentUsers.Id;
+                            model.Id = 0;
+                            _context.Calendars.Add(model);
+                            _context.SaveChanges();
+                        }
+                    }
+                    var emailSend = sendEmailAsync2(currentUser.Email, model);
+                    model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
+                    eventToUpdate.Email = model.Email;
+                }
                 await _context.SaveChangesAsync();
-                    return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+                return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
                 }
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
 
@@ -247,25 +270,49 @@ namespace CrmCorner.Controllers
 
         }
         [HttpPost]
-        public IActionResult GetDescription(int? ID)
+        public async Task<IActionResult> GetDescription(int? ID)
         {
             Calendar calendar = _context.Calendars.Find(ID);
-
+            List<string> findUserCompany = new List<string>();
+            List<string> notfindUserCompany = new List<string>();
 
             if (calendar == null)
             {
                 return Json(new { Message = "error" });
             }
-            
-                var calendarDto = new Calendar
+            if (calendar.Email != null)
+            {
+                var emailArray = calendar.Email.Split(',');
+                foreach (var item in emailArray)
                 {
-                    Id = calendar.Id,
-                    Description = calendar.Description,
-                    StartDate=calendar.StartDate,
-                    EndDate=calendar.EndDate,
-                    Email=calendar.Email
-                    // Diğer gerekli alanlar
-                };
+                    if (item != "bos")
+                    {
+                        var name = await _userManager.FindByEmailAsync(item);
+                        if (name != null)
+                        {
+                            findUserCompany.Add(item);
+                        }
+                        else
+                        {
+                            notfindUserCompany.Add(item);
+                        }
+                    }
+                }
+            }
+           
+            string resultString = string.Join(",", findUserCompany);
+            string resultStringNot= string.Join(",", notfindUserCompany);
+
+            var calendarDto = new Calendar
+            {
+                Id = calendar.Id,
+                Description = calendar.Description,
+                StartDate = calendar.StartDate,
+                EndDate = calendar.EndDate,
+                Email = resultString,
+                NotEmail = resultStringNot
+                // Diğer gerekli alanlar
+            };
                 return Json(new { Message = calendarDto });
 
         }

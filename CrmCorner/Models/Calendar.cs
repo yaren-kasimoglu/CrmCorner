@@ -30,7 +30,8 @@ public class Calendar
     public EmailProperty EmailProperty { get; set; }
     [NotMapped]
     public List<string> SelectedEmails { get; set; } = new List<string>();
-
+    [NotMapped]
+    public string? NotEmail { get; set; }
 
 
 }
