@@ -16,7 +16,7 @@
                                 <th>İlk ödeme yapıldı mı?</th>
                                 <th>Bir problem var mı, varsa nedir?</th>
                                 <th>Devam etmeyi düşünüyorlar mı?</th>
-                                <th>Trustpilot yorumu yapıldı mı?</th>
+                                <th>Trustpilot yorumu yapıldı mı? - Referanslar dahil edildi mi?</th>
                                 <th>Logolarını kullanabilir miyiz?</th>
                                 <th>İşlemler</th>
                             </tr>
@@ -89,7 +89,11 @@
                                                 <i class="fa fa-edit"></i>
                                             </button>
                                         </a>
-
+                                        <a href="/Task/TaskDetail/@sale.TaskCompId" target="_self">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fa fa-send"></i>
+                                            </button>
+                                        </a>
                                         <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#detailModal" onclick='showDetails(@Html.Raw(jsonSale))'>
                                             Detay
                                         </button>
@@ -134,7 +138,7 @@
             <div class="modal-body">
                 <!-- Problem açıklaması dinamik olarak buraya yüklenecek -->
             </div>
-        
+
         </div>
     </div>
 </div>
@@ -149,7 +153,7 @@
             <div class="modal-body">
                 <!-- Trustpilot yorumu dinamik olarak buraya yüklenecek -->
             </div>
-     
+
         </div>
     </div>
 </div>
@@ -168,28 +172,32 @@
 <script>
     function showDetails(sale) {
         var modalBody = document.querySelector('#detailModal .modal-body');
-        modalBody.innerHTML = `
-                        <p>İlk ödeme yapıldı mı? ${sale.isFirstPaymentMade ? 'Evet' : 'Hayır'}</p>
-                        <p>Bir problem var mı? ${sale.isThereAProblem ? 'Evet' : 'Hayır'}</p>
-                        ${sale.isThereAProblem && sale.problemDescription ?
-                '<div class="alert alert-warning" role="alert" title="' + sale.problemDescription.substring(0, 255) + '"><strong>Problem Açıklaması:</strong> ' + sale.problemDescription + '</div>' : ''}
-                        <p>Devam etmeyi düşünüyorlar mı? ${sale.isContinuationConsidered ? 'Evet' : 'Hayır'}</p>
-                        <p>Trustpilot yorumu yapıldı mı? ${sale.isTrustpilotReviewed ? 'Evet' : 'Hayır'}</p>
-                        ${sale.isTrustpilotReviewed && sale.trustPilotComment ?
-                '<div class="alert alert-info" role="alert"><strong>Trustpilot Yorumu:</strong> ' + sale.trustPilotComment + '</div>' : ''}
-                        <p>Logolarını kullanabilir miyiz? ${sale.canUseLogo ? 'Evet' : 'Hayır'}</p>
-                    `;
+        modalBody.innerHTML =
+            <p>İlk ödeme yapıldı mı ? ${ sale.isFirstPaymentMade ? 'Evet' : 'Hayır' } </p>
+                < p > Bir problem var mı?${ sale.isThereAProblem ?'Evet': 'Hayır'}</p>
+                            ${
+            sale.isThereAProblem && sale.problemDescription ?
+            '<div class="alert alert-warning" role="alert" title="' + sale.problemDescription.substring(0, 255) + '"><strong>Problem Açıklaması:</strong> ' + sale.problemDescription + '</div>' : ''
+        }
+        <p>Devam etmeyi düşünüyorlar mı ? ${ sale.isContinuationConsidered ? 'Evet' : 'Hayır' } </p>
+            < p > Trustpilot yorumu yapıldı mı ? ${ sale.isTrustpilotReviewed ? 'Evet' : 'Hayır' } </p>
+                            ${
+            sale.isTrustpilotReviewed && sale.trustPilotComment ?
+            '<div class="alert alert-info" role="alert"><strong>Trustpilot Yorumu:</strong> ' + sale.trustPilotComment + '</div>' : ''
+        }
+        <p>Logolarını kullanabilir miyiz ? ${ sale.canUseLogo ? 'Evet' : 'Hayır' } </p>
+            ;
     }
 
     function showProblemDescription(tooltip, fullDescription) {
         var modalBody = document.querySelector('#problemDescriptionModal .modal-body');
-        modalBody.innerHTML = `<p>${fullDescription}</p>`;
+        modalBody.innerHTML = <p>${ fullDescription } </p>;
         $('#problemDescriptionModal').modal('show');
     }
 
     function showTrustpilotComment(tooltip, fullComment) {
         var modalBody = document.querySelector('#trustpilotCommentModal .modal-body');
-        modalBody.innerHTML = `<p>${fullComment}</p>`;
+        modalBody.innerHTML = <p>${ fullComment } </p>;
         $('#trustpilotCommentModal').modal('show');
     }
 </script>

@@ -75,12 +75,11 @@
 @* <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>*@
 
 
+
 <div class="row">
-
-
     @if (Model.CurrentUser != null)
     {
-        <div class="col-xl-4 col-lg-6 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6 d-flex align-items-start">
             <div class="card top_counter">
                 <div class="list-group list-group-custom list-group-flush">
                     <div class="list-group-item d-flex align-items-center py-3">
@@ -116,19 +115,55 @@
         </div>
     }
 
+    <div class="col-xl-8 col-lg-6 col-md-6 d-flex align-items-start">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title">Yapılacaklar</h6>
+                <small>Yaklaşan Yapılacaklar Listesi</small>
+            </div>
+            <div class="card-body todo_list">
+                @if (ViewBag.ToDoList != null)
+                {
+                    var todoList = ViewBag.ToDoList as List<Tuple<string, string>>;
 
-    <div class="col-xl-8 col-lg-12 col-md-6">
-        <div class="col-12">
-            <div class="custom-card" style="width: 55%;">
-                <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
-                <div class="card-body">
-                    <canvas id="userTaskStatusChart"></canvas>
-                </div>
+                    @for (int i = 0; i < Math.Min(5, todoList.Count); i++)
+                    {
+                        var task = todoList[i].Item1;
+                        var url = todoList[i].Item2;
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="form-check">
+                                <a href="@url" class="form-check-label" style="color: black;" id="@task"><i class="fa fa-calendar me-2"></i>@task</a>
+                            </div>
+                        </div>
+                    }
+                }
             </div>
         </div>
     </div>
-
 </div>
+
+
+
+
+<div class="row">
+    <div class="col-xl-4 col-lg-4 col-md-12">
+        <div class="custom-card" style="width: 100%;">
+            <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
+            <div class="card-body">
+                <canvas id="userTaskStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-8 col-lg-8 col-md-12">
+        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
+            <canvas id="valueOfferChart"></canvas>
+        </div>
+    </div>
+</div>
+
+
+
 <div class="container">
     <div class="row no-gutters">
         <div class="col-xl-4 col-lg-4 col-md-12">
@@ -157,66 +192,11 @@
         </div>
     </div>
 </div>
-<!--<div class="custom-card">
-    <div class="row g-2 clearfix row-deck">-->
-<!-- Flex container for charts -->
-<!--<div class="chart-container d-flex justify-content-between">
-            <div class="chart-item">
-                <h6>Görevlerin Durumlarına Göre Dağılımları</h6>
-                <div style="width: 100%;">
-                    <canvas id="outcomeStatusChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-item">
-                <h6>Son Karar Mercii İle Görüşme Durumları</h6>
-                <div style="width: 100%;">
-                    <canvas id="isFinalDecisionMaker"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>-->
-
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="card-title">Yapılacaklar</h6>
-                <small>Yaklaşan Yapılacaklar Listesi</small>
-            </div>
-            <div class="card-body todo_list">
-                @if (ViewBag.ToDoList != null)
-                {
-                    var todoList = ViewBag.ToDoList as List<Tuple<string, string>>;
-
-                    @for (int i = 0; i < Math.Min(5, todoList.Count); i++)
-                    {
-                        var task = todoList[i].Item1;
-                        var url = todoList[i].Item2;
-
-                        <div class="d-flex justify-content-between mb-3">
-                            <div class="form-check">
-                                <a href="@url" class="form-check-label" style=" color: black;" id="@task"><i class="fa fa-calendar me-2"></i>@task</a>
-                            </div>
-                        </div>
-                    }
-                }
-            </div>
-        </div>
-    </div>
-
-</div>
-
-
-<div class="chart-container" style="position: relative; height:40vh; width:80vw">
-    <canvas id="valueOfferChart"></canvas>
-</div>
 
 
 
 
-@*}*@
+
 <!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 
@@ -226,7 +206,8 @@
 <script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script type="text/javascript">$(document).ready(function () {
+<script type="text/javascript">
+    $(document).ready(function () {
         $.ajax({
             type: "GET",
             url: "/Home/UserTaskStatusChart",

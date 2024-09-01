@@ -200,6 +200,9 @@ namespace CrmCorner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -421,6 +424,30 @@ namespace CrmCorner.Migrations
                     b.ToTable("Statuses");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.TableHeader", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ColumnKey")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ColumnName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("TableHeaders");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.Property<int>("TaskId")
@@ -429,6 +456,9 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("AssignedUserId")
                         .HasColumnType("varchar(255)");
+
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
@@ -459,6 +489,9 @@ namespace CrmCorner.Migrations
 
                     b.Property<DateTime?>("SalesDone")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("SelectedCurrency")
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("StatusId")
                         .HasColumnType("int");
@@ -519,6 +552,29 @@ namespace CrmCorner.Migrations
                     b.ToTable("TaskCompLogs");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.TaskCompNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TaskCompId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskCompId");
+
+                    b.ToTable("TaskCompNotes");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.ToDo", b =>
                 {
                     b.Property<int>("Id")
@@ -527,6 +583,9 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("AppUserId")
                         .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("DoneList")
                         .HasColumnType("longtext");
@@ -542,6 +601,9 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("Title")
                         .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("UpdateSystemDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
@@ -559,6 +621,9 @@ namespace CrmCorner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DoneList")
                         .HasColumnType("longtext");
 
@@ -573,6 +638,9 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("Title")
                         .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("UpdateSystemDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
@@ -747,6 +815,16 @@ namespace CrmCorner.Migrations
                     b.Navigation("TaskComp");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.TableHeader", b =>
+                {
+                    b.HasOne("CrmCorner.Models.Company", "Company")
+                        .WithMany("TableHeaders")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AssignedUser")
@@ -789,6 +867,17 @@ namespace CrmCorner.Migrations
                     b.Navigation("UpdatedBy");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.TaskCompNote", b =>
+                {
+                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
+                        .WithMany("Notes")
+                        .HasForeignKey("TaskCompId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaskComp");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.ToDo", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -818,6 +907,11 @@ namespace CrmCorner.Migrations
                     b.Navigation("UserRoles");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.Company", b =>
+                {
+                    b.Navigation("TableHeaders");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.Navigation("Taskcomps");
@@ -831,6 +925,8 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.TaskComp", b =>
                 {
                     b.Navigation("FileAttachments");
+
+                    b.Navigation("Notes");
 
                     b.Navigation("Notification");
 

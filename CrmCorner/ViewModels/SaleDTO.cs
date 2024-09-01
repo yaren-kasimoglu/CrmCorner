@@ -3,6 +3,7 @@
     public class SaleDTO
     {
         public int Id { get; set; }
+        public int TaskCompId { get; set; } // Eğer yeni alan eklerseniz
         public string TaskCompTitle { get; set; }
         public bool IsFirstPaymentMade { get; set; }
         public bool IsThereAProblem { get; set; }

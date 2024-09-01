@@ -51,9 +51,10 @@ namespace CrmCorner.Controllers
             }
         }
 
-        public async Task Logout()
+        public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
 
         public async Task<IActionResult> PasswordChange()

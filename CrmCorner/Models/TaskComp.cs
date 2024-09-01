@@ -47,11 +47,16 @@ public partial class TaskComp
 
     public OutcomeTypeSales? OutcomeStatus { get; set; }=OutcomeTypeSales.None;
 
+    public int? CompanyId { get; set; }
+
     // Dosya ekleri için koleksiyon
     public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
     public virtual ICollection<TaskCompLog>? TaskCompLogs { get; set; }
     public virtual Notification? Notification { get; set; }
-  
+
+    public virtual ICollection<TaskCompNote> Notes { get; set; } = new List<TaskCompNote>();
+
+
     public string? SelectedCurrency { get; set; } 
 
 

@@ -140,7 +140,7 @@
                                 <br />
                                 <span>E-Posta: @Model.Customer.CompanyEmail</span>
                                 <br />
-                                <span>Sektör: @EnumExtensions.GetDisplayName(Model.Customer.Industry)</span>                  
+                                <span>Sektör: @EnumExtensions.GetDisplayName(Model.Customer.Industry)</span>
                                 <br />
                                 <span class="message">Çalışan Sayısı: @EnumExtensions.GetDisplayName(Model.Customer.EmployeeCount)</span>
                             </div>
@@ -185,6 +185,45 @@
                     </ul>
                 </div>
             </div>
+            <div class="card mb-2">
+                <div class="card-header">
+                    <h6 class="card-title">Not Ekle</h6>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddNote", "Task", FormMethod.Post))
+                    {
+                        <div class="form-group">
+                            <textarea name="note" class="form-control" rows="3" placeholder="Yeni not girin..."></textarea>
+                            <input type="hidden" name="taskId" value="@Model.TaskId" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <input type="submit" value="Not Ekle" class="btn btn-primary" />
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="card mb-2">
+                <div class="card-header">
+                    <h6 class="card-title">Eklenen Notlar</h6>
+                </div>
+                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                    @if (Model.Notes != null && Model.Notes.Any())
+                    {
+                        foreach (var note in Model.Notes.OrderByDescending(n => n.CreatedAt))
+                        {
+                            <small class="text-muted">(@note.CreatedAt.ToString("dd.MM.yyyy HH:mm"))</small>
+                            <p>@note.Note</p>
+                        }
+                    }
+                    else
+                    {
+                        <p>Henüz bir not eklenmedi.</p>
+                    }
+                </div>
+            </div>
+
+
+
             <div class="card mb-2">
                 <div class="card-header">
                     <h6 class="card-title">Dosyalar & Belgeler & Sözleşmeler</h6>

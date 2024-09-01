@@ -232,7 +232,7 @@
                 <option value="3">Görüşme Gerçekleşti</option>
                 <option value="4">Teklif Gönderildi</option>
                 <option value="5">Sözleşme Aşamasında</option>
-                <option value="6">Satış Tamamlandı</option>
+             @*   <option value="6">Satış Tamamlandı</option>*@
             </select>
         </div>
 
@@ -622,8 +622,8 @@
                 return 4;
             case "Sözleşme Aşamasında":
                 return 5;
-            case "Satış Tamamlandı":
-                return 6;
+            //case "Satış Tamamlandı":
+            //    return 6;
             default:
                 return 7;
         }
@@ -644,7 +644,7 @@
 
 
 
-    var statusOrder = [1, 2, 3, 4, 5, 6]; // Durumların sıralı ID'leri
+    var statusOrder = [1, 2, 3, 4, 5]; // Durumların sıralı ID'leri
 
     function canChangeStatus(currentStatusId, newStatusId) {
         var currentIndex = statusOrder.indexOf(currentStatusId);
@@ -657,7 +657,7 @@
     // Kartları bırakılabilir yapın, böylece boş kartlar da görevleri kabul edebilir
     // Kartları ve listeleri bırakılabilir yapın
 
-    var statusOrder = [1, 2, 3, 4, 5, 6]; // Örnek olarak belirlediğim durum ID'leri
+    var statusOrder = [1, 2, 3, 4, 5]; // Örnek olarak belirlediğim durum ID'leri
 
     function canChangeStatus(currentStatusId, newStatusId) {
         var currentIndex = statusOrder.indexOf(currentStatusId);

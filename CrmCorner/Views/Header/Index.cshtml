@@ -1,0 +1,38 @@
+﻿@model IEnumerable<CrmCorner.Models.TableHeader>
+
+@{
+    ViewData["Title"] = "Header Yönetimi";
+}
+
+<h2>Header Yönetimi</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.Message
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Column Key</th>
+                <th>Column Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var header in Model)
+            {
+                <tr>
+                    <td>@header.ColumnKey</td>
+                    <td>@header.ColumnName</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@header.Id" class="btn btn-primary">Düzenle</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
