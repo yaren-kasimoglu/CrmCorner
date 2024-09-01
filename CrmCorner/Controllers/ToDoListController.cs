@@ -541,7 +541,7 @@ namespace CrmCorner.Controllers
         
 
         [HttpPost]
-        public async Task<IActionResult> UpdateToDoText(int id, string notselectedtext,string selectedtext)
+        public async Task<IActionResult> UpdateToDoText(int taskId, string notselectedtext,string selectedtext)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var today = DateTime.Today;
@@ -549,6 +549,7 @@ namespace CrmCorner.Controllers
             string[] splittedunselected = null;
             string[] resultselected = null;
             string[] resultunselected = null;
+            var id = taskId;
             if (notselectedtext != null || selectedtext!=null)
             {
                     if (id > 0)
