@@ -484,26 +484,35 @@
                 var notselectedTaskTexts = [];
 
 
-            taskLabels.forEach(function (label) {
-                var checkbox = label.querySelector('.taskCheckbox');
-                console.log("checkbox deger:" + checkbox);
-                var textInput = label.querySelector('input[type="text"]');
-                console.log("textınput deger:" + textInput);
-                if (textInput.value != null && checkbox!=null) {
-                    if (checkbox.checked) {
-                        selectedTaskTexts.push(textInput.value.trim());
+                taskLabels.forEach(function (label) {
+                    var inputElement = label.querySelector('.textContent');
+
+                    // Güvenli bir şekilde input elementinin değerini al
+                    var taskText = inputElement ? inputElement.value.trim() : '';
+
+                    if (taskText !== '') {
+                        var checkbox = label.querySelector('.taskCheckbox');
+                        console.log("checkbox deger:" + checkbox.checked);
+                        var textInput = label.querySelector('input[type="text"]');
+                        console.log("textınput deger:" + textInput);
+                        if (textInput.value != null && checkbox != null) {
+                            if (checkbox.checked) {
+                                selectedTaskTexts.push(textInput.value.trim());
+                            }
+                            else {
+                                notselectedTaskTexts.push(textInput.value.trim());
+                            }
+                        }
                     }
-                    else {
-                        notselectedTaskTexts.push(textInput.value.trim());
-                    }
-                }
-            });
+                });
                 var selectedTaskTextsString1 = selectedTaskTexts.join(",");
                 var notselectedTaskTextsString1 = notselectedTaskTexts.join(",");
                 var selectedTaskTextsString = selectedTaskTextsString1.replace(/^,|,$/g, '');
                 var notselectedTaskTextsString = notselectedTaskTextsString1.replace(/^,|,$/g, '');
-                var selectedDate = document.getElementsByName("selectedDate")[0].value;
 
+                console.log(selectedTaskTextsString);
+                console.log(notselectedTaskTexts);
+                console.log(notselectedTaskTextsString);
                 var textContentInput = document.createElement("input");
                 textContentInput.setAttribute("type", "hidden");
                 textContentInput.setAttribute("name", "selectedtext");
@@ -515,13 +524,6 @@
                 textContentInput2.setAttribute("name", "notselectedtext");
                 textContentInput2.setAttribute("value", notselectedTaskTexts);
                 form.appendChild(textContentInput2);
-
-                var textContentInput3= document.createElement("input");
-                textContentInput2.setAttribute("type", "hidden");
-                textContentInput2.setAttribute("name", "datetime");
-                textContentInput2.setAttribute("value", selectedDate);
-                form.appendChild(textContentInput3);
-
 
                 var taskIdInput = document.createElement("input");
                 taskIdInput.setAttribute("type", "hidden");
