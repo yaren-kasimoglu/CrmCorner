@@ -10,10 +10,11 @@
                 <span>Hoşgeldin,</span>
                 <a href="#" class="dropdown-toggle user-name" data-bs-toggle="dropdown"><strong>@User.Identity.Name</strong></a>
                 <ul class="dropdown-menu p-2 shadow-sm">
-                    <li><a asp-action="MyProfile" asp-controller="Member"><i class="fa fa-user me-2"></i> Profilim</a></li>
-                    <li><a asp-action="UserEdit" asp-controller="Member"><i class="fa fa-bars"></i>  Profil Güncelle</a></li>
-                    <li><a asp-action="PasswordChange" asp-controller="Member"><i class="fa fa-lock"></i>  Şifre Değiştir</a></li>
-                    <li><a asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout"><i class="fa fa-power-off me-2"></i>Çıkış Yap</a></li>
+                    <li><a asp-action="MyProfile" asp-controller="Member" asp-area=""><i class="fa fa-user me-2"></i> Profilim</a></li>
+                    <li><a asp-action="UserEdit" asp-controller="Member" asp-area=""><i class="fa fa-bars"></i>  Profil Güncelle</a></li>
+                    <li><a asp-action="PasswordChange" asp-controller="Member" asp-area=""><i class="fa fa-lock"></i>  Şifre Değiştir</a></li>
+@*                    <li><a asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout" asp-area=""><i class="fa fa-power-off me-2"></i>Çıkış Yap</a></li>*@
+                    <li><a class="icon-menu" asp-controller="Member" asp-action="Logout" asp-area=""><i class="fa fa-power-off me-2"></i>Çıkış Yap</a></li>
                 </ul>
             </div>
 

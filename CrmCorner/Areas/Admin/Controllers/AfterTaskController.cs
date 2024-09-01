@@ -15,42 +15,48 @@ namespace CrmCorner.Areas.Admin.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
-        public AfterTaskController(UserManager<AppUser> userManager, CrmCornerContext context) :base(userManager)
+        public AfterTaskController(UserManager<AppUser> userManager, CrmCornerContext context) : base(userManager)
         {
             _userManager = userManager;
             _context = context;
         }
-
         public async Task<IActionResult> ListPositiveSalesAdmin()
         {
             await SetLayout();
             try
             {
-                var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
-
+                var user = await _userManager.GetUserAsync(User); // Aktif kullanıcıyı al
                 var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
+                var companyId = user.CompanyId; // Aktif kullanıcının şirket ID'si
 
                 ViewBag.PictureUrl = "/userprofilepicture/" + (user.Picture ?? "defaultpp.png");
 
-                var roles = await _userManager.GetRolesAsync(user);
+                // Başlıkları veritabanından kullanıcıya özel olarak yükle
+                var headers = await _context.TableHeaders
+                                            .Where(th => th.CompanyId == companyId)
+                                            .ToDictionaryAsync(th => th.ColumnKey, th => th.ColumnName);
 
-                var positiveSalesQuery = _context.PostSaleInfos
+                ViewBag.Headers = headers; // ViewBag'e başlıkları ekle
+
+                // Belirtilen şirketin tüm tasklarını listele
+                var companyTasksQuery = _context.PostSaleInfos
                                                  .Include(psi => psi.TaskComp)
-                                                 .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
+                                                     .ThenInclude(tc => tc.AppUser)
+                                                 .Include(psi => psi.TaskComp.Status)
+                                                 .Include(psi => psi.TaskComp.AssignedUser)
+                                                 .Include(psi => psi.TaskComp.Customer)
+                                                 .Where(psi => psi.TaskComp.AppUser.EmailDomain == userEmailDomain)
                                                  .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won)
-                                                 .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)); // E-posta domainine göre filtrele
+                                                 .Where(psi => psi.TaskComp.StatusId == 5);
 
 
-          
-                if (!roles.Contains("Admin"))
-                {
-                    positiveSalesQuery = positiveSalesQuery.Where(psi => psi.TaskComp.UserId == user.Id || psi.TaskComp.AssignedUserId == user.Id);
-                }
 
-                var positiveSales = await positiveSalesQuery
+                // DTO'ya projeksiyon yap
+                var companyTasks = await companyTasksQuery
                                             .Select(psi => new SaleDTO
                                             {
                                                 Id = psi.Id,
+                                                TaskCompId = psi.TaskComp.TaskId,
                                                 TaskCompTitle = psi.TaskComp.Title,
                                                 IsFirstPaymentMade = psi.IsFirstPaymentMade,
                                                 IsThereAProblem = psi.IsThereAProblem,
@@ -62,13 +68,14 @@ namespace CrmCorner.Areas.Admin.Controllers
                                             })
                                             .ToListAsync();
 
-                return View(positiveSales);
+                return View(companyTasks);
             }
             catch (Exception ex)
             {
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
 
 
 
@@ -106,8 +113,6 @@ namespace CrmCorner.Areas.Admin.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
-
-
 
 
         [HttpPost]
