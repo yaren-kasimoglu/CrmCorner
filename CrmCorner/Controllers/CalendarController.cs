@@ -153,8 +153,8 @@ namespace CrmCorner.Controllers
                             );
 
                             _context.Calendars.Add(newCalendar);
-                            _context.SaveChanges();
-
+                            _context.SaveChanges();//
+                             
                             validEmails.Add(email);
                         }
                     }
