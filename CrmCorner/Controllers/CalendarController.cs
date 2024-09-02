@@ -113,7 +113,7 @@ namespace CrmCorner.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
-                
+
                 string[] emailArray = null;
                 var dateFormat = "yyyy-MM-dd";
                 List<string> validEmails = new List<string>();
@@ -133,11 +133,13 @@ namespace CrmCorner.Controllers
                             {
                                 UserId = currentUsers.Id,
                                 Title = Calendar.Title,
-                                Description = Calendar.Description,
+
                                 Date = Calendar.Date,
                                 EmailProperty = Calendar.EmailProperty,
                                 Email = email,
                             };
+
+
 
 
                             DateTime datePart = DateTime.ParseExact(Calendar.Date, dateFormat, null);
@@ -154,6 +156,23 @@ namespace CrmCorner.Controllers
                             );
 
                             _context.Calendars.Add(newCalendar);
+
+                            _context.SaveChanges();
+
+                            validEmails.Add(email); // Geçerli e-posta adreslerini topla
+                        }
+                    }
+
+                    // Tüm geçerli e-posta adreslerine toplu e-posta gönderimi
+                    if (validEmails.Count > 0)
+                    {
+                        foreach (var email in validEmails)
+                        {
+                            await sendEmailAsync2(email, Calendar);
+                        }
+                    }
+                }
+
                             _context.SaveChanges();//
                         
                             validEmails.Add(email);
@@ -202,12 +221,14 @@ namespace CrmCorner.Controllers
                     emailPropertyDateTimeEnds.Hour, emailPropertyDateTimeEnds.Minute, emailPropertyDateTimeEnds.Second
                 );
 
+
                 AddCompany(newCalendars);
                 return RedirectToAction("Calendar");
             }
 
             return Json(new { Message = true });
         }
+
 
         [HttpPost]
         public bool AddCompany(Calendar model)
