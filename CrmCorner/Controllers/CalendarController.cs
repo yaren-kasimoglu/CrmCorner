@@ -28,6 +28,7 @@ using Humanizer;
 using Microsoft.Office.Interop.Outlook;
 using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.VisualBasic;
+using static Google.Protobuf.Reflection.UninterpretedOption.Types;
 
 namespace CrmCorner.Controllers
 {
@@ -112,12 +113,6 @@ namespace CrmCorner.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
-                // Title alanının boş olup olmadığını kontrol et
-                if (string.IsNullOrWhiteSpace(Calendar.Title))
-                {
-                    ModelState.AddModelError("Title", "Title alanı boş olamaz.");
-                    return View(Calendar); // Formu hatalarla birlikte geri döndür
-                }
 
                 string[] emailArray = null;
                 var dateFormat = "yyyy-MM-dd";
@@ -133,18 +128,20 @@ namespace CrmCorner.Controllers
                         var currentUsers = await _userManager.FindByEmailAsync(email);
                         if (currentUsers != null)
                         {
-                            // Her döngüde yeni bir Calendar nesnesi oluşturun ve kullanıcıya göre ayarlayın
+
                             Calendar newCalendar = new Calendar
                             {
                                 UserId = currentUsers.Id,
                                 Title = Calendar.Title,
-                                Description = Calendar.Description ?? "Varsayılan Açıklama",
+
                                 Date = Calendar.Date,
                                 EmailProperty = Calendar.EmailProperty,
                                 Email = email,
                             };
 
-                            // Tarihleri ayarlayın
+
+
+
                             DateTime datePart = DateTime.ParseExact(Calendar.Date, dateFormat, null);
                             DateTime emailPropertyDateTime = Calendar.EmailProperty.StartDate;
                             DateTime emailPropertyDateTimeEnd = Calendar.EmailProperty.EndDate;
@@ -159,6 +156,7 @@ namespace CrmCorner.Controllers
                             );
 
                             _context.Calendars.Add(newCalendar);
+
                             _context.SaveChanges();
 
                             validEmails.Add(email); // Geçerli e-posta adreslerini topla
@@ -175,6 +173,56 @@ namespace CrmCorner.Controllers
                     }
                 }
 
+                            _context.SaveChanges();//
+                        
+                            validEmails.Add(email);
+                        }
+                        else
+                        {
+                            validEmails.Add(email);
+                        }
+                    }
+
+                    // Tüm geçerli e-posta adreslerine toplu e-posta gönderimi
+                    if (validEmails.Count > 0)
+                    {
+                        foreach (var email in validEmails)
+                        {
+                            await sendEmailAsync2(email, Calendar);
+                        }
+                    }
+                }
+                string mail = null;
+                if (validEmails.Count > 0){
+                    mail = string.Join(",", validEmails);
+
+                }
+                Calendar newCalendars = new Calendar
+                {
+                    UserId = currentUser.Id,
+                    Title = Calendar.Title,
+                    Description = Calendar.Description,
+                    Date = Calendar.Date,
+                    EmailProperty = Calendar.EmailProperty,
+                    Email = mail!=null?mail:"bos",
+                };
+
+
+                DateTime dateParts = DateTime.ParseExact(Calendar.Date, dateFormat, null);
+                DateTime emailPropertyDateTimes = Calendar.EmailProperty.StartDate;
+                DateTime emailPropertyDateTimeEnds = Calendar.EmailProperty.EndDate;
+
+                newCalendars.StartDate = new DateTime(
+                    dateParts.Year, dateParts.Month, dateParts.Day,
+                    emailPropertyDateTimes.Hour, emailPropertyDateTimes.Minute, emailPropertyDateTimes.Second
+                );
+                newCalendars.EndDate = new DateTime(
+                    dateParts.Year, dateParts.Month, dateParts.Day,
+                    emailPropertyDateTimeEnds.Hour, emailPropertyDateTimeEnds.Minute, emailPropertyDateTimeEnds.Second
+                );
+
+
+                AddCompany(newCalendars);
                 return RedirectToAction("Calendar");
             }
 
@@ -183,9 +231,18 @@ namespace CrmCorner.Controllers
 
 
         [HttpPost]
+        public bool AddCompany(Calendar model)
+        {
+            
+            _context.Calendars.Add(model);
+            _context.SaveChanges();
+            return true;
+        }
+        [HttpPost]
         public async Task<IActionResult> Edit(Calendar model)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            string[] emailArray = null;
 
             var eventToUpdate = await _context.Set<Calendar>().FindAsync(model.Id);
                 if (eventToUpdate != null)
@@ -217,8 +274,30 @@ namespace CrmCorner.Controllers
                 );
                 eventToUpdate.StartDate = model.StartDate;
                 eventToUpdate.EndDate= model.EndDate;
+            
+                if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
+                {
+                    var filteredEmails = model.SelectedEmails
+                                    .Where(email => !string.IsNullOrWhiteSpace(email) && email!= "bos")
+                                  .ToList();
+                    model.SelectedEmails = filteredEmails;
+                    foreach (string email in filteredEmails)
+                    {
+                        var currentUsers = await _userManager.FindByEmailAsync(email);
+                        if (currentUsers != null)
+                        {
+                            model.UserId = currentUsers.Id;
+                            model.Id = 0;
+                            _context.Calendars.Add(model);
+                            _context.SaveChanges();
+                        }
+                    }
+                    var emailSend = sendEmailAsync2(currentUser.Email, model);
+                    model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
+                    eventToUpdate.Email = model.Email;
+                }
                 await _context.SaveChangesAsync();
-                    return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+                return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
                 }
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
 
@@ -265,25 +344,49 @@ namespace CrmCorner.Controllers
 
         }
         [HttpPost]
-        public IActionResult GetDescription(int? ID)
+        public async Task<IActionResult> GetDescription(int? ID)
         {
             Calendar calendar = _context.Calendars.Find(ID);
-
+            List<string> findUserCompany = new List<string>();
+            List<string> notfindUserCompany = new List<string>();
 
             if (calendar == null)
             {
                 return Json(new { Message = "error" });
             }
-            
-                var calendarDto = new Calendar
+            if (calendar.Email != null)
+            {
+                var emailArray = calendar.Email.Split(',');
+                foreach (var item in emailArray)
                 {
-                    Id = calendar.Id,
-                    Description = calendar.Description,
-                    StartDate=calendar.StartDate,
-                    EndDate=calendar.EndDate,
-                    Email=calendar.Email
-                    // Diğer gerekli alanlar
-                };
+                    if (item != "bos")
+                    {
+                        var name = await _userManager.FindByEmailAsync(item);
+                        if (name != null)
+                        {
+                            findUserCompany.Add(item);
+                        }
+                        else
+                        {
+                            notfindUserCompany.Add(item);
+                        }
+                    }
+                }
+            }
+           
+            string resultString = string.Join(",", findUserCompany);
+            string resultStringNot= string.Join(",", notfindUserCompany);
+
+            var calendarDto = new Calendar
+            {
+                Id = calendar.Id,
+                Description = calendar.Description,
+                StartDate = calendar.StartDate,
+                EndDate = calendar.EndDate,
+                Email = resultString,
+                NotEmail = resultStringNot
+                // Diğer gerekli alanlar
+            };
                 return Json(new { Message = calendarDto });
 
         }
@@ -386,6 +489,9 @@ namespace CrmCorner.Controllers
         }
         static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails)
         {
+            TimeSpan gmtPlus3 = TimeSpan.FromHours(3);
+            DateTime startTimeUtc = startTime - gmtPlus3;
+            DateTime endTimeUtc = endTime - gmtPlus3;
             string[] emailsArray = toEmails.Split(',');
 
             StringBuilder ics = new StringBuilder();
@@ -394,8 +500,8 @@ namespace CrmCorner.Controllers
             ics.AppendLine("PRODID:-//Your Company//Your Product//EN");
             ics.AppendLine("METHOD:REQUEST");
             ics.AppendLine("BEGIN:VEVENT");
-            ics.AppendLine($"DTSTART:{startTime:yyyyMMddTHHmmssZ}");
-            ics.AppendLine($"DTEND:{endTime:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"DTSTART:{startTimeUtc:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"DTEND:{endTimeUtc:yyyyMMddTHHmmssZ}");
             ics.AppendLine($"SUMMARY:{subject}");
             ics.AppendLine($"DESCRIPTION:{description}");
             ics.AppendLine($"UID:{Guid.NewGuid()}");
