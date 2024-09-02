@@ -112,57 +112,75 @@ namespace CrmCorner.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
+                // Title alanının boş olup olmadığını kontrol et
+                if (string.IsNullOrWhiteSpace(Calendar.Title))
+                {
+                    ModelState.AddModelError("Title", "Title alanı boş olamaz.");
+                    return View(Calendar); // Formu hatalarla birlikte geri döndür
+                }
+
                 string[] emailArray = null;
                 var dateFormat = "yyyy-MM-dd";
-                if (Calendar.SelectedEmails!=null &&Calendar.SelectedEmails.Count>0 && Calendar.SelectedEmails[0]!=null)
+                List<string> validEmails = new List<string>();
+
+                if (Calendar.SelectedEmails != null && Calendar.SelectedEmails.Count > 0 && Calendar.SelectedEmails[0] != null)
                 {
                     string lastEmailString = Calendar.SelectedEmails[Calendar.SelectedEmails.Count - 1];
                     emailArray = lastEmailString.Split(',');
+
                     foreach (string email in emailArray)
                     {
                         var currentUsers = await _userManager.FindByEmailAsync(email);
                         if (currentUsers != null)
                         {
-                            Calendar.UserId = currentUsers.Id;
-                            Calendar.Id = 0;
-                            _context.Calendars.Add(Calendar);
+                            // Her döngüde yeni bir Calendar nesnesi oluşturun ve kullanıcıya göre ayarlayın
+                            Calendar newCalendar = new Calendar
+                            {
+                                UserId = currentUsers.Id,
+                                Title = Calendar.Title,
+                                Description = Calendar.Description ?? "Varsayılan Açıklama",
+                                Date = Calendar.Date,
+                                EmailProperty = Calendar.EmailProperty,
+                                Email = email,
+                            };
+
+                            // Tarihleri ayarlayın
+                            DateTime datePart = DateTime.ParseExact(Calendar.Date, dateFormat, null);
+                            DateTime emailPropertyDateTime = Calendar.EmailProperty.StartDate;
+                            DateTime emailPropertyDateTimeEnd = Calendar.EmailProperty.EndDate;
+
+                            newCalendar.StartDate = new DateTime(
+                                datePart.Year, datePart.Month, datePart.Day,
+                                emailPropertyDateTime.Hour, emailPropertyDateTime.Minute, emailPropertyDateTime.Second
+                            );
+                            newCalendar.EndDate = new DateTime(
+                                datePart.Year, datePart.Month, datePart.Day,
+                                emailPropertyDateTimeEnd.Hour, emailPropertyDateTimeEnd.Minute, emailPropertyDateTimeEnd.Second
+                            );
+
+                            _context.Calendars.Add(newCalendar);
                             _context.SaveChanges();
+
+                            validEmails.Add(email); // Geçerli e-posta adreslerini topla
                         }
                     }
-                    var emailSend = sendEmailAsync2(currentUser.Email,Calendar);
-                }
-                string dateStr = Calendar.Date;
 
-                DateTime emailPropertyDateTime = Calendar.EmailProperty.StartDate;
-                DateTime emailPropertyDateTimeEnd = Calendar.EmailProperty.EndDate;
-                DateTime datePart = DateTime.ParseExact(dateStr, dateFormat, null);
-                Calendar.UserId = currentUser.Id;
-                Calendar.Email = emailArray != null ? string.Join(",", emailArray) : "bos";
-                Calendar.StartDate = new DateTime(
-                    datePart.Year, // Yıl
-                    datePart.Month, // Ay
-                    datePart.Day, // Gün
-                    emailPropertyDateTime.Hour, // Saat
-                    emailPropertyDateTime.Minute, // Dakika
-                    emailPropertyDateTime.Second // Saniye
-                );
-                Calendar.EndDate = new DateTime(
-                                   datePart.Year, // Yıl
-                                   datePart.Month, // Ay
-                                   datePart.Day, // Gün
-                                   emailPropertyDateTimeEnd.Hour, // Saat
-                                   emailPropertyDateTimeEnd.Minute, // Dakika
-                                   emailPropertyDateTimeEnd.Second // Saniye
-                               );
-                _context.Calendars.Add(Calendar);
-                _context.SaveChanges();
+                    // Tüm geçerli e-posta adreslerine toplu e-posta gönderimi
+                    if (validEmails.Count > 0)
+                    {
+                        foreach (var email in validEmails)
+                        {
+                            await sendEmailAsync2(email, Calendar);
+                        }
+                    }
+                }
 
                 return RedirectToAction("Calendar");
             }
 
             return Json(new { Message = true });
-
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Edit(Calendar model)
