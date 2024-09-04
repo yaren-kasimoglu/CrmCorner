@@ -12,4 +12,6 @@ public partial class Company
     public bool? IsApproved { get; set; } = false;
     public string EmailDomain { get; set; } = null!;
 
+    public virtual ICollection<TableHeader> TableHeaders { get; set; } = new List<TableHeader>();
+
 }

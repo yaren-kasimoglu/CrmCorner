@@ -1,4 +1,4 @@
-﻿﻿using CrmCorner.Models;
+﻿using CrmCorner.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Calendar = CrmCorner.Models.Calendar;
@@ -85,12 +85,12 @@ namespace CrmCorner.Controllers
                 ViewBag.Calendar = calendars;
                 ViewBag.CalendarFilter = calendarItemsFilter.Take(5);
                 ViewBag.Users = _context.Users
-                    .Where(u=>u.Id!=currentUser.Id && u.CompanyId==currentUser.CompanyId)
+                    .Where(u => u.Id != currentUser.Id && u.CompanyId == currentUser.CompanyId)
                     .Select(u => new SelectListItem
-                {
-                    Value = u.Email,
-                    Text = u.UserName // veya başka bir kullanıcı adı alanı
-                }).ToList();
+                    {
+                        Value = u.Email,
+                        Text = u.UserName // veya başka bir kullanıcı adı alanı
+                    }).ToList();
                 return View("Calendar");
             }
 
@@ -113,7 +113,7 @@ namespace CrmCorner.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null)
             {
-                
+
                 string[] emailArray = null;
                 var dateFormat = "yyyy-MM-dd";
                 List<string> validEmails = new List<string>();
@@ -155,7 +155,7 @@ namespace CrmCorner.Controllers
 
                             _context.Calendars.Add(newCalendar);
                             _context.SaveChanges();//
-                        
+
                             validEmails.Add(email);
                         }
                         else
@@ -171,7 +171,8 @@ namespace CrmCorner.Controllers
                     }
                 }
                 string mail = null;
-                if (validEmails.Count > 0){
+                if (validEmails.Count > 0)
+                {
                     mail = string.Join(",", validEmails);
 
                 }
@@ -182,7 +183,7 @@ namespace CrmCorner.Controllers
                     Description = Calendar.Description,
                     Date = Calendar.Date,
                     EmailProperty = Calendar.EmailProperty,
-                    Email = mail!=null?mail:"bos",
+                    Email = mail != null ? mail : "bos",
                 };
 
 
@@ -209,7 +210,7 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public bool AddCalendarWithUser(Calendar model)
         {
-            
+
             _context.Calendars.Add(model);
             _context.SaveChanges();
             return true;
@@ -221,6 +222,7 @@ namespace CrmCorner.Controllers
             string[] emailArray = null;
 
             var eventToUpdate = await _context.Set<Calendar>().FindAsync(model.Id);
+
                 if (eventToUpdate != null)
                 {
                     eventToUpdate.Title = model.Title;
@@ -250,12 +252,12 @@ namespace CrmCorner.Controllers
                      emailPropertyDateTimeEnd.Second // Saniye
                 );
                 eventToUpdate.StartDate = model.StartDate;
-                eventToUpdate.EndDate= model.EndDate;
-            
+                eventToUpdate.EndDate = model.EndDate;
+
                 if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
                 {
                     var filteredEmails = model.SelectedEmails
-                                    .Where(email => !string.IsNullOrWhiteSpace(email) && email!= "bos")
+                                    .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
                                   .ToList();
                     model.SelectedEmails = filteredEmails;
                     foreach (string email in filteredEmails)
@@ -274,7 +276,7 @@ namespace CrmCorner.Controllers
                     eventToUpdate.Email = model.Email;
                 }
                 return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
-                }
+            }
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
 
         }
@@ -349,9 +351,9 @@ namespace CrmCorner.Controllers
                     }
                 }
             }
-           
+
             string resultString = string.Join(",", findUserCompany);
-            string resultStringNot= string.Join(",", notfindUserCompany);
+            string resultStringNot = string.Join(",", notfindUserCompany);
 
             var calendarDto = new Calendar
             {
@@ -363,7 +365,7 @@ namespace CrmCorner.Controllers
                 NotEmail = resultStringNot
                 // Diğer gerekli alanlar
             };
-                return Json(new { Message = calendarDto });
+            return Json(new { Message = calendarDto });
 
         }
 
@@ -396,19 +398,26 @@ namespace CrmCorner.Controllers
             return Json(new { Message = true });
 
         }
-        
-        public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar,List<String>? validmail )
+        public async Task<ActionResult> sendEmailAsync2(string from, Calendar calendar)
         {
             try
             {
-                
+
                 string fromEmail = from;
-                string subject = calendar.Title;               
-                string body = "Merhaba,Yukarıda gönderilen event size "+calendar.Description+" açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
+                string subject = calendar.Title;
+                string body = "Merhaba,Yukarıda gönderilen event size " + calendar.Description + " açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
 
                 DateTime startTime = calendar.EmailProperty.StartDate;
 
-                DateTime endTime = calendar.EmailProperty.EndDate;            
+                DateTime endTime = calendar.EmailProperty.EndDate;
+                string toEmails = null;
+                if (calendar.SelectedEmails.Any())
+                {
+                    var lastSelectedEmail = calendar.SelectedEmails.Last();
+                    toEmails = string.Join(",", lastSelectedEmail);
+                    // lastSelectedEmail'i kullan
+                }
+
 
                 // iCalendar dosyası oluşturma
                 string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, from);
@@ -487,9 +496,6 @@ namespace CrmCorner.Controllers
 
             return ics.ToString();
         }
-       
-
-       
 
 
 

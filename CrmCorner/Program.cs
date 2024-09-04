@@ -68,6 +68,13 @@ builder.Services.AddIdentity<AppUser, AppRole>()
 
 builder.Services.AddScoped<IEmailServices, EmailServices>();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Kullanıcı kilitlenme ayarları
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+});
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     var cookieBuilder = new CookieBuilder

@@ -31,9 +31,11 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
     public DbSet<TaskCompLog> TaskCompLogs { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-    public DbSet<BigecSayfaDeneme>BigeçSayfaDenemes  { get; set; }
+    public DbSet<BigecSayfaDeneme> BigeçSayfaDenemes { get; set; }
 
     public DbSet<PostSaleInfo> PostSaleInfos { get; set; }
+    public DbSet<TableHeader> TableHeaders { get; set; }
+    public DbSet<TaskCompNote> TaskCompNotes { get; set; }
 
     public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
 
@@ -42,7 +44,7 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
 
-  => optionsBuilder.UseMySql("server=94.73.148.165;database=u1613932_db877;user=u1613932_user877;password=@TOSf4:8c8@Wb6n:;Charset=utf8mb4;ConvertZeroDateTime=True;",Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.16-mariadb"));
+  => optionsBuilder.UseMySql("server=94.73.148.165;database=u1613932_db877;user=u1613932_user877;password=@TOSf4:8c8@Wb6n:;Charset=utf8mb4;ConvertZeroDateTime=True;", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.16-mariadb"));
 
 
 
@@ -95,33 +97,51 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
         });
 
-        modelBuilder.Entity<AppUser>(entity => {
+
+
+        modelBuilder.Entity<TableHeader>()
+       .HasOne(th => th.Company)
+       .WithMany(c => c.TableHeaders)
+       .HasForeignKey(th => th.CompanyId)
+       .OnDelete(DeleteBehavior.Cascade); // Eğer Company silinirse, bağlı TableHeader kayıtları da silinir
+
+
+
+        modelBuilder.Entity<AppUser>(entity =>
+        {
             entity.ToTable(name: "users");
         });
 
-        modelBuilder.Entity<AppRole>(entity => {
+        modelBuilder.Entity<AppRole>(entity =>
+        {
             entity.ToTable(name: "roles");
         });
 
-        modelBuilder.Entity<IdentityUserRole<string>>(entity => {
+        modelBuilder.Entity<IdentityUserRole<string>>(entity =>
+        {
             entity.ToTable("userroles");
         });
 
-        modelBuilder.Entity<IdentityUserClaim<string>>(entity => {
+        modelBuilder.Entity<IdentityUserClaim<string>>(entity =>
+        {
             entity.ToTable("userclaims");
         });
 
-        modelBuilder.Entity<IdentityUserLogin<string>>(entity => {
+        modelBuilder.Entity<IdentityUserLogin<string>>(entity =>
+        {
             entity.ToTable("userlogins");
         });
 
-        modelBuilder.Entity<IdentityRoleClaim<string>>(entity => {
+        modelBuilder.Entity<IdentityRoleClaim<string>>(entity =>
+        {
             entity.ToTable("roleclaims");
         });
 
-        modelBuilder.Entity<IdentityUserToken<string>>(entity => {
+        modelBuilder.Entity<IdentityUserToken<string>>(entity =>
+        {
             entity.ToTable("usertokens");
         });
+
 
         OnModelCreatingPartial(modelBuilder);
         modelBuilder.Entity<AppUserRole>()

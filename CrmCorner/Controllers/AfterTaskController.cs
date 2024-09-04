@@ -24,23 +24,28 @@ namespace CrmCorner.Controllers
             await SetLayout();
             try
             {
-                var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
+                var user = await _userManager.GetUserAsync(User); // Kullanıcıyı al
                 var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
+                var companyId = user.CompanyId; // Kullanıcının şirket ID'si
 
                 ViewBag.PictureUrl = "/userprofilepicture/" + (user.Picture ?? "defaultpp.png");
 
                 var roles = await _userManager.GetRolesAsync(user);
 
-                var positiveSalesQuery = _context.PostSaleInfos
-                                                 .Include(psi => psi.TaskComp)
-                                                 .ThenInclude(tc => tc.AppUser) // Satışı yapan kullanıcı bilgilerini dahil et
-                                                 .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won)
-                                                 .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)); // E-posta domainine göre filtrele
-
-                if (roles.Contains("Admin"))//areaya yönlendiriyorum
+                if (roles.Contains("Admin"))
                 {
                     return RedirectToAction("ListPositiveSalesAdmin", "AfterTask", new { area = "Admin" });
                 }
+
+                var positiveSalesQuery = _context.PostSaleInfos
+                                                 .Include(psi => psi.TaskComp)
+                                                     .ThenInclude(tc => tc.AppUser)
+                                                 .Include(psi => psi.TaskComp.Status)
+                                                 .Include(psi => psi.TaskComp.AssignedUser)
+                                                 .Include(psi => psi.TaskComp.Customer)
+                                                 .Where(psi => psi.TaskComp.AppUser.EmailDomain == userEmailDomain)
+                                                 .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won)
+                                                 .Where(psi => psi.TaskComp.StatusId == 5);
 
                 if (!roles.Contains("Admin"))
                 {
@@ -69,6 +74,8 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
 
 
 

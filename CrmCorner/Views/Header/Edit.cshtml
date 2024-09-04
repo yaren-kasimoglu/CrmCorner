@@ -1,0 +1,35 @@
+﻿@model CrmCorner.Models.TableHeader
+
+@{
+    ViewData["Title"] = "Başlık Düzenle";
+}
+
+<h2>Başlık Düzenle</h2>
+
+<form asp-action="Edit" method="post">
+    <div class="form-group">
+        <label asp-for="ColumnKey" class="control-label"></label>
+        <input asp-for="ColumnKey" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label asp-for="ColumnName" class="control-label"></label>
+        <input asp-for="ColumnName" class="form-control" />
+        <span asp-validation-for="ColumnName" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="CompanyId" />
+
+    <div class="form-group">
+        <input type="submit" value="Kaydet" class="btn btn-primary" />
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Geri Dön</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

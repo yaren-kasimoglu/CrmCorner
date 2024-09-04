@@ -1,4 +1,5 @@
-﻿using CrmCorner.Models;
+﻿using CrmCorner.Extensions;
+using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -173,7 +174,7 @@ namespace CrmCorner.Controllers
             new SelectListItem { Text = "Görüşme Gerçekleşti", Value = "3" },
             new SelectListItem { Text = "Teklif Gönderildi", Value = "4" },
             new SelectListItem { Text = "Sözleşme Aşamasında", Value = "5" },
-            new SelectListItem { Text = "Satış Tamamlandı", Value = "6" }
+            //new SelectListItem { Text = "Satış Tamamlandı", Value = "6" }
         };
 
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -231,7 +232,7 @@ namespace CrmCorner.Controllers
                         _context.SaveChanges();
 
                         // Outcomes Olumlu ise PostSaleInfo oluştur
-                        if (task.Outcomes == OutcomeType.Olumlu)
+                        if (task.Outcomes == OutcomeType.Olumlu  && task.OutcomeStatus==OutcomeTypeSales.Won)
                         {
                             var postSaleInfo = new PostSaleInfo
                             {
@@ -400,7 +401,7 @@ namespace CrmCorner.Controllers
                 }
 
                 var status = _context.Statuses.FirstOrDefault(s => s.StatusId == editedTask.StatusId);
-                if ((status?.StatusName == "Sözleşme Aşamasında" || status?.StatusName == "Satış Tamamlandı") && !originalTask.FileAttachments.Any())
+                if ((status?.StatusName == "Sözleşme Aşamasında")/* || status?.StatusName == "Satış Tamamlandı")*/ && !originalTask.FileAttachments.Any())
                 {
                     ModelState.AddModelError("file", "Dosya yüklemesi zorunludur.");
                 }
@@ -428,15 +429,10 @@ namespace CrmCorner.Controllers
                         }
                     }
 
-                    // selectedCurrency değerini kontrol ediyoruz
-                    originalTask.SelectedCurrency = editedTask.SelectedCurrency;
+                    var existingPostSaleInfo = _context.PostSaleInfos
+                .FirstOrDefault(psi => psi.TaskCompId == editedTask.TaskId);
 
-                    await LogChanges(originalTask, editedTask);
-
-                    _context.Entry(originalTask).CurrentValues.SetValues(editedTask);
-                    await _context.SaveChangesAsync();
-
-                    if (editedTask.Outcomes == OutcomeType.Olumlu && originalTask.Outcomes != OutcomeType.Olumlu)
+                    if (editedTask.OutcomeStatus == OutcomeTypeSales.Won && originalTask.OutcomeStatus != OutcomeTypeSales.Won && existingPostSaleInfo == null)
                     {
                         var postSaleInfo = new PostSaleInfo
                         {
@@ -452,8 +448,18 @@ namespace CrmCorner.Controllers
                         await _context.SaveChangesAsync();
                     }
 
+
+                    // selectedCurrency değerini kontrol ediyoruz
+                    originalTask.SelectedCurrency = editedTask.SelectedCurrency;
+
+                    await LogChanges(originalTask, editedTask);
+
+                    _context.Entry(originalTask).CurrentValues.SetValues(editedTask);
+                    await _context.SaveChangesAsync();
+
+              
                     // E-posta gönderme işlemi
-                    if (editedTask.OutcomeStatus == OutcomeTypeSales.Won)
+                    if (editedTask.OutcomeStatus == OutcomeTypeSales.Won && originalTask.OutcomeStatus!=OutcomeTypeSales.Won)
                     {
                         var appUser = _context.Users.FirstOrDefault(u => u.Id == editedTask.UserId);
                         var assignedUser = _context.Users.FirstOrDefault(u => u.Id == editedTask.AssignedUserId);
@@ -569,6 +575,10 @@ namespace CrmCorner.Controllers
             {
                 foreach (var property in typeof(TaskComp).GetProperties())
                 {
+                    if (property.Name == "Notes")
+                    {
+                        continue; // Notes alanını loglara dahil etmeden bir sonraki döngüye geç
+                    }
                     var originalValue = property.GetValue(originalTask);
                     var editedValue = property.GetValue(editedTask);
 
@@ -637,8 +647,9 @@ namespace CrmCorner.Controllers
                         if (property.Name == "OutcomeStatus")
                         {
                             fieldName = "Sonuç Durumu";
-                            oldValueString = Enum.GetName(typeof(OutcomeTypeSales), originalValue);
-                            newValueString = Enum.GetName(typeof(OutcomeTypeSales), editedValue);
+                            oldValueString = ((OutcomeTypeSales)Enum.Parse(typeof(OutcomeTypeSales), originalValue.ToString())).GetDisplayName();
+                            newValueString = ((OutcomeTypeSales)Enum.Parse(typeof(OutcomeTypeSales), editedValue.ToString())).GetDisplayName();
+
                         }
 
                         if (property.Name == "IsFinalDecisionMaker")
@@ -776,6 +787,7 @@ namespace CrmCorner.Controllers
                     .Include(e => e.Customer)
                     .Include(e => e.Status)
                     .Include(e => e.AppUser)
+                    .Include(e => e.Notes)  // Notları dahil ediyoruz
                     .FirstOrDefault(t => t.TaskId == id);
 
                 if (task == null)
@@ -792,7 +804,6 @@ namespace CrmCorner.Controllers
 
                 if (task.FileAttachments == null)
                 {
-                    // FileAttachments koleksiyonu null ise, boş bir liste ile başlat
                     task.FileAttachments = new List<FileAttachment>();
                 }
 
@@ -803,6 +814,26 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
+        [HttpPost]
+        public IActionResult AddNote(int taskId, string note)
+        {
+            var task = _context.TaskComps.Include(t => t.Notes).FirstOrDefault(t => t.TaskId == taskId);
+            if (task != null)
+            {
+                var newNote = new TaskCompNote
+                {
+                    TaskCompId = taskId,
+                    Note = note,
+                    CreatedAt = DateTime.Now
+                };
+                task.Notes.Add(newNote);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("TaskDetail", new { id = taskId });
+        }
+
         #endregion
 
 
@@ -1191,9 +1222,8 @@ namespace CrmCorner.Controllers
                     {
                         return Json(new { isValid = false, message = "Görev durumunu bu aşamaya getirebilmek için 'Sözleşme / Anlaşma' dosyalarını yüklemeniz gerekmektedir. Sözleşme dosyalarınızın sisteme doğru bir şekilde yüklendiğinden emin olun." });
                     }
-                }
-                if (newStatusId == 6)
-                {
+
+
                     // OutcomeTypeSales kontrolü
                     if (task.OutcomeStatus == null)
                     {
@@ -1222,6 +1252,7 @@ namespace CrmCorner.Controllers
                         }
                     }
                 }
+
 
                 return Json(new { isValid = true });
             }

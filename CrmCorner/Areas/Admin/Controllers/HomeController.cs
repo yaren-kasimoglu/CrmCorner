@@ -18,14 +18,16 @@ namespace CrmCorner.Areas.Admin.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
         private readonly ILogger<HomeController> _logger;
+        private readonly SignInManager<AppUser> _signInManager;
 
 
 
-        public HomeController(UserManager<AppUser> userManager, CrmCornerContext context = null, ILogger<HomeController> logger = null) : base(userManager)
+        public HomeController(UserManager<AppUser> userManager, CrmCornerContext context = null, ILogger<HomeController> logger = null, SignInManager<AppUser> signInManager = null) : base(userManager)
         {
             _userManager = userManager;
             _context = context;
             _logger = logger;
+            _signInManager = signInManager;
         }
 
         public async Task<IActionResult> Index()
@@ -415,5 +417,10 @@ namespace CrmCorner.Areas.Admin.Controllers
 
 
         #endregion
+
+        public async Task Logout()
+        {
+            await _signInManager.SignOutAsync();
+        }
     }
 }

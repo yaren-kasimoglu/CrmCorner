@@ -439,7 +439,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null) //ADMİN PANELİNE YÖNLENDİRİYOR
         {
             try
             {

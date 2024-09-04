@@ -268,7 +268,7 @@
     $(document).ready(function () {
         function toggleOutcomeStatusSection() {
             var selectedStatus = $("#StatusId option:selected").text();
-            if (selectedStatus === "Satış Tamamlandı") {
+            if (selectedStatus === "Sözleşme Aşamasında") {
                 $("#OutcomeStatusSection").show();
             } else {
                 $("#OutcomeStatusSection").hide();
@@ -304,7 +304,7 @@
 
         function toggleFileUpload() {
             var selectedStatus = $("#StatusId option:selected").text();
-            if (selectedStatus === "Sözleşme Aşamasında" || selectedStatus === "Teklif Gönderildi" || selectedStatus === "Satış Tamamlandı") {
+            if (selectedStatus === "Sözleşme Aşamasında" || selectedStatus === "Teklif Gönderildi") {
                 $("#file").prop('disabled', false);
             } else {
                 $("#file").prop('disabled', true);
