@@ -398,7 +398,7 @@ namespace CrmCorner.Controllers
             return Json(new { Message = true });
 
         }
-        public async Task<ActionResult> sendEmailAsync2(string from, Calendar calendar)
+        public async Task<ActionResult> sendEmailAsync2(string from, Calendar calendar,List<String>? validmail)
         {
             try
             {
