@@ -383,40 +383,51 @@
         return eventsArr;
     }
 
+
     document.addEventListener('DOMContentLoaded', function () {
-        let startTimePicker = document.getElementById('StartDate');
-        let endTimePicker = document.getElementById('EndDate');
-        let startTimePickers = document.getElementById('StartDates');
-        let endTimePickers = document.getElementById('EndDates');
+        const startTimePicker = document.getElementById('StartDate');
+        const endTimePicker = document.getElementById('EndDate');
+        const startTimePickers = document.getElementById('StartDates');
+        const endTimePickers = document.getElementById('EndDates');
 
+        function populateTimePickers() {
+            for (let hour = 0; hour < 24; hour++) {
+                for (let minute = 0; minute < 60; minute += 15) {
+                    const timeValue = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 
-        for (let hour = 0; hour < 24; hour++) {
-            for (let minute = 0; minute < 60; minute += 15) {
-                let timeValue = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-
-                let startOption = document.createElement('option');
-                startOption.value = timeValue;
-                startOption.textContent = timeValue;
-                startTimePicker.appendChild(startOption);
-
-                let endOption = document.createElement('option');
-                endOption.value = timeValue;
-                endOption.textContent = timeValue;
-                endTimePicker.appendChild(endOption);
-
-                let startOptions = document.createElement('option');
-                startOptions.value = timeValue;
-                startOptions.textContent = timeValue;
-                startTimePickers.appendChild(startOptions);
-
-                let endOptions = document.createElement('option');
-                endOptions.value = timeValue;
-                endOptions.textContent = timeValue;
-                endTimePickers.appendChild(endOptions);
+                    // Create and append options
+                    [startTimePicker, endTimePicker, startTimePickers, endTimePickers].forEach(picker => {
+                        const option = document.createElement('option');
+                        option.value = timeValue;
+                        option.textContent = timeValue;
+                        picker.appendChild(option);
+                    });
+                }
             }
         }
-        var calendarEl = document.getElementById('my_calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+
+        function updateEndTimeOptions() {
+            const startValue = startTimePicker.value;
+            const [startHour, startMinute] = startValue.split(':').map(Number);
+
+            const options = Array.from(endTimePicker.options);
+            endTimePicker.innerHTML = ''; // Clear existing options
+
+            options.forEach(option => {
+                const [hour, minute] = option.value.split(':').map(Number);
+                if (hour > startHour || (hour === startHour && minute > startMinute)) {
+                    endTimePicker.appendChild(option);
+                }
+            });
+        }
+
+        startTimePicker.addEventListener('change', updateEndTimeOptions);
+
+        populateTimePickers();
+        updateEndTimeOptions();
+
+        const calendarEl = document.getElementById('my_calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
             timeZone: 'UTC',
             initialView: 'dayGridMonth',
             events: eventsArr,
@@ -430,21 +441,21 @@
                     data: { ID: info.event.id },
                     dataType: "json",
                     success: function (data) {
-                        someFunction(data);
+                        someFunction(data); // Define someFunction as needed
                     }
                 });
+
                 document.getElementById("modalTitle").innerHTML = info.event.title;
                 document.getElementById("modalTitle2").value = info.event.title;
-                document.getElementById("modalStart").value = info.event.start.toJSON().slice(0, 10);
-                document.getElementById("Id").innerHTML = info.event.id;
-                document.getElementById("calendarId").value = info.event.id; // Gizli input alanına ID'yi yerleştir
+                document.getElementById("modalStart").textContent = info.event.start.toJSON().slice(0, 10);
+                document.getElementById("Id").textContent = info.event.id;
+                document.getElementById("calendarId").value = info.event.id; // Hidden input for ID
                 $('#calendarModal').modal('show');
             },
             dateClick: function (info) {
-                // Tıklanan tarihi almak
-                var clickedDate = info.dateStr;
+                const clickedDate = info.dateStr;
                 document.getElementById('modelDate').value = clickedDate;
-                var modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+                const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
                 modal.show();
             }
         });

@@ -122,7 +122,7 @@ namespace CrmCorner.Controllers
                 {
                     string lastEmailString = Calendar.SelectedEmails[Calendar.SelectedEmails.Count - 1];
                     emailArray = lastEmailString.Split(',');
-
+                    Calendar.SelectedEmails.RemoveAt(Calendar.SelectedEmails.Count - 1);
                     foreach (string email in emailArray)
                     {
                         var currentUsers = await _userManager.FindByEmailAsync(email);
@@ -163,14 +163,11 @@ namespace CrmCorner.Controllers
                             validEmails.Add(email);
                         }
                     }
-
+                    validEmails.Add(currentUser.Email);
                     // Tüm geçerli e-posta adreslerine toplu e-posta gönderimi
                     if (validEmails.Count > 0)
                     {
-                        foreach (var email in validEmails)
-                        {
-                            await sendEmailAsync2(email, Calendar);
-                        }
+                       await sendEmailAsync2(currentUser.Email,Calendar, validEmails);
                     }
                 }
                 string mail = null;
@@ -202,7 +199,7 @@ namespace CrmCorner.Controllers
                     emailPropertyDateTimeEnds.Hour, emailPropertyDateTimeEnds.Minute, emailPropertyDateTimeEnds.Second
                 );
 
-                AddCompany(newCalendars);
+                AddCalendarWithUser(newCalendars);
                 return RedirectToAction("Calendar");
             }
 
@@ -210,7 +207,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public bool AddCompany(Calendar model)
+        public bool AddCalendarWithUser(Calendar model)
         {
             
             _context.Calendars.Add(model);
@@ -230,6 +227,7 @@ namespace CrmCorner.Controllers
                     eventToUpdate.Description = model.Description;
                     eventToUpdate.Date = model.Date;
                     eventToUpdate.UserId = currentUser.Id;
+                    eventToUpdate.Id = model.Id;
                 string dateStr = model.Date;
                 var dateFormat = "yyyy-MM-dd";
                 DateTime emailPropertyDateTime = model.EmailProperty.StartDate;
@@ -267,15 +265,14 @@ namespace CrmCorner.Controllers
                         {
                             model.UserId = currentUsers.Id;
                             model.Id = 0;
-                            _context.Calendars.Add(model);
+                            _context.Calendars.Update(eventToUpdate);
                             _context.SaveChanges();
                         }
                     }
-                    var emailSend = sendEmailAsync2(currentUser.Email, model);
+                    var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails);
                     model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
                     eventToUpdate.Email = model.Email;
                 }
-                await _context.SaveChangesAsync();
                 return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
                 }
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
@@ -400,7 +397,7 @@ namespace CrmCorner.Controllers
 
         }
         
-        public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar)
+        public async Task<ActionResult> sendEmailAsync2(string from , Calendar calendar,List<String>? validmail )
         {
             try
             {
@@ -411,18 +408,10 @@ namespace CrmCorner.Controllers
 
                 DateTime startTime = calendar.EmailProperty.StartDate;
 
-                DateTime endTime = calendar.EmailProperty.EndDate;
-                string toEmails = null;
-                if (calendar.SelectedEmails.Any())
-                {
-                    var lastSelectedEmail = calendar.SelectedEmails.Last();
-                   toEmails = string.Join(",", lastSelectedEmail);
-                    // lastSelectedEmail'i kullan
-                }
-            
+                DateTime endTime = calendar.EmailProperty.EndDate;            
 
                 // iCalendar dosyası oluşturma
-                string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, toEmails);
+                string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, from);
                 System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
 
                 // SMTP sunucusu bilgileri
@@ -447,14 +436,16 @@ namespace CrmCorner.Controllers
                 //    Body = body,
                 //    IsBodyHtml = true
                 //};
-                foreach (var email in calendar.SelectedEmails)
+                if(validmail != null && validmail.Count>0)
                 {
-                    mailMessage.To.Add(email);
+                    foreach (var email in validmail)
+                    {
+                        mailMessage.To.Add(email);
+                    }
                 }
 
                 mailMessage.Attachments.Add(calendarAttachment);
 
-                mailMessage.To.Add(fromEmail);
                 // E-posta gönderimi
                 client.Send(mailMessage);
 
