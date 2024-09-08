@@ -40,9 +40,6 @@ namespace CrmCorner.Models.Enums
         [Display(Name = "İmalat")]
         Manufacturing,
 
-        [Display(Name = "Madencilik")]
-        Mining,
-
         [Display(Name = "İlaç")]
         Pharmaceuticals,
 
@@ -63,5 +60,36 @@ namespace CrmCorner.Models.Enums
 
         [Display(Name = "Hizmetler")]
         Utilities,
+
+        // Yeni eklenen sektörler
+        [Display(Name = "Metal")]
+        Metal,
+
+        [Display(Name = "Demir Çelik")]
+        IronSteel,
+
+        [Display(Name = "Elektrik & Elektronik")]
+        ElectricalElectronics,
+
+        [Display(Name = "Alüminyum")]
+        Aluminum,
+
+        [Display(Name = "Üretim")]
+        Production,
+
+        [Display(Name = "Mekanik Endüstri")]
+        MechanicalIndustry,
+
+        [Display(Name = "Tekstil")]
+        Textile,
+
+        [Display(Name = "Lojistik")]
+        Logistics,
+
+        [Display(Name = "Makine")]
+        Machinery,
+
+        [Display(Name = "Diğer")]
+        Other
     }
 }

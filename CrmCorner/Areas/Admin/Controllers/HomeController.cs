@@ -163,6 +163,44 @@ namespace CrmCorner.Areas.Admin.Controllers
 
         #region CHARTS
 
+
+        [Authorize]
+        public async Task<IActionResult> HeardFromChart()
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+
+                // Kullanıcının AppUser ve AssignedUser olduğu görevleri birleştir
+                var taskComps = await _context.TaskComps
+                                              .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
+                                              .Where(tc => !string.IsNullOrEmpty(tc.HeardFrom)) // HeardFrom boş olmayanları filtrele
+                                              .ToListAsync();
+
+                var chartData = taskComps
+                                .GroupBy(tc => tc.HeardFrom.ToLower()) // Küçük harf ile gruplandır
+                                .Select(group => new
+                                {
+                                    HeardFrom = group.Key,
+                                    Count = group.Count(),
+                                    TaskNames = group.Select(tc => tc.Title).ToList()
+                                })
+                                .ToList();
+
+                var labels = chartData.Select(data => data.HeardFrom).ToArray();
+                var dataValues = chartData.Select(data => data.Count).ToArray();
+                var taskNames = chartData.Select(data => data.TaskNames).ToArray();
+
+                return Json(new { labels, data = dataValues, taskNames });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "HeardFrom chart verileri getirilirken bir hata oluştu.");
+                return StatusCode(500, "İşleminiz sırasında bir hata oluştu.");
+            }
+        }
+
+
         [Authorize]
         public async Task<IActionResult> ValueOfferChart()
         {

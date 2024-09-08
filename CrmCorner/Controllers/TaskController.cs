@@ -225,6 +225,13 @@ namespace CrmCorner.Controllers
                 {
                     task.CreatedDate = DateTime.Now; // Oluşturulma tarihini şimdi olarak ayarla
 
+                    // Nereden duydunuz alanını küçük harfe çevir
+                    if (!string.IsNullOrEmpty(task.HeardFrom))
+                    {
+                        task.HeardFrom = task.HeardFrom.ToLower();
+                    }
+
+
                     if (task.StatusId.HasValue && task.StatusId.Value != 0) // StatusId kontrolü
                     {
                         _context.TaskComps.Add(task); // Task'ı ekleyin
@@ -405,6 +412,13 @@ namespace CrmCorner.Controllers
                 {
                     ModelState.AddModelError("file", "Dosya yüklemesi zorunludur.");
                 }
+
+                // Nereden duydunuz alanını küçük harfe çevirme işlemi
+                if (!string.IsNullOrEmpty(editedTask.HeardFrom))
+                {
+                    editedTask.HeardFrom = editedTask.HeardFrom.ToLower();
+                }
+
 
                 if (ModelState.IsValid)
                 {
