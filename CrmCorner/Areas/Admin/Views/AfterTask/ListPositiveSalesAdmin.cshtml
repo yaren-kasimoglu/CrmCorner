@@ -118,7 +118,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="detailModalLabel">Satış Detayları</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -126,7 +126,7 @@
                 <!-- Dinamik içerik buraya yüklenecek -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal()">Kapat</button>
             </div>
         </div>
     </div>
@@ -162,8 +162,7 @@
     </div>
 </div>
 
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
 <!-- Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
@@ -176,28 +175,41 @@
 <script>
     function showDetails(sale) {
         var modalBody = document.querySelector('#detailModal .modal-body');
-        modalBody.innerHTML = 
-                        <p>İlk ödeme yapıldı mı? ${sale.isFirstPaymentMade ? 'Evet' : 'Hayır'}</p>
-                        <p>Bir problem var mı? ${sale.isThereAProblem ? 'Evet' : 'Hayır'}</p>
-                        ${sale.isThereAProblem && sale.problemDescription ?
-                '<div class="alert alert-warning" role="alert" title="' + sale.problemDescription.substring(0, 255) + '"><strong>Problem Açıklaması:</strong> ' + sale.problemDescription + '</div>' : ''}
-                        <p>Devam etmeyi düşünüyorlar mı? ${sale.isContinuationConsidered ? 'Evet' : 'Hayır'}</p>
-                        <p>Trustpilot yorumu yapıldı mı? ${sale.isTrustpilotReviewed ? 'Evet' : 'Hayır'}</p>
-                        ${sale.isTrustpilotReviewed && sale.trustPilotComment ?
-                '<div class="alert alert-info" role="alert"><strong>Trustpilot Yorumu:</strong> ' + sale.trustPilotComment + '</div>' : ''}
-                        <p>Logolarını kullanabilir miyiz? ${sale.canUseLogo ? 'Evet' : 'Hayır'}</p>
-                    ;
+        modalBody.innerHTML = `
+            <p>İlk ödeme yapıldı mı? ${sale.isFirstPaymentMade ? 'Evet' : 'Hayır'}</p>
+            <p>Bir problem var mı? ${sale.isThereAProblem ? 'Evet' : 'Hayır'}</p>
+            ${sale.isThereAProblem && sale.problemDescription ?
+                `<div class="alert alert-warning" role="alert" title="${sale.problemDescription.substring(0, 255)}">
+                    <strong>Problem Açıklaması:</strong> ${sale.problemDescription}
+                </div>`
+                : ''}
+            <p>Devam etmeyi düşünüyorlar mı? ${sale.isContinuationConsidered ? 'Evet' : 'Hayır'}</p>
+            <p>Trustpilot yorumu yapıldı mı? ${sale.isTrustpilotReviewed ? 'Evet' : 'Hayır'}</p>
+            ${sale.isTrustpilotReviewed && sale.trustPilotComment ?
+                `<div class="alert alert-info" role="alert">
+                    <strong>Trustpilot Yorumu:</strong> ${sale.trustPilotComment}
+                </div>`
+                : ''}
+            <p>Logolarını kullanabilir miyiz? ${sale.canUseLogo ? 'Evet' : 'Hayır'}</p>
+        `;
+        $('#detailModal').modal('show');
     }
 
     function showProblemDescription(tooltip, fullDescription) {
         var modalBody = document.querySelector('#problemDescriptionModal .modal-body');
-        modalBody.innerHTML = <p>${fullDescription}</p>;
+        modalBody.innerHTML = `<p>${fullDescription}</p>`;
         $('#problemDescriptionModal').modal('show');
     }
 
     function showTrustpilotComment(tooltip, fullComment) {
         var modalBody = document.querySelector('#trustpilotCommentModal .modal-body');
-        modalBody.innerHTML = <p>${fullComment}</p>;
+        modalBody.innerHTML = `<p>${fullComment}</p>`;
         $('#trustpilotCommentModal').modal('show');
     }
+    function closeModal() {
+        $('#detailModal').modal('hide'); // Modalı manuel kapat
+    }
+
 </script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
