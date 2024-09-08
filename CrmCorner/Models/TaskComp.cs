@@ -49,6 +49,11 @@ public partial class TaskComp
 
     public int? CompanyId { get; set; }
 
+
+    public string? HeardFrom { get; set; } // Nereden duydunuz?
+
+
+
     // Dosya ekleri için koleksiyon
     public virtual ICollection<FileAttachment>? FileAttachments { get; set; }
     public virtual ICollection<TaskCompLog>? TaskCompLogs { get; set; }

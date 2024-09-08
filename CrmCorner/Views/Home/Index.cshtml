@@ -155,7 +155,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-8 col-lg-8 col-md-12">
+  <div class="col-xl-8 col-lg-8 col-md-12">
         <div class="chart-container" style="position: relative; height:40vh; width:100%;">
             <canvas id="valueOfferChart"></canvas>
         </div>
@@ -194,7 +194,14 @@
 </div>
 
 
-
+<div class="col-xl-4 col-lg-4 col-md-12">
+    <div class="custom-card">
+        <div class="chart-title">Müşteri Bilgisine Nereden Ulaşıldı?</div>
+        <div class="card-body">
+            <canvas id="heardFromChart"></canvas>
+        </div>
+    </div>
+</div>
 
 
 <!-- core js file -->
@@ -666,6 +673,98 @@
             ];
 
             // Renklerin sayısına göre döndür
+            return predefinedColors.slice(0, count);
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Home/HeardFromChart", // Controller metoduna yapılan istek
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için
+                var ctx = document.getElementById('heardFromChart').getContext('2d');
+
+                // Renkleri dinamik olarak belirleyelim
+                var colors = generateColors(data.labels.length);
+
+                new Chart(ctx, {
+                    type: 'doughnut', // Burada chart tipini doughnut yapıyoruz
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11,
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.raw;
+
+                                        var index = context.dataIndex;
+                                        var taskNames = data.taskNames[index];
+                                        var lines = [label].concat(taskNames); // Görev isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            }
+                        },
+                        // Scales'ı kaldırıyoruz çünkü doughnut grafiklerde eksen yok
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        }
+                    }
+                });
+
+            },
+            error: function (xhr, status, error) {
+                console.error('HeardFrom chart verisi getirilirken hata oluştu:', error);
+            }
+        });
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var predefinedColors = [
+                '#A3D9A5',
+                '#FFDAC1',
+                '#BAFFB3',
+                '#C2C2F0',
+                '#B3F3D0',
+                '#BAE1FF',
+                '#FFB3BA',
+                '#FFDFBA',
+                '#FFFFBA',
+                '#D5AAFF',
+                '#FFB3E6'
+            ];
+
+            // Gerekli renk sayısına göre renkleri döndür
             return predefinedColors.slice(0, count);
         }
     });

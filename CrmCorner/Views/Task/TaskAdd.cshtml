@@ -140,6 +140,13 @@
                 <label asp-for="IsFinalDecisionMaker" class="control-label">Son Karar Mercii İle Görüşüldü</label>
                 <span asp-validation-for="IsFinalDecisionMaker" class="text-danger"></span>
             </div>
+            </br>
+            <div class="form-group">
+                <label for="HeardFrom">Bu görüşme kaydını nereden edindiniz?</label>
+                <input type="text" class="form-control" id="HeardFrom" name="HeardFrom" asp-for="HeardFrom" />
+                <span asp-validation-for="HeardFrom" class="text-danger"></span>
+            </div>
+
         </div>
     </div>
     <br>
