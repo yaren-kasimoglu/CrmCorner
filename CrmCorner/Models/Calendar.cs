@@ -24,6 +24,7 @@ public class Calendar
     public string? Email { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+    public int? ToId { get; set; }
 
 
     [NotMapped]

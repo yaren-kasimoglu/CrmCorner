@@ -122,8 +122,33 @@ namespace CrmCorner.Controllers
                 {
                     string lastEmailString = Calendar.SelectedEmails[Calendar.SelectedEmails.Count - 1];
                     emailArray = lastEmailString.Split(',');
-                    Calendar.SelectedEmails.RemoveAt(Calendar.SelectedEmails.Count - 1);
-                    foreach (string email in emailArray)
+                    Calendar.SelectedEmails = new List<string>(lastEmailString.Split(','));
+                    Calendar newCalendars = new Calendar
+                    {
+                        UserId = currentUser.Id,
+                        Title = Calendar.Title,
+                        Description = Calendar.Description,
+                        Date = Calendar.Date,
+                        EmailProperty = Calendar.EmailProperty,
+                        Email = lastEmailString != null ? lastEmailString : "bos",
+                    };
+
+
+                    DateTime dateParts = DateTime.ParseExact(Calendar.Date, dateFormat, null);
+                    DateTime emailPropertyDateTimes = Calendar.EmailProperty.StartDate;
+                    DateTime emailPropertyDateTimeEnds = Calendar.EmailProperty.EndDate;
+
+                    newCalendars.StartDate = new DateTime(
+                        dateParts.Year, dateParts.Month, dateParts.Day,
+                        emailPropertyDateTimes.Hour, emailPropertyDateTimes.Minute, emailPropertyDateTimes.Second
+                    );
+                    newCalendars.EndDate = new DateTime(
+                        dateParts.Year, dateParts.Month, dateParts.Day,
+                        emailPropertyDateTimeEnds.Hour, emailPropertyDateTimeEnds.Minute, emailPropertyDateTimeEnds.Second
+                    );
+
+                    var id=AddCalendarWithUser(newCalendars);
+                    foreach (string email in Calendar.SelectedEmails)
                     {
                         var currentUsers = await _userManager.FindByEmailAsync(email);
                         if (currentUsers != null)
@@ -136,7 +161,7 @@ namespace CrmCorner.Controllers
                                 Description = Calendar.Description,
                                 Date = Calendar.Date,
                                 EmailProperty = Calendar.EmailProperty,
-                                Email = email,
+                                Email = lastEmailString,
                             };
 
 
@@ -152,9 +177,9 @@ namespace CrmCorner.Controllers
                                 datePart.Year, datePart.Month, datePart.Day,
                                 emailPropertyDateTimeEnd.Hour, emailPropertyDateTimeEnd.Minute, emailPropertyDateTimeEnd.Second
                             );
-
+                            newCalendar.ToId = id;
                             _context.Calendars.Add(newCalendar);
-                            _context.SaveChanges();//
+                            _context.SaveChanges();
 
                             validEmails.Add(email);
                         }
@@ -170,37 +195,7 @@ namespace CrmCorner.Controllers
                        await sendEmailAsync2(currentUser.Email,Calendar, validEmails);
                     }
                 }
-                string mail = null;
-                if (validEmails.Count > 0)
-                {
-                    mail = string.Join(",", validEmails);
-
-                }
-                Calendar newCalendars = new Calendar
-                {
-                    UserId = currentUser.Id,
-                    Title = Calendar.Title,
-                    Description = Calendar.Description,
-                    Date = Calendar.Date,
-                    EmailProperty = Calendar.EmailProperty,
-                    Email = mail != null ? mail : "bos",
-                };
-
-
-                DateTime dateParts = DateTime.ParseExact(Calendar.Date, dateFormat, null);
-                DateTime emailPropertyDateTimes = Calendar.EmailProperty.StartDate;
-                DateTime emailPropertyDateTimeEnds = Calendar.EmailProperty.EndDate;
-
-                newCalendars.StartDate = new DateTime(
-                    dateParts.Year, dateParts.Month, dateParts.Day,
-                    emailPropertyDateTimes.Hour, emailPropertyDateTimes.Minute, emailPropertyDateTimes.Second
-                );
-                newCalendars.EndDate = new DateTime(
-                    dateParts.Year, dateParts.Month, dateParts.Day,
-                    emailPropertyDateTimeEnds.Hour, emailPropertyDateTimeEnds.Minute, emailPropertyDateTimeEnds.Second
-                );
-
-                AddCalendarWithUser(newCalendars);
+           
                 return RedirectToAction("Calendar");
             }
 
@@ -208,12 +203,12 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public bool AddCalendarWithUser(Calendar model)
+        public int AddCalendarWithUser(Calendar model)
         {
 
             _context.Calendars.Add(model);
             _context.SaveChanges();
-            return true;
+            return model.Id;
         }
         [HttpPost]
         public async Task<IActionResult> Edit(Calendar model)
@@ -222,63 +217,266 @@ namespace CrmCorner.Controllers
             string[] emailArray = null;
 
             var eventToUpdate = await _context.Set<Calendar>().FindAsync(model.Id);
-
-                if (eventToUpdate != null)
-                {
-                    eventToUpdate.Title = model.Title;
-                    eventToUpdate.Description = model.Description;
-                    eventToUpdate.Date = model.Date;
-                    eventToUpdate.UserId = currentUser.Id;
-                    eventToUpdate.Id = model.Id;
-                string dateStr = model.Date;
-                var dateFormat = "yyyy-MM-dd";
-                DateTime emailPropertyDateTime = model.EmailProperty.StartDate;
-                DateTime emailPropertyDateTimeEnd = model.EmailProperty.EndDate;
-                DateTime datePart = DateTime.ParseExact(dateStr, dateFormat, null);
+            var eventToIdUpdate=  _context.Calendars
+                       .Include(e => e.AppUser)
+                       .Where(e => e.ToId == model.Id || e.Id==model.Id)
+                       .ToList();
+            foreach (var item in eventToIdUpdate)
+            {
+                item.Date = model.Date;
+                item.Title = model.Title;
+                item.Description = model.Description;
+                item.ToId = eventToUpdate.Id;
+                string dateStrs = model.Date;
+                var dateFormats = "yyyy-MM-dd";
+                DateTime emailPropertyDateTimes = model.EmailProperty.StartDate;
+                DateTime emailPropertyDateTimeEnds = model.EmailProperty.EndDate;
+                DateTime dateParts = DateTime.ParseExact(dateStrs, dateFormats, null);
                 model.StartDate = new DateTime(
-                    datePart.Year, // Yıl
-                    datePart.Month, // Ay
-                    datePart.Day, // Gün
-                    emailPropertyDateTime.Hour, // Saat
-                    emailPropertyDateTime.Minute, // Dakika
-                    emailPropertyDateTime.Second // Saniye
+                dateParts.Year, // Yıl
+                dateParts.Month, // Ay
+                dateParts.Day, // Gün
+                emailPropertyDateTimes.Hour, // Saat
+                emailPropertyDateTimes.Minute, // Dakika
+                emailPropertyDateTimes.Second // Saniye
                 );
                 model.EndDate = new DateTime(
-                     datePart.Year, // Yıl
-                     datePart.Month, // Ay
-                     datePart.Day, // Gün
-                     emailPropertyDateTimeEnd.Hour, // Saat
-                     emailPropertyDateTimeEnd.Minute, // Dakika
-                     emailPropertyDateTimeEnd.Second // Saniye
-                );
-                eventToUpdate.StartDate = model.StartDate;
-                eventToUpdate.EndDate = model.EndDate;
-
+                dateParts.Year, // Yıl
+                 dateParts.Month, // Ay
+                dateParts.Day, // Gün
+                emailPropertyDateTimeEnds.Hour, // Saat
+                emailPropertyDateTimeEnds.Minute, // Dakika
+                emailPropertyDateTimeEnds.Second // Saniye
+                 );
+                item.StartDate = model.StartDate;
+                item.EndDate = model.EndDate;
                 if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
                 {
                     var filteredEmails = model.SelectedEmails
                                     .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
                                   .ToList();
-                    model.SelectedEmails = filteredEmails;
-                    foreach (string email in filteredEmails)
-                    {
-                        var currentUsers = await _userManager.FindByEmailAsync(email);
-                        if (currentUsers != null)
-                        {
-                            model.UserId = currentUsers.Id;
-                            model.Id = 0;
-                            _context.Calendars.Update(eventToUpdate);
-                            _context.SaveChanges();
-                        }
-                    }
-                    var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails);
                     model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
-                    eventToUpdate.Email = model.Email;
+                    item.Email = model.Email;
                 }
-                return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+                model.UserId = item.UserId;
+                model.Id = 0;
+                _context.Calendars.Update(item);
+                _context.SaveChanges();
             }
+            foreach (var item in model.SelectedEmails)
+            {
+                var currentUsers = await _userManager.FindByEmailAsync(item);
+                if (currentUsers != null) { 
+                //İlk eklenmedi ama sonra eklendi
+                var eventToIdAdedUser = _context.Calendars
+                    .Include(e => e.AppUser)
+                    .Where(e => e.ToId == eventToUpdate.Id && e.UserId == currentUsers.Id)
+                    .FirstOrDefault();
+                    if (eventToIdAdedUser == null)
+                    {
+                        eventToIdAdedUser = new Calendar();
+                        eventToIdAdedUser.Date = model.Date;
+                        eventToIdAdedUser.Title = model.Title;
+                        eventToIdAdedUser.Description = model.Description;
+                        eventToIdAdedUser.ToId = eventToUpdate.Id;
+                        string dateStrs = model.Date;
+                        var dateFormats = "yyyy-MM-dd";
+                        DateTime emailPropertyDateTimes = model.EmailProperty.StartDate;
+                        DateTime emailPropertyDateTimeEnds = model.EmailProperty.EndDate;
+                        DateTime dateParts = DateTime.ParseExact(dateStrs, dateFormats, null);
+                        model.StartDate = new DateTime(
+                        dateParts.Year, // Yıl
+                        dateParts.Month, // Ay
+                        dateParts.Day, // Gün
+                        emailPropertyDateTimes.Hour, // Saat
+                        emailPropertyDateTimes.Minute, // Dakika
+                        emailPropertyDateTimes.Second // Saniye
+                        );
+                        model.EndDate = new DateTime(
+                        dateParts.Year, // Yıl
+                         dateParts.Month, // Ay
+                        dateParts.Day, // Gün
+                        emailPropertyDateTimeEnds.Hour, // Saat
+                        emailPropertyDateTimeEnds.Minute, // Dakika
+                        emailPropertyDateTimeEnds.Second // Saniye
+                         );
+                        eventToIdAdedUser.StartDate = model.StartDate;
+                        eventToIdAdedUser.EndDate = model.EndDate;
+
+
+                        if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
+                        {
+                            var filteredEmails = model.SelectedEmails
+                                            .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
+                                          .ToList();
+                            model.SelectedEmails = filteredEmails;
+                            model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
+                            eventToIdAdedUser.Email = model.Email;
+                        }
+                        _context.Calendars.Add(eventToIdAdedUser);
+                        _context.SaveChanges();
+                    }
+                }
+            }
+            var filteredEmails2 = model.SelectedEmails
+                                            .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
+                                          .ToList();
+            var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails2);
+
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
 
+
+            //    foreach (var item in model.SelectedEmails)
+            //{
+            //    var currentUsers = await _userManager.FindByEmailAsync(item);
+            //    //İlk eklenmedi ama sonra eklendi
+            //    var eventToIdAdedUser = _context.Calendars
+            //        .Include(e => e.AppUser)
+            //        .Where(e => e.ToId == model.Id && e.UserId == currentUsers.Id)
+            //        .FirstOrDefault();
+
+            //    if (eventToIdAdedUser == null)
+            //    {
+            //        eventToIdAdedUser.Date = model.Date;
+            //        eventToIdAdedUser.Title = model.Title;
+            //        eventToIdAdedUser.Description = model.Description;
+            //        eventToIdAdedUser.ToId = model.Id;
+            //        string dateStrs = model.Date;
+            //        var dateFormats = "yyyy-MM-dd";
+            //        DateTime emailPropertyDateTimes = model.EmailProperty.StartDate;
+            //        DateTime emailPropertyDateTimeEnds = model.EmailProperty.EndDate;
+            //        DateTime dateParts = DateTime.ParseExact(dateStrs, dateFormats, null);
+            //        model.StartDate = new DateTime(
+            //        dateParts.Year, // Yıl
+            //        dateParts.Month, // Ay
+            //        dateParts.Day, // Gün
+            //        emailPropertyDateTimes.Hour, // Saat
+            //        emailPropertyDateTimes.Minute, // Dakika
+            //        emailPropertyDateTimes.Second // Saniye
+            //        );
+            //        model.EndDate = new DateTime(
+            //        dateParts.Year, // Yıl
+            //         dateParts.Month, // Ay
+            //        dateParts.Day, // Gün
+            //        emailPropertyDateTimeEnds.Hour, // Saat
+            //        emailPropertyDateTimeEnds.Minute, // Dakika
+            //        emailPropertyDateTimeEnds.Second // Saniye
+            //         );
+            //        eventToIdAdedUser.StartDate = model.StartDate;
+            //        eventToIdAdedUser.EndDate = model.EndDate;
+
+
+            //       if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
+            //       {
+            //           var filteredEmails = model.SelectedEmails
+            //                           .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
+            //                         .ToList();
+            //           model.SelectedEmails = filteredEmails;
+            //           model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
+            //           eventToIdAdedUser.Email = model.Email;
+            //       }
+            //       _context.Calendars.Add(eventToIdAdedUser);
+            //       _context.SaveChanges();
+            //   }
+            //   else
+            //   {
+
+            //   }
+            //}
+
+            //Güncellencek diğer kişiler
+            //    if (eventToIdUpdate != null)
+            //{
+            //    foreach (var item in eventToIdUpdate)
+            //    {
+            //        item.Title = model.Title;
+            //        item.Description = model.Description;
+            //        item.Date = model.Date;
+            //        item.UserId = eventToUpdate.UserId;
+            //        string dateStrs = model.Date;
+            //        var dateFormats = "yyyy-MM-dd";
+            //        DateTime emailPropertyDateTimes = model.EmailProperty.StartDate;
+            //        DateTime emailPropertyDateTimeEnds = model.EmailProperty.EndDate;
+            //        DateTime dateParts = DateTime.ParseExact(dateStrs, dateFormats, null);
+            //        model.StartDate = new DateTime(
+            //        dateParts.Year, // Yıl
+            //        dateParts.Month, // Ay
+            //        dateParts.Day, // Gün
+            //        emailPropertyDateTimes.Hour, // Saat
+            //        emailPropertyDateTimes.Minute, // Dakika
+            //        emailPropertyDateTimes.Second // Saniye
+            //        );
+            //        model.EndDate = new DateTime(
+            //     dateParts.Year, // Yıl
+            //     dateParts.Month, // Ay
+            //     dateParts.Day, // Gün
+            //     emailPropertyDateTimeEnds.Hour, // Saat
+            //     emailPropertyDateTimeEnds.Minute, // Dakika
+            //     emailPropertyDateTimeEnds.Second // Saniye
+            //    );
+            //        item.StartDate = model.StartDate;
+            //        item.EndDate = model.EndDate;
+
+            //        if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
+            //        {
+            //            var filteredEmails = model.SelectedEmails
+            //                            .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
+            //                          .ToList();
+            //            model.SelectedEmails = filteredEmails;
+            //            model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
+            //            item.Email = model.Email;
+            //        }
+            //        model.UserId = item.UserId;
+            //        model.Id = 0;
+            //        _context.Calendars.Update(item);
+            //        _context.SaveChanges();
+            //    }
+            //}
+            //kendisi
+            //if (eventToUpdate != null)
+            //   {
+            //       eventToUpdate.Title = model.Title;
+            //       eventToUpdate.Description = model.Description;
+            //       eventToUpdate.Date = model.Date;
+            //       eventToUpdate.UserId = currentUser.Id;
+            //       string dateStr = model.Date;
+            //       var dateFormat = "yyyy-MM-dd";
+            //       DateTime emailPropertyDateTime = model.EmailProperty.StartDate;
+            //       DateTime emailPropertyDateTimeEnd = model.EmailProperty.EndDate;
+            //       DateTime datePart = DateTime.ParseExact(dateStr, dateFormat, null);
+            //       model.StartDate = new DateTime(
+            //           datePart.Year, // Yıl
+            //           datePart.Month, // Ay
+            //           datePart.Day, // Gün
+            //           emailPropertyDateTime.Hour, // Saat
+            //           emailPropertyDateTime.Minute, // Dakika
+            //           emailPropertyDateTime.Second // Saniye
+            //       );
+            //       model.EndDate = new DateTime(
+            //            datePart.Year, // Yıl
+            //            datePart.Month, // Ay
+            //            datePart.Day, // Gün
+            //            emailPropertyDateTimeEnd.Hour, // Saat
+            //            emailPropertyDateTimeEnd.Minute, // Dakika
+            //            emailPropertyDateTimeEnd.Second // Saniye
+            //       );
+            //       eventToUpdate.StartDate = model.StartDate;
+            //       eventToUpdate.EndDate = model.EndDate;
+
+            //       if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
+            //       {
+            //           var filteredEmails = model.SelectedEmails
+            //                           .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
+            //                         .ToList();
+            //       model.SelectedEmails = filteredEmails;
+            //       var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails);
+            //       model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
+            //       eventToUpdate.Email = model.Email;
+            //       }
+            //   model.UserId = currentUser.Id;
+            //   model.Id = 0;
+            //   _context.Calendars.Update(eventToUpdate);
+            //   _context.SaveChanges();
         }
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
@@ -362,7 +560,8 @@ namespace CrmCorner.Controllers
                 StartDate = calendar.StartDate,
                 EndDate = calendar.EndDate,
                 Email = resultString,
-                NotEmail = resultStringNot
+                NotEmail = resultStringNot,
+                Date=calendar.Date,
                 // Diğer gerekli alanlar
             };
             return Json(new { Message = calendarDto });

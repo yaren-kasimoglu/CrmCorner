@@ -447,7 +447,8 @@
 
                 document.getElementById("modalTitle").innerHTML = info.event.title;
                 document.getElementById("modalTitle2").value = info.event.title;
-                document.getElementById("modalStart").textContent = info.event.start.toJSON().slice(0, 10);
+                //document.getElementById("modalStart").value = info.event.date;
+                //document.getElementById("modalStart").textContent = info.event.date.toJSON().slice(0, 10);
                 document.getElementById("Id").textContent = info.event.id;
                 document.getElementById("calendarId").value = info.event.id; // Hidden input for ID
                 $('#calendarModal').modal('show');
@@ -465,6 +466,13 @@
         document.getElementById("modalDescription").value = data.message.description;
         document.getElementById("modalDescription").innerHTML = data.message.description;
         document.getElementById("modalDescription").innerHTML = data.message.email;
+        console.log("info.event.date" + data.message.date);
+
+        const dateInput = document.getElementById('modalStart');
+
+        // Tarih alanını JSON'dan alınan değerle ayarla
+        dateInput.value = data.message.date;
+
         if (data.message.startDate != null && data.message.endDate!=null) {
             const startDateTime = new Date(data.message.startDate);
             const hours = startDateTime.getHours().toString().padStart(2, '0');
