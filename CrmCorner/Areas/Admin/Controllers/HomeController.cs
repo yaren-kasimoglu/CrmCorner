@@ -21,7 +21,7 @@ namespace CrmCorner.Areas.Admin.Controllers
         private readonly SignInManager<AppUser> _signInManager;
 
 
-
+        //deneme yorum
         public HomeController(UserManager<AppUser> userManager, CrmCornerContext context = null, ILogger<HomeController> logger = null, SignInManager<AppUser> signInManager = null) : base(userManager)
         {
             _userManager = userManager;
