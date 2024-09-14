@@ -512,6 +512,7 @@ namespace CrmCorner.Controllers
                 {
                     validmail.Add(items);
                 }
+                validmail.Add(currentUser.Email);
                 var emailSend = sendEmailAsync2(currentUser.Email, model, validmail, guid, 2);
             }
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
@@ -642,7 +643,7 @@ namespace CrmCorner.Controllers
                     toEmails = string.Join(",", lastSelectedEmail);
                     // lastSelectedEmail'i kullan
                 }
-                string body;
+                string body=null;
                 System.Net.Mail.Attachment calendarAttachment=null;
                 // iCalendar dosyası oluşturma
                 if (type == 1)
