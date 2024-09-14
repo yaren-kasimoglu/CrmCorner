@@ -29,6 +29,7 @@ using Microsoft.Office.Interop.Outlook;
 using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.VisualBasic;
 using static Google.Protobuf.Reflection.UninterpretedOption.Types;
+using System;
 
 namespace CrmCorner.Controllers
 {
@@ -123,6 +124,7 @@ namespace CrmCorner.Controllers
                     string lastEmailString = Calendar.SelectedEmails[Calendar.SelectedEmails.Count - 1];
                     emailArray = lastEmailString.Split(',');
                     Calendar.SelectedEmails = new List<string>(lastEmailString.Split(','));
+                    Guid guid=Guid.NewGuid();
                     Calendar newCalendars = new Calendar
                     {
                         UserId = currentUser.Id,
@@ -131,6 +133,7 @@ namespace CrmCorner.Controllers
                         Date = Calendar.Date,
                         EmailProperty = Calendar.EmailProperty,
                         Email = lastEmailString != null ? lastEmailString : "bos",
+                        Guid = guid.ToString(),
                     };
 
 
@@ -162,6 +165,7 @@ namespace CrmCorner.Controllers
                                 Date = Calendar.Date,
                                 EmailProperty = Calendar.EmailProperty,
                                 Email = lastEmailString,
+                                Guid=guid.ToString(),
                             };
 
 
@@ -192,7 +196,7 @@ namespace CrmCorner.Controllers
                     // Tüm geçerli e-posta adreslerine toplu e-posta gönderimi
                     if (validEmails.Count > 0)
                     {
-                       await sendEmailAsync2(currentUser.Email,Calendar, validEmails);
+                       await sendEmailAsync2(currentUser.Email,Calendar, validEmails,guid,1);
                     }
                 }
            
@@ -221,6 +225,7 @@ namespace CrmCorner.Controllers
                        .Include(e => e.AppUser)
                        .Where(e => e.ToId == model.Id || e.Id==model.Id)
                        .ToList();
+            Guid guid = Guid.NewGuid();
             foreach (var item in eventToIdUpdate)
             {
                 item.Date = model.Date;
@@ -321,7 +326,7 @@ namespace CrmCorner.Controllers
             var filteredEmails2 = model.SelectedEmails
                                             .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
                                           .ToList();
-            var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails2);
+            var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails2, guid,1);
 
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
 
@@ -481,14 +486,37 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var eventToDelete = await _context.Set<Calendar>().FindAsync(id);
-            if (eventToDelete != null)
+            var currentUser = await _userManager.GetUserAsync(User);
+            var eventToIdUpdate = _context.Calendars
+                      .Include(e => e.AppUser)
+                      .Where(e => e.ToId == id || e.Id == id)
+                      .ToList();
+            string[] emailArray = null;
+
+            if (eventToIdUpdate == null)
             {
-                _context.Set<Calendar>().Remove(eventToDelete);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+                return NotFound();
             }
-            return NotFound(); // Event bulunamazsa
+            foreach (var item in eventToIdUpdate)
+            {
+                _context.Calendars.Remove(item);
+                _context.SaveChanges();
+                Guid guid = new Guid(item.Guid);
+                guid = guid;
+                Calendar model = new Calendar();
+                model = item;
+                model.EmailProperty = new EmailProperty();
+                List<String> validmail = new List<string>();
+                emailArray = model.Email.Split(',');
+                foreach (var items in emailArray)
+                {
+                    validmail.Add(items);
+                }
+                validmail.Add(currentUser.Email);
+                var emailSend = sendEmailAsync2(currentUser.Email, model, validmail, guid, 2);
+            }
+            return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
+            
         }
         [HttpPost]
         //public async Task<IActionResult> CalendarUpdate(int? ID, string title,string description, string date,DateTime startdate,DateTime enddate)
@@ -597,18 +625,17 @@ namespace CrmCorner.Controllers
             return Json(new { Message = true });
 
         }
-        public async Task<ActionResult> sendEmailAsync2(string from, Calendar calendar,List<String>? validmail)
+        public async Task<ActionResult> sendEmailAsync2(string from, Calendar calendar,List<String>? validmail,Guid guid,int type)
         {
             try
             {
 
                 string fromEmail = from;
                 string subject = calendar.Title;
-                string body = "Merhaba,Yukarıda gönderilen event size " + calendar.Description + " açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
 
-                DateTime startTime = calendar.EmailProperty.StartDate;
+                DateTime startTime;
 
-                DateTime endTime = calendar.EmailProperty.EndDate;
+                DateTime endTime;
                 string toEmails = null;
                 if (calendar.SelectedEmails.Any())
                 {
@@ -616,11 +643,29 @@ namespace CrmCorner.Controllers
                     toEmails = string.Join(",", lastSelectedEmail);
                     // lastSelectedEmail'i kullan
                 }
-
-
+                string body=null;
+                System.Net.Mail.Attachment calendarAttachment=null;
                 // iCalendar dosyası oluşturma
-                string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, from);
-                System.Net.Mail.Attachment calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
+                if (type == 1)
+                {
+                    startTime =calendar.EmailProperty.StartDate;
+                    endTime = calendar.EmailProperty.EndDate;
+                     body = "Merhaba,Yukarıda gönderilen event size " + calendar.Description + " açıklaması ile atanmıştır. Lütfen takviminize ekleyiniz.. ";
+                    string icsContent = CreateICS(subject, body, startTime, endTime, fromEmail, from, guid);
+                    calendarAttachment = new System.Net.Mail.Attachment(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)), "invite.ics", "text/calendar");
+                }
+                if (type == 2)
+                {
+                    body = "Merhaba,Yukarıda gönderilen event size iptal için eklenmiştir. Lütfen takviminizde iptal etmeyi unutmayınız.. ";
+                    startTime = calendar.StartDate.Value;
+                    endTime = calendar.EndDate.Value;
+                    string icsContent = DeleteICS(subject, body, startTime, endTime, fromEmail, from, guid);
+                    calendarAttachment = new System.Net.Mail.Attachment(
+                        new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)),
+                        "cancelled-invite.ics",
+                        "text/calendar"
+                    );
+                }
 
                 // SMTP sunucusu bilgileri
                 var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
@@ -665,7 +710,7 @@ namespace CrmCorner.Controllers
             }
             return RedirectToAction("Calendar");
         }
-        static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails)
+        static string CreateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails,Guid guid)
         {
             TimeSpan gmtPlus3 = TimeSpan.FromHours(3);
             DateTime startTimeUtc = startTime - gmtPlus3;
@@ -682,7 +727,7 @@ namespace CrmCorner.Controllers
             ics.AppendLine($"DTEND:{endTimeUtc:yyyyMMddTHHmmssZ}");
             ics.AppendLine($"SUMMARY:{subject}");
             ics.AppendLine($"DESCRIPTION:{description}");
-            ics.AppendLine($"UID:{Guid.NewGuid()}");
+            ics.AppendLine($"UID:{guid}");
             foreach (var toEmail in emailsArray)
             {
                 ics.AppendLine($"ATTENDEE;CN=\"Takvim\";RSVP=TRUE:mailto:{toEmail}");
@@ -695,6 +740,40 @@ namespace CrmCorner.Controllers
 
             return ics.ToString();
         }
+        string DeleteICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails, Guid eventUid)
+        {
+            TimeSpan gmtPlus3 = TimeSpan.FromHours(3);
+            DateTime startTimeUtc = startTime - gmtPlus3;
+            DateTime endTimeUtc = endTime - gmtPlus3;
+
+            StringBuilder ics = new StringBuilder();
+            ics.AppendLine("BEGIN:VCALENDAR");
+            ics.AppendLine("VERSION:2.0");
+            ics.AppendLine("PRODID:-//Your Company//Your Product//EN");
+            ics.AppendLine("METHOD:CANCEL");  // Etkinliği iptal ettiğimizi belirtiyoruz
+            ics.AppendLine("BEGIN:VEVENT");
+            ics.AppendLine($"DTSTART:{startTimeUtc:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"DTEND:{endTimeUtc:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"SUMMARY:{subject}");
+            ics.AppendLine($"DESCRIPTION:{description}");
+            ics.AppendLine($"UID:{eventUid}");  // İptal edilecek etkinliğin UID'si
+            ics.AppendLine($"SEQUENCE:1");  // Genellikle SEQUENCE değeri artırılır
+            ics.AppendLine("STATUS:CANCELLED");  // Etkinliği iptal ettiğimizi belirtiyoruz
+            ics.AppendLine($"ORGANIZER;CN=\"{fromEmail}\":mailto:{fromEmail}");
+            if (!string.IsNullOrEmpty(toEmails))
+            {
+                var emailsArray = toEmails.Split(',');
+                foreach (var toEmail in emailsArray)
+                {
+                    ics.AppendLine($"ATTENDEE;CN=\"Takvim\";RSVP=TRUE:mailto:{toEmail}");
+                }
+            }
+            ics.AppendLine("END:VEVENT");
+            ics.AppendLine("END:VCALENDAR");
+
+            return ics.ToString();
+        }
+
 
 
 
