@@ -25,6 +25,7 @@ public class Calendar
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public int? ToId { get; set; }
+    public String? Guid { get; set; }
 
 
     [NotMapped]
@@ -33,6 +34,7 @@ public class Calendar
     public List<string> SelectedEmails { get; set; } = new List<string>();
     [NotMapped]
     public string? NotEmail { get; set; }
+
 
 
 }
