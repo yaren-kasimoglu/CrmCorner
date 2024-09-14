@@ -326,162 +326,9 @@ namespace CrmCorner.Controllers
             var filteredEmails2 = model.SelectedEmails
                                             .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
                                           .ToList();
-            var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails2, guid,1);
+            var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails2, guid,3);
 
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
-
-
-            //    foreach (var item in model.SelectedEmails)
-            //{
-            //    var currentUsers = await _userManager.FindByEmailAsync(item);
-            //    //İlk eklenmedi ama sonra eklendi
-            //    var eventToIdAdedUser = _context.Calendars
-            //        .Include(e => e.AppUser)
-            //        .Where(e => e.ToId == model.Id && e.UserId == currentUsers.Id)
-            //        .FirstOrDefault();
-
-            //    if (eventToIdAdedUser == null)
-            //    {
-            //        eventToIdAdedUser.Date = model.Date;
-            //        eventToIdAdedUser.Title = model.Title;
-            //        eventToIdAdedUser.Description = model.Description;
-            //        eventToIdAdedUser.ToId = model.Id;
-            //        string dateStrs = model.Date;
-            //        var dateFormats = "yyyy-MM-dd";
-            //        DateTime emailPropertyDateTimes = model.EmailProperty.StartDate;
-            //        DateTime emailPropertyDateTimeEnds = model.EmailProperty.EndDate;
-            //        DateTime dateParts = DateTime.ParseExact(dateStrs, dateFormats, null);
-            //        model.StartDate = new DateTime(
-            //        dateParts.Year, // Yıl
-            //        dateParts.Month, // Ay
-            //        dateParts.Day, // Gün
-            //        emailPropertyDateTimes.Hour, // Saat
-            //        emailPropertyDateTimes.Minute, // Dakika
-            //        emailPropertyDateTimes.Second // Saniye
-            //        );
-            //        model.EndDate = new DateTime(
-            //        dateParts.Year, // Yıl
-            //         dateParts.Month, // Ay
-            //        dateParts.Day, // Gün
-            //        emailPropertyDateTimeEnds.Hour, // Saat
-            //        emailPropertyDateTimeEnds.Minute, // Dakika
-            //        emailPropertyDateTimeEnds.Second // Saniye
-            //         );
-            //        eventToIdAdedUser.StartDate = model.StartDate;
-            //        eventToIdAdedUser.EndDate = model.EndDate;
-
-
-            //       if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
-            //       {
-            //           var filteredEmails = model.SelectedEmails
-            //                           .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
-            //                         .ToList();
-            //           model.SelectedEmails = filteredEmails;
-            //           model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
-            //           eventToIdAdedUser.Email = model.Email;
-            //       }
-            //       _context.Calendars.Add(eventToIdAdedUser);
-            //       _context.SaveChanges();
-            //   }
-            //   else
-            //   {
-
-            //   }
-            //}
-
-            //Güncellencek diğer kişiler
-            //    if (eventToIdUpdate != null)
-            //{
-            //    foreach (var item in eventToIdUpdate)
-            //    {
-            //        item.Title = model.Title;
-            //        item.Description = model.Description;
-            //        item.Date = model.Date;
-            //        item.UserId = eventToUpdate.UserId;
-            //        string dateStrs = model.Date;
-            //        var dateFormats = "yyyy-MM-dd";
-            //        DateTime emailPropertyDateTimes = model.EmailProperty.StartDate;
-            //        DateTime emailPropertyDateTimeEnds = model.EmailProperty.EndDate;
-            //        DateTime dateParts = DateTime.ParseExact(dateStrs, dateFormats, null);
-            //        model.StartDate = new DateTime(
-            //        dateParts.Year, // Yıl
-            //        dateParts.Month, // Ay
-            //        dateParts.Day, // Gün
-            //        emailPropertyDateTimes.Hour, // Saat
-            //        emailPropertyDateTimes.Minute, // Dakika
-            //        emailPropertyDateTimes.Second // Saniye
-            //        );
-            //        model.EndDate = new DateTime(
-            //     dateParts.Year, // Yıl
-            //     dateParts.Month, // Ay
-            //     dateParts.Day, // Gün
-            //     emailPropertyDateTimeEnds.Hour, // Saat
-            //     emailPropertyDateTimeEnds.Minute, // Dakika
-            //     emailPropertyDateTimeEnds.Second // Saniye
-            //    );
-            //        item.StartDate = model.StartDate;
-            //        item.EndDate = model.EndDate;
-
-            //        if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
-            //        {
-            //            var filteredEmails = model.SelectedEmails
-            //                            .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
-            //                          .ToList();
-            //            model.SelectedEmails = filteredEmails;
-            //            model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
-            //            item.Email = model.Email;
-            //        }
-            //        model.UserId = item.UserId;
-            //        model.Id = 0;
-            //        _context.Calendars.Update(item);
-            //        _context.SaveChanges();
-            //    }
-            //}
-            //kendisi
-            //if (eventToUpdate != null)
-            //   {
-            //       eventToUpdate.Title = model.Title;
-            //       eventToUpdate.Description = model.Description;
-            //       eventToUpdate.Date = model.Date;
-            //       eventToUpdate.UserId = currentUser.Id;
-            //       string dateStr = model.Date;
-            //       var dateFormat = "yyyy-MM-dd";
-            //       DateTime emailPropertyDateTime = model.EmailProperty.StartDate;
-            //       DateTime emailPropertyDateTimeEnd = model.EmailProperty.EndDate;
-            //       DateTime datePart = DateTime.ParseExact(dateStr, dateFormat, null);
-            //       model.StartDate = new DateTime(
-            //           datePart.Year, // Yıl
-            //           datePart.Month, // Ay
-            //           datePart.Day, // Gün
-            //           emailPropertyDateTime.Hour, // Saat
-            //           emailPropertyDateTime.Minute, // Dakika
-            //           emailPropertyDateTime.Second // Saniye
-            //       );
-            //       model.EndDate = new DateTime(
-            //            datePart.Year, // Yıl
-            //            datePart.Month, // Ay
-            //            datePart.Day, // Gün
-            //            emailPropertyDateTimeEnd.Hour, // Saat
-            //            emailPropertyDateTimeEnd.Minute, // Dakika
-            //            emailPropertyDateTimeEnd.Second // Saniye
-            //       );
-            //       eventToUpdate.StartDate = model.StartDate;
-            //       eventToUpdate.EndDate = model.EndDate;
-
-            //       if (model.SelectedEmails != null && model.SelectedEmails.Count > 0 && model.SelectedEmails[0] != null)
-            //       {
-            //           var filteredEmails = model.SelectedEmails
-            //                           .Where(email => !string.IsNullOrWhiteSpace(email) && email != "bos")
-            //                         .ToList();
-            //       model.SelectedEmails = filteredEmails;
-            //       var emailSend = sendEmailAsync2(currentUser.Email, model, filteredEmails);
-            //       model.Email = filteredEmails != null ? string.Join(",", filteredEmails) : "bos";
-            //       eventToUpdate.Email = model.Email;
-            //       }
-            //   model.UserId = currentUser.Id;
-            //   model.Id = 0;
-            //   _context.Calendars.Update(eventToUpdate);
-            //   _context.SaveChanges();
         }
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
@@ -518,20 +365,6 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Calendar"); // Başarılı işlemi belirten bir sayfaya yönlendirin.
             
         }
-        [HttpPost]
-        //public async Task<IActionResult> CalendarUpdate(int? ID, string title,string description, string date,DateTime startdate,DateTime enddate)
-        //{
-        //    var currentUser = await _userManager.GetUserAsync(User);
-        //    Calendar calendar = new Calendar { Id = ID.Value, Title = title, Date = date ,UserId= currentUser.Id,Description=description};
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Calendars.Update(calendar);
-        //        _context.SaveChanges();
-
-        //        return Json(new { Message = "success" });
-        //    }
-        //    return View("Calendar");
-        //}
 
         [HttpPost]
         public IActionResult CalendarDelete(int? ID)
@@ -666,7 +499,18 @@ namespace CrmCorner.Controllers
                         "text/calendar"
                     );
                 }
-
+                if (type == 3)
+                {
+                    body = "Merhaba,Yukarıda gönderilen event size " + calendar.Description + " açıklaması ile değiştirilmiştir. Lütfen takviminizde değişiklik yapmayı unutmayınız.. ";
+                    startTime = calendar.StartDate.Value;
+                    endTime = calendar.EndDate.Value;
+                    string icsContent = UpdateICS(subject, body, startTime, endTime, fromEmail, from, guid);
+                    calendarAttachment = new System.Net.Mail.Attachment(
+                        new System.IO.MemoryStream(Encoding.UTF8.GetBytes(icsContent)),
+                        "updated-invite.ics",
+                        "text/calendar"
+                    );
+                }
                 // SMTP sunucusu bilgileri
                 var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
                 {
@@ -682,13 +526,6 @@ namespace CrmCorner.Controllers
                     IsBodyHtml = true,
                 };
 
-                //MailMessage mailMessage = new MailMessage
-                //{
-                //    From = new MailAddress(fromEmail), // İstediğiniz "From" adresini burada belirleyin
-                //    Subject = subject,
-                //    Body = body,
-                //    IsBodyHtml = true
-                //};
                 if(validmail != null && validmail.Count>0)
                 {
                     foreach (var email in validmail)
@@ -774,7 +611,41 @@ namespace CrmCorner.Controllers
             return ics.ToString();
         }
 
+        string UpdateICS(string subject, string description, DateTime startTime, DateTime endTime, string fromEmail, string toEmails, Guid eventUid)
+        {
+            TimeSpan gmtPlus3 = TimeSpan.FromHours(3);
+            DateTime startTimeUtc = startTime - gmtPlus3;
+            DateTime endTimeUtc = endTime - gmtPlus3;
 
+            StringBuilder ics = new StringBuilder();
+            ics.AppendLine("BEGIN:VCALENDAR");
+            ics.AppendLine("VERSION:2.0");
+            ics.AppendLine("PRODID:-//Your Company//Your Product//EN");
+            ics.AppendLine("METHOD:REQUEST");  // Etkinliği güncelleme isteği belirtiyoruz
+            ics.AppendLine("BEGIN:VEVENT");
+            ics.AppendLine($"DTSTART:{startTimeUtc:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"DTEND:{endTimeUtc:yyyyMMddTHHmmssZ}");
+            ics.AppendLine($"SUMMARY:{subject}");
+            ics.AppendLine($"DESCRIPTION:{description}");
+            ics.AppendLine($"UID:{eventUid}");  // Güncellenen etkinliğin UID'si
+            ics.AppendLine($"SEQUENCE:2");  // SEQUENCE değerini artırıyoruz
+            ics.AppendLine($"STATUS:CONFIRMED");  // Güncellenmiş etkinliği belirtiyoruz
+            ics.AppendLine($"ORGANIZER;CN=\"{fromEmail}\":mailto:{fromEmail}");
+
+            if (!string.IsNullOrEmpty(toEmails))
+            {
+                var emailsArray = toEmails.Split(',');
+                foreach (var toEmail in emailsArray)
+                {
+                    ics.AppendLine($"ATTENDEE;CN=\"Takvim\";RSVP=TRUE:mailto:{toEmail.Trim()}");
+                }
+            }
+
+            ics.AppendLine("END:VEVENT");
+            ics.AppendLine("END:VCALENDAR");
+
+            return ics.ToString();
+        }
 
 
     }
