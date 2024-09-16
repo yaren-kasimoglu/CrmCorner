@@ -30,11 +30,13 @@
             <input asp-for="CustomerTitle" class="form-control" />
             <span asp-validation-for="CustomerTitle" class="text-danger"></span>
         </div>
+
         <div class="form-group">
             <label asp-for="PhoneNumber" class="control-label">Telefon Numarası</label>
-            <input asp-for="PhoneNumber" class="form-control" />
+            <input asp-for="PhoneNumber" id="PhoneNumber" class="form-control" type="tel" placeholder="5__-___-____" />
             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
         </div>
+
 
         <div class="form-group">
             <label asp-for="CompanyName" class="control-label">Firma Adı</label>
@@ -53,7 +55,7 @@
         </div>
         <div class="form-group">
             <label asp-for="Industry" class="control-label">Sektör</label>
-            @Html.DropDownListFor(model => model.Industry, (SelectList)ViewBag.IndustryTypes, "Seçiniz", new { @class = "form-control" })
+            @Html.DropDownListFor(model => model.Industry, (IEnumerable<SelectListItem>)ViewBag.IndustryTypes, "Seçiniz", new { @class = "form-control" })
             <span asp-validation-for="Industry" class="text-danger"></span>
         </div>
 
@@ -79,3 +81,16 @@
 
 <!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+
+
+@*TELEFON NUMARASI FORMATLAMAK İÇİN AŞAĞIDAKİ 2 CDN VE BİR SCRİPT YAZILMIŞTIR*@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7/inputmask.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#PhoneNumber").inputmask("5\\99-999-9999", {
+            "placeholder": "5__-___-____"
+        });
+    });
+</script>
