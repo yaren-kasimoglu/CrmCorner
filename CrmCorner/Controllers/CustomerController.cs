@@ -46,7 +46,7 @@ namespace CrmCorner.Controllers
                         // TeamLeader ise, kendi ve TeamMember rolündeki kullanıcıların müşterilerini getir
                         var teamMembers = await _userManager.GetUsersInRoleAsync("TeamMember");
                         var teamMemberIds = teamMembers.Where(u => u.CompanyId == currentUser.CompanyId).Select(u => u.Id).ToList();
-                        teamMemberIds.Add(currentUser.Id); 
+                        teamMemberIds.Add(currentUser.Id);
 
                         customersQuery = customersQuery.Where(c => teamMemberIds.Contains(c.AppUserId));
                     }
@@ -96,12 +96,22 @@ namespace CrmCorner.Controllers
                     })
                     .ToList();
 
-                // IndustryType enum'undan dropdown listesi için verileri hazırlama
-                ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
-                {
-                    Text = v.GetDisplayName(), // Enum için Display Attribute'unu okuyan extension method
-                    Value = ((int)v).ToString()
-                }).ToList(), "Value", "Text");
+                //// IndustryType enum'undan dropdown listesi için verileri hazırlama
+                //ViewBag.IndustryTypes = new SelectList(Enum.GetValues(typeof(IndustryType)).Cast<IndustryType>().Select(v => new SelectListItem
+                //{
+                //    Text = v.GetDisplayName(), // Enum için Display Attribute'unu okuyan extension method
+                //    Value = ((int)v).ToString()
+                //}).ToList(), "Value", "Text");
+
+                var industryTypes = Enum.GetValues(typeof(CrmCorner.Models.Enums.IndustryType))
+                        .Cast<CrmCorner.Models.Enums.IndustryType>()
+                        .Select(e => new SelectListItem
+                        {
+                            Value = ((int)e).ToString(),
+                            Text = e.GetDisplayName().ToString()
+                        }).ToList();
+
+                ViewBag.IndustryTypes = industryTypes;
 
                 ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
                     .Cast<EmployeeCountRange>()

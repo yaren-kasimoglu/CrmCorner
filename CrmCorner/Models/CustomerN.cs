@@ -15,6 +15,8 @@ public partial class CustomerN
 
     public string CustomerEmail { get; set; } = null!;
     public string CustomerTitle { get; set; }
+
+    [RegularExpression(@"^\d{10}$", ErrorMessage = "Lütfen 10 haneli bir telefon numarası giriniz.")]
     public string PhoneNumber { get; set; } = null!;
 
     public string CompanyName { get; set; } = null!;
