@@ -7,6 +7,8 @@ namespace CrmCorner.Migrations
     /// <inheritdoc />
     public partial class HeardFromEkle1 : Migration
     {
+        
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {

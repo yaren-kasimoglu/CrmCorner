@@ -3,8 +3,20 @@
     ViewData["Title"] = "CustomerAdd";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
-<div>&nbsp;</div>
-<div>&nbsp;</div>
+<!-- Hataları göstermek için -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+
 <div class="col-md-6 offset-md-0">
     <form asp-action="CustomerAdd" method="post">
         <div class="form-group">
@@ -53,6 +65,7 @@
             @Html.DropDownListFor(m=>m.AppUserId,(List<SelectListItem>)  ViewBag.AppUsers,"Seçiniz",new {@class="form-select", aria_label="AppUserId",@id="AppUserId", @required="required"})
             <span asp-validation-for="AppUserId" class="text-danger"></span>
         </div>
+
         <div class="form-group">
             <label asp-for="Industry" class="control-label">Sektör</label>
             @Html.DropDownListFor(model => model.Industry, (IEnumerable<SelectListItem>)ViewBag.IndustryTypes, "Seçiniz", new { @class = "form-control" })
@@ -81,6 +94,48 @@
 
 <!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        // Formun submit olayını yakala
+        $("form").on("submit", function (e) {
+            // Boş bırakılan nullable alanları topla
+            var emptyFields = [];
+
+            // Kontrol edilecek alanlar
+            var nullableFields = [
+                { name: "CustomerEmail", label: "Müşteri Email" },
+                { name: "CustomerTitle", label: "Pozisyon" },
+                { name: "PhoneNumber", label: "Telefon Numarası" },
+                { name: "CompanyName", label: "Firma Adı" },
+                { name: "CompanyEmail", label: "Firma Email" }
+            ];
+
+            // Boş alanları kontrol et
+            nullableFields.forEach(function (field) {
+                var value = $("#" + field.name).val(); // Alanın değerini al
+                if (!value || value.trim() === "") { // Eğer boşsa listeye ekle
+                    emptyFields.push(field.label);
+                }
+            });
+
+            // Eğer boş alan varsa
+            if (emptyFields.length > 0) {
+                // Boş alanları kullanıcıya göster
+                var message = "Aşağıdaki alanlar boş bırakılmış:\n\n" + emptyFields.join("\n") + "\n\nOnaylıyor musunuz?";
+
+                // Kullanıcıya onay sor
+                var confirmed = confirm(message);
+
+                if (!confirmed) {
+                    // Eğer kullanıcı onaylamazsa, formun gönderilmesini engelle
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+</script>
 
 
 

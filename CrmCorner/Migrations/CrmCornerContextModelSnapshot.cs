@@ -184,6 +184,9 @@ namespace CrmCorner.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Guid")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime?>("StartDate")
                         .HasMaxLength(50)
                         .HasColumnType("datetime(6)");
@@ -192,6 +195,9 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
+
+                    b.Property<int?>("ToId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
@@ -267,22 +273,18 @@ namespace CrmCorner.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("CompanyEmail")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("CompanyName")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CustomerEmail")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("CustomerTitle")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int?>("EmployeeCount")
@@ -299,7 +301,6 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Surname")

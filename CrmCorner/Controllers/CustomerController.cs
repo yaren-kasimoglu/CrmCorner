@@ -26,6 +26,11 @@ namespace CrmCorner.Controllers
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    ErrorHelper.HandleError(this, "Geçerli kullanıcı bilgisi bulunamadı.");
+                    return RedirectToAction("NotFound", "Error");
+                }
 
                 ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
@@ -65,9 +70,20 @@ namespace CrmCorner.Controllers
                     return View();
                 }
             }
+            catch (NullReferenceException ex)
+            {
+                ErrorHelper.HandleError(this, "Veri bulunamadı: " + ex.Message);
+                return RedirectToAction("NotFound", "Error");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                ErrorHelper.HandleError(this, "Yetkisiz erişim: " + ex.Message);
+                return RedirectToAction("Unauthorized", "Error");
+            }
             catch (Exception ex)
             {
-                return RedirectToAction("NotFound", "Error");
+                ErrorHelper.HandleError(this, "Bir hata oluştu: " + ex.Message);
+                return RedirectToAction("Error", "Error"); // Genel hata sayfası
             }
         }
 
@@ -146,12 +162,24 @@ namespace CrmCorner.Controllers
 
                     return RedirectToAction("CustomerList");
                 }
+                else
+                {
+                    // ModelState hatalarını yakala ve bunları kullanıcıya göster
+                    foreach (var modelState in ModelState.Values)
+                    {
+                        foreach (var error in modelState.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.ErrorMessage);
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                return RedirectToAction("NotFound", "Error");
+                ModelState.AddModelError(string.Empty, "Bir hata oluştu: " + ex.Message);
             }
 
+            // ViewBag verilerini yeniden yükleyin, çünkü sayfa doğrulama hatası nedeniyle geri dönüyor
             var appUsers = _userManager.Users.ToList();
             var appUserItems = appUsers
                 .Select(u => new SelectListItem
@@ -163,7 +191,25 @@ namespace CrmCorner.Controllers
 
             ViewBag.AppUsers = appUserItems;
 
-            return View(customer);
+            var industryTypes = Enum.GetValues(typeof(CrmCorner.Models.Enums.IndustryType))
+                .Cast<CrmCorner.Models.Enums.IndustryType>()
+                .Select(e => new SelectListItem
+                {
+                    Value = ((int)e).ToString(),
+                    Text = e.GetDisplayName()
+                }).ToList();
+
+            ViewBag.IndustryTypes = new SelectList(industryTypes, "Value", "Text");
+
+            ViewBag.EmployeeCountSelectList = Enum.GetValues(typeof(EmployeeCountRange))
+                .Cast<EmployeeCountRange>()
+                .Select(e => new SelectListItem
+                {
+                    Text = e.GetDisplayName(),
+                    Value = ((int)e).ToString()
+                }).ToList();
+
+            return View(customer); // ModelState geçersiz olduğu için form yeniden yüklenir
         }
 
         [HttpGet]
