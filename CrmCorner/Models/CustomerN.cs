@@ -13,15 +13,15 @@ public partial class CustomerN
 
     public string Surname { get; set; } = null!;
 
-    public string CustomerEmail { get; set; } = null!;
-    public string CustomerTitle { get; set; }
+    public string? CustomerEmail { get; set; } = null!;
+    public string? CustomerTitle { get; set; }
 
     [RegularExpression(@"^\d{10}$", ErrorMessage = "Lütfen 10 haneli bir telefon numarası giriniz.")]
-    public string PhoneNumber { get; set; } = null!;
+    public string? PhoneNumber { get; set; } = null!;
 
-    public string CompanyName { get; set; } = null!;
+    public string? CompanyName { get; set; } = null!;
 
-    public string CompanyEmail { get; set; } = null!;
+    public string? CompanyEmail { get; set; } = null!;
 
     public DateTime CreatedDate { get; set; }
 
