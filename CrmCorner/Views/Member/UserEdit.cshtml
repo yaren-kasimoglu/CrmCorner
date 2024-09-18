@@ -54,7 +54,7 @@
                         <span class="text-danger" asp-validation-for="Email"></span>
                     </div>
                     <div class="form-floating mb-1">
-                        <input asp-for="Phone" class="form-control">
+                        <input asp-for="Phone" class="form-control" type="tel" placeholder="5__-___-____" >
                         <label asp-for="Phone"></label>
                         <span class="text-danger" asp-validation-for="Phone"></span>
                     </div>
@@ -123,3 +123,9 @@
 
 <!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+<script>$(document).ready(function () {
+    $("#Phone").inputmask("5\\99-999-9999", {
+            "placeholder": "5__-___-____"
+        });
+    });</script>
