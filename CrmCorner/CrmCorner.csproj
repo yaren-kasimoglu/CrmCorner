@@ -25,6 +25,7 @@
     <None Remove="Views\ToDoList\" />
     <Content Remove="wwwroot\icons\" />
     <Content Remove="wwwroot\icons\todo\" />
+    <None Remove="Views\EmailList\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.SignalR" Version="2.4.3" />
@@ -81,6 +82,7 @@
 
     <Folder Include="wwwroot\icons\" />
     <Folder Include="wwwroot\icons\todo\" />
+    <Folder Include="Views\EmailList\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\CRMTema\bootstrap4\assets\images\coin\BTC.svg" />
