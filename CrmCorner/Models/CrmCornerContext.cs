@@ -38,6 +38,7 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     public DbSet<TaskCompNote> TaskCompNotes { get; set; }
 
     public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
+    public DbSet<EmailList> EmailList { get; set; }
 
 
 
