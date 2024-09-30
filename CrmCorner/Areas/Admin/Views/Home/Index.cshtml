@@ -157,16 +157,18 @@
 
 <div class="row">
     <div class="col-xl-4 col-lg-4 col-md-12">
-        <div class="custom-card" style="width: 100%;">
-            <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
-            <div class="card-body">
-                <canvas id="userTaskStatusChart"></canvas>
-            </div>
+        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
+            <canvas id="valueOfferChartTL"></canvas>
         </div>
     </div>
-    <div class="col-xl-8 col-lg-8 col-md-12">
+    <div class="col-xl-4 col-lg-4 col-md-12">
         <div class="chart-container" style="position: relative; height:40vh; width:100%;">
-            <canvas id="valueOfferChart"></canvas>
+            <canvas id="valueOfferChartEU"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-4 col-md-12">
+        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
+            <canvas id="valueOfferChart$"></canvas>
         </div>
     </div>
 </div>
@@ -200,6 +202,17 @@
             </div>
         </div>
     </div>
+</div>
+
+<div>
+<div class="col-xl-4 col-lg-4 col-md-12">
+    <div class="custom-card" style="width: 100%;">
+        <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
+        <div class="card-body">
+            <canvas id="userTaskStatusChart"></canvas>
+        </div>
+    </div>
+</div>
 </div>
 
 
@@ -606,9 +619,87 @@
         }
     });</script>
 
+   <script>
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/Home/ValueOfferChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                createChart('valueOfferChartTL', data.tlChart, '₺');
+                createChart('valueOfferChartEU', data.euChart, '€');
+                createChart('valueOfferChart$', data.dollarChart, '$');
+            },
+            error: function (xhr, status, error) {
+                console.error('Veri getirilirken hata oluştu:', error);
+            }
+        });
 
+        // Grafik oluşturma fonksiyonu
+        function createChart(canvasId, chartData,currency) {
+            var ctx = document.getElementById(canvasId).getContext('2d');
+            var colors = generateColors(chartData.labels.length);
 
-<script type="text/javascript">
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Değer Teklifi (' + currency + ')',
+                        data: chartData.data,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    var label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+
+                                    var value = context.dataset.data[context.dataIndex]; // Toplam Değer
+                                    var index = context.dataIndex;
+                                    var taskNames = chartData.taskNames[index];
+
+                                    var lines = [
+                                        label + value + ' ' + currency, // Toplam Değer ve Para Birimi
+                                        'Görev: ' + taskNames.join(', ') // Görev isimleri
+                                    ];
+
+                                    return lines;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var predefinedColors = [
+                '#A3D9A5', '#FFDAC1', '#BAFFB3', '#C2C2F0', '#B3F3D0', '#BAE1FF',
+                '#FFB3BA', '#FFDFBA', '#FFFFBA', '#D5AAFF', '#FFB3E6'
+            ];
+            return predefinedColors.slice(0, count);
+        }
+    });
+
+       </script>
+
+@*<script type="text/javascript">
     $(document).ready(function () {
         $.ajax({
             type: "GET",
@@ -688,7 +779,8 @@
             return predefinedColors.slice(0, count);
         }
     });
-</script>
+
+</script>*@
 
 <script type="text/javascript">
     $(document).ready(function () {
