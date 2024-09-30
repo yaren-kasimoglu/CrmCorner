@@ -14,6 +14,7 @@ public partial class TaskComp
 
     [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
     public decimal? ValueOrOffer { get; set; }
+    public string? SelectedCurrency { get; set; }
 
     public string? Description { get; set; }
 
@@ -62,7 +63,6 @@ public partial class TaskComp
     public virtual ICollection<TaskCompNote> Notes { get; set; } = new List<TaskCompNote>();
 
 
-    public string? SelectedCurrency { get; set; } 
 
 
 }
