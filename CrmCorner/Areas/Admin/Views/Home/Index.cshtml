@@ -620,6 +620,7 @@
     });</script>
 
    <script>
+
     $(document).ready(function () {
         $.ajax({
             type: "GET",
@@ -637,20 +638,31 @@
         });
 
         // Grafik oluşturma fonksiyonu
-        function createChart(canvasId, chartData,currency) {
+        function createChart(canvasId, chartData, currency) {
             var ctx = document.getElementById(canvasId).getContext('2d');
             var colors = generateColors(chartData.labels.length);
+
+            // Her görevi ayrı sütun olarak göstermek için data yapısını dönüştürelim
+            var datasets = [];
+            for (var i = 0; i < chartData.data.length; i++) {
+                var tasksInRange = chartData.data[i];
+                var taskNamesInRange = chartData.taskNames[i];
+
+                for (var j = 0; j < tasksInRange.length; j++) {
+                    datasets.push({
+                        label: taskNamesInRange[j] + ' (' + currency + ')', // Görev isimlerini geri ekledik
+                        data: Array(i).fill(null).concat(tasksInRange[j]), // Veriyi doğru aralığa yerleştiriyoruz
+                        backgroundColor: colors[i % colors.length],
+                        borderWidth: 1
+                    });
+                }
+            }
 
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: chartData.labels,
-                    datasets: [{
-                        label: 'Değer Teklifi (' + currency + ')',
-                        data: chartData.data,
-                        backgroundColor: colors,
-                        borderWidth: 1
-                    }]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
@@ -665,12 +677,8 @@
                                     }
 
                                     var value = context.dataset.data[context.dataIndex]; // Toplam Değer
-                                    var index = context.dataIndex;
-                                    var taskNames = chartData.taskNames[index];
-
                                     var lines = [
-                                        label + value + ' ' + currency, // Toplam Değer ve Para Birimi
-                                        'Görev: ' + taskNames.join(', ') // Görev isimleri
+                                        label + value + ' ' + currency // Toplam Değer ve Para Birimi
                                     ];
 
                                     return lines;
@@ -696,6 +704,7 @@
             return predefinedColors.slice(0, count);
         }
     });
+
 
        </script>
 

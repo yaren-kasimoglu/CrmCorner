@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using System.Drawing;
 using Org.BouncyCastle.Asn1.Crmf;
 using System;
 using System.Runtime.CompilerServices;
@@ -1329,6 +1332,94 @@ namespace CrmCorner.Controllers
                 return View("Error");
             }
         }
+
+
+        //EXCEL EXPORT
+        [HttpGet]
+        public async Task<IActionResult> ExportTasksToExcel()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            // Mevcut kullanıcının kimliği ve rolünü alın
+            var currentUser = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(currentUser);
+
+            List<TaskComp> tasks;
+
+            if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                // Admin ise, aynı şirketteki tüm kullanıcıların görevlerini al
+                var companyUserIds = _context.Users
+                    .Where(u => u.CompanyId == currentUser.CompanyId)
+                    .Select(u => u.Id)
+                    .ToList();
+
+                tasks = await _context.TaskComps
+                    .Include(e => e.Status)
+                    .Include(e => e.Customer)
+                    .Include(e => e.AppUser)
+                    .Where(t => companyUserIds.Contains(t.UserId) || companyUserIds.Contains(t.AssignedUserId))
+                    .ToListAsync();
+            }
+            else
+            {
+                // Admin değilse, sadece kendi UserId veya AssignedUserId olduğu görevleri al
+                tasks = await _context.TaskComps
+                    .Include(e => e.Status)
+                    .Include(e => e.Customer)
+                    .Include(e => e.AppUser)
+                    .Where(t => t.UserId == currentUser.Id || t.AssignedUserId == currentUser.Id)
+                    .ToListAsync();
+            }
+
+            // Excel dosyasını oluştur
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Tasks");
+
+                // Başlıkları ekle
+                worksheet.Cells[1, 1].Value = "Görev Başlığı";
+                worksheet.Cells[1, 2].Value = "Durum";
+                worksheet.Cells[1, 3].Value = "Değer Teklifi";
+                worksheet.Cells[1, 4].Value = "Açıklama";
+                worksheet.Cells[1, 5].Value = "Satış Tarihi";
+                worksheet.Cells[1, 6].Value = "Oluşturulma Tarihi";
+                worksheet.Cells[1, 7].Value = "Müşteri";
+                worksheet.Cells[1, 8].Value = "Kullanıcı";
+
+                // Verileri doldur
+                int row = 2;
+                foreach (var task in tasks)
+                {
+                    worksheet.Cells[row, 1].Value = task.Title;
+                    worksheet.Cells[row, 2].Value = task.Status?.StatusName;
+                    worksheet.Cells[row, 3].Value = task.ValueOrOffer.HasValue ? task.ValueOrOffer.Value.ToString("N2") : "";
+                    worksheet.Cells[row, 4].Value = task.Description;
+                    worksheet.Cells[row, 5].Value = task.SalesDone?.ToString("yyyy-MM-dd");
+                    worksheet.Cells[row, 6].Value = task.CreatedDate.ToString("yyyy-MM-dd");
+                    worksheet.Cells[row, 7].Value = $"{task.Customer?.Name} {task.Customer?.Surname}";
+                    worksheet.Cells[row, 8].Value = task.AppUser?.UserName;
+                    row++;
+                }
+
+                // Stil ayarları
+                worksheet.Cells[1, 1, 1, 8].Style.Font.Bold = true;
+                worksheet.Cells[1, 1, 1, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                worksheet.Cells[1, 1, 1, 8].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                // Excel dosyasını indirme olarak kullanıcıya gönder
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+                var fileName = $"Tasks_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(stream, contentType, fileName);
+            }
+        }
+
 
     }
 

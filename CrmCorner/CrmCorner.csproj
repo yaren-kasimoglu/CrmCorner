@@ -28,6 +28,7 @@
     <None Remove="Views\EmailList\" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.4.0" />
     <PackageReference Include="Microsoft.AspNet.SignalR" Version="2.4.3" />
     <PackageReference Include="Microsoft.AspNet.SignalR.Owin" Version="1.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.39" />
