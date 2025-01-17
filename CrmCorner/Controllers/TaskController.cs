@@ -129,6 +129,8 @@ namespace CrmCorner.Controllers
 
 
 
+
+
         //YORUMA ALINDI 06.05.2024 GERİ AÇILACAK ROL İŞLEVLERİ YAPILINCA
         //public async Task<IActionResult> Index()
         //{
@@ -465,6 +467,8 @@ namespace CrmCorner.Controllers
                         await _context.SaveChangesAsync();
                     }
 
+                    // Orijinal CreatedBy değerini koru
+                    editedTask.CreatedBy = originalTask.CreatedBy;
 
                     // selectedCurrency değerini kontrol ediyoruz
                     originalTask.SelectedCurrency = editedTask.SelectedCurrency;
@@ -1420,6 +1424,107 @@ namespace CrmCorner.Controllers
             }
         }
 
+        //EXCEL ıMPORT
+
+        [HttpPost]
+        public async Task<IActionResult> ImportTasksFromExcel(IFormFile excelFile)
+        {
+            if (excelFile == null || excelFile.Length == 0)
+            {
+                TempData["ErrorMessage"] = "Lütfen bir Excel dosyası yükleyin.";
+                return RedirectToAction("TaskAdd");
+            }
+
+            try
+            {
+                // Mevcut kullanıcı bilgisi
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    TempData["ErrorMessage"] = "Geçerli kullanıcı bilgisi bulunamadı.";
+                    return RedirectToAction("TaskAdd");
+                }
+
+                using (var stream = new MemoryStream())
+                {
+                    await excelFile.CopyToAsync(stream);
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    using (var package = new ExcelPackage(stream))
+                    {
+                        var worksheet = package.Workbook.Worksheets.First();
+                        var rowCount = worksheet.Dimension.Rows;
+                        var tasks = new List<TaskComp>();
+
+                        for (int row = 2; row <= rowCount; row++) // 1. satır başlık olduğu için 2'den başlıyor
+                        {
+                            var outcomeText = worksheet.Cells[row, 6].Value?.ToString().Trim();
+
+                            // Eğer "Süreçte" yazılmışsa bunu "Surecte" olarak değiştir
+                            if (!string.IsNullOrEmpty(outcomeText) && outcomeText.Equals("Süreçte", StringComparison.OrdinalIgnoreCase))
+                            {
+                                outcomeText = "Surecte";
+                            }
+
+                            // Enum dönüşümü
+                            if (!Enum.TryParse(outcomeText, true, out OutcomeType outcome))
+                            {
+                                TempData["ErrorMessage"] = $"Sonuç Durumu sütunundaki değer geçersiz. Lütfen Excel dosyanızı kontrol edin. Satır: {row}";
+                                return RedirectToAction("TaskAdd");
+                            }
+
+                            var isFinalDecisionMakerText = worksheet.Cells[row, 8].Value?.ToString().Trim().ToLower();
+                            var isFinalDecisionMaker = isFinalDecisionMakerText == "evet";
+
+                            var task = new TaskComp
+                            {
+                                Title = worksheet.Cells[row, 1].Value?.ToString().Trim(),
+                                ValueOrOffer = decimal.TryParse(worksheet.Cells[row, 2].Value?.ToString().Trim(), out var value) ? value : 0,
+                                Description = worksheet.Cells[row, 3].Value?.ToString().Trim(),
+                                HeardFrom = worksheet.Cells[row, 4].Value?.ToString().Trim(),
+                                SalesDone = DateTime.TryParse(worksheet.Cells[row, 5].Value?.ToString().Trim(), out var date) ? date : (DateTime?)null,
+                                Outcomes = outcome,
+                                NegativeReason = (outcome == OutcomeType.Olumsuz) ? worksheet.Cells[row, 7].Value?.ToString().Trim() : null,
+                                IsFinalDecisionMaker = isFinalDecisionMaker,
+                                AssignedUserId = currentUser.Id, // Yükleyen kullanıcı AssignedUser olarak atanıyor
+                                UserId = currentUser.Id, // Yükleyen kullanıcı AppUser olarak atanıyor
+                              //  CustomerId = currentUser.CompanyId, // Mevcut kullanıcının şirket ID'si atanıyor
+                                CreatedBy = currentUser.Id, // Görevi oluşturan olarak mevcut kullanıcı atanıyor
+                                StatusId = 1 // İlk Temas durumu
+                            };
+
+                            // Eğer "Sonuç Durumu" olumsuz ise "NegativeReason" kontrol edilir
+                            if (outcome == OutcomeType.Olumsuz && string.IsNullOrEmpty(task.NegativeReason))
+                            {
+                                TempData["ErrorMessage"] = $"Olumsuz Sonuç Durumu için Negatif Sebep sütunu boş olamaz. Satır: {row}";
+                                return RedirectToAction("TaskAdd");
+                            }
+
+                            // Eğer başlık ve açıklama eksikse geçerli kayıt oluşturulamaz
+                            if (string.IsNullOrEmpty(task.Title) || string.IsNullOrEmpty(task.Description))
+                            {
+                                TempData["ErrorMessage"] = $"Başlık ve Açıklama alanları zorunludur. Lütfen Excel dosyanızı kontrol edin. Satır: {row}";
+                                return RedirectToAction("TaskAdd");
+                            }
+
+                            tasks.Add(task);
+                        }
+
+                        // Tüm görevleri veritabanına kaydet
+                        _context.TaskComps.AddRange(tasks);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                TempData["SuccessMessage"] = "Excel verileri başarıyla içe aktarıldı. Görevler mevcut kullanıcıya atandı.";
+                return RedirectToAction("Index", "Task");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Excel dosyasını işlerken bir hata oluştu: " +
+                    (ex.InnerException?.Message ?? ex.Message);
+                return RedirectToAction("TaskAdd");
+            }
+        }
 
     }
 

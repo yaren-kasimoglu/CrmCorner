@@ -108,6 +108,7 @@
     .selected-status {
         order: -1; /* Bu, seçilen statü kutusunun öncelikli olarak sola hizalanmasını sağlar */
     }
+
     .final-decision-filter {
         display: flex;
         align-items: center;
@@ -151,15 +152,15 @@
         border: 2px solid #000; /* Örnek: kalın siyah kenarlık */
     }
 
-            /* Hover efektleri */
-            .search-box input[type="text"]:hover,
-            .search-box input[type="text"]:focus,
-            .status-filter select:hover,
-            .status-filter select:focus,
-            .final-decision-filter select:hover,
-            .final-decision-filter select:focus {
-                background-color: #e6e6e6;
-            }
+    /* Hover efektleri */
+    .search-box input[type="text"]:hover,
+    .search-box input[type="text"]:focus,
+    .status-filter select:hover,
+    .status-filter select:focus,
+    .final-decision-filter select:hover,
+    .final-decision-filter select:focus {
+        background-color: #e6e6e6;
+    }
 
     @@media (max-width: 768px) {
         .search-filter-container {
@@ -174,6 +175,8 @@
             border: 3px solid #2D6187; /* Gri tonlu 1 piksel kalınlığında çerçeve */
             border-radius: 4px; /* Hafif yuvarlatılmış köşeler için */
         }
+
+ 
     }
 
 
@@ -193,6 +196,38 @@
         .scroll-arrow:hover {
             color: #006400;
         }
+
+
+
+
+    /* Default warning sınıfı: Kırmızı çerçeve */
+    .default-warning {
+        border: 2px solid red; /* Kırmızı çerçeve */
+        border-radius: 5px; /* Hafif yuvarlatılmış köşeler */
+        background-color: #ffe6e6; /* Açık kırmızı arka plan */
+        padding: 10px; /* İç boşluk */
+        margin-bottom: 10px; /* Alt boşluk */
+        transition: background-color 0.3s ease, border-color 0.3s ease; /* Geçiş efekti */
+    }
+
+    /* Uyarı simgesi */
+    .default-warning-icon {
+        color: red; /* Kırmızı renk */
+        font-size: 18px; /* Simge boyutu */
+        margin-left: 10px; /* Sağdan boşluk */
+        vertical-align: middle; /* Ortada hizalama */
+    }
+
+    /* Hover efekt: Görev üzerine gelindiğinde */
+    .default-warning:hover {
+        background-color: #ffcccc; /* Daha koyu kırmızı arka plan */
+        border-color: #cc0000; /* Daha koyu kırmızı çerçeve */
+    }
+
+    /* Uyarı simgesi hover efekti */
+    .default-warning .default-warning-icon:hover {
+        color: #cc0000; /* Daha koyu kırmızı renk */
+    }
 </style>
 
 
@@ -232,7 +267,7 @@
                 <option value="3">Görüşme Gerçekleşti</option>
                 <option value="4">Teklif Gönderildi</option>
                 <option value="5">Sözleşme Aşamasında</option>
-             @*   <option value="6">Satış Tamamlandı</option>*@
+                @*   <option value="6">Satış Tamamlandı</option>*@
             </select>
         </div>
 
@@ -254,14 +289,36 @@
         <button type="button" id="filterButton">Filtrele</button>
         </div>*@
 
-        <div class="export-btn">
-            <a href="/Task/ExportTasksToExcel" class="btn btn-success">
-                <i class="fa fa-file-excel-o"></i> Excel'e Aktar
-            </a>
+        <div style="display: flex; gap: 10px;">
+            <div class="export-btn">
+                <a href="/Task/ExportTasksToExcel" class="btn btn-success">
+                    <i class="fa fa-file-excel-o"></i> Excel'e Aktar
+                </a>
+            </div>
+
+            <div class="import-btn">
+                <form action="/Task/ImportTasksFromExcel" method="post" enctype="multipart/form-data">
+                    <label for="excelUpload" class="btn btn-primary">
+                        <i class="fa fa-upload"></i> Excel'den İçe Aktar
+                    </label>
+                    <input type="file" id="excelUpload" name="excelFile" style="display: none;" onchange="this.form.submit()">
+                </form>
+            </div>
         </div>
+
     </div>
 </div>
 
+
+            @if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible my-custom-alert" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
 
 <div class="row g-3">
     @{
@@ -348,6 +405,7 @@
                                             data-user-id="@task.AppUser?.Id"
                                             data-assigned-user-name="@task.AssignedUser?.UserName"
                                             data-customer-name="@task.Customer?.Name @task.Customer?.Surname"
+                                            data-customer-id="@task.CustomerId"
                                             data-outcome-type="@task.Outcomes.ToString()">
                                             <div class="dd-handle">
                                                 <a href="/Task/TaskDetail/@task.TaskId" class="dd-item-title">
@@ -766,5 +824,25 @@
     function showHiddenTasks(statusKey) {
         $('ol.hidden-tasks[data-statusid="' + statusKey + '"]').toggle();
     }
+
+    //////////////////         UYARI DEFAULT        //////////////////////
+    document.addEventListener("DOMContentLoaded", function () {
+        var tasks = document.querySelectorAll(".dd-item");
+
+        tasks.forEach(function (task) {
+            var customerId = task.getAttribute("data-customer-id");
+
+            // Eğer CustomerId boş ise
+            if (!customerId) {
+                task.classList.add("default-warning");
+
+                var warningIcon = document.createElement("i");
+                warningIcon.className = "fa fa-exclamation-circle default-warning-icon";
+                task.querySelector(".dd-handle").appendChild(warningIcon);
+            }
+        });
+    });
+
+
 
 </script>

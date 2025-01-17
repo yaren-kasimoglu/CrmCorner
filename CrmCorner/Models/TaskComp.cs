@@ -15,7 +15,6 @@ public partial class TaskComp
     [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
     public decimal? ValueOrOffer { get; set; }
     public string? SelectedCurrency { get; set; }
-
     public string? Description { get; set; }
 
     [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
@@ -28,7 +27,7 @@ public partial class TaskComp
     [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
     public DateTime? FinalSalesDone { get; set; }
 
-    public int? StatusId { get; set; }
+
 
     public string? UserId { get; set; }
     public virtual AppUser? AppUser { get; set; }
@@ -36,6 +35,7 @@ public partial class TaskComp
     public string? AssignedUserId { get; set; } // Görüşmeyi gerçekleştiren kişinin UserId'si
     public virtual AppUser? AssignedUser { get; set; } // Görüşmeyi gerçekleştiren kişi
 
+    public int? StatusId { get; set; }
     public virtual Status? Status { get; set; }
 
     public int? CustomerId { get; set; }
@@ -50,8 +50,12 @@ public partial class TaskComp
 
     public int? CompanyId { get; set; }
 
-
     public string? HeardFrom { get; set; } // Nereden duydunuz?
+
+
+    public string? CreatedBy { get; set; } // Task'ı kimin oluşturduğu (örneğin, "DefaultUser")
+    public int? CreatedByCompanyId { get; set; } // Task'ın şirket kimliği
+
 
 
 
