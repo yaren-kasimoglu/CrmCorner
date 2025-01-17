@@ -314,6 +314,44 @@ namespace CrmCorner.Migrations
                     b.ToTable("CustomerNs");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.EmailList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Body")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CC")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("From")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool?>("IsStar")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("SendMail")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("To")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailList");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
                 {
                     b.Property<int>("FileAttachmentId")
@@ -471,6 +509,13 @@ namespace CrmCorner.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("CreatedByCompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
