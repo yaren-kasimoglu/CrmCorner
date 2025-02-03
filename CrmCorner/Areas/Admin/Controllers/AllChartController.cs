@@ -20,67 +20,65 @@ namespace CrmCorner.Areas.Admin.Controllers
             _context = context;
         }
 
-       public async Task<IActionResult> AllCharts()
+        public IActionResult AllUserTaskStatusChartsView()
         {
             return View();
         }
 
-        public async Task<IActionResult> CompanyUserTaskCharts()
+
+        public async Task<IActionResult> AllUserTaskStatusCharts()
         {
-            try
+            // Şirketin ID'sini al (örnek olarak CurrentUser'ın CompanyId'si üzerinden)
+            var companyId = _userManager.Users.FirstOrDefault(u => u.Id == _userManager.GetUserId(User))?.CompanyId;
+
+            if (companyId == null)
             {
-                // Şu anki kullanıcı ID'sini al
-                var currentUserId = _userManager.GetUserId(User);
-                if (currentUserId == null)
-                {
-                    ViewData["Error"] = "Geçerli kullanıcı ID'si alınamadı.";
-                    return View("AllCharts");
-                }
+                return Unauthorized();
+            }
 
-                // Şu anki kullanıcının bilgilerini al
-                var currentUser = await _context.Users
-                                                .FirstOrDefaultAsync(u => u.Id == currentUserId);
+            // Şirket çalışanlarını al
+            var users = await _userManager.Users
+                                          .Where(u => u.CompanyId == companyId)
+                                          .ToListAsync();
 
-                if (currentUser == null)
-                {
-                    ViewData["Error"] = "Kullanıcı bulunamadı.";
-                    return View("AllCharts");
-                }
+            // Her kullanıcı için görev durumlarını gruplandır
+            var allChartsData = new List<object>();
 
-                // Şu anki kullanıcı ile aynı şirketteki tüm kullanıcıları al
-                var companyUsers = await _context.Users
-                                                 .Where(u => u.CompanyId == currentUser.CompanyId)
-                                                 .Include(u => u.TaskComps)
-                                                 .ThenInclude(tc => tc.Status)
+            foreach (var user in users)
+            {
+                var userId = user.Id;
+
+                // Kullanıcının görevlerini al
+                var appUserTasks = await _context.TaskComps
+                                                 .Include(tc => tc.Status)
+                                                 .Where(tc => tc.UserId == userId)
                                                  .ToListAsync();
 
-                var chartDataList = new List<object>();
+                var assignedUserTasks = await _context.TaskComps
+                                                      .Include(tc => tc.Status)
+                                                      .Where(tc => tc.AssignedUserId == userId)
+                                                      .ToListAsync();
 
-                // Her kullanıcı için görev verilerini grupla ve grafik verisi oluştur
-                foreach (var user in companyUsers)
-                {
-                    var taskComps = user.TaskComps;
+                var combinedTasks = appUserTasks.Concat(assignedUserTasks).ToList();
 
-                    var chartData = taskComps.GroupBy(tc => tc.Status?.StatusName ?? "Durum Yok")
+                var chartData = combinedTasks.GroupBy(tc => tc.Status.StatusName)
                                              .Select(group => new
                                              {
                                                  StatusName = group.Key,
                                                  TaskNames = group.Select(tc => tc.Title).Distinct().ToList(),
-                                                 Count = group.Count()
+                                                 Count = group.Select(tc => tc.Title).Distinct().Count()
                                              }).ToList();
 
-                    chartDataList.Add(new { UserName = user.UserName, ChartData = chartData });
-                }
+                allChartsData.Add(new
+                {
+                    UserName = user.UserName, // Kullanıcı ismi
+                    ChartData = chartData
+                });
+            }
 
-                return Json(chartDataList);
-            }
-            catch (Exception ex)
-            {
-                // Hata mesajını ViewData'ya ekle ve view'i döndür
-                ViewData["Error"] = $"Hata oluştu: {ex.Message}";
-                return View("AllCharts");
-            }
+            return Json(allChartsData);
         }
+
 
 
 
