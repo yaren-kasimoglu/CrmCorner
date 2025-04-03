@@ -5,10 +5,28 @@
     ViewData["Title"] = "İçerik Listesi";
 }
 <style>
-    .card.bg-warning, .card.bg-success, .card.bg-danger {
+    .card.bg-warning {
         width: 200px; /* Kutuların genişliğini küçültüyoruz */
-        font-size: 5px; /* Yazı boyutunu küçültüyoruz */
+        font-size: 12px; /* Yazı boyutunu küçültüyoruz */
         margin: 0 auto; /* Ortalamak için */
+        background-color: #f8d57e !important;
+        border-color: #f1c40f; /* Sarı rengi daha pastel yapmak */
+    }
+
+    .card.bg-success {
+        width: 200px; /* Kutuların genişliğini küçültüyoruz */
+        font-size: 12px; /* Yazı boyutunu küçültüyoruz */
+        margin: 0 auto; /* Ortalamak için */
+        background-color: #81c784 !important; /* Daha pastel bir yeşil tonu */
+        border-color: #388e3c; /* Yeşil rengi yumuşatmak */
+    }
+
+    .card.bg-danger {
+        width: 200px; /* Kutuların genişliğini küçültüyoruz */
+        font-size: 12px; /* Yazı boyutunu küçültüyoruz */
+        margin: 0 auto; /* Ortalamak için */
+        background-color: #e57373 !important; /* Daha pastel bir kırmızı tonu */
+        border-color: #d32f2f; /* Kırmızı rengi daha yumuşak hale getirmek */
     }
 
     .card-body {
@@ -17,14 +35,15 @@
 
     .card-text.display-6 {
         font-size: 15px; /* Sayacın boyutunu küçültüyoruz */
-        color:black
+        color: black;
     }
 
     .card-title {
         font-size: 14px; /* Başlık boyutunu küçültüyoruz */
-        color: black
+        color: black;
     }
 </style>
+
 
 <div class="container mt-5">
     <h2 class="mb-4">📋 Planlanan Sosyal Medya İçerikleri</h2>

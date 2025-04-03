@@ -15,8 +15,21 @@ namespace CrmCorner.Models
         public DateTime CreatedDate { get; set; }
         public ContentStatus Status { get; set; } // OnayBekliyor, Onaylandı, FeedbackVerildi
 
-        public string? FeedbackMessage { get; set; } // Kullanıcının geri bildirimi varsa
+        // Geri Bildirim Koleksiyonu
+        public ICollection<Feedback> Feedbacks { get; set; }
         public DateTime? ScheduledPublishDate { get; set; }
 
     }
+
+    public class Feedback
+    {
+        public int Id { get; set; }
+        public int SocialMediaContentId { get; set; }  // İlgili içerik
+        public string Message { get; set; }  // Geri bildirim mesajı
+        public DateTime CreatedDate { get; set; }  // Geri bildirim oluşturulma tarihi
+
+        // İlişkiler
+        public SocialMediaContent SocialMediaContent { get; set; }
+    }
+
 }

@@ -40,6 +40,7 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
     public DbSet<EmailList> EmailList { get; set; }
     public DbSet<SocialMediaContent> SocialMediaContents { get; set; }
+    public DbSet<Feedback> Feedbacks { get; set; }
 
 
 
@@ -145,8 +146,15 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
             entity.ToTable("usertokens");
         });
 
+    
 
-        OnModelCreatingPartial(modelBuilder);
+        // Eğer gerekliyse, ilişkileri burada da tanımlayabilirsiniz
+        modelBuilder.Entity<Feedback>()
+            .HasOne(f => f.SocialMediaContent)
+            .WithMany(s => s.Feedbacks)
+            .HasForeignKey(f => f.SocialMediaContentId);
+
+    OnModelCreatingPartial(modelBuilder);
         modelBuilder.Entity<AppUserRole>()
        .HasKey(ur => new { ur.UserId, ur.RoleId });
 

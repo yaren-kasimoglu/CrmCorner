@@ -51,12 +51,9 @@
             }
         </p>
 
+        <!-- Geri Bildirim Gönderme -->
         @if (Model.Status == CrmCorner.Models.Enums.ContentStatus.OnayBekliyor)
         {
-            <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="d-inline">
-                <button type="submit" class="btn btn-success me-2">✅ Onayla</button>
-            </form>
-
             <form asp-action="SendFeedback" asp-route-id="@Model.Id" method="post">
                 <div class="mb-3 mt-3">
                     <label for="FeedbackMessage" class="form-label">📝 Geri Bildirim</label>
@@ -65,12 +62,25 @@
                 <button type="submit" class="btn btn-danger">📤 Feedback Gönder</button>
             </form>
         }
-        else if (!string.IsNullOrEmpty(Model.FeedbackMessage))
+
+        <!-- Geri Bildirimlerin Listelenmesi -->
+        <h5 class="mt-4">📬 Verilen Geri Bildirimler:</h5>
+        @if (Model.Feedbacks != null && Model.Feedbacks.Any())
         {
-            <div class="mt-4">
-                <h5>📬 Verilen Geri Bildirim:</h5>
-                <p class="border rounded p-3 bg-light">@Model.FeedbackMessage</p>
-            </div>
+            <ul class="list-group">
+                @foreach (var feedback in Model.Feedbacks)
+                {
+                    <li class="list-group-item">
+                        <strong>@feedback.Message</strong><br />
+                        <small class="text-muted">Gönderilme Tarihi: @feedback.CreatedDate.ToString("dd.MM.yyyy HH:mm")</small>
+                    </li>
+                }
+            </ul>
         }
+        else
+        {
+            <p>Henüz geri bildirim yapılmamış.</p>
+        }
+
     </div>
 </div>

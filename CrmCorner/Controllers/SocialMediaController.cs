@@ -26,6 +26,7 @@ namespace CrmCorner.Controllers
             if (type.HasValue)
                 query = query.Where(x => x.ContentType == type.Value);
 
+
             // Sayfalama
             int pageSize = 6;
             var items = await PaginatedList<SocialMediaContent>.CreateAsync(query.OrderByDescending(x => x.CreatedDate), page, pageSize);
@@ -37,12 +38,10 @@ namespace CrmCorner.Controllers
 
             ViewBag.Search = search;
             ViewBag.Type = type;
+        
 
             return View(items);
         }
-
-
-
 
         [HttpGet]
         public IActionResult Create()
@@ -98,40 +97,94 @@ namespace CrmCorner.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
+            var content = await _context.SocialMediaContents
+                .Include(c => c.Feedbacks)  // Geri bildirimleri dahil et
+                .FirstOrDefaultAsync(c => c.Id == id);  // İçeriği ID ile bul
+
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            // Geri bildirimleri oluşturulma tarihine göre azalan sırayla sıralıyoruz
+            content.Feedbacks = content.Feedbacks.OrderByDescending(f => f.CreatedDate).ToList();
+
+            return View(content);  // İçeriği ve geri bildirimlerini View'a gönder
+        }
+
+
+        // Onaylama
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
             var content = await _context.SocialMediaContents.FindAsync(id);
             if (content == null)
             {
                 return NotFound();
             }
 
-            return View(content);
+            content.Status = ContentStatus.Onaylandi;  // Onaylandı olarak ayarlıyoruz.
+            _context.Update(content);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = content.Id });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Approve(int id)
+        public async Task<IActionResult> CancelApproval(int id)
         {
             var content = await _context.SocialMediaContents.FindAsync(id);
-            if (content == null) return NotFound();
-
-            content.Status = ContentStatus.Onaylandi;
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index", "SocialMedia");
+            if (content != null)
+            {
+                content.Status = ContentStatus.OnayBekliyor;  // Geri al
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Details", new { id = content.Id });
         }
 
+        // Geri bildirim eklemek için metot
         [HttpPost]
-        public async Task<IActionResult> GiveFeedback(int id, string feedbackMessage)
+        public async Task<IActionResult> SendFeedback(int id, string feedbackMessage)
         {
-            var content = await _context.SocialMediaContents.FindAsync(id);
-            if (content == null) return NotFound();
+            var content = await _context.SocialMediaContents
+                .Include(c => c.Feedbacks)  // İlişkili geri bildirimleri dahil et
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-            content.FeedbackMessage = feedbackMessage;
-            content.Status = ContentStatus.FeedbackVerildi;
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            // Yeni bir geri bildirim oluştur
+            var feedback = new Feedback
+            {
+                SocialMediaContentId = content.Id,
+                Message = feedbackMessage,
+                CreatedDate = DateTime.Now
+            };
+
+            // Geri bildirimi veritabanına ekle
+            _context.Feedbacks.Add(feedback);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index", "SocialMedia");
+            return RedirectToAction("Details", new { id = content.Id });
         }
 
+        // Geri bildirimi silmek için metot
+        [HttpPost]
+        public async Task<IActionResult> DeleteFeedback(int feedbackId, int contentId)
+        {
+            var feedback = await _context.Feedbacks.FindAsync(feedbackId);
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+
+            _context.Feedbacks.Remove(feedback);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = contentId });
+        }
 
     }
 }
