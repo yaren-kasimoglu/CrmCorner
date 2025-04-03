@@ -1,0 +1,171 @@
+﻿@model CrmCorner.Models.PaginatedList<CrmCorner.Models.SocialMediaContent>
+@using CrmCorner.Models.Enums
+
+@{
+    ViewData["Title"] = "İçerik Listesi";
+}
+<style>
+    .card.bg-warning, .card.bg-success, .card.bg-danger {
+        width: 200px; /* Kutuların genişliğini küçültüyoruz */
+        font-size: 5px; /* Yazı boyutunu küçültüyoruz */
+        margin: 0 auto; /* Ortalamak için */
+    }
+
+    .card-body {
+        padding: 8px; /* İçerik alanını sıkıştırıyoruz */
+    }
+
+    .card-text.display-6 {
+        font-size: 15px; /* Sayacın boyutunu küçültüyoruz */
+        color:black
+    }
+
+    .card-title {
+        font-size: 14px; /* Başlık boyutunu küçültüyoruz */
+        color: black
+    }
+</style>
+
+<div class="container mt-5">
+    <h2 class="mb-4">📋 Planlanan Sosyal Medya İçerikleri</h2>
+
+    <!-- Özet Kartlar -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Onay Bekliyor</h5>
+                    <p class="card-text display-6">@ViewBag.PendingCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Onaylandı</h5>
+                    <p class="card-text display-6">@ViewBag.ApprovedCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Feedback Verildi</h5>
+                    <p class="card-text display-6">@ViewBag.FeedbackCount</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <input name="search" value="@ViewBag.Search" class="form-control" placeholder="🔍 Başlık veya açıklama" />
+            </div>
+            <div class="col-md-4">
+                <select name="type" class="form-select">
+                    <option value="">Tüm Türler</option>
+                    @foreach (var type in Enum.GetValues(typeof(ContentType)))
+                    {
+                        <option value="@type">
+                            @if (ViewBag.Type?.ToString() == type.ToString())
+                            {
+                                @:selected
+                            }
+                            @type
+                        </option>
+
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Kartlar -->
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm h-100">
+                    @if (!string.IsNullOrEmpty(item.MediaPath))
+                    {
+                        var isVideo = item.MediaPath.ToLower().EndsWith(".mp4") || item.MediaPath.ToLower().EndsWith(".mov") || item.MediaPath.ToLower().EndsWith(".webm");
+
+                        if (isVideo)
+                        {
+                            <video class="card-img-top" style="height: 350px; object-fit: cover;" controls>
+                                <source src="@item.MediaPath" type="video/mp4" />
+                                Tarayıcınız video öğesini desteklemiyor.
+                            </video>
+                        }
+                        else
+                        {
+                            <img src="@item.MediaPath" class="card-img-top" style="height: 350px; object-fit: cover;" />
+                        }
+                    }
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@item.Title</h5>
+                        <p class="card-text text-muted mb-1">
+                            <strong>📅 Yayın Tarihi:</strong> @item.ScheduledPublishDate?.ToString("dd.MM.yyyy HH:mm") ?? "-"
+                        </p>
+                        <p class="card-text text-muted mb-1">
+                            <strong>📌 Tür:</strong> @item.ContentType.ToString()
+                        </p>
+                        <p class="card-text">
+                            <strong>🔁 Durum:</strong>
+                            @switch (item.Status)
+                            {
+                                case ContentStatus.OnayBekliyor:
+                                    <span class="badge bg-warning text-dark">Onay Bekliyor</span>
+                                    break;
+                                case ContentStatus.Onaylandi:
+                                    <span class="badge bg-success">Onaylandı</span>
+                                    break;
+                                case ContentStatus.FeedbackVerildi:
+                                    <span class="badge bg-danger">Feedback Verildi</span>
+                                    break;
+                            }
+                        </p>
+                        <div class="mt-auto">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary w-100">📄 Detay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Sayfalama -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @if (Model.HasPreviousPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="?page=@(Model.PageIndex - 1)&search=@ViewBag.Search&type=@ViewBag.Type">⏮ Önceki</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">⏮ Önceki</span></li>
+            }
+
+            <li class="page-item active"><span class="page-link">@Model.PageIndex</span></li>
+
+            @if (Model.HasNextPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="?page=@(Model.PageIndex + 1)&search=@ViewBag.Search&type=@ViewBag.Type">Sonraki ⏭</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled"><span class="page-link">Sonraki ⏭</span></li>
+            }
+        </ul>
+    </nav>
+</div>

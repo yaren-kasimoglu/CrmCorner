@@ -39,6 +39,8 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
     public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
     public DbSet<EmailList> EmailList { get; set; }
+    public DbSet<SocialMediaContent> SocialMediaContents { get; set; }
+
 
 
 

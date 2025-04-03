@@ -78,6 +78,7 @@
 
     <Folder Include="wwwroot\json\" />
     <Folder Include="Views\ToDoList\" />
+    <Folder Include="wwwroot\uploadsSocialMedia\" />
 
     <Folder Include="wwwroot\uploads\" />
 

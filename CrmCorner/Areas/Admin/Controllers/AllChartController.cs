@@ -22,7 +22,7 @@ namespace CrmCorner.Areas.Admin.Controllers
 
         public IActionResult AllUserTaskStatusChartsView()
         {
-            return View();
+            return View("AllUserTaskStatusChartsView");
         }
 
 

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    [Migration("20250117170132_AddCreatedByFieldsToTaskComps")]
-    partial class AddCreatedByFieldsToTaskComps
+    [Migration("20250402230718_AddScheduledPublishDateToSocialMediaContent")]
+    partial class AddScheduledPublishDateToSocialMediaContent
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -463,6 +463,44 @@ namespace CrmCorner.Migrations
                     b.ToTable("PostSaleInfos");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.SocialMediaContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("ContentType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FeedbackMessage")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MediaPath")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("ScheduledPublishDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SocialMediaContents");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.Status", b =>
                 {
                     b.Property<int>("StatusId")
@@ -515,10 +553,9 @@ namespace CrmCorner.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("CreatedByCompanyId")
+                    b.Property<int?>("CreatedByCompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")

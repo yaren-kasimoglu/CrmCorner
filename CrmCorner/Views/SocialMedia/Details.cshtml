@@ -1,0 +1,76 @@
+﻿@model CrmCorner.Models.SocialMediaContent
+
+@{
+    ViewData["Title"] = "İçerik Detayı";
+    var isVideo = Model.MediaPath?.ToLower().EndsWith(".mp4") == true
+               || Model.MediaPath?.ToLower().EndsWith(".mov") == true
+               || Model.MediaPath?.ToLower().EndsWith(".webm") == true;
+}
+
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h2 class="mb-4 text-primary">📄 İçerik Detayı</h2>
+
+        @if (!string.IsNullOrEmpty(Model.MediaPath))
+        {
+            if (isVideo)
+            {
+                <video class="rounded mb-3 d-block mx-auto" width="300" height="533" controls style="object-fit: cover;">
+                    <source src="@Model.MediaPath" type="video/mp4">
+                    Tarayıcınız video öğesini desteklemiyor.
+                </video>
+            }
+            else
+            {
+                <img src="@Model.MediaPath" class="img-fluid rounded mb-3 d-block mx-auto"
+                     style="width: 300px; height: 300px; object-fit: cover;" />
+            }
+        }
+
+        <h4>@Model.Title</h4>
+        <p class="text-muted">
+            <strong>📅 Yayın Tarihi:</strong>
+            @Model.ScheduledPublishDate?.ToString("dd.MM.yyyy HH:mm") ?? "-"
+        </p>
+        <p><strong>📌 Tür:</strong> @Model.ContentType.ToString()</p>
+        <p><strong>📃 Açıklama:</strong> @Html.Raw(Model.Description)</p>
+
+        <p>
+            <strong>🔁 Statü:</strong>
+            @switch (Model.Status)
+            {
+                case CrmCorner.Models.Enums.ContentStatus.OnayBekliyor:
+                    <span class="badge bg-warning text-dark">Onay Bekliyor</span>
+                    break;
+                case CrmCorner.Models.Enums.ContentStatus.Onaylandi:
+                    <span class="badge bg-success">Onaylandı</span>
+                    break;
+                case CrmCorner.Models.Enums.ContentStatus.FeedbackVerildi:
+                    <span class="badge bg-danger">Feedback Verildi</span>
+                    break;
+            }
+        </p>
+
+        @if (Model.Status == CrmCorner.Models.Enums.ContentStatus.OnayBekliyor)
+        {
+            <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success me-2">✅ Onayla</button>
+            </form>
+
+            <form asp-action="SendFeedback" asp-route-id="@Model.Id" method="post">
+                <div class="mb-3 mt-3">
+                    <label for="FeedbackMessage" class="form-label">📝 Geri Bildirim</label>
+                    <textarea name="feedbackMessage" class="form-control" rows="3" placeholder="Geri bildiriminizi yazın..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger">📤 Feedback Gönder</button>
+            </form>
+        }
+        else if (!string.IsNullOrEmpty(Model.FeedbackMessage))
+        {
+            <div class="mt-4">
+                <h5>📬 Verilen Geri Bildirim:</h5>
+                <p class="border rounded p-3 bg-light">@Model.FeedbackMessage</p>
+            </div>
+        }
+    </div>
+</div>
