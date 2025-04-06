@@ -1,23 +1,30 @@
 ﻿using CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize]
     public class SocialMediaController : Controller
     {
+        private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
         private readonly IWebHostEnvironment _environment;
 
-        public SocialMediaController(CrmCornerContext context, IWebHostEnvironment environment)
+        public SocialMediaController(UserManager<AppUser> userManager, CrmCornerContext context, IWebHostEnvironment environment)
         {
+            _userManager = userManager;
             _context = context;
             _environment = environment;
         }
 
         public async Task<IActionResult> Index(string search, ContentType? type, int page = 1)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             var query = _context.SocialMediaContents.AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
@@ -44,14 +51,19 @@ namespace CrmCorner.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             return View();
         }
 
+     
         [HttpPost]
         public async Task<IActionResult> Create(SocialMediaContent model, IFormFile mediaFile)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             // Bu alan formda gelmediği için manuel set ediyoruz, validasyon dışında tutmalıyız
             ModelState.Remove("MediaPath");
 
@@ -95,8 +107,11 @@ namespace CrmCorner.Controllers
             return View(model);
         }
 
+
         public async Task<IActionResult> Details(int id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             var content = await _context.SocialMediaContents
                 .Include(c => c.Feedbacks)  // Geri bildirimleri dahil et
                 .FirstOrDefaultAsync(c => c.Id == id);  // İçeriği ID ile bul
@@ -117,6 +132,8 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public async Task<IActionResult> Approve(int id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             var content = await _context.SocialMediaContents.FindAsync(id);
             if (content == null)
             {
@@ -130,9 +147,12 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Details", new { id = content.Id });
         }
 
+  
         [HttpPost]
         public async Task<IActionResult> CancelApproval(int id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             var content = await _context.SocialMediaContents.FindAsync(id);
             if (content != null)
             {
@@ -142,10 +162,14 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Details", new { id = content.Id });
         }
 
+
+
         // Geri bildirim eklemek için metot
         [HttpPost]
         public async Task<IActionResult> SendFeedback(int id, string feedbackMessage)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             var content = await _context.SocialMediaContents
                 .Include(c => c.Feedbacks)  // İlişkili geri bildirimleri dahil et
                 .FirstOrDefaultAsync(c => c.Id == id);
@@ -170,6 +194,7 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Details", new { id = content.Id });
         }
 
+  
         // Geri bildirimi silmek için metot
         [HttpPost]
         public async Task<IActionResult> DeleteFeedback(int feedbackId, int contentId)

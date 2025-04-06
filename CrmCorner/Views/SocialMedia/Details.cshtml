@@ -6,6 +6,9 @@
                || Model.MediaPath?.ToLower().EndsWith(".mov") == true
                || Model.MediaPath?.ToLower().EndsWith(".webm") == true;
 }
+<!-- Bootstrap Icons CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
 
 <div class="container mt-5">
     <div class="card shadow p-4">
@@ -51,6 +54,21 @@
             }
         </p>
 
+        <!-- Onaylama ve Geri Alma -->
+        @if (Model.Status == CrmCorner.Models.Enums.ContentStatus.OnayBekliyor)
+        {
+            <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success me-2">✅ Onayla</button>
+            </form>
+        }
+        else if (Model.Status == CrmCorner.Models.Enums.ContentStatus.Onaylandi)
+        {
+            <!-- Onayı Geri Alma -->
+            <form asp-action="CancelApproval" asp-route-id="@Model.Id" method="post" class="d-inline">
+                <button type="submit" class="btn btn-warning me-2">🔄 Onayı Geri Al</button>
+            </form>
+        }
+
         <!-- Geri Bildirim Gönderme -->
         @if (Model.Status == CrmCorner.Models.Enums.ContentStatus.OnayBekliyor)
         {
@@ -68,11 +86,17 @@
         @if (Model.Feedbacks != null && Model.Feedbacks.Any())
         {
             <ul class="list-group">
-                @foreach (var feedback in Model.Feedbacks)
+                @foreach (var feedback in Model.Feedbacks.OrderByDescending(f => f.CreatedDate))
                 {
                     <li class="list-group-item">
                         <strong>@feedback.Message</strong><br />
                         <small class="text-muted">Gönderilme Tarihi: @feedback.CreatedDate.ToString("dd.MM.yyyy HH:mm")</small>
+                        <!-- Silme butonu ekliyoruz -->
+                        <form asp-action="DeleteFeedback" asp-route-feedbackId="@feedback.Id" asp-route-contentId="@Model.Id" method="post" class="d-inline float-end ms-2">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Sil">
+                                <i class="bi bi-trash"></i> <!-- Çöp kutusu simgesi -->
+                            </button>
+                        </form>
                     </li>
                 }
             </ul>
@@ -82,5 +106,13 @@
             <p>Henüz geri bildirim yapılmamış.</p>
         }
 
+
     </div>
 </div>
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
