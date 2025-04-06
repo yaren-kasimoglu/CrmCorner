@@ -1,5 +1,6 @@
 ﻿using CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -210,6 +211,48 @@ namespace CrmCorner.Controllers
 
             return RedirectToAction("Details", new { id = contentId });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var content = await _context.SocialMediaContents.FindAsync(id);
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            _context.SocialMediaContents.Remove(content);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "İçerik başarıyla silindi.";
+            return RedirectToAction("Index", "SocialMedia");
+        }
+
+
+        public async Task<IActionResult> Calendar()
+        {
+            var currentMonth = DateTime.Now.Month;
+            var currentYear = DateTime.Now.Year;
+
+            var contents = _context.SocialMediaContents
+                .Where(c => c.ScheduledPublishDate.HasValue &&
+                            c.ScheduledPublishDate.Value.Month == currentMonth &&
+                            c.ScheduledPublishDate.Value.Year == currentYear)
+                .ToList();
+
+            var calendarViewModel = new CalendarViewModel
+            {
+                Month = currentMonth,
+                Year = currentYear,
+                Contents = contents
+            };
+
+            // Modeli View'e aktar
+            return View(calendarViewModel);
+        }
+
+
+
 
     }
 }

@@ -153,6 +153,11 @@
                         </p>
                         <div class="mt-auto">
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary w-100">📄 Detay</a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger w-100 mt-2" title="Sil">
+                                    <i class="bi bi-trash"></i> Sil
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
