@@ -554,7 +554,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null) //ADMİN PANELİNE YÖNLENDİRİYOR
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null) //SOCIAL MEDIA PANELİNE YÖNLENDİRİYOR
         {
             try
             {
@@ -563,7 +563,7 @@ namespace CrmCorner.Controllers
                     return View();
                 }
 
-                returnUrl ??= Url.Action("Index", "Home"); // null olma durumuna karşılık bu değerin atanması. Basit bir kullanım yöntemi
+                returnUrl ??= Url.Action("Index", "SocialMedia"); // returnUrl değerini SocialMedia/Index olarak değiştiriyoruz
 
                 var hasUser = await _userManager.FindByEmailAsync(model.Email);
                 if (hasUser == null)
@@ -589,10 +589,10 @@ namespace CrmCorner.Controllers
 
                     if (isAdminOrManager)
                     {
-                        return RedirectToAction("Index", "Home", new { area = "Admin" });
+                        return RedirectToAction("Index", "SocialMedia", new { area = "Admin" }); // Admin rolü için SocialMedia/Index sayfasına yönlendir
                     }
 
-                    return Redirect(returnUrl);
+                    return Redirect(returnUrl); // Kullanıcıyı, belirlenen returnUrl'ye yönlendir
                 }
 
                 if (signInresult.IsLockedOut)
@@ -610,8 +610,6 @@ namespace CrmCorner.Controllers
                 return View();
             }
         }
-
-
         #endregion
 
         #region Kayıt
@@ -693,28 +691,8 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
-
-
-        //public async Task<IActionResult> SignUp(SignUpViewModel request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View();
-        //    }
-        //    var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, Email = request.Email, PhoneNumber = request.Phone,NameSurname=request.NameSurname,PositionName=request.PositionName,CompanyName=request.CompanyName,EmployeeCount=request.EmployeeCount,Sector=request.Sector }, request.Password);
-
-
-
-        //    if (identityResult.Succeeded)
-        //    {
-        //        TempData["SucceesMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
-        //        return RedirectToAction("SignIn", "Home");
-
-        //    }
-        //    ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
-        //    return View();
-        //}
         #endregion
+
 
 
 

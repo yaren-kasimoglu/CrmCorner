@@ -41,6 +41,7 @@ namespace CrmCorner.Controllers
             _emailService = emailService;
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             try

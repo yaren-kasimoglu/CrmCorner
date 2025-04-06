@@ -1,23 +1,31 @@
 ﻿using CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize]
     public class SocialMediaController : Controller
     {
+        private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
         private readonly IWebHostEnvironment _environment;
 
-        public SocialMediaController(CrmCornerContext context, IWebHostEnvironment environment)
+        public SocialMediaController(UserManager<AppUser> userManager, CrmCornerContext context, IWebHostEnvironment environment)
         {
+            _userManager = userManager;
             _context = context;
             _environment = environment;
         }
 
         public async Task<IActionResult> Index(string search, ContentType? type, int page = 1)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             var query = _context.SocialMediaContents.AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
@@ -25,6 +33,7 @@ namespace CrmCorner.Controllers
 
             if (type.HasValue)
                 query = query.Where(x => x.ContentType == type.Value);
+
 
             // Sayfalama
             int pageSize = 6;
@@ -37,22 +46,25 @@ namespace CrmCorner.Controllers
 
             ViewBag.Search = search;
             ViewBag.Type = type;
+        
 
             return View(items);
         }
 
-
-
-
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             return View();
         }
 
+     
         [HttpPost]
         public async Task<IActionResult> Create(SocialMediaContent model, IFormFile mediaFile)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             // Bu alan formda gelmediği için manuel set ediyoruz, validasyon dışında tutmalıyız
             ModelState.Remove("MediaPath");
 
@@ -96,7 +108,112 @@ namespace CrmCorner.Controllers
             return View(model);
         }
 
+
         public async Task<IActionResult> Details(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+            var content = await _context.SocialMediaContents
+                .Include(c => c.Feedbacks)  // Geri bildirimleri dahil et
+                .FirstOrDefaultAsync(c => c.Id == id);  // İçeriği ID ile bul
+
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            // Geri bildirimleri oluşturulma tarihine göre azalan sırayla sıralıyoruz
+            content.Feedbacks = content.Feedbacks.OrderByDescending(f => f.CreatedDate).ToList();
+
+            return View(content);  // İçeriği ve geri bildirimlerini View'a gönder
+        }
+
+
+        // Onaylama
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+            var content = await _context.SocialMediaContents.FindAsync(id);
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            content.Status = ContentStatus.Onaylandi;  // Onaylandı olarak ayarlıyoruz.
+            _context.Update(content);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = content.Id });
+        }
+
+  
+        [HttpPost]
+        public async Task<IActionResult> CancelApproval(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+            var content = await _context.SocialMediaContents.FindAsync(id);
+            if (content != null)
+            {
+                content.Status = ContentStatus.OnayBekliyor;  // Geri al
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Details", new { id = content.Id });
+        }
+
+
+
+        // Geri bildirim eklemek için metot
+        [HttpPost]
+        public async Task<IActionResult> SendFeedback(int id, string feedbackMessage)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+            var content = await _context.SocialMediaContents
+                .Include(c => c.Feedbacks)  // İlişkili geri bildirimleri dahil et
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            // Yeni bir geri bildirim oluştur
+            var feedback = new Feedback
+            {
+                SocialMediaContentId = content.Id,
+                Message = feedbackMessage,
+                CreatedDate = DateTime.Now
+            };
+
+            // Geri bildirimi veritabanına ekle
+            _context.Feedbacks.Add(feedback);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = content.Id });
+        }
+
+  
+        // Geri bildirimi silmek için metot
+        [HttpPost]
+        public async Task<IActionResult> DeleteFeedback(int feedbackId, int contentId)
+        {
+            var feedback = await _context.Feedbacks.FindAsync(feedbackId);
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+
+            _context.Feedbacks.Remove(feedback);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = contentId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
         {
             var content = await _context.SocialMediaContents.FindAsync(id);
             if (content == null)
@@ -104,33 +221,37 @@ namespace CrmCorner.Controllers
                 return NotFound();
             }
 
-            return View(content);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Approve(int id)
-        {
-            var content = await _context.SocialMediaContents.FindAsync(id);
-            if (content == null) return NotFound();
-
-            content.Status = ContentStatus.Onaylandi;
+            _context.SocialMediaContents.Remove(content);
             await _context.SaveChangesAsync();
 
+            TempData["SuccessMessage"] = "İçerik başarıyla silindi.";
             return RedirectToAction("Index", "SocialMedia");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GiveFeedback(int id, string feedbackMessage)
+
+        public async Task<IActionResult> Calendar()
         {
-            var content = await _context.SocialMediaContents.FindAsync(id);
-            if (content == null) return NotFound();
+            var currentMonth = DateTime.Now.Month;
+            var currentYear = DateTime.Now.Year;
 
-            content.FeedbackMessage = feedbackMessage;
-            content.Status = ContentStatus.FeedbackVerildi;
-            await _context.SaveChangesAsync();
+            var contents = _context.SocialMediaContents
+                .Where(c => c.ScheduledPublishDate.HasValue &&
+                            c.ScheduledPublishDate.Value.Month == currentMonth &&
+                            c.ScheduledPublishDate.Value.Year == currentYear)
+                .ToList();
 
-            return RedirectToAction("Index", "SocialMedia");
+            var calendarViewModel = new CalendarViewModel
+            {
+                Month = currentMonth,
+                Year = currentYear,
+                Contents = contents
+            };
+
+            // Modeli View'e aktar
+            return View(calendarViewModel);
         }
+
+
 
 
     }

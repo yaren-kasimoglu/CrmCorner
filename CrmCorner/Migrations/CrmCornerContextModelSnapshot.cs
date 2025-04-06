@@ -352,6 +352,29 @@ namespace CrmCorner.Migrations
                     b.ToTable("EmailList");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.Feedback", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("SocialMediaContentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SocialMediaContentId");
+
+                    b.ToTable("Feedbacks");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
                 {
                     b.Property<int>("FileAttachmentId")
@@ -474,9 +497,6 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("FeedbackMessage")
                         .HasColumnType("longtext");
 
                     b.Property<string>("MediaPath")
@@ -874,6 +894,17 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.Feedback", b =>
+                {
+                    b.HasOne("CrmCorner.Models.SocialMediaContent", "SocialMediaContent")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("SocialMediaContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SocialMediaContent");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.FileAttachment", b =>
                 {
                     b.HasOne("CrmCorner.Models.TaskComp", "Task")
@@ -1013,6 +1044,11 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.Navigation("Taskcomps");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.SocialMediaContent", b =>
+                {
+                    b.Navigation("Feedbacks");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Status", b =>

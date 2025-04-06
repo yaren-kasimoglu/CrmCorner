@@ -11,10 +11,10 @@
 
     <div class="row g-3">
 
-        <div class="col-lg-3 col-md-12">
+        <div class="col-lg-6 col-md-12">
             <div class="card mb-3 profile-header">
                 <div class="card-body text-center">
-                    <div class="profile-image mb-3"> <user-picture-thumbnail class="rounded" style="width:180px; height:200px" picture-url="@Model.PictureUrl"></user-picture-thumbnail> </div>
+                    <div class="profile-image mb-3"> <user-picture-thumbnail class="rounded" style="width:200px; height:200px" picture-url="@Model.PictureUrl"></user-picture-thumbnail> </div>
                     <div>
                         <h4 class=""><strong>@Model.UserName</strong></h4>
                     </div>
@@ -42,17 +42,17 @@
         </div>
         <div class="col-lg-9 col-md-12">
         <!-- Sekme menüsü -->
-        <ul class="nav nav-tabs">
+@*         <ul class="nav nav-tabs">
             <li class="nav-item">
                 <a class="nav-link active" href="#doughnutChartContainer" data-bs-toggle="tab">Chart</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#barChartContainer" data-bs-toggle="tab">Grafik</a>
             </li>
-        </ul>
+        </ul> *@
   
         <!-- Sekme içerikleri -->
-        <div class="tab-content">
+@*         <div class="tab-content">
             <div id="doughnutChartContainer" class="tab-pane fade show active">
                 <div class="col-lg-8">
                     <div style="width: 60%; height: 400px;">
@@ -70,10 +70,11 @@
 
 
 
-        </div>
+        </div> *@
 
 
     </div>
+
 
 </div>
 <!-- core js file -->
@@ -103,6 +104,7 @@
 
     </script>
 
+@*    AÇILACAK SOSYAL MEDYADAN SONRA     
     <script type="text/javascript">
             $(document).ready(function () {
                 $.ajax({
@@ -153,9 +155,12 @@
                     }
                 });
             });
-    </script>
+    </script> *@
 
-    <script type="text/javascript">
+
+@*    
+AÇILACAK SOSYAL MEDYADAN SONRA    
+<script type="text/javascript">
         $(document).ready(function () {
             $.ajax({
                 type: "GET",
@@ -210,11 +215,15 @@
                 }
             });
         });
-    </script>
+    </script> *@
 }
 
 
-//@*<script type="text/javascript">
+
+
+
+
+@*<script type="text/javascript">
 //    $(document).ready(function () {
 //        $.ajax({
 //            type: "GET",
