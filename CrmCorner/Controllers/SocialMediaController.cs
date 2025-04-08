@@ -59,54 +59,77 @@ namespace CrmCorner.Controllers
             return View();
         }
 
-     
         [HttpPost]
         public async Task<IActionResult> Create(SocialMediaContent model, IFormFile mediaFile)
         {
+            // Mevcut kullanıcıyı alıyoruz
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             // Bu alan formda gelmediği için manuel set ediyoruz, validasyon dışında tutmalıyız
             ModelState.Remove("MediaPath");
 
+            // Model geçerli mi kontrolü
             if (ModelState.IsValid)
             {
+                // Dosya kontrolü yapıyoruz
                 if (mediaFile != null && mediaFile.Length > 0)
                 {
-                    var uploadFolder = Path.Combine(_environment.WebRootPath, "uploadsSocialMedia");
-                    Directory.CreateDirectory(uploadFolder); // klasör yoksa oluştur
-
-                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + mediaFile.FileName;
-                    var filePath = Path.Combine(uploadFolder, uniqueFileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    try
                     {
-                        await mediaFile.CopyToAsync(stream);
-                    }
+                        // Yükleme klasörünü oluşturuyoruz (wwwroot/uploadsSocialMedia)
+                        var uploadFolder = Path.Combine(_environment.WebRootPath, "uploadsSocialMedia");
+                        Directory.CreateDirectory(uploadFolder); // Klasör yoksa oluşturuyoruz
 
-                    model.MediaPath = "/uploadsSocialMedia/" + uniqueFileName;
+                        // Dosya adını benzersiz hale getiriyoruz
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + mediaFile.FileName;
+                        var filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+                        // Dosyayı belirtilen yere kopyalıyoruz
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await mediaFile.CopyToAsync(stream);
+                        }
+
+                        // MediaPath özelliğini güncelliyoruz
+                        model.MediaPath = "/uploadsSocialMedia/" + uniqueFileName;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Hata durumunda kullanıcıya bilgi veriyoruz
+                        ModelState.AddModelError("", "Dosya yüklenirken bir hata oluştu: " + ex.Message);
+                        return View(model); // Hata mesajını görüntülüyoruz
+                    }
                 }
 
+                // İçeriğin diğer alanlarını güncelliyoruz
                 model.CreatedDate = DateTime.Now;
-                model.Status = 0;
+                model.Status = 0; // İçeriği "Onay Bekliyor" olarak başlatıyoruz
 
+                // Yeni içeriği ekliyoruz
                 _context.SocialMediaContents.Add(model);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // Veritabanına kaydediyoruz
 
+                // Başarılı bir şekilde kaydedildiyse, Index sayfasına yönlendiriyoruz
                 return RedirectToAction("Index", "SocialMedia");
             }
-
-            // Validasyon hataları varsa yazdır
-            foreach (var error in ModelState)
+            else
             {
-                Console.WriteLine($"Key: {error.Key}");
-                foreach (var e in error.Value.Errors)
+                // Eğer model geçerli değilse, hata mesajlarını logluyoruz
+                foreach (var error in ModelState)
                 {
-                    Console.WriteLine($"  Error: {e.ErrorMessage}");
+                    Console.WriteLine($"Key: {error.Key}");
+                    foreach (var e in error.Value.Errors)
+                    {
+                        Console.WriteLine($"  Error: {e.ErrorMessage}");
+                    }
                 }
-            }
 
-            return View(model);
+                // Hata varsa kullanıcıyı aynı sayfada tutuyoruz ve formu yeniden gösteriyoruz
+                return View(model);
+            }
         }
+
 
 
         public async Task<IActionResult> Details(int id)
@@ -231,6 +254,8 @@ namespace CrmCorner.Controllers
 
         public async Task<IActionResult> Calendar()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
 

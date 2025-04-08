@@ -67,14 +67,6 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-danger mb-3">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Feedback Verildi</h5>
-                    <p class="card-text display-6">@ViewBag.FeedbackCount</p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Filtreleme -->
@@ -153,12 +145,17 @@
                         </p>
                         <div class="mt-auto">
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary w-100">📄 Detay</a>
-                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-danger w-100 mt-2" title="Sil">
-                                    <i class="bi bi-trash"></i> Sil
-                                </button>
-                            </form>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger w-100 mt-2" title="Sil">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </button>
+                                </form>
+                            }
                         </div>
+
                     </div>
                 </div>
             </div>
