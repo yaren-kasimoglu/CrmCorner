@@ -16,7 +16,7 @@ namespace CrmCorner.Models
         public ContentStatus Status { get; set; } // OnayBekliyor, Onaylandı, FeedbackVerildi
 
         // Geri Bildirim Koleksiyonu
-        public ICollection<Feedback> Feedbacks { get; set; }
+        public ICollection<Feedback>? Feedbacks { get; set; }
         public DateTime? ScheduledPublishDate { get; set; }
 
     }

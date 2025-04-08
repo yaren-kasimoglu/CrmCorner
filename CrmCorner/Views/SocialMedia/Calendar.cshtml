@@ -5,114 +5,53 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-<!-- FullCalendar ve Bootstrap için gerekli CSS dosyalarını ekle -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.css" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap 4 ve FullCalendar CSS -->
+<link rel="stylesheet" href="~/CRMTema/bootstrap4/documentation/assets/vendor/bootstrap/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/CRMTema/js/fullcalendar/main.min.css" />
 
-<!-- Table for displaying events if any -->
-<table id="todoTable" style="display: none; visibility:collapse">
-    @if (Model.Contents != null && Model.Contents.Any())
-    {
-        foreach (var item in Model.Contents)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Title</td>
-                <td>@item.ScheduledPublishDate?.ToString("yyyy-MM-dd")</td>
-                <td>@item.Description</td>
-            </tr>
-        }
-    }
-    else
-    {
-        <tr>
-            <td colspan="4">No events available.</td>
-        </tr>
-    }
-</table>
-
-<style>
-    .fc-event {
-        color: #000 !important; /* Event yazısının rengini siyah yap */
-        padding: 5px;
-    }
-
-    .hidden-section {
-        display: none;
-    }
-
-    .custom-padding {
-        padding-left: 20px;
-    }
-</style>
-<div class="row g-3 clearfix">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-body" id="my_calendar"></div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card mb-3">
-            <div class="card-body">
-                @foreach (var item in Model.Contents)
-                {
-                    <div class="event-name row g-2">
-                        <div class="col-2 text-center">
-                            <h6>@item.ScheduledPublishDate?.ToString("yyyy-MM-dd")</h6>
-                        </div>
-                        <div class="col-10">
-                            <h6 class="mb-0">@item.Title</h6>
-                            <p class="mb-0">@item.Description</p>
-                        </div>
-                    </div>
-                }
-                <hr>
-            </div>
+<div class="container py-4">
+    <div class="card">
+        <div class="card-body">
+            <div id="calendar"></div>
         </div>
     </div>
 </div>
 
-<!-- FullCalendar ve Bootstrap için gerekli JS dosyalarını ekle -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Gerekli Scriptler -->
+<script src="~/CRMTema/bootstrap4/documentation/assets/vendor/jquery/jquery.min.js"></script>
+<script src="~/CRMTema/js/fullcalendar/main.min.js"></script>
 
 <script>
-    // Verilen renkler listesi
-    const eventColors = [
-        '#A3D9A5',  // Pastel yeşil
-        '#FFDAC1',  // Pastel şeftali
-        '#BAFFB3',  // Pastel açık yeşil
-        '#C2C2F0',  // Pastel lavanta
-        '#B3F3D0',  // Pastel açık mint
-        '#BAE1FF',  // Pastel mavi
-        '#FFB3BA',  // Pastel pembe
-        '#FFDFBA',  // Pastel şeftali
-        '#FFFFBA',  // Pastel sarı
-        '#D5AAFF',  // Pastel mor
-        '#FFB3E6'   // Pastel fuşya
-    ];
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
 
-    // Rastgele bir renk seçme fonksiyonu
-    function getRandomColor() {
-        const randomIndex = Math.floor(Math.random() * eventColors.length);
-        return eventColors[randomIndex];
-    }
-
-    $(document).ready(function () {
-        $('#my_calendar').fullCalendar({
-            events: @Html.Raw(Json.Serialize(Model.Contents.Select(c => new { id = c.Id, title = c.Title, start = c.ScheduledPublishDate?.ToString("yyyy-MM-dd"), description = c.Description }).ToList())),
-            eventRender: function (event, element) {
-                // Eventlere rastgele renk ata
-                var randomColor = getRandomColor();
-                element.css('background-color', randomColor);
-                element.css('color', '#000'); // Yazı rengini siyah yap
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
             },
+            events: [
+    @foreach (var item in Model.Contents)
+    {
+        <text>
+                        {
+                                  id: '@item.Id',
+                title: @Html.Raw(Json.Serialize(item.Title)),
+                start: '@item.ScheduledPublishDate?.ToString("yyyy-MM-dd")',
+                description: @Html.Raw(Json.Serialize(item.Description))
+                        },
+        </text>
+    }
+            ],
             eventClick: function (info) {
-                window.location.href = '@Url.Action("Details", "SocialMedia")/' + info.event.id;
-            }
+                window.location.href = '/SocialMedia/Details/' + info.event.id;
+            },
+            eventDisplay: 'block',
+            eventColor: '#A3D9A5',
         });
+
+        calendar.render();
     });
 </script>
