@@ -1,9 +1,69 @@
-﻿
-@{
-    ViewData["Title"] = "AccessDenied";
-    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+﻿@{
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml"; // Admin Layout kullanıyorsan değiştirirsin
 }
 
-<div class="alert alert-info">
-    <h1>@ViewBag.message</h1>
+<style>
+    .access-denied-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    .access-denied-icon {
+        font-size: 100px;
+        color: #ff4d4f;
+        margin-bottom: 20px;
+    }
+
+    .access-denied-title {
+        font-size: 36px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .access-denied-text {
+        font-size: 20px;
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    .btn-home {
+        background-color: #2eacb3;
+        color: white;
+        padding: 12px 24px;
+        font-size: 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .btn-home:hover {
+            background-color: #24888e;
+            color: white;
+        }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="access-denied-container">
+    <div class="access-denied-icon">🚫</div>
+    <h1 class="access-denied-title">Erişim Reddedildi</h1>
+    <p class="access-denied-text">Bu sayfaya erişim yetkiniz bulunmamaktadır.</p>
+    <a href="/" class="btn-home">Ana Sayfaya Dön</a>
 </div>

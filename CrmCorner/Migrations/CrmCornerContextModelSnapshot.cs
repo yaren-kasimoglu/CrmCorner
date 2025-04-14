@@ -499,9 +499,8 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("MediaPath")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<byte[]>("MediaFile")
+                        .HasColumnType("longblob");
 
                     b.Property<DateTime?>("ScheduledPublishDate")
                         .HasColumnType("datetime(6)");

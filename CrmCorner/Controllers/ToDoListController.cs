@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using CrmCorner.Models;
 using CrmCorner.ViewModels;
 using Independentsoft.Graph.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ using Exception = System.Exception;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ToDoListController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

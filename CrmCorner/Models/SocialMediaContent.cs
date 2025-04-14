@@ -8,8 +8,7 @@ namespace CrmCorner.Models
 
         public string Title { get; set; } // İçerik başlığı
         public string Description { get; set; } // Açıklama (caption)
-
-        public string MediaPath { get; set; } // Görsel veya video yolu
+        public byte[]? MediaFile { get; set; } // <-- Dosya içeriği buraya gelecek
         public ContentType ContentType { get; set; } // Post, Story, Reels
 
         public DateTime CreatedDate { get; set; }

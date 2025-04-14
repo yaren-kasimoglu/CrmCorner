@@ -2,11 +2,13 @@
 
 @{
     ViewData["Title"] = "Satış Sonrası Bilgi Düzenleme";
-    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml"; // Tek bir layout kullanıyoruz ✅
 }
 
 <h2>Satış Sonrası Bilgi Düzenleme</h2>
+
 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
 <form asp-action="AfterTaskEdit" method="post">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="TaskCompId" />
@@ -14,16 +16,16 @@
     <div class="form-group">
         <label asp-for="IsFirstPaymentMade" class="control-label">İlk Ödeme Yapıldı mı?</label>
         <div>
-            <label><input type="radio" asp-for="IsFirstPaymentMade" value="true" id="IsFirstPaymentMadeTrue" name="IsFirstPaymentMade" /> Evet</label>
-            <label><input type="radio" asp-for="IsFirstPaymentMade" value="false" id="IsFirstPaymentMadeFalse" name="IsFirstPaymentMade" /> Hayır</label>
+            <label><input type="radio" asp-for="IsFirstPaymentMade" value="true" /> Evet</label>
+            <label><input type="radio" asp-for="IsFirstPaymentMade" value="false" /> Hayır</label>
         </div>
     </div>
 
     <div class="form-group">
         <label asp-for="IsThereAProblem" class="control-label">Bir Sorun Var mı?</label>
         <div>
-            <label><input type="radio" asp-for="IsThereAProblem" value="true" id="IsThereAProblemTrue" name="IsThereAProblem" /> Evet</label>
-            <label><input type="radio" asp-for="IsThereAProblem" value="false" id="IsThereAProblemFalse" name="IsThereAProblem" /> Hayır</label>
+            <label><input type="radio" asp-for="IsThereAProblem" value="true" /> Evet</label>
+            <label><input type="radio" asp-for="IsThereAProblem" value="false" /> Hayır</label>
         </div>
     </div>
 
@@ -36,16 +38,16 @@
     <div class="form-group">
         <label asp-for="IsContinuationConsidered" class="control-label">Devam Etmeyi Düşünüyorlar mı?</label>
         <div>
-            <label><input type="radio" asp-for="IsContinuationConsidered" value="true" id="IsContinuationConsideredTrue" name="IsContinuationConsidered" /> Evet</label>
-            <label><input type="radio" asp-for="IsContinuationConsidered" value="false" id="IsContinuationConsideredFalse" name="IsContinuationConsidered" /> Hayır</label>
+            <label><input type="radio" asp-for="IsContinuationConsidered" value="true" /> Evet</label>
+            <label><input type="radio" asp-for="IsContinuationConsidered" value="false" /> Hayır</label>
         </div>
     </div>
 
     <div class="form-group">
         <label asp-for="IsTrustpilotReviewed" class="control-label">Trustpilot Yorumu Yapıldı mı?</label>
         <div>
-            <label><input type="radio" asp-for="IsTrustpilotReviewed" value="true" id="IsTrustpilotReviewedTrue" name="IsTrustpilotReviewed" /> Evet</label>
-            <label><input type="radio" asp-for="IsTrustpilotReviewed" value="false" id="IsTrustpilotReviewedFalse" name="IsTrustpilotReviewed" /> Hayır</label>
+            <label><input type="radio" asp-for="IsTrustpilotReviewed" value="true" /> Evet</label>
+            <label><input type="radio" asp-for="IsTrustpilotReviewed" value="false" /> Hayır</label>
         </div>
     </div>
 
@@ -58,12 +60,12 @@
     <div class="form-group">
         <label asp-for="CanUseLogo" class="control-label">Logo Kullanılabilir mi?</label>
         <div>
-            <label><input type="radio" asp-for="CanUseLogo" value="true" id="CanUseLogoTrue" name="CanUseLogo" /> Evet</label>
-            <label><input type="radio" asp-for="CanUseLogo" value="false" id="CanUseLogoFalse" name="CanUseLogo" /> Hayır</label>
+            <label><input type="radio" asp-for="CanUseLogo" value="true" /> Evet</label>
+            <label><input type="radio" asp-for="CanUseLogo" value="false" /> Hayır</label>
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group mt-3">
         <input type="submit" value="Kaydet" class="btn btn-primary" />
         <a asp-action="ListPositiveSales" asp-controller="AfterTask" class="btn btn-secondary">İptal</a>
     </div>
@@ -72,21 +74,17 @@
 @section Scripts {
     <script>
         function toggleProblemDescription(isVisible) {
-            var section = document.getElementById('problemDescriptionSection');
-            section.style.display = isVisible ? 'block' : 'none';
+            document.getElementById('problemDescriptionSection').style.display = isVisible ? 'block' : 'none';
         }
 
         function toggleTrustpilotComment(isVisible) {
-            var section = document.getElementById('trustPilotCommentSection');
-            section.style.display = isVisible ? 'block' : 'none';
+            document.getElementById('trustPilotCommentSection').style.display = isVisible ? 'block' : 'none';
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Sayfa yüklendiğinde mevcut değerleri kontrol et ve gerekli alanları göster
             toggleProblemDescription(@(Model.IsThereAProblem.ToString().ToLower()));
             toggleTrustpilotComment(@(Model.IsTrustpilotReviewed.ToString().ToLower()));
 
-            // Radyo düğmeleri değiştiğinde ilgili alanları göster veya gizle
             document.querySelectorAll('input[name="IsThereAProblem"]').forEach(function (elem) {
                 elem.addEventListener('change', function () {
                     toggleProblemDescription(this.value === 'true');
@@ -100,12 +98,8 @@
             });
         });
     </script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
 
-<!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-<!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>

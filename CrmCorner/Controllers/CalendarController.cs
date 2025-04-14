@@ -30,9 +30,11 @@ using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.VisualBasic;
 using static Google.Protobuf.Reflection.UninterpretedOption.Types;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CalendarController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

@@ -1,0 +1,21 @@
+﻿@model CrmCorner.Models.Company
+@{
+    ViewData["Title"] = "CompanyEdit";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+<form asp-action="CompanyEdit" method="post">
+    <input type="hidden" asp-for="CompanyId" />
+    <div class="form-group">
+        <label asp-for="CompanyName" class="control-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="text-danger"></span>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>

@@ -1,5 +1,4 @@
-﻿using CrmCorner.Areas.Admin.Controllers;
-using CrmCorner.Extensions;
+﻿using CrmCorner.Extensions;
 using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.Services;
@@ -168,9 +167,6 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
-
-
-
 
         #region CHARTS
 
@@ -692,10 +688,6 @@ namespace CrmCorner.Controllers
             }
         }
         #endregion
-
-
-
-
         public IActionResult ForgetPassword()
         {
             return View();

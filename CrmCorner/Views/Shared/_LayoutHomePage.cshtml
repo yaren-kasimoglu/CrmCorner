@@ -214,24 +214,29 @@
         <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a>
         </li>
                                     *@
-                                    <li class="nav-item">
 
-                                        <a asp-area="" asp-controller="SocialMedia" asp-action="Index">📋<span> Sosyal Medya</span></a>
+
+                                    <li class="nav-item">
+                                        <a asp-area="" asp-controller="SocialMedia" asp-action="Index">
+                                            <i class="fa fa-globe"></i> <span>Sosyal Medya</span>
+                                        </a>
                                     </li>
                                     @if (userRole == "Admin")
                                     {
                                         <li class="nav-item">
-
-                                            <a asp-area="" asp-controller="SocialMedia" asp-action="Create">📋<span> Sosyal Medya İçerik Oluştur</span></a>
+                                            <a asp-area="" asp-controller="SocialMedia" asp-action="Create">
+                                                <i class="fa fa-pencil-square-o"></i><span>Sosyal Medya İçerik Oluştur</span>
+                                            </a>
                                         </li>
                                     }
-
                                     <li class="nav-item">
-
-                                        <a asp-area="" asp-controller="SocialMedia" asp-action="Calendar">📋<span> Sosyal Medya Takvim</span></a>
+                                        <a asp-area="" asp-controller="SocialMedia" asp-action="Calendar">
+                                            <i class="fa fa-calendar"></i> <span>Sosyal Medya Takvim</span>
+                                        </a>
                                     </li>
 
-                                @*     <li class="always-open">
+
+                                    <li class="always-open">
                                         <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
                                         <ul class="list-unstyled">
                                             <li class="nav-item">
@@ -245,8 +250,8 @@
                                             </li>
 
                                         </ul>
-                                    </li> *@
-@* 
+                                    </li> 
+ 
                                     @if (userRole == "Admin")
                                     {
                                         <li class="nav-item">
@@ -254,8 +259,8 @@
                                                 <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
                                             </a>
                                         </li>
-                                    } *@
-@* 
+                                    } 
+
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="AfterTask" asp-action="ListPositiveSales"><i class="fa fa-tag"></i>Satış Sonrası Takibasyon</a>
                                     </li>
@@ -277,7 +282,7 @@
                                     </li>
                                     <li class="nav-item">
                                         <a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a>
-                                    </li> *@
+                                    </li> *
 
                                 </ul>
                             </nav>

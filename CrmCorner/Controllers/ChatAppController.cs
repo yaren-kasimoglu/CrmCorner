@@ -1,12 +1,14 @@
 ﻿using System;
 using CrmCorner.Models;
 using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ChatAppController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

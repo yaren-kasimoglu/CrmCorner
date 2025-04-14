@@ -2,6 +2,7 @@
 using CrmCorner.Extensions;
 using CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,7 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-	public class EmailListController : Controller
+    [Authorize(Roles = "Admin")]
+    public class EmailListController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;

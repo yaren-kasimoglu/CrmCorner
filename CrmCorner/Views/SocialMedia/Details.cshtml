@@ -2,40 +2,42 @@
 
 @{
     ViewData["Title"] = "İçerik Detayı";
-    var isVideo = Model.MediaPath?.ToLower().EndsWith(".mp4") == true
-               || Model.MediaPath?.ToLower().EndsWith(".mov") == true
-               || Model.MediaPath?.ToLower().EndsWith(".webm") == true;
+    bool isVideo = Model.ContentType == CrmCorner.Models.Enums.ContentType.Reels; // Reels ise video
 }
+
 <!-- Bootstrap Icons CDN -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
 
 <div class="container mt-5">
     <div class="card shadow p-4">
         <h2 class="mb-4 text-primary">📄 İçerik Detayı</h2>
 
-        @if (!string.IsNullOrEmpty(Model.MediaPath))
+        @if (Model.MediaFile != null)
         {
             if (isVideo)
             {
                 <video class="rounded mb-3 d-block mx-auto" width="300" height="533" controls style="object-fit: cover;">
-                    <source src="@Model.MediaPath" type="video/mp4">
+                    <source src="@Url.Action("GetMedia", "SocialMedia", new { id = Model.Id })" type="video/mp4">
                     Tarayıcınız video öğesini desteklemiyor.
                 </video>
             }
             else
             {
-                <img src="@Model.MediaPath" class="img-fluid rounded mb-3 d-block mx-auto"
+                <img src="@Url.Action("GetMedia", "SocialMedia", new { id = Model.Id })"
+                     class="img-fluid rounded mb-3 d-block mx-auto"
                      style="width: 300px; height: 300px; object-fit: cover;" />
             }
         }
 
         <h4>@Model.Title</h4>
+
         <p class="text-muted">
             <strong>📅 Yayın Tarihi:</strong>
             @Model.ScheduledPublishDate?.ToString("dd.MM.yyyy HH:mm") ?? "-"
         </p>
+
         <p><strong>📌 Tür:</strong> @Model.ContentType.ToString()</p>
+
         <p><strong>📃 Açıklama:</strong> @Html.Raw(Model.Description)</p>
 
         <p>
@@ -54,7 +56,7 @@
             }
         </p>
 
-        <!-- Onaylama ve Geri Alma -->
+        <!-- Onaylama / Onayı Geri Alma -->
         @if (Model.Status == CrmCorner.Models.Enums.ContentStatus.OnayBekliyor)
         {
             <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="d-inline">
@@ -63,25 +65,24 @@
         }
         else if (Model.Status == CrmCorner.Models.Enums.ContentStatus.Onaylandi)
         {
-            <!-- Onayı Geri Alma -->
             <form asp-action="CancelApproval" asp-route-id="@Model.Id" method="post" class="d-inline">
                 <button type="submit" class="btn btn-warning me-2">🔄 Onayı Geri Al</button>
             </form>
         }
 
-        <!-- Geri Bildirim Gönderme -->
+        <!-- Geri Bildirim Gönder -->
         @if (Model.Status == CrmCorner.Models.Enums.ContentStatus.OnayBekliyor)
         {
             <form asp-action="SendFeedback" asp-route-id="@Model.Id" method="post">
                 <div class="mb-3 mt-3">
-                    <label for="FeedbackMessage" class="form-label">📝 Geri Bildirim</label>
+                    <label for="feedbackMessage" class="form-label">📝 Geri Bildirim</label>
                     <textarea name="feedbackMessage" class="form-control" rows="3" placeholder="Geri bildiriminizi yazın..."></textarea>
                 </div>
                 <button type="submit" class="btn btn-danger">📤 Feedback Gönder</button>
             </form>
         }
 
-        <!-- Geri Bildirimlerin Listelenmesi -->
+        <!-- Geri Bildirimler -->
         <h5 class="mt-4">📬 Verilen Geri Bildirimler:</h5>
         @if (Model.Feedbacks != null && Model.Feedbacks.Any())
         {
@@ -91,10 +92,9 @@
                     <li class="list-group-item">
                         <strong>@feedback.Message</strong><br />
                         <small class="text-muted">Gönderilme Tarihi: @feedback.CreatedDate.ToString("dd.MM.yyyy HH:mm")</small>
-                        <!-- Silme butonu ekliyoruz -->
                         <form asp-action="DeleteFeedback" asp-route-feedbackId="@feedback.Id" asp-route-contentId="@Model.Id" method="post" class="d-inline float-end ms-2">
                             <button type="submit" class="btn btn-sm btn-danger" title="Sil">
-                                <i class="bi bi-trash"></i> <!-- Çöp kutusu simgesi -->
+                                <i class="bi bi-trash"></i>
                             </button>
                         </form>
                     </li>
@@ -106,13 +106,15 @@
             <p>Henüz geri bildirim yapılmamış.</p>
         }
 
-
+        <!-- Düzenle Butonu -->
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning mt-4">✏️ Düzenle</a>
+        }
     </div>
 </div>
-<!-- core js file -->
+
+<!-- JS Files -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-<!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>

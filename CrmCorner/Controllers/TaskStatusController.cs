@@ -1,11 +1,13 @@
 ﻿using CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class TaskStatusController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

@@ -10,6 +10,7 @@ using Microsoft.Extensions.FileProviders;
 
 namespace CrmCorner.Controllers
 {
+
     public class MemberController : Controller //Sadece kullanıcı olanların görebileceği bir sayfadır
     {
         private readonly CrmCornerContext _context;
@@ -250,98 +251,6 @@ namespace CrmCorner.Controllers
             return View();
         }
 
-
-
-
-
-
-        //public async Task<IActionResult> UserEdit(UserEditViewModel request)
-        //{
-
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View();
-        //    }
-
-        //    var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
-        //    currentUser.UserName = request.UserName;
-        //    currentUser.Email = request.Email;
-        //    currentUser.BirthDate = request.BirthDate;
-        //    currentUser.City = request.City;
-        //    currentUser.Gender = request.Gender;
-        //    currentUser.PhoneNumber = request.Phone;
-
-        //  //profil resmi için yol oluşturma ve kaydetme bloğu
-        //    if (request.Picture != null && request.Picture.Length > 0)
-        //    {
-        //        var wwwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
-        //        var randomFileName = $"{Guid.NewGuid().ToString()}{Path.GetExtension(request.Picture.FileName)}";
-
-        //        var newPicturePath = Path.Combine(wwwrootFolder.FirstOrDefault(x => x.Name == "userprofilepicture").PhysicalPath!, randomFileName);
-
-
-
-
-        //        using var stream = new FileStream(newPicturePath, FileMode.Create);
-        //        await request.Picture.CopyToAsync(stream);
-
-        //        currentUser.Picture = randomFileName;
-
-        //    }
-        //    var updateToUserResult=await _userManager.UpdateAsync(currentUser);
-
-        //    if (!updateToUserResult.Succeeded)
-        //    {
-        //        ModelState.AddModelErrorList(updateToUserResult.Errors);
-        //        return View();
-        //    }
-
-        //    await _userManager.UpdateSecurityStampAsync(currentUser); //kritil bilgilerin değişmiş olma ihtimaline karşı db deki değeri güncelliyor, diğer oturumlardan atması için
-        //    await _signInManager.SignOutAsync();
-        //    await _signInManager.SignInAsync(currentUser, true);
-
-        //    TempData["SucceesMessage"] = "Bilgiler başarıyla değiştirildi.";
-
-        //    var userEditViewModel = new UserEditViewModel()
-        //    {
-        //        UserName = currentUser.UserName!,
-        //        Email = currentUser.Email!,
-        //        Phone = currentUser.PhoneNumber!,
-        //        BirthDate = currentUser.BirthDate,
-        //        City = currentUser.City,
-        //        Gender = currentUser.Gender,
-
-
-        //    };
-
-        //    return View(userEditViewModel);
-        //}
-
-
-        //public async Task<IActionResult> UserTaskStatusChart()
-        //{
-        //    // Aktif kullanıcının ID'sini al
-        //    var userId = _userManager.GetUserId(User);
-
-        //    // Kullanıcı ID'sini kullanarak AppUser kaydını ve ilişkili TaskComps'ı bul
-        //    var user = await _context.Users
-        //                             .Include(u => u.TaskComps)
-        //                                 .ThenInclude(tc => tc.Status)
-        //                             .FirstOrDefaultAsync(u => u.Id == userId);
-
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var chartData = new
-        //    {
-        //        labels = user.TaskComps.Select(tc => tc.Status.StatusName).Distinct(),
-        //        data = user.TaskComps.GroupBy(tc => tc.Status.StatusName).Select(group => group.Count())
-        //    };
-
-        //    return Json(chartData);
-        //}
     }
 
 }

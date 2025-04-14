@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class CustomerController : Controller
     {
         private readonly CrmCornerContext _context;
