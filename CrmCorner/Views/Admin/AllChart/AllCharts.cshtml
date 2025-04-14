@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "AllCharts";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div id="charts-container">
+    <!-- Chartlar buraya dinamik olarak eklenecek -->
+</div>
+
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @ViewData["Error"]
+    </div>
+}
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+<script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/AllChart/CompanyUserTaskCharts",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log("Gelen veri:", data); // Veriyi konsola yazdırma
+
+                if (data && data.length > 0) {
+                    data.forEach(function (userChart) {
+                        var container = $('<div class="user-chart"><h3>' + userChart.UserName + '</h3><canvas id="chart-' + userChart.UserName + '"></canvas></div>');
+                        $('#charts-container').append(container);
+
+                        var ctx = document.getElementById('chart-' + userChart.UserName).getContext('2d');
+
+                        if (ctx) {
+                            new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: userChart.ChartData.map(c => c.StatusName),
+                                    datasets: [{
+                                        label: 'Görevler',
+                                        data: userChart.ChartData.map(c => c.Count),
+                                        backgroundColor: '#6baed6'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false
+                                }
+                            });
+                        } else {
+                            console.error("Canvas elementi bulunamadı: chart-" + userChart.UserName);
+                        }
+                    });
+                } else {
+                    console.warn("Boş veya geçersiz veri döndü.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Veri getirilirken hata oluştu:', error);
+                console.log(xhr.responseText);
+            }
+        });
+    });
+
+</script>

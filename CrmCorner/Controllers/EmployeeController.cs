@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class EmployeeController : Controller
     {
         private readonly CrmCornerContext _context;

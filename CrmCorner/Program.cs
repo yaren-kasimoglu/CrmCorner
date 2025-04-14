@@ -113,10 +113,7 @@ app.UseRouting();
 app.UseAuthentication(); // Kimlik doğrulama
 app.UseAuthorization(); // Yetkilendirme
 
-// Alanları ve varsayılan rotayı yapılandırın
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
 
 app.MapControllerRoute(
     name: "default",

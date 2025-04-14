@@ -8,12 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
+    [Route("Admin/[controller]/[action]")]
     public class AfterTaskController : BaseController
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
-        public AfterTaskController(UserManager<AppUser> userManager, CrmCornerContext context) :base(userManager)
+
+        public AfterTaskController(UserManager<AppUser> userManager, CrmCornerContext context) : base(userManager)
         {
             _userManager = userManager;
             _context = context;
@@ -24,28 +26,22 @@ namespace CrmCorner.Controllers
             await SetLayout();
             try
             {
-                var user = await _userManager.GetUserAsync(User); // Kullanıcıyı al
-                var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
-                var companyId = user.CompanyId; // Kullanıcının şirket ID'si
+                var user = await _userManager.GetUserAsync(User);
+                var roles = await _userManager.GetRolesAsync(user);
+                var userEmailDomain = user.Email.Split('@')[1];
+                var companyId = user.CompanyId;
 
                 ViewBag.PictureUrl = "/userprofilepicture/" + (user.Picture ?? "defaultpp.png");
 
-                var roles = await _userManager.GetRolesAsync(user);
-
-                if (roles.Contains("Admin"))
-                {
-                    return RedirectToAction("ListPositiveSalesAdmin", "AfterTask", new { area = "Admin" });
-                }
-
                 var positiveSalesQuery = _context.PostSaleInfos
-                                                 .Include(psi => psi.TaskComp)
-                                                     .ThenInclude(tc => tc.AppUser)
-                                                 .Include(psi => psi.TaskComp.Status)
-                                                 .Include(psi => psi.TaskComp.AssignedUser)
-                                                 .Include(psi => psi.TaskComp.Customer)
-                                                 .Where(psi => psi.TaskComp.AppUser.EmailDomain == userEmailDomain)
-                                                 .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won)
-                                                 .Where(psi => psi.TaskComp.StatusId == 5);
+                    .Include(psi => psi.TaskComp)
+                        .ThenInclude(tc => tc.AppUser)
+                    .Include(psi => psi.TaskComp.Status)
+                    .Include(psi => psi.TaskComp.AssignedUser)
+                    .Include(psi => psi.TaskComp.Customer)
+                    .Where(psi => psi.TaskComp.AppUser.EmailDomain == userEmailDomain)
+                    .Where(psi => psi.TaskComp.OutcomeStatus == OutcomeTypeSales.Won)
+                    .Where(psi => psi.TaskComp.StatusId == 5);
 
                 if (!roles.Contains("Admin"))
                 {
@@ -53,35 +49,31 @@ namespace CrmCorner.Controllers
                 }
 
                 var positiveSales = await positiveSalesQuery
-                                            .Select(psi => new SaleDTO
-                                            {
-                                                Id = psi.Id,
-                                                TaskCompTitle = psi.TaskComp.Title,
-                                                IsFirstPaymentMade = psi.IsFirstPaymentMade,
-                                                IsThereAProblem = psi.IsThereAProblem,
-                                                ProblemDescription = psi.ProblemDescription,
-                                                IsContinuationConsidered = psi.IsContinuationConsidered,
-                                                IsTrustpilotReviewed = psi.IsTrustpilotReviewed,
-                                                TrustPilotComment = psi.TrustPilotComment,
-                                                CanUseLogo = psi.CanUseLogo
-                                            })
-                                            .ToListAsync();
+                    .Select(psi => new SaleDTO
+                    {
+                        Id = psi.Id,
+                        TaskCompId = psi.TaskComp.TaskId,
+                        TaskCompTitle = psi.TaskComp.Title,
+                        IsFirstPaymentMade = psi.IsFirstPaymentMade,
+                        IsThereAProblem = psi.IsThereAProblem,
+                        ProblemDescription = psi.ProblemDescription,
+                        IsContinuationConsidered = psi.IsContinuationConsidered,
+                        IsTrustpilotReviewed = psi.IsTrustpilotReviewed,
+                        TrustPilotComment = psi.TrustPilotComment,
+                        CanUseLogo = psi.CanUseLogo
+                    })
+                    .ToListAsync();
 
                 return View(positiveSales);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return RedirectToAction("NotFound", "Error");
             }
         }
 
-
-
-
-
         public async Task<IActionResult> AfterTaskEdit(int? id)
         {
-
             try
             {
                 if (id == null)
@@ -89,41 +81,38 @@ namespace CrmCorner.Controllers
                     return NotFound();
                 }
 
-                var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
+                var user = await _userManager.GetUserAsync(User);
+                var roles = await _userManager.GetRolesAsync(user);
                 ViewBag.PictureUrl = "/userprofilepicture/" + (user.Picture ?? "defaultpp.png");
 
-                var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
+                var userEmailDomain = user.Email.Split('@')[1];
 
-                var postSaleInfo = await _context.PostSaleInfos
-                                                 .Include(psi => psi.TaskComp) // İlişkili TaskComp bilgilerini de yükle
-                                                 .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)) // E-posta domainine göre filtrele
-                                                 .FirstOrDefaultAsync(m => m.Id == id);
+                var postSaleInfoQuery = _context.PostSaleInfos
+                    .Include(psi => psi.TaskComp)
+                    .Where(psi => psi.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || psi.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain));
 
-                var roles = await _userManager.GetRolesAsync(user);
-
-                if (roles.Contains("Admin"))//areaya yönlendiriyorum
+                if (!roles.Contains("Admin"))
                 {
-                    return RedirectToAction("AfterTaskEdit", "AfterTask", new { area = "Admin" });
+                    var userId = user.Id;
+                    postSaleInfoQuery = postSaleInfoQuery.Where(psi => psi.TaskComp.UserId == userId || psi.TaskComp.AssignedUserId == userId);
                 }
+
+                var postSaleInfo = await postSaleInfoQuery.FirstOrDefaultAsync(m => m.Id == id);
 
                 if (postSaleInfo == null)
                 {
                     return NotFound();
                 }
 
-                // Gizli alan için TaskCompId'yi view modelinde veya ViewBag'de taşı
                 ViewBag.TaskCompId = postSaleInfo.TaskCompId;
 
                 return View(postSaleInfo);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return RedirectToAction("NotFound", "Error");
             }
         }
-
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -136,15 +125,23 @@ namespace CrmCorner.Controllers
                     return NotFound();
                 }
 
-                var user = await _userManager.GetUserAsync(User); // Kullanıcı nesnesini al
+                var user = await _userManager.GetUserAsync(User);
+                var roles = await _userManager.GetRolesAsync(user);
                 ViewBag.PictureUrl = "/userprofilepicture/" + (user.Picture ?? "defaultpp.png");
 
-                var userEmailDomain = user.Email.Split('@')[1]; // Kullanıcının e-posta domainini al
+                var userEmailDomain = user.Email.Split('@')[1];
 
-                var postSaleInfo = await _context.PostSaleInfos
-                                                 .Include(p => p.TaskComp)
-                                                 .Where(p => p.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || p.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain)) // E-posta domainine göre filtrele
-                                                 .FirstOrDefaultAsync(m => m.Id == id);
+                var postSaleInfoQuery = _context.PostSaleInfos
+                    .Include(p => p.TaskComp)
+                    .Where(p => p.TaskComp.AppUser.Email.EndsWith(userEmailDomain) || p.TaskComp.AssignedUser.Email.EndsWith(userEmailDomain));
+
+                if (!roles.Contains("Admin"))
+                {
+                    var userId = user.Id;
+                    postSaleInfoQuery = postSaleInfoQuery.Where(p => p.TaskComp.UserId == userId || p.TaskComp.AssignedUserId == userId);
+                }
+
+                var postSaleInfo = await postSaleInfoQuery.FirstOrDefaultAsync(m => m.Id == id);
 
                 if (postSaleInfo == null)
                 {
@@ -153,7 +150,6 @@ namespace CrmCorner.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    // Güncelleme işlemi için alanları kopyala
                     postSaleInfo.TaskCompId = model.TaskCompId;
                     postSaleInfo.IsFirstPaymentMade = model.IsFirstPaymentMade;
                     postSaleInfo.IsThereAProblem = model.IsThereAProblem;
@@ -169,56 +165,15 @@ namespace CrmCorner.Controllers
 
                 return View(model);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return RedirectToAction("NotFound", "Error");
             }
         }
 
-
-
-
         private bool PostSaleInfoExists(int id)
         {
             return _context.PostSaleInfos.Any(e => e.Id == id);
         }
-
-        //public async Task<IActionResult> AddPostSaleInfo(int taskId)
-        //{
-        //    var task = await _context.TaskComps
-        //                             .Include(t => t.Status)
-        //                             .Include(t => t.AppUser)
-        //                             .Include(t => t.AssignedUser)
-        //                             .Include(t => t.Customer)
-        //                             .FirstOrDefaultAsync(t => t.TaskId == taskId && t.Outcomes == OutcomeType.Olumlu);
-
-        //    if (task == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var postSaleInfo = new PostSaleInfo
-        //    {
-        //        TaskCompId = taskId
-        //    };
-
-        //    return View(postSaleInfo);
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> AddPostSaleInfo(PostSaleInfo postSaleInfo)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(postSaleInfo);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction("PositiveTasks"); // Kazanılan görevler listesine yönlendirme
-        //    }
-
-        //    return View(postSaleInfo); // Validasyon hatası varsa formu tekrar göster
-        //}
-
-
-
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    
     public class SocialMediaController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -52,6 +52,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -60,75 +61,145 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(SocialMediaContent model, IFormFile mediaFile)
         {
-            // Mevcut kullanıcıyı alıyoruz
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
-            // Bu alan formda gelmediği için manuel set ediyoruz, validasyon dışında tutmalıyız
-            ModelState.Remove("MediaPath");
+            ModelState.Remove("MediaFile");
 
-            // Model geçerli mi kontrolü
             if (ModelState.IsValid)
             {
-                // Dosya kontrolü yapıyoruz
-                if (mediaFile != null && mediaFile.Length > 0)
+                try
                 {
-                    try
+                    if (mediaFile != null && mediaFile.Length > 0)
                     {
-                        // Yükleme klasörünü oluşturuyoruz (wwwroot/uploadsSocialMedia)
-                        var uploadFolder = Path.Combine(_environment.WebRootPath, "uploadsSocialMedia");
-                        Directory.CreateDirectory(uploadFolder); // Klasör yoksa oluşturuyoruz
-
-                        // Dosya adını benzersiz hale getiriyoruz
-                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + mediaFile.FileName;
-                        var filePath = Path.Combine(uploadFolder, uniqueFileName);
-
-                        // Dosyayı belirtilen yere kopyalıyoruz
-                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        using (var memoryStream = new MemoryStream())
                         {
-                            await mediaFile.CopyToAsync(stream);
+                            await mediaFile.CopyToAsync(memoryStream);
+                            model.MediaFile = memoryStream.ToArray(); // sadece veritabanına kaydediyoruz
                         }
+                    }
 
-                        // MediaPath özelliğini güncelliyoruz
-                        model.MediaPath = "/uploadsSocialMedia/" + uniqueFileName;
-                    }
-                    catch (Exception ex)
-                    {
-                        // Hata durumunda kullanıcıya bilgi veriyoruz
-                        ModelState.AddModelError("", "Dosya yüklenirken bir hata oluştu: " + ex.Message);
-                        return View(model); // Hata mesajını görüntülüyoruz
-                    }
+                    model.CreatedDate = DateTime.Now;
+                    model.Status = ContentStatus.OnayBekliyor;
+
+                    _context.SocialMediaContents.Add(model);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("Index", "SocialMedia");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "İçerik eklenirken bir hata oluştu: " + ex.Message);
+                }
+            }
+
+            return View(model);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var content = await _context.SocialMediaContents.FindAsync(id);
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            return View(content); // Düzenlenecek içeriği View'a gönder
+        }
+
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(SocialMediaContent model, IFormFile mediaFile)
+        {
+            ModelState.Remove("MediaFile");
+
+            if (ModelState.IsValid)
+            {
+                var content = await _context.SocialMediaContents.FindAsync(model.Id);
+                if (content == null)
+                {
+                    return NotFound();
                 }
 
-                // İçeriğin diğer alanlarını güncelliyoruz
-                model.CreatedDate = DateTime.Now;
-                model.Status = 0; // İçeriği "Onay Bekliyor" olarak başlatıyoruz
+                try
+                {
+                    if (mediaFile != null && mediaFile.Length > 0)
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await mediaFile.CopyToAsync(memoryStream);
+                            content.MediaFile = memoryStream.ToArray();
+                        }
+                    }
+                    // Eğer dosya yüklenmediyse eski MediaFile aynen kalacak
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Dosya yüklenirken bir hata oluştu: " + ex.Message);
+                    return View(model);
+                }
 
-                // Yeni içeriği ekliyoruz
-                _context.SocialMediaContents.Add(model);
-                await _context.SaveChangesAsync(); // Veritabanına kaydediyoruz
+                // Diğer alanları güncelle
+                content.Title = model.Title;
+                content.Description = model.Description;
+                content.ScheduledPublishDate = model.ScheduledPublishDate;
+                content.ContentType = model.ContentType;
+                content.Status = model.Status;
 
-                // Başarılı bir şekilde kaydedildiyse, Index sayfasına yönlendiriyoruz
+                _context.Update(content);
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction("Index", "SocialMedia");
             }
-            else
-            {
-                // Eğer model geçerli değilse, hata mesajlarını logluyoruz
-                foreach (var error in ModelState)
-                {
-                    Console.WriteLine($"Key: {error.Key}");
-                    foreach (var e in error.Value.Errors)
-                    {
-                        Console.WriteLine($"  Error: {e.ErrorMessage}");
-                    }
-                }
 
-                // Hata varsa kullanıcıyı aynı sayfada tutuyoruz ve formu yeniden gösteriyoruz
-                return View(model);
-            }
+            return View(model);
         }
+
+
+        public async Task<IActionResult> GetMedia(int id)
+        {
+            var content = await _context.SocialMediaContents.FindAsync(id);
+            if (content == null || content.MediaFile == null)
+            {
+                return NotFound();
+            }
+
+            // İçerik tipine göre content type set edelim (jpg, png, mp4 gibi)
+            var fileExtension = GetFileExtension(content);
+            var mimeType = GetMimeType(fileExtension);
+
+            return File(content.MediaFile, mimeType);
+        }
+
+        // Yardımcı methodlar:
+        private string GetFileExtension(SocialMediaContent content)
+        {
+            // Basit mantık: burada istersen ContentType'a göre de ayarlayabiliriz.
+            // Örneğin ContentType == Reels ise mp4 kabul ederiz gibi.
+            if (content.ContentType == ContentType.Reels)
+                return "mp4";
+            else
+                return "jpg"; // Default image
+        }
+
+        private string GetMimeType(string extension)
+        {
+            return extension switch
+            {
+                "jpg" => "image/jpeg",
+                "jpeg" => "image/jpeg",
+                "png" => "image/png",
+                "mp4" => "video/mp4",
+                _ => "application/octet-stream",
+            };
+        }
+
 
 
 
@@ -221,6 +292,7 @@ namespace CrmCorner.Controllers
   
         // Geri bildirimi silmek için metot
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteFeedback(int feedbackId, int contentId)
         {
             var feedback = await _context.Feedbacks.FindAsync(feedbackId);
@@ -236,6 +308,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var content = await _context.SocialMediaContents.FindAsync(id);
@@ -276,8 +349,7 @@ namespace CrmCorner.Controllers
             return View(calendarViewModel);
         }
 
-
-
+     
 
     }
 }

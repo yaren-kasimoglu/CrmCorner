@@ -1,0 +1,94 @@
+﻿@using CrmCorner.Models.Enums
+@model CrmCorner.Models.SocialMediaContent
+
+@{
+    ViewData["Title"] = "İçerik Düzenle";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h2 class="mb-4 text-primary">✏️ İçerik Düzenle</h2>
+
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" /> <!-- ID gizli input -->
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" placeholder="Başlık giriniz..." required />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Açıklama giriniz..." required></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mevcut Medya</label><br />
+                @if (Model.MediaFile != null)
+                {
+                    var isVideo = Model.ContentType == ContentType.Reels;
+                    if (isVideo)
+                    {
+                        <video width="300" height="533" controls style="object-fit:cover;">
+                            <source src="@Url.Action("GetMedia", "SocialMedia", new { id = Model.Id })" type="video/mp4">
+                            Tarayıcınız video öğesini desteklemiyor.
+                        </video>
+                    }
+                    else
+                    {
+                        <img src="@Url.Action("GetMedia", "SocialMedia", new { id = Model.Id })"
+                             class="img-fluid rounded mb-3 d-block"
+                             style="width: 300px; height: 300px; object-fit: cover;" />
+                    }
+                }
+                else
+                {
+                    <p>Mevcut bir medya bulunmamaktadır.</p>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="mediaFile" class="form-label">Yeni Medya Yükle (İsteğe Bağlı)</label>
+                <input type="file" class="form-control" id="mediaFile" name="mediaFile" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ScheduledPublishDate" class="form-label">Yayın Tarihi ve Saati</label>
+                <input asp-for="ScheduledPublishDate" class="form-control" type="datetime-local"
+                       value="@Model.ScheduledPublishDate?.ToString("yyyy-MM-ddTHH:mm")" required />
+                <span asp-validation-for="ScheduledPublishDate" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContentType" class="form-label">İçerik Türü</label>
+                @Html.DropDownListFor(
+                         model => model.ContentType,
+                         new SelectList(Enum.GetValues(typeof(ContentType))),
+                         "Tür Seçin",
+                         new { @class = "form-select" }
+                         )
+                <span asp-validation-for="ContentType" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label">Statü</label>
+                @Html.DropDownListFor(
+                         model => model.Status,
+                         new SelectList(Enum.GetValues(typeof(ContentStatus))),
+                         "Statü Seçin",
+                         new { @class = "form-select" }
+                         )
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">💾 İçeriği Güncelle</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

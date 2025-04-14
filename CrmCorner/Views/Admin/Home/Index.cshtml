@@ -1,0 +1,889 @@
+﻿@model CompanyUsersViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = "AdminAnasayfa";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+
+<style>
+
+
+  
+
+    .chart-container {
+        position: relative;
+        width: 100%; /* Kart içindeki grafikler için genişlik ayarı */
+        height: 250px; /* Grafiklerin yüksekliği sabitlendi */
+    }
+
+    canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .custom-card {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 10px;
+        border: 1px solid #ddd;
+        max-width: 400px; /* Kartların maksimum genişliği */
+        max-height: 350px; /* Kartların maksimum yüksekliği */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .chart-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px; /* Başlık altı boşluk */
+    }
+
+    .card-body {
+        padding: 10px; /* İç boşluk */
+    }
+
+
+    /* Responsive grid ayarları */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .col-xl-4, .col-lg-6, .col-md-6, .col-xl-8, .col-lg-12, .col-md-12 {
+        padding: 15px; /* İç boşluk */
+    }
+
+    /* Küçük cihazlar için sütun boyutları */
+    @@media (max-width: 768px) {
+        .col-xl-4, .col-lg-6, .col-md-6, .col-xl-8, .col-lg-12, .col-md-12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .custom-card, .card-body {
+            width: 100% !important; /* !important kullanımı genelde kaçınılması gereken bir yöntemdir ama burada özel bir durum için kullanılmıştır. */
+            margin: 10px auto;
+        }
+    }
+</style>
+
+
+<div class="row">
+    @if (Model.CurrentUser != null)
+    {
+        <div class="col-xl-4 col-lg-6 col-md-6 d-flex align-items-start">
+            <div class="card top_counter" style="width: 100%; height:300px;">
+                <div class="list-group list-group-custom list-group-flush">
+                    <div class="list-group-item d-flex align-items-center py-3">
+                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-user"></i> </a></div>
+                        <div class="content">
+                            <div>Çalışan Sayımız</div>
+                            <h5 class="mb-0">@Model.CompanyUsers.Count</h5>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center py-3">
+                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i></a> </div>
+                        <div class="content">
+                            <div>Müşterilerim</div>
+                            <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center py-3">
+                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-users"></i></a> </div>
+                        <div class="content">
+                            <div>Sahip Olduğum Görev Sayısı</div>
+                            <h5 class="mb-0">@Model.CurrentUser.TaskComps.Count</h5>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center py-3">
+                        <div class="icon text-center me-3"><i class="fa fa-briefcase"></i></div>
+                        <div class="content">
+                            <div>Sektör</div>
+                            <h5 class="mb-0">@Model.SectorCount</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="col-xl-4 col-lg-6 col-md-6 d-flex align-items-start">
+        <div class="card" style="width: 100%; height:310px;">
+            <div class="card-header">
+                <h6 class="card-title">Yapılacaklar</h6>
+                <small>Yaklaşan Yapılacaklar Listesi</small>
+            </div>
+            <div class="card-body todo_list">
+                @if (ViewBag.ToDoList != null)
+                {
+                    var todoList = ViewBag.ToDoList as List<Tuple<string, string>>;
+
+                    @for (int i = 0; i < Math.Min(5, todoList.Count); i++)
+                    {
+                        var task = todoList[i].Item1;
+                        var url = todoList[i].Item2;
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="form-check">
+                                <a href="@url" class="form-check-label" style="color: black;" id="@task"><i class="fa fa-calendar me-2"></i>@task</a>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="col-xl-4 col-lg-6 col-md-6 d-flex align-items-start">
+        <div class="card" style="width: 100%; height:310px;">
+            <div class="chart-title">Müşteri Bilgisine Nereden Ulaşıldı?</div>
+            <div class="card-body">
+                <canvas id="heardFromChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+
+<div class="row">
+    <div class="col-xl-4 col-lg-4 col-md-12">
+        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
+            <canvas id="valueOfferChartTL"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-4 col-md-12">
+        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
+            <canvas id="valueOfferChartEU"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-4 col-md-12">
+        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
+            <canvas id="valueOfferChart$"></canvas>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container">
+    <div class="row no-gutters">
+        <div class="col-xl-4 col-lg-4 col-md-12">
+            <div class="custom-card">
+                <div class="chart-title">Görevlerin Durumlarına Göre Dağılımları</div>
+                <div class="card-body">
+                    <canvas id="outcomeStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-12">
+            <div class="custom-card">
+                <div class="chart-title">Son Karar Mercii İle Görüşme Durumları</div>
+                <div class="card-body">
+                    <canvas id="isFinalDecisionMaker"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-12">
+            <div class="custom-card">
+                <div class="chart-title">Şirketin Müşterilerinin Sektörel Dağılımları</div>
+                <div class="card-body">
+                    <canvas id="industuryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+<div class="col-xl-4 col-lg-4 col-md-12">
+    <div class="custom-card" style="width: 100%;">
+        <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
+        <div class="card-body">
+            <canvas id="userTaskStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+
+<!-- core js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+<!-- page js file -->
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+<script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/Home/UserTaskStatusChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
+                var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
+                //var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
+                var colors = [
+                    '#d0e9f5', // En açık mavi
+                    '#a0c4e3', // Açık mavi
+                    '#6baed6', // Orta mavi
+                    '#3182bd'  // Koyu mavi
+                ];
+
+
+                // Gelen veri yapısına göre haritalama yapalım
+                var labels = data.map(item => item.statusName);
+                var dataValues = data.map(item => item.count);
+                var taskNames = data.map(item => item.taskNames);
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,  // Responsive ayarı aktif
+                        maintainAspectRatio: false,  // En-boy oranını koruma, böylece yükseklik ayarı uygulanabilir
+                        layout: {
+                            padding: {
+                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                bottom: 0
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var tasks = taskNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(tasks); // Görev isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8// Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
+                            }
+
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/Home/OutcomeStatusChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
+                var ctx = document.getElementById('outcomeStatusChart').getContext('2d');
+                var colors = [
+                    '#f3e6f6', // En açık mor
+                    '#e1a7e8', // Açık mor
+                    '#b76cd0', // Orta mor
+                    '#8a2c77'  // Koyu mor
+                ];
+
+                var labels = data.labels;
+                var dataValues = data.data;
+                var taskNames = data.taskNames;
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,  // Responsive ayarı aktif
+                        maintainAspectRatio: false,  // En-boy oranını koruma, böylece yükseklik ayarı uygulanabilir
+                        layout: {
+                            padding: {
+                                top: 10,
+                                bottom: 0
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11,
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var tasks = taskNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(tasks);
+                                        return lines;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8 // Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    });
+
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/Home/IsFinalDecisionMaker",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
+                var ctx = document.getElementById('isFinalDecisionMaker').getContext('2d');
+                var colors = [
+                    '#FFE0B2', // En açık turuncu
+                    '#FF6F00'  // Koyu turuncu
+                ];
+
+                var labels = data.labels;
+                var dataValues = data.data;
+                var taskNames = data.taskNames;
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,  // Responsive ayarı aktif
+                        maintainAspectRatio: false,  // En-boy oranını koruma, böylece yükseklik ayarı uygulanabilir
+                        layout: {
+                            padding: {
+                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                bottom: 0
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var tasks = taskNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(tasks);
+                                        return lines;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8// Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
+                            }
+
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    });</script>
+<script>    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/Home/IndustryChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
+                var ctx = document.getElementById('industuryChart').getContext('2d');
+                // Dinamik olarak renk seçimi
+                var colors = generateColors(data.labels.length);
+
+                var labels = data.labels;
+                var dataValues = data.data;
+                var customerNames = data.customerNames;
+
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,  // Responsive ayarı aktif
+                        maintainAspectRatio: false,  // En-boy oranını koruma, böylece yükseklik ayarı uygulanabilir
+                        layout: {
+                            padding: {
+                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
+                                bottom: 0
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 10,
+                                    padding: 5,
+                                    font: {
+                                        size: 10, // Yazı boyutunu 12px olarak ayarladım
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var index = context.dataIndex;
+                                        var count = dataValues[index];
+                                        var customers = customerNames[index];
+                                        var label = labels[index] + ': ' + count;
+                                        var lines = [label].concat(customers); // Müşteri isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: 'rgba(0, 0, 0, 0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 8// Yazı boyutunu küçük tut
+                                },
+                                anchor: 'center', // Konumu merkezde gösterir
+                                align: 'center',  // Yazıları merkezde hizalar
+                                offset: 10 // Sağ tarafa doğru kaydırma
+                            }
+
+                        }
+                    },
+                    plugins: [ChartDataLabels] // ChartDataLabels plugin'ini kullanın
+                });
+
+            },
+            error: function (xhr, status, error) {
+                // Hata durumunda kullanıcıya bildirim
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                console.error('Error - ' + errorMessage);
+                // alert('Failed to fetch data. Error: ' + errorMessage);
+            }
+        });
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var predefinedColors = [
+                '#A3D9A5',
+                '#FFDAC1',
+                '#BAFFB3',
+                '#C2C2F0', // Pastel lavanta
+                '#B3F3D0',
+                '#BAE1FF',
+                '#FFB3BA', // Pastel pembe
+                '#FFDFBA', // Pastel şeftali
+                '#FFFFBA', // Pastel sarı
+                '#D5AAFF', // Pastel mor
+                '#FFB3E6', // Pastel fuşya
+
+            ];
+
+            // Renklerin sayısına göre döndür
+            return predefinedColors.slice(0, count);
+        }
+    });</script>
+
+   <script>
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/Home/ValueOfferChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                createChart('valueOfferChartTL', data.tlChart, '₺');
+                createChart('valueOfferChartEU', data.euChart, '€');
+                createChart('valueOfferChart$', data.dollarChart, '$');
+            },
+            error: function (xhr, status, error) {
+                console.error('Veri getirilirken hata oluştu:', error);
+            }
+        });
+
+        // Grafik oluşturma fonksiyonu
+        function createChart(canvasId, chartData, currency) {
+            var ctx = document.getElementById(canvasId).getContext('2d');
+            var colors = generateColors(chartData.labels.length);
+
+            // Her görevi ayrı sütun olarak göstermek için data yapısını dönüştürelim
+            var datasets = [];
+            for (var i = 0; i < chartData.data.length; i++) {
+                var tasksInRange = chartData.data[i];
+                var taskNamesInRange = chartData.taskNames[i];
+
+                for (var j = 0; j < tasksInRange.length; j++) {
+                    datasets.push({
+                        label: taskNamesInRange[j] + ' (' + currency + ')', // Görev isimlerini geri ekledik
+                        data: Array(i).fill(null).concat(tasksInRange[j]), // Veriyi doğru aralığa yerleştiriyoruz
+                        backgroundColor: colors[i % colors.length],
+                        borderWidth: 1
+                    });
+                }
+            }
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    var label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+
+                                    var value = context.dataset.data[context.dataIndex]; // Toplam Değer
+                                    var lines = [
+                                        label + value + ' ' + currency // Toplam Değer ve Para Birimi
+                                    ];
+
+                                    return lines;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var predefinedColors = [
+                '#A3D9A5', '#FFDAC1', '#BAFFB3', '#C2C2F0', '#B3F3D0', '#BAE1FF',
+                '#FFB3BA', '#FFDFBA', '#FFFFBA', '#D5AAFF', '#FFB3E6'
+            ];
+            return predefinedColors.slice(0, count);
+        }
+    });
+
+
+       </script>
+
+@*<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/Home/ValueOfferChart",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için konsola yazdır
+                var ctx = document.getElementById('valueOfferChart').getContext('2d');
+                var colors = generateColors(data.labels.length);
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Değer Teklifi',
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,  // Responsive ayarı aktif
+                        maintainAspectRatio: false,  // En-boy oranını koruma, böylece yükseklik ayarı uygulanabilir
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.raw;
+
+                                        var index = context.dataIndex;
+                                        var taskNames = data.taskNames[index];
+                                        var lines = [label].concat(taskNames);
+                                        //label += '\n' + taskNames.join('\n');
+
+                                        return lines;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Veri getirilirken hata oluştu:', error);
+            }
+        });
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var predefinedColors = [
+                '#A3D9A5',
+                '#FFDAC1',
+                '#BAFFB3',
+                '#C2C2F0', // Pastel lavanta
+                '#B3F3D0',
+                '#BAE1FF',
+                '#FFB3BA', // Pastel pembe
+                '#FFDFBA', // Pastel şeftali
+                '#FFFFBA', // Pastel sarı
+                '#D5AAFF', // Pastel mor
+                '#FFB3E6', // Pastel fuşya
+
+            ];
+
+            // Renklerin sayısına göre döndür
+            return predefinedColors.slice(0, count);
+        }
+    });
+
+</script>*@
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "/Home/HeardFromChart", // Controller metoduna yapılan istek
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                console.log(data); // Gelen veriyi kontrol etmek için
+                var ctx = document.getElementById('heardFromChart').getContext('2d');
+
+                // Renkleri dinamik olarak belirleyelim
+                var colors = generateColors(data.labels.length);
+
+                new Chart(ctx, {
+                    type: 'doughnut', // Burada chart tipini doughnut yapıyoruz
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,  // Responsive ayarı aktif
+                        maintainAspectRatio: false,  // En-boy oranını koruma, böylece yükseklik ayarı uygulanabilir
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 8,
+                                    font: {
+                                        size: 11,
+                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.raw;
+
+                                        var index = context.dataIndex;
+                                        var taskNames = data.taskNames[index];
+                                        var lines = [label].concat(taskNames); // Görev isimlerini ekle
+                                        return lines;
+                                    }
+                                }
+                            }
+                        },
+                        // Scales'ı kaldırıyoruz çünkü doughnut grafiklerde eksen yok
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        }
+                    }
+                });
+
+            },
+            error: function (xhr, status, error) {
+                console.error('HeardFrom chart verisi getirilirken hata oluştu:', error);
+            }
+        });
+
+        // Dinamik renk üretimi
+        function generateColors(count) {
+            var predefinedColors = [
+                '#A3D9A5',
+                '#FFDAC1',
+                '#BAFFB3',
+                '#C2C2F0',
+                '#B3F3D0',
+                '#BAE1FF',
+                '#FFB3BA',
+                '#FFDFBA',
+                '#FFFFBA',
+                '#D5AAFF',
+                '#FFB3E6'
+            ];
+
+            // Gerekli renk sayısına göre renkleri döndür
+            return predefinedColors.slice(0, count);
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>

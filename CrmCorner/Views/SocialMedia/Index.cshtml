@@ -5,46 +5,43 @@
     ViewData["Title"] = "İçerik Listesi";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+
 <style>
+    .card.bg-warning, .card.bg-success, .card.bg-danger {
+        width: 200px;
+        font-size: 12px;
+        margin: 0 auto;
+    }
+
     .card.bg-warning {
-        width: 200px; /* Kutuların genişliğini küçültüyoruz */
-        font-size: 12px; /* Yazı boyutunu küçültüyoruz */
-        margin: 0 auto; /* Ortalamak için */
         background-color: #f8d57e !important;
-        border-color: #f1c40f; /* Sarı rengi daha pastel yapmak */
+        border-color: #f1c40f;
     }
 
     .card.bg-success {
-        width: 200px; /* Kutuların genişliğini küçültüyoruz */
-        font-size: 12px; /* Yazı boyutunu küçültüyoruz */
-        margin: 0 auto; /* Ortalamak için */
-        background-color: #81c784 !important; /* Daha pastel bir yeşil tonu */
-        border-color: #388e3c; /* Yeşil rengi yumuşatmak */
+        background-color: #81c784 !important;
+        border-color: #388e3c;
     }
 
     .card.bg-danger {
-        width: 200px; /* Kutuların genişliğini küçültüyoruz */
-        font-size: 12px; /* Yazı boyutunu küçültüyoruz */
-        margin: 0 auto; /* Ortalamak için */
-        background-color: #e57373 !important; /* Daha pastel bir kırmızı tonu */
-        border-color: #d32f2f; /* Kırmızı rengi daha yumuşak hale getirmek */
+        background-color: #e57373 !important;
+        border-color: #d32f2f;
     }
 
     .card-body {
-        padding: 8px; /* İçerik alanını sıkıştırıyoruz */
+        padding: 8px;
     }
 
     .card-text.display-6 {
-        font-size: 15px; /* Sayacın boyutunu küçültüyoruz */
+        font-size: 15px;
         color: black;
     }
 
     .card-title {
-        font-size: 14px; /* Başlık boyutunu küçültüyoruz */
+        font-size: 14px;
         color: black;
     }
 </style>
-
 
 <div class="container mt-5">
     <h2 class="mb-4">📋 Planlanan Sosyal Medya İçerikleri</h2>
@@ -80,16 +77,17 @@
                     <option value="">Tüm Türler</option>
                     @foreach (var type in Enum.GetValues(typeof(ContentType)))
                     {
-                        <option value="@type">
-                            @if (ViewBag.Type?.ToString() == type.ToString())
-                            {
-                                @:selected
-                            }
-                            @type
-                        </option>
-
+                        if (ViewBag.Type?.ToString() == type.ToString())
+                        {
+                            <option value="@type" selected>@type</option>
+                        }
+                        else
+                        {
+                            <option value="@type">@type</option>
+                        }
                     }
                 </select>
+
             </div>
             <div class="col-md-4">
                 <button type="submit" class="btn btn-primary w-100">Filtrele</button>
@@ -103,20 +101,22 @@
         {
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm h-100">
-                    @if (!string.IsNullOrEmpty(item.MediaPath))
+
+                    @if (item.MediaFile != null)
                     {
-                        var isVideo = item.MediaPath.ToLower().EndsWith(".mp4") || item.MediaPath.ToLower().EndsWith(".mov") || item.MediaPath.ToLower().EndsWith(".webm");
+                        var isVideo = item.ContentType == ContentType.Reels;
 
                         if (isVideo)
                         {
                             <video class="card-img-top" style="height: 350px; object-fit: cover;" controls>
-                                <source src="@item.MediaPath" type="video/mp4" />
+                                <source src="@Url.Action("GetMedia", "SocialMedia", new { id = item.Id })" type="video/mp4" />
                                 Tarayıcınız video öğesini desteklemiyor.
                             </video>
                         }
                         else
                         {
-                            <img src="@item.MediaPath" class="card-img-top" style="height: 350px; object-fit: cover;" />
+                            <img src="@Url.Action("GetMedia", "SocialMedia", new { id = item.Id })"
+                                 class="card-img-top" style="height: 350px; object-fit: cover;" />
                         }
                     }
 
@@ -144,18 +144,17 @@
                             }
                         </p>
                         <div class="mt-auto">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary w-100">📄 Detay</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary w-100 mb-2">📄 Detay</a>
 
                             @if (User.IsInRole("Admin"))
                             {
                                 <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-danger w-100 mt-2" title="Sil">
+                                    <button type="submit" class="btn btn-sm btn-danger w-100" title="Sil">
                                         <i class="bi bi-trash"></i> Sil
                                     </button>
                                 </form>
                             }
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -192,10 +191,7 @@
     </nav>
 </div>
 
-<!-- core js file -->
+<!-- JS Files -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-<!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
