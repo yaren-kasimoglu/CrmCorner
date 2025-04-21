@@ -1,0 +1,35 @@
+﻿@model CrmCorner.Models.ApolloSettings
+@{
+    ViewData["Title"] = "Apollo Ayarları";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+
+<h2>Apollo API Tokenınızı Kaydedin</h2>
+@if (TempData["HealthStatus"] != null)
+{
+    <div class="alert alert-info">@TempData["HealthStatus"]</div>
+}
+
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+<form asp-action="Save" method="post">
+    <div class="form-group">
+        <label for="ApolloApiToken">Apollo API Token:</label>
+        <input type="text" class="form-control" id="ApolloApiToken" name="ApolloApiToken"
+               value="@Model.ApolloApiToken" required />
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+</form>
+
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
