@@ -24,6 +24,9 @@ builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
 // MVC ve SignalR servislerini ekleyin
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient<ApolloService>();
+builder.Services.AddHttpClient<ApolloHealthService>();
+
 builder.Services.AddSignalR();
 
 // Razor runtime derlemesini ekleyin
@@ -95,6 +98,9 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 // Dosya yükleme seçeneklerini yapılandırın
 builder.Services.Configure<FileUploadOptions>(builder.Configuration.GetSection("FileUploadOptions"));
+
+
+
 
 var app = builder.Build();
 

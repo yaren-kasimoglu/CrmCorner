@@ -1,0 +1,40 @@
+﻿@model List<CrmCorner.Services.ApolloCompanyResultDto>
+@{
+    ViewData["Title"] = "Şirket Arama Sonuçları";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h2>Şirket Arama Sonuçları</h2>
+
+@if (!Model.Any())
+{
+        <div class="alert alert-info">Hiçbir sonuç bulunamadı.</div>
+}
+else
+{
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Ad</th>
+                    <th>Website</th>
+                    <th>Lokasyon</th>
+                    <th>Sektör</th>
+                    <th>Çalışan Sayısı</th>
+                    <th>Oluşturulma Tarihi</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var company in Model)
+            {
+                        <tr>
+                            <td>@company.Name</td>
+                            <td>@company.WebsiteUrl</td>
+                            <td>@company.Location</td>
+                            <td>@company.Industry</td>
+                            <td>@company.EmployeeCount</td>
+                            <td>@company.CreatedAt?.ToString("dd.MM.yyyy")</td>
+                        </tr>
+            }
+            </tbody>
+        </table>
+}

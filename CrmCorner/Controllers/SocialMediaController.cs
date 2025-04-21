@@ -4,6 +4,7 @@ using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
@@ -22,34 +23,68 @@ namespace CrmCorner.Controllers
             _environment = environment;
         }
 
-        public async Task<IActionResult> Index(string search, ContentType? type, int page = 1)
+        public async Task<IActionResult> Index(string search, ContentType? type, int page = 1, int? selectedCompanyId = null)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
+            var roles = await _userManager.GetRolesAsync(currentUser);
             var query = _context.SocialMediaContents.AsQueryable();
 
+            // Adminse: Firma seçimini yapabilir
+            if (roles.Contains("Admin"))
+            {
+                // Dropdown için şirket listesini ViewBag’e ekle
+                var companies = await _context.Companies.ToListAsync();
+                ViewBag.CompanyList = new SelectList(companies, "CompanyId", "CompanyName");
+                ViewBag.SelectedCompanyId = selectedCompanyId;
+
+                // Eğer admin belirli bir firma seçtiyse, o firmaya göre filtrele
+                if (selectedCompanyId.HasValue)
+                {
+                    query = query.Where(x => x.CompanyId == selectedCompanyId.Value);
+                }
+            }
+            else
+            {
+                // Admin değilse sadece kendi şirketine ait içerikleri görebilsin
+                query = query.Where(x => x.CompanyId == currentUser.CompanyId);
+            }
+
+            // Arama filtresi
             if (!string.IsNullOrEmpty(search))
+            {
                 query = query.Where(x => x.Title.Contains(search) || x.Description.Contains(search));
+            }
 
+            // Tür filtresi
             if (type.HasValue)
+            {
                 query = query.Where(x => x.ContentType == type.Value);
+            }
 
-
-            // Sayfalama
+            // Sayfalama işlemleri
             int pageSize = 6;
-            var items = await PaginatedList<SocialMediaContent>.CreateAsync(query.OrderByDescending(x => x.CreatedDate), page, pageSize);
+            var items = await PaginatedList<SocialMediaContent>.CreateAsync(
+                query.OrderByDescending(x => x.CreatedDate),
+                page,
+                pageSize
+            );
 
-            // Özet için ViewBag
-            ViewBag.PendingCount = await _context.SocialMediaContents.CountAsync(x => x.Status == ContentStatus.OnayBekliyor);
-            ViewBag.ApprovedCount = await _context.SocialMediaContents.CountAsync(x => x.Status == ContentStatus.Onaylandi);
-            ViewBag.FeedbackCount = await _context.SocialMediaContents.CountAsync(x => x.Status == ContentStatus.FeedbackVerildi);
+            // Özet bilgileri ViewBag’e gönder
+            ViewBag.PendingCount = await query.CountAsync(x => x.Status == ContentStatus.OnayBekliyor);
+            ViewBag.ApprovedCount = await query.CountAsync(x => x.Status == ContentStatus.Onaylandi);
+            ViewBag.FeedbackCount = await query.CountAsync(x => x.Status == ContentStatus.FeedbackVerildi);
 
             ViewBag.Search = search;
             ViewBag.Type = type;
-        
+            ViewBag.IsAdmin = roles.Contains("Admin");
+
 
             return View(items);
         }
+
+
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -57,8 +92,22 @@ namespace CrmCorner.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-            return View();
+
+            // HATALARI ENGELLEMEK İÇİN NULL KONTROLÜ
+            if (currentUser == null)
+            {
+                TempData["ErrorMessage"] = "Kullanıcı bilgisi alınamadı.";
+                return RedirectToAction("Index");
+            }
+
+            // Company listesi ViewBag'e atanıyor
+            var companies = await _context.Companies.ToListAsync();
+            ViewBag.CompanyList = new SelectList(companies, "CompanyId", "CompanyName");
+
+            return View(new SocialMediaContent()); // boş model döndürüyoruz
         }
+
+
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -201,8 +250,6 @@ namespace CrmCorner.Controllers
         }
 
 
-
-
         public async Task<IActionResult> Details(int id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -329,14 +376,23 @@ namespace CrmCorner.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
 
-            var contents = _context.SocialMediaContents
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            var query = _context.SocialMediaContents
                 .Where(c => c.ScheduledPublishDate.HasValue &&
                             c.ScheduledPublishDate.Value.Month == currentMonth &&
-                            c.ScheduledPublishDate.Value.Year == currentYear)
-                .ToList();
+                            c.ScheduledPublishDate.Value.Year == currentYear);
+
+            // Admin değilse sadece kendi şirketine ait içerikleri getir
+            if (!roles.Contains("Admin"))
+            {
+                query = query.Where(c => c.CompanyId == currentUser.CompanyId);
+            }
+
+            var contents = await query.ToListAsync();
 
             var calendarViewModel = new CalendarViewModel
             {
@@ -345,11 +401,11 @@ namespace CrmCorner.Controllers
                 Contents = contents
             };
 
-            // Modeli View'e aktar
             return View(calendarViewModel);
         }
 
-     
+
+
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CrmCorner.Models
 {
@@ -17,6 +18,11 @@ namespace CrmCorner.Models
         // Geri Bildirim Koleksiyonu
         public ICollection<Feedback>? Feedbacks { get; set; }
         public DateTime? ScheduledPublishDate { get; set; }
+
+        public int? CompanyId { get; set; } // Başlangıçta nullable
+        [ForeignKey("CompanyId")]
+        public Company? Company { get; set; }
+
 
     }
 

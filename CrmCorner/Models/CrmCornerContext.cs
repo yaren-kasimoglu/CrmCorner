@@ -42,6 +42,8 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     public DbSet<SocialMediaContent> SocialMediaContents { get; set; }
     public DbSet<Feedback> Feedbacks { get; set; }
 
+    public DbSet<ApolloSettings> ApolloSettings { get; set; }
+
 
 
 

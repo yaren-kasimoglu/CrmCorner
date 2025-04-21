@@ -87,8 +87,23 @@
                         }
                     }
                 </select>
-
             </div>
+@if (ViewBag.IsAdmin != null && ViewBag.IsAdmin)
+{
+    <div class="col-md-4">
+        <select name="selectedCompanyId" class="form-select">
+            <option value="">🔍 Tüm Şirketler</option>
+            @foreach (var company in (SelectList)ViewBag.CompanyList)
+            {
+ <option value="@company.Value" selected="@(ViewBag.SelectedCompanyId != null && ViewBag.SelectedCompanyId.ToString() == company.Value)">
+    @company.Text
+</option>
+
+            }
+        </select>
+    </div>
+}
+
             <div class="col-md-4">
                 <button type="submit" class="btn btn-primary w-100">Filtrele</button>
             </div>
@@ -137,9 +152,6 @@
                                     break;
                                 case ContentStatus.Onaylandi:
                                     <span class="badge bg-success">Onaylandı</span>
-                                    break;
-                                case ContentStatus.FeedbackVerildi:
-                                    <span class="badge bg-danger">Feedback Verildi</span>
                                     break;
                             }
                         </p>

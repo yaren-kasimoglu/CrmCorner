@@ -1,0 +1,21 @@
+﻿@model CrmCorner.Services.ApolloHealthResult
+@{
+    ViewData["Title"] = "Apollo Token Durumu";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h2>Apollo API Token Sağlık Kontrolü</h2>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">
+        Hata: @Model.Error
+    </div>
+}
+else
+{
+    <ul class="list-group">
+        <li class="list-group-item">Token Geçerli mi: <strong>@Model.Healthy</strong></li>
+        <li class="list-group-item">Giriş Yapılmış mı: <strong>@Model.IsLoggedIn</strong></li>
+    </ul>
+}

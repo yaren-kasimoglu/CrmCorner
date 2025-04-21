@@ -22,6 +22,25 @@ namespace CrmCorner.Migrations
 
             MySqlModelBuilderExtensions.HasCharSet(modelBuilder, "utf8mb4");
 
+            modelBuilder.Entity("CrmCorner.Models.ApolloSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApolloApiToken")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApolloSettings");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.AppRole", b =>
                 {
                     b.Property<string>("Id")
@@ -489,6 +508,9 @@ namespace CrmCorner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ContentType")
                         .HasColumnType("int");
 
@@ -513,6 +535,8 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("SocialMediaContents");
                 });
@@ -941,6 +965,15 @@ namespace CrmCorner.Migrations
                         .IsRequired();
 
                     b.Navigation("TaskComp");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.SocialMediaContent", b =>
+                {
+                    b.HasOne("CrmCorner.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId");
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.TableHeader", b =>

@@ -1,0 +1,44 @@
+﻿@model CrmCorner.Services.ApolloMatchedPersonDto
+
+@{
+    ViewData["Title"] = "Eşleşen Kişi Bilgisi";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h2>Eşleşen Kişi</h2>
+
+@if (Model != null)
+{
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Ad</th>
+                    <th>Soyad</th>
+                    <th>Email</th>
+                    <th>Görev</th>
+                <th>LinkedIn</th>
+                <th>Telefon</th>
+                <th>Kıdem</th>
+                <th>Şirket</th>
+                <th>Konum</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@Model.FirstName</td>
+                    <td>@Model.LastName</td>
+                    <td>@Model.Email</td>
+                    <td>@Model.Title</td>
+                <td>@Model.LinkedinUrl</td>
+                <td>@Model.PhoneNumber</td>
+                <td>@Model.Seniority</td>
+                <td>@Model.OrganizationName</td>
+                <td>@Model.Location</td>
+                </tr>
+            </tbody>
+        </table>
+}
+else
+{
+        <div class="alert alert-info">Kişi bulunamadı.</div>
+}

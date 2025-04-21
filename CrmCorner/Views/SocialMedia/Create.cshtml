@@ -2,7 +2,12 @@
 
 @{
     ViewData["Title"] = "Yeni İçerik Ekle";
-    Layout = "~/Views/Shared/_LayoutHomePage.cshtml"; // Layout'u da ekliyorum
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+@if (ViewBag.CompanyList == null)
+{
+    throw new Exception("CompanyList ViewBag'e atanamadı.");
 }
 
 <div class="container mt-5">
@@ -42,10 +47,22 @@
                          model => model.ContentType,
                          new SelectList(Enum.GetValues(typeof(CrmCorner.Models.Enums.ContentType))),
                          "Tür Seçin",
-                         new { @class = "form-select" }
-                         )
+                         new { @class = "form-select" })
                 <span asp-validation-for="ContentType" class="text-danger"></span>
             </div>
+
+      
+                <div class="mb-3">
+                    <label asp-for="CompanyId" class="form-label">Şirket Seçin</label>
+                    @Html.DropDownListFor(
+                             model => model.CompanyId,
+                             ViewBag.CompanyList as SelectList,
+                             "Şirket Seçin",
+                             new { @class = "form-select" }
+                             )
+                    <span asp-validation-for="CompanyId" class="text-danger"></span>
+                </div>
+            
 
             <button type="submit" class="btn btn-success w-100">💾 Oluştur</button>
         </form>
@@ -89,7 +106,7 @@
                     dropzoneText.innerText = file.name;
                 } else {
                     alert('Sadece JPG, JPEG, PNG ve MP4 dosyaları yükleyebilirsiniz.');
-                    input.value = ''; // Seçimi temizle
+                    input.value = '';
                     dropzoneText.innerText = 'Dosyanızı buraya sürükleyin veya tıklayarak seçin';
                 }
             }
