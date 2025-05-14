@@ -44,6 +44,9 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
 
     public DbSet<ApolloSettings> ApolloSettings { get; set; }
 
+    public DbSet<ApolloContactDbModel> ApolloContacts { get; set; }
+
+
 
 
 

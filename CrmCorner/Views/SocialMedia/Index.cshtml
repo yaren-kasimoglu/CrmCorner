@@ -67,12 +67,12 @@
     </div>
 
     <!-- Filtreleme -->
-    <form method="get" class="mb-4">
-        <div class="row">
-            <div class="col-md-4">
-                <input name="search" value="@ViewBag.Search" class="form-control" placeholder="🔍 Başlık veya açıklama" />
-            </div>
-            <div class="col-md-4">
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <input name="search" value="@ViewBag.Search" class="form-control" placeholder="🔍 Başlık veya açıklama" />
+        </div>
+        <div class="col-md-3">
                 <select name="type" class="form-select">
                     <option value="">Tüm Türler</option>
                     @foreach (var type in Enum.GetValues(typeof(ContentType)))
@@ -87,28 +87,27 @@
                         }
                     }
                 </select>
-            </div>
-@if (ViewBag.IsAdmin != null && ViewBag.IsAdmin)
-{
-    <div class="col-md-4">
-        <select name="selectedCompanyId" class="form-select">
-            <option value="">🔍 Tüm Şirketler</option>
-            @foreach (var company in (SelectList)ViewBag.CompanyList)
-            {
- <option value="@company.Value" selected="@(ViewBag.SelectedCompanyId != null && ViewBag.SelectedCompanyId.ToString() == company.Value)">
-    @company.Text
-</option>
-
-            }
-        </select>
-    </div>
-}
-
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-primary w-100">Filtrele</button>
-            </div>
         </div>
-    </form>
+        @if (ViewBag.IsAdmin != null && ViewBag.IsAdmin)
+        {
+            <div class="col-md-3">
+                <select name="selectedCompanyId" class="form-select">
+                    <option value="">🔍 Tüm Şirketler</option>
+                    @foreach (var company in (SelectList)ViewBag.CompanyList)
+                    {
+                        <option value="@company.Value" selected="@(ViewBag.SelectedCompanyId?.ToString() == company.Value)">
+                            @company.Text
+                        </option>
+                    }
+                </select>
+            </div>
+        }
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+        </div>
+    </div>
+</form>
+
 
     <!-- Kartlar -->
     <div class="row">

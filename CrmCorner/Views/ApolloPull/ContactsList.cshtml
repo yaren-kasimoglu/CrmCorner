@@ -1,0 +1,71 @@
+﻿@model IEnumerable<CrmCorner.Models.ApolloContactDbModel>
+@{
+    ViewData["Title"] = "Apollo Kişi Listesi";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h2>Apollo Kişi Listesi</h2>
+
+<div class="table-responsive">
+    <table id="contactsTable" class="display nowrap table table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>Ad</th>
+                <th>Soyad</th>
+                <th>Unvan</th>
+                <th>Şirket</th>
+                <th>Email</th>
+                <th>Güncelleme Tarihi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in Model)
+            {
+                <tr>
+                    <td>@contact.FirstName</td>
+                    <td>@contact.LastName</td>
+                    <td>@contact.Title</td>
+                    <td>@contact.CompanyName</td>
+                    <td>@contact.Email</td>
+                    <td>@(((DateTime?)contact.UpdatedAt)?.ToString("yyyy-MM-dd") ?? "")</td>
+
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- DataTables CSS ve JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#contactsTable').DataTable({
+            dom: 'Bfrtip',
+            pageLength: 20,
+            responsive: true,
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"
+            },
+            buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5',
+                'colvis'
+            ]
+        });
+    });
+</script>

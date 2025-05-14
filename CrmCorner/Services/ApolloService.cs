@@ -354,6 +354,23 @@ namespace CrmCorner.Services
 
     }
 
+    public class PersonViewModel
+    {
+        public string Name { get; set; }
+        public string Title { get; set; }
+        public string Country { get; set; }
+        public string LinkedInUrl { get; set; }
+        public string PhotoUrl { get; set; }
+    }
+
+    public class ApolloSearchViewModel
+    {
+        public List<string> SelectedTitles { get; set; } = new();
+        public List<string> SelectedCountries { get; set; } = new();
+        public List<string> SelectedIndustries { get; set; } = new();
+    }
+
+
     public class ApolloCompanySearchDto
     {
         public string OrganizationName { get; set; }

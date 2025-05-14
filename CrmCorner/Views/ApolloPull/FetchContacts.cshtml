@@ -1,0 +1,121 @@
+﻿@model CrmCorner.ViewModels.ApolloApiViewModel
+@{
+    ViewData["Title"] = "Apollo Kişi Verisi Çek";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h2>Apollo Kişi Verisi Çek</h2>
+
+<form asp-action="FetchContacts" method="post">
+    <div class="form-group">
+        <label>API Anahtarınız</label>
+        <input type="text" name="ApiKey" value="@Model.ApiKey" class="form-control" required />
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Liste Seçin</label>
+        <select name="SelectedLabelId" class="form-select">
+            <option value="">-- Tüm Listeler --</option>
+            @foreach (var item in (ViewBag.Labels as List<SelectListItem>) ?? new List<SelectListItem>())
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        </select>
+@*         <div class="form-group mt-2">
+            <label>Güncelleme Başlangıç Tarihi</label>
+            <input type="date" name="StartDate" class="form-control"
+                   value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="form-group mt-2">
+            <label>Güncelleme Bitiş Tarihi</label>
+            <input type="date" name="EndDate" class="form-control"
+                   value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
+        </div> *@
+
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Kişileri Getir</button>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mt-3">@ViewBag.Error</div>
+}
+
+@if (ViewBag.TotalCount != null)
+{
+    <div class="alert alert-info mt-4">
+        Toplam <strong>@ViewBag.TotalCount</strong> kişi getirildi.
+    </div>
+}
+
+@if (ViewBag.ContactList != null)
+{
+    var contacts = ViewBag.ContactList as List<CrmCorner.ViewModels.ApolloContactViewModel>;
+    <h4 class="mt-4">📋 Çekilen Kişiler</h4>
+    <table id="contactsTable" class="display nowrap table table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>Ad</th>
+                <th>Soyad</th>
+                <th>Unvan</th>
+                <th>Şirket</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in contacts)
+            {
+                <tr>
+                    <td>@contact.FirstName</td>
+                    <td>@contact.LastName</td>
+                    <td>@contact.Title</td>
+                    <td>@contact.CompanyName</td>
+                    <td>@contact.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- ✅ DataTables & Extensions CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+
+<!-- ✅ jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- ✅ DataTables & Extensions JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"></script>
+
+<!-- ✅ Export için gereken JS kütüphaneleri -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<!-- ✅ DataTable Başlatma -->
+<script>
+    $(document).ready(function () {
+        $('#contactsTable').DataTable({
+            dom: 'Bfrtip',
+            pageLength: 20,
+            responsive: true,
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"
+            },
+            buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5',
+                'colvis'
+            ]
+        });
+    });
+</script>
