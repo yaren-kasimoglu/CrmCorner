@@ -19,6 +19,8 @@ namespace CrmCorner.Models
         public string EmailDomain { get; set; } 
         public int CompanyId { get; set; }
 
+        public UserRole Role { get; set; }
+
 
         public virtual ICollection<CustomerN> Customers { get; set; }
         public virtual ICollection<TaskComp> TaskComps { get; set; }
