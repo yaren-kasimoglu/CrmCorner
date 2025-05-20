@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize] 
+    //api kaydetme ve kontrol etme controllerı
+    [Authorize(Roles = "Admin")]
     public class ApolloSettingsController : Controller
     {
         private readonly CrmCornerContext _context;
