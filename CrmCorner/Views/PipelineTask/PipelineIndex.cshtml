@@ -1,0 +1,238 @@
+﻿@using CrmCorner.Models.Enums
+@model List<PipelineTask>
+
+@{
+    ViewData["Title"] = "Pipeline Index";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+    var stageList = ViewBag.StatusList as Dictionary<PipelineStage, string>;
+}
+
+<!-- Yazı tipi ve ikon -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .sortable-placeholder {
+        background-color: #e2e2e2;
+        border: 2px dashed #999;
+        height: 40px;
+        margin: 5px 0;
+    }
+
+    .dd-item {
+        padding: 10px;
+        background-color: #fff;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.2s ease;
+    }
+
+        .dd-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .dd-handle {
+        cursor: grab;
+    }
+
+    .sortable {
+        min-height: 80px;
+    }
+
+    .kanban-title {
+        font-weight: 600;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .kanban-sub {
+        font-size: 13px;
+        color: #777;
+    }
+
+    .task-actions i {
+        font-size: 14px;
+    }
+
+    .card-column {
+        min-width: 220px;
+    }
+
+    .card-body {
+        height: 420px;
+        overflow-y: auto;
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        background: #f9fafb;
+    }
+
+    .card-header {
+        background: transparent;
+        border-bottom: none;
+    }
+</style>
+
+<div class="row g-3">
+    @foreach (var stage in stageList)
+    {
+        var tasksInThisStage = Model
+        .Where(task => task.Stage.HasValue && task.Stage.Value == stage.Key)
+        .ToList();
+
+        <div class="col-lg-2 col-md-3 col-sm-6 card-column">
+            <div class="card mb-4 shadow-sm" style="height: 500px;">
+                <div class="card-header d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kanban-title">@stage.Value</div>
+                        <small class="kanban-sub">Görev Sayısı: @tasksInThisStage.Count()</small>
+                    </div>
+                    @if ((int)stage.Key == 1)
+                    {
+                        <a href="/PipelineTask/PipelineTaskCreate" class="text-primary ms-2 mt-1">
+                            <i class="fas fa-plus-circle fs-5"></i>
+                        </a>
+                    }
+                </div>
+
+                <div class="card-body p-2">
+                    <ol class="dd-list sortable" data-statusid="@((int)stage.Key)">
+                        @foreach (var task in tasksInThisStage)
+                        {
+                            <li class="dd-item" data-taskid="@task.Id">
+                                <div class="dd-handle">
+                                    <strong>@task.Title</strong><br />
+                                    <small class="text-muted">
+                                        @task.CompanyName - @task.CustomerName @task.CustomerSurname
+                                        @if (!string.IsNullOrEmpty(task.Source))
+                                        {
+                                            <span class="badge bg-info text-dark ms-2">Apollo</span>
+                                        }
+                                        @if (task.ContactedViaLinkedIn == true)
+                                        {
+                                            <span class="badge bg-success text-white ms-1">LinkedIn</span>
+                                        }
+
+                                        @if (task.ContactedViaColdCall == true)
+                                        {
+                                            <span class="badge bg-success text-white ms-1">Cold Call</span>
+                                        }
+                                    </small>
+                                    <div class="mt-2 task-actions">
+                                        <a href="/PipelineTask/Edit/@task.Id" class="text-primary me-2" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="/PipelineTask/Delete/@task.Id" class="text-danger me-2" title="Sil">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                        <a href="/PipelineTask/PipelineDetails/@task.Id" class="text-secondary" title="Detay">
+                                            <i class="fas fa-file-alt"></i>
+                                        </a>
+                                        @if (task.Stage == PipelineStage.IletisimKuruldu)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-contact-method" data-id="@task.Id">
+                                                Etiketle
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ol>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="contactMethodModal" tabindex="-1" aria-labelledby="contactMethodModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="contactMethodForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contactMethodModalLabel">İletişim Yöntemi Seç</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="taskId" id="modalTaskId" />
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="linkedin" id="chkLinkedin">
+                        <label class="form-check-label" for="chkLinkedin">LinkedIn</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="coldcall" id="chkColdCall">
+                        <label class="form-check-label" for="chkColdCall">Cold Call</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
+<script>
+    $(function () {
+        $(".sortable").sortable({
+            connectWith: ".sortable",
+            placeholder: "sortable-placeholder",
+            update: function (event, ui) {
+                var taskId = ui.item.data("taskid");
+                var newStage = ui.item.closest(".sortable").data("statusid");
+
+                if (taskId !== undefined && newStage !== undefined) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/PipelineTask/UpdateStage",
+                        data: {
+                            id: taskId,
+                            newStage: newStage
+                        },
+                        success: function () {
+                            console.log("Görev başarıyla güncellendi.");
+                        },
+                        error: function () {
+                            alert("Hata oluştu, lütfen tekrar deneyin.");
+                        }
+                    });
+                }
+            }
+        }).disableSelection();
+
+        $(document).on('click', '.btn-contact-method', function () {
+            var taskId = $(this).data('id');
+            $('#modalTaskId').val(taskId);
+            $('#chkLinkedin').prop('checked', false);
+            $('#chkColdCall').prop('checked', false);
+            $('#contactMethodModal').modal('show');
+        });
+
+        $('#contactMethodForm').submit(function (e) {
+            e.preventDefault();
+
+            var taskId = $('#modalTaskId').val();
+            var linkedin = $('#chkLinkedin').is(':checked');
+            var coldcall = $('#chkColdCall').is(':checked');
+
+            $.post('/PipelineTask/UpdateContactMethods', {
+                taskId: taskId,
+                contactedViaLinkedIn: linkedin,
+                contactedViaColdCall: coldcall
+            }, function () {
+                location.reload();
+            });
+        });
+    });
+</script>

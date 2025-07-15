@@ -1,0 +1,117 @@
+﻿@model CrmCorner.Models.PipelineTask
+@{
+    ViewData["Title"] = "Yeni Görev Oluştur";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var key in ViewData.ModelState.Keys)
+            {
+                foreach (var error in ViewData.ModelState[key].Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="PipelineTaskCreate" method="post">
+    <div class="row">
+        <!-- Sol taraf: Görev Bilgileri -->
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label asp-for="Title">Başlık</label>
+                <input asp-for="Title" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Value">Değer Teklifi</label>
+                <div class="input-group">
+                    <input asp-for="Value" class="form-control" />
+                    <select asp-for="Currency" class="form-control" style="max-width: 20%;">
+                        <option value="₺">₺</option>
+                        <option value="$">$</option>
+                        <option value="€">€</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Description">Açıklama</label>
+                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Stage">Aşama</label>
+                <select asp-for="Stage" asp-items="ViewBag.StageList" class="form-control">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+            </div>
+
+
+
+            <div class="form-group">
+                <label asp-for="ExpectedCloseDate">Planlanan Satış Tarihi</label>
+                <input asp-for="ExpectedCloseDate" type="date" class="form-control" />
+            </div>
+        </div>
+
+        <!-- Sağ taraf: Müşteri Bilgileri -->
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label asp-for="CustomerName">Ad</label>
+                <input asp-for="CustomerName" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CustomerSurname">Soyad</label>
+                <input asp-for="CustomerSurname" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CompanyName">Şirket Adı</label>
+                <input asp-for="CompanyName" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Phone">Telefon</label>
+                <input asp-for="Phone" class="form-control" placeholder="5xxxxxxxxx" maxlength="10" pattern="\d{10}" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email">E-posta</label>
+                <input asp-for="Email" type="email" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LinkedinUrl">LinkedIn URL</label>
+                <input asp-for="LinkedinUrl" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SourceChannel">Bu görüşme kaydını nereden edindiniz?</label>
+                <input asp-for="SourceChannel" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ResponsibleUserId">Görüşmeyi Alan</label>
+                <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-control">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <div class="form-group">
+        <input type="submit" value="EKLE" class="btn btn-primary" />
+    </div>
+</form>

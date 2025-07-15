@@ -34,7 +34,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class CalendarController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class ChatAppController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

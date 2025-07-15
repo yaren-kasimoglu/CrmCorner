@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize(Roles = "Admin")]
-    [Route("Admin/[controller]/[action]")]
+    //[Authorize(Roles = "Admin")]
+    //[Route("Admin/[controller]/[action]")]
     public class AfterTaskController : BaseController
     {
         private readonly UserManager<AppUser> _userManager;

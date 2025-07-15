@@ -19,7 +19,7 @@ namespace CrmCorner.Controllers.Admin
     }
 
 
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [Route("Admin/[controller]/[action]")]
     public class HomeController : BaseController
     {

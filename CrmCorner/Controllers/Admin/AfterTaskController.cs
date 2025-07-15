@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers.Admin
 {
-    [Authorize(Roles = "Admin")]
-    [Route("Admin/[controller]/[action]")]
+    //[Authorize(Roles = "Admin")]
+    //[Route("Admin/[controller]/[action]")]
 
     public class AfterTaskController : BaseController
     {

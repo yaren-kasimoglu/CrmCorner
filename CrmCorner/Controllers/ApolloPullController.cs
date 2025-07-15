@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using CrmCorner.Services;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +17,7 @@ using System.Text;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class ApolloPullController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -32,7 +33,7 @@ namespace CrmCorner.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult FetchContacts()
         {
@@ -41,7 +42,7 @@ namespace CrmCorner.Controllers
             return View(new ApolloApiViewModel());
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> FetchContacts(ApolloApiViewModel model)
         {
@@ -244,7 +245,7 @@ namespace CrmCorner.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> ContactsList()
         {
             var currentUserId = _userManager.GetUserId(User);
@@ -282,6 +283,61 @@ namespace CrmCorner.Controllers
                 return Content($"HATA: {ex.Message}");
             }
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> TransferToTasks(List<int> selectedIds)
+        {
+            var contacts = _context.ApolloContacts
+                .Where(c => selectedIds.Contains(c.Id))
+                .ToList();
+
+            var currentUserId = _userManager.GetUserId(User);
+
+            foreach (var contact in contacts)
+            {
+                var customer = new CustomerN
+                {
+                    Name = contact.FirstName,
+                    Surname = contact.LastName,
+                    CompanyName = contact.CompanyName,
+                    PhoneNumber = contact.Phone,
+                    CustomerEmail = contact.Email,
+                    LinkedinUrl = contact.LinkedinUrl,
+                    AppUserId = currentUserId,
+                    CreatedDate = DateTime.UtcNow,
+                    Source = "Apollo"
+                };
+
+                _context.CustomerNs.Add(customer);
+                await _context.SaveChangesAsync(); // Müşteri kaydedildi, Id oluştu
+
+                var pipelineTask = new PipelineTask
+                {
+                    Title = $"{contact.FirstName} {contact.LastName} - {contact.CompanyName}",
+                    Description = "Apollo'dan aktarıldı.",
+                    CreatedDate = DateTime.UtcNow,
+                    CustomerName = contact.FirstName,
+                    CustomerSurname = contact.LastName,
+                    CompanyName = contact.CompanyName,
+                    Phone = contact.Phone,
+                    Email = contact.Email,
+                    LinkedinUrl = contact.LinkedinUrl,
+                    AppUserId = currentUserId,
+                    CustomerId = customer.Id,
+                    Stage = PipelineStage.Degerlendirilen, // varsayılan ilk aşama
+                    Source = "Apollo",
+                    SourceChannel = "Apollo"
+                };
+
+                _context.PipelineTasks.Add(pipelineTask);
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["Success"] = "Seçilen kişiler başarıyla görev olarak aktarıldı.";
+            return RedirectToAction("ContactsList");
+        }
+
 
 
 

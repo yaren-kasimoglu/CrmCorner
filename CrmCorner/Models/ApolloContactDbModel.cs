@@ -3,13 +3,13 @@
     public class ApolloContactDbModel
     {
         public int Id { get; set; }
-        public string PersonId { get; set; }  // string olabilir, çünkü genelde GUID veya ObjectId gibi
+        public string PersonId { get; set; }
 
         public string? Email { get; set; } // UNIQUE
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Title { get; set; }
-        public string? CompanyName { get; set; }
+        public string? CompanyName { get; set; }  // ❗ OrganizationName yerine bunu kullanacağız
         public string? SourceLabelId { get; set; }
         public string? SourceLabelName { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -20,5 +20,7 @@
         public string? Location { get; set; }
         public string? Headline { get; set; }
 
+        // ❗ Eksik olanlar:
+        public string? Phone { get; set; }
     }
 }
