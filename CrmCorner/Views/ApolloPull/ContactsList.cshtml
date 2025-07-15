@@ -6,37 +6,57 @@
 
 <h2>Apollo Kişi Listesi</h2>
 
-<div class="table-responsive">
-    <table id="contactsTable" class="display nowrap table table-bordered" style="width:100%">
-        <thead>
-            <tr>
-                <th>Ad</th>
-                <th>Soyad</th>
-                <th>Unvan</th>
-                <th>Şirket</th>
-                <th>Email</th>
-                <th>Güncelleme Tarihi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var contact in Model)
-            {
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<form asp-action="TransferToTasks" method="post" id="contactTransferForm">
+    <div class="table-responsive">
+        <table id="contactsTable" class="display nowrap table table-bordered" style="width:100%">
+            <thead>
                 <tr>
-                    <td>@contact.FirstName</td>
-                    <td>@contact.LastName</td>
-                    <td>@contact.Title</td>
-                    <td>@contact.CompanyName</td>
-                    <td>@contact.Email</td>
-                    <td>@(((DateTime?)contact.UpdatedAt)?.ToString("yyyy-MM-dd") ?? "")</td>
-
-
+                    <th><input type="checkbox" id="selectAll" /></th> <!-- Toplu seçim -->
+                    <th>Ad</th>
+                    <th>Soyad</th>
+                    <th>Unvan</th>
+                    <th>Şirket</th>
+                    <th>Email</th>
+                    <th>Güncelleme Tarihi</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach (var contact in Model)
+                {
+                    <tr>
+                        <td><input type="checkbox" name="selectedIds" value="@contact.Id" class="selectCheckbox" /></td>
+                        <td>@contact.FirstName</td>
+                        <td>@contact.LastName</td>
+                        <td>@contact.Title</td>
+                        <td>@contact.CompanyName</td>
+                        <td>@contact.Email</td>
+                        <td>@(((DateTime?)contact.UpdatedAt)?.ToString("yyyy-MM-dd") ?? "")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-<!-- DataTables CSS ve JS -->
+    <button type="submit" class="btn btn-primary mt-3">Görevlerime Taşı</button>
+</form>
+
+<!-- ✅ GÜNCELLENMEMİŞ KALAN TÜM SCRIPTLER AYNEN DURUYOR -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -52,6 +72,7 @@
 
 <script>
     $(document).ready(function () {
+        // ✅ DataTable ayarları
         $('#contactsTable').DataTable({
             dom: 'Bfrtip',
             pageLength: 20,
@@ -67,5 +88,46 @@
                 'colvis'
             ]
         });
+
+        // ✅ Toplu seçim scripti
+        $('#selectAll').on('change', function () {
+            $('.selectCheckbox').prop('checked', this.checked);
+        });
     });
+
+  
+    $(document).ready(function () {
+        var table = $('#contactsTable').DataTable({
+            dom: 'Bfrtip',
+            pageLength: 20,
+            responsive: true,
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"
+            },
+            buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5',
+                'colvis'
+            ]
+        });
+
+        // ✅ "Hepsini Seç" checkbox davranışı
+        $('#selectAll').on('click', function () {
+            var rows = table.rows({ 'search': 'applied' }).nodes();
+            $('input[type="checkbox"].selectCheckbox', rows).prop('checked', this.checked);
+        });
+
+        // ✅ Tek tek seçildiğinde "Hepsini Seç" kutusunu kontrol et
+        $('#contactsTable tbody').on('change', 'input[type="checkbox"].selectCheckbox', function () {
+            if (!this.checked) {
+                var el = $('#selectAll').get(0);
+                if (el && el.checked && ('indeterminate' in el)) {
+                    el.indeterminate = true;
+                }
+            }
+        });
+    });
+
 </script>

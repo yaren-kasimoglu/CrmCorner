@@ -1,8 +1,10 @@
 ﻿using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CrmCorner.Models
 {
+    [Table("users")]
     public class AppUser : IdentityUser
     {
         public string? City { get; set; }
@@ -19,7 +21,9 @@ namespace CrmCorner.Models
         public string EmailDomain { get; set; } 
         public int CompanyId { get; set; }
 
-        public UserRole Role { get; set; }
+        //[NotMapped]
+        //public UserRole Role { get; set; }
+
 
 
         public virtual ICollection<CustomerN> Customers { get; set; }
@@ -29,6 +33,7 @@ namespace CrmCorner.Models
         public virtual ICollection<TaskCompLog> TaskCompLogs { get; set; } = new List<TaskCompLog>();
 
         public virtual ICollection<AppUserRole> UserRoles { get; set; }
+
     }
 
 }

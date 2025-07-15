@@ -87,7 +87,7 @@ namespace CrmCorner.Controllers
 
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -110,7 +110,7 @@ namespace CrmCorner.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(SocialMediaContent model, IFormFile mediaFile)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -163,7 +163,7 @@ namespace CrmCorner.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(SocialMediaContent model, IFormFile mediaFile)
         {
             ModelState.Remove("MediaFile");
@@ -339,7 +339,7 @@ namespace CrmCorner.Controllers
   
         // Geri bildirimi silmek için metot
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteFeedback(int feedbackId, int contentId)
         {
             var feedback = await _context.Feedbacks.FindAsync(feedbackId);
@@ -355,7 +355,7 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var content = await _context.SocialMediaContents.FindAsync(id);

@@ -171,7 +171,7 @@ namespace CrmCorner.Controllers
         #region CHARTS
 
 
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> HeardFromChart()
         {
             try
@@ -206,7 +206,7 @@ namespace CrmCorner.Controllers
                 return StatusCode(500, "İşleminiz sırasında bir hata oluştu.");
             }
         }
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> ValueOfferChart()
         {
             try
@@ -347,7 +347,7 @@ namespace CrmCorner.Controllers
         //   }
 
 
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> IndustryChart()
         {
             try
@@ -411,7 +411,7 @@ namespace CrmCorner.Controllers
         }
 
 
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> IsFinalDecisionMaker()
         {
             var userId = _userManager.GetUserId(User);
@@ -443,7 +443,7 @@ namespace CrmCorner.Controllers
         }
 
 
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> OutcomeStatusChart()
         {
             var userId = _userManager.GetUserId(User);
@@ -499,7 +499,7 @@ namespace CrmCorner.Controllers
             return Json(chartData);
         }
 
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> UserTaskStatusChart()
        {
             // Aktif kullanıcının ID'sini al
@@ -550,16 +550,14 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null) //SOCIAL MEDIA PANELİNE YÖNLENDİRİYOR
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
         {
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return View();
-                }
 
-                returnUrl ??= Url.Action("Index", "SocialMedia"); // returnUrl değerini SocialMedia/Index olarak değiştiriyoruz
+                returnUrl ??= Url.Action("Index", "SocialMedia");
 
                 var hasUser = await _userManager.FindByEmailAsync(model.Email);
                 if (hasUser == null)
@@ -568,36 +566,14 @@ namespace CrmCorner.Controllers
                     return View();
                 }
 
-                // Şirket onaylı mı değil mi kontrol edildiği yer
-                var company = _context.Companies.FirstOrDefault(c => c.CompanyId == hasUser.CompanyId);
-                if (company == null || !(company.IsApproved ?? false))
+                var result = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
+
+                if (result.Succeeded)
                 {
-                    ModelState.AddModelError(string.Empty, "Şirketiniz sistem tarafından henüz onaylanmamış.");
-                    return View();
+                    return Redirect(returnUrl);
                 }
 
-                var signInresult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
-
-                if (signInresult.Succeeded)
-                {
-                    var roles = await _userManager.GetRolesAsync(hasUser);
-                    bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
-
-                    if (isAdminOrManager)
-                    {
-                        return RedirectToAction("Index", "SocialMedia", new { area = "Admin" }); // Admin rolü için SocialMedia/Index sayfasına yönlendir
-                    }
-
-                    return Redirect(returnUrl); // Kullanıcıyı, belirlenen returnUrl'ye yönlendir
-                }
-
-                if (signInresult.IsLockedOut)
-                {
-                    ModelState.AddModelError(string.Empty, "3 dakika boyunca giriş yapamazsınız.");
-                    return View();
-                }
-
-                ModelState.AddModelError(string.Empty, $"Email veya şifre hatalı. (Başarısız giriş sayısı : {await _userManager.GetAccessFailedCountAsync(hasUser)})");
+                ModelState.AddModelError(string.Empty, "Giriş başarısız.");
                 return View();
             }
             catch (Exception ex)
@@ -606,6 +582,7 @@ namespace CrmCorner.Controllers
                 return View();
             }
         }
+
         #endregion
 
         #region Kayıt

@@ -56,6 +56,9 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Phone")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("SourceLabelId")
                         .HasColumnType("longtext");
 
@@ -105,6 +108,7 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("NormalizedName")
@@ -214,7 +218,7 @@ namespace CrmCorner.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AppUserRole");
+                    b.ToTable("AppUserRoles");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.BigecSayfaDeneme", b =>
@@ -367,6 +371,9 @@ namespace CrmCorner.Migrations
                     b.Property<int?>("Industry")
                         .HasColumnType("int");
 
+                    b.Property<string>("LinkedinUrl")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime(6)");
 
@@ -375,6 +382,9 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("PhoneNumber")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Source")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Surname")
@@ -518,6 +528,140 @@ namespace CrmCorner.Migrations
                         .IsUnique();
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("CompanyName")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool?>("ContactedViaColdCall")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool?>("ContactedViaLinkedIn")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CustomerSurname")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("ExpectedCloseDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("LinkedinUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("Outcomes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ResponsibleUserId")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SourceChannel")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("Stage")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal?>("Value")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("PipelineTasks");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTaskLog", b =>
+                {
+                    b.Property<int>("LogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("PipelineTaskId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("UpdatedField")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("LogId");
+
+                    b.HasIndex("PipelineTaskId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("PipelineTaskLogs");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTaskNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("PipelineTaskId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PipelineTaskId");
+
+                    b.ToTable("PipelineTaskNotes");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
@@ -1011,6 +1155,47 @@ namespace CrmCorner.Migrations
                     b.Navigation("TaskComp");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.PipelineTask", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId");
+
+                    b.HasOne("CrmCorner.Models.CustomerN", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTaskLog", b =>
+                {
+                    b.HasOne("CrmCorner.Models.PipelineTask", "PipelineTask")
+                        .WithMany()
+                        .HasForeignKey("PipelineTaskId");
+
+                    b.HasOne("CrmCorner.Models.AppUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
+
+                    b.Navigation("PipelineTask");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTaskNote", b =>
+                {
+                    b.HasOne("CrmCorner.Models.PipelineTask", "PipelineTask")
+                        .WithMany("Notes")
+                        .HasForeignKey("PipelineTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PipelineTask");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
                 {
                     b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
@@ -1131,6 +1316,11 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.Navigation("Taskcomps");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTask", b =>
+                {
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.SocialMediaContent", b =>

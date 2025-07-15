@@ -54,7 +54,7 @@ var connectionString = builder.Configuration.GetConnectionString("CrmConnection"
 
 builder.Services.AddDbContext<CrmCornerContext>(options =>
 {
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 14)))
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 18)))
            .EnableSensitiveDataLogging() // Detaylı loglama için
            .EnableDetailedErrors(); // Daha detaylı hata mesajları için
 });
@@ -64,7 +64,7 @@ builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpS
 builder.Services.AddSingleton<EmailService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
-// Identity servislerini ve cookie yapılandırmasını ekleyin
+//Identity servislerini ve cookie yapılandırmasını ekleyin
 builder.Services.AddIdentity<AppUser, AppRole>()
     .AddEntityFrameworkStores<CrmCornerContext>()
     .AddDefaultTokenProviders();

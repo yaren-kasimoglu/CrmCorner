@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class CompanyController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -18,7 +18,7 @@ namespace CrmCorner.Controllers
             _userManager = userManager;
         }
     
-        [Authorize(Roles ="Admin")]
+        //[Authorize(Roles ="Admin")]
         public async Task<IActionResult> CompanyList()
         {
             try

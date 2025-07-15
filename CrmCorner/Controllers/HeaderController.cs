@@ -6,7 +6,7 @@ using CrmCorner.Models;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class HeaderController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

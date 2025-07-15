@@ -23,12 +23,18 @@ public partial class CustomerN
 
     public string? CompanyEmail { get; set; } = null!;
 
+    public string? LinkedinUrl { get; set; }
+
+
     public DateTime CreatedDate { get; set; }
 
     public DateTime? ModifiedDate { get; set; }
 
     [Display(Name = "Çalışan Sayısı")]
     public EmployeeCountRange? EmployeeCount { get; set; }
+
+    public string? Source { get; set; }
+
 
     public string? AppUserId { get; set; }
 

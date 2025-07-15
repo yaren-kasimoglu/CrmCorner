@@ -20,7 +20,7 @@ using Exception = System.Exception;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class ToDoListController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
