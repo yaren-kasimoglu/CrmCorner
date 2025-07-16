@@ -1,0 +1,47 @@
+﻿@model List<PipelineTask>
+@{
+    ViewData["Title"] = "Olumsuz Pipeline Görevleri";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+<table class="table table-bordered" id="pipelineStatus_List">
+    <thead>
+        <tr>
+            <th>Görev Adı</th>
+            <th>Değer Teklifi</th>
+            <th>Olumsuz Sebep</th>
+            <th>Açıklama</th>
+            <th>Görev Sahibi</th>
+            <th>Müşteri</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Value?.ToString("N2")</td>
+            @*     <td>@item.NegativeReason</td> *@
+                <td>@item.Description</td>
+                <td>@item.AppUser?.NameSurname ?? "Bilinmiyor"</td>
+                <td>@item.Customer?.Name @item.Customer?.Surname @item.Customer?.CustomerEmail</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#pipelineStatus_List').dataTable({
+                responsive: true
+            });
+        });
+    </script>
+}

@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20250715222929_AddPipelineTaskHistory1")]
+    partial class AddPipelineTaskHistory1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -341,40 +344,6 @@ namespace CrmCorner.Migrations
                     b.ToTable("Companies");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.CrmCorner.Models.PipelineTaskFileAttachment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("PipelineTaskId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UploadedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PipelineTaskId");
-
-                    b.ToTable("PipelineTaskFileAttachments");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.Property<int>("Id")
@@ -608,9 +577,6 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("LinkedinUrl")
                         .HasColumnType("longtext");
-
-                    b.Property<int?>("OutcomeStatus")
-                        .HasColumnType("int");
 
                     b.Property<int?>("Outcomes")
                         .HasColumnType("int");
@@ -1183,17 +1149,6 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.CrmCorner.Models.PipelineTaskFileAttachment", b =>
-                {
-                    b.HasOne("CrmCorner.Models.PipelineTask", "PipelineTask")
-                        .WithMany("FileAttachments")
-                        .HasForeignKey("PipelineTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PipelineTask");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -1418,8 +1373,6 @@ namespace CrmCorner.Migrations
 
             modelBuilder.Entity("CrmCorner.Models.PipelineTask", b =>
                 {
-                    b.Navigation("FileAttachments");
-
                     b.Navigation("Notes");
                 });
 

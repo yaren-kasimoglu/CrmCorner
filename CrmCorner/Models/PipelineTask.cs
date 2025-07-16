@@ -1,4 +1,5 @@
-﻿using CrmCorner.Models.Enums;
+﻿using CrmCorner.Models.CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace CrmCorner.Models
 {
@@ -29,7 +30,7 @@ namespace CrmCorner.Models
         public bool? ContactedViaColdCall { get; set; }
 
 
-
+        public OutcomeTypeSales? OutcomeStatus { get; set; } = OutcomeTypeSales.None;
 
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
@@ -47,6 +48,9 @@ namespace CrmCorner.Models
         public int? CustomerId { get; set; }  // Foreign key
 
         public virtual ICollection<PipelineTaskNote> Notes { get; set; } = new List<PipelineTaskNote>();
+
+        public virtual ICollection<PipelineTaskFileAttachment> FileAttachments { get; set; } = new List<PipelineTaskFileAttachment>();
+
 
 
     }

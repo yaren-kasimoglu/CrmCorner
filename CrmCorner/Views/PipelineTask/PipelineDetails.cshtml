@@ -25,12 +25,52 @@
         .buyukYazi {
             font-size: 20px;
         }
+
+        .timeline-item {
+            position: relative;
+            margin: 20px 0;
+            padding-left: 40px;
+        }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                top: 5px;
+                left: 14px;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #007bff;
+            }
+
+            .timeline-item.green::before {
+                background: #28a745;
+            }
+
+            .timeline-item .timeline-panel {
+                background: #f1f1f1;
+                padding: 10px 15px;
+                border-radius: 6px;
+            }
+
+        .timeline-title {
+            font-weight: bold;
+        }
+
+        .ellipsis {
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
     </style>
 }
 
 <div class="container-fluid">
     <div class="row g-2">
         <div class="col-lg-4 col-md-12">
+
             <div class="card mb-2">
                 <div class="card-body">
                     <h6 class="card-title mb-4">Detaylar/Notlar</h6>
@@ -40,16 +80,52 @@
                     </span>
                 </div>
             </div>
-
             <div class="card mb-2">
                 <div class="card-body">
                     <ul class="list-unstyled basic-list mb-0">
-                        <li class="d-flex justify-content-between mb-3">Sorumlu:<span class="badge bg-primary">@Model.AppUser?.NameSurname</span></li>
-                       @*  <li class="d-flex justify-content-between mb-3">Görev Oluşturma Tarihi:<span class="bg-success badge">@Model.CreatedDate?.ToString("dd.MM.yyyy")</span></li> *@
-                       @*  <li class="d-flex justify-content-between mb-3">Güncel Durum:<span class="bg-info badge">@Model.Status?.StatusName</span></li>
-                        <li class="d-flex justify-content-between mb-3">Satış Kapatma Tarihi:<span class="bg-danger badge">@Model.SalesDone?.ToString("dd.MM.yyyy")</span></li>
-                        <li class="d-flex justify-content-between mb-3">Değer Teklifi:<span class="bg-warning badge">@Model.ValueOrOffer?.ToString("N2")</span></li>
-                        <li class="d-flex justify-content-between mb-3">Kayıt Nereden Geldi?<span class="badge bg-primary">@Model.HeardFrom</span></li> *@
+                        <li class="d-flex justify-content-between mb-3">
+                            Sorumlu:
+                            <span class="badge bg-primary">@Model.AppUser?.NameSurname</span>
+                        </li>
+                        <li class="d-flex justify-content-between mb-3">
+                            Görev Oluşturma Tarihi:
+                            <span class="badge bg-success">
+                                @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")
+
+                            </span>
+                        </li>
+                        <li class="d-flex justify-content-between mb-3">
+                            Güncel Durum:
+                            <span class="badge bg-info">
+                                @Model.Stage?.GetDisplayName()
+                            </span>
+                        </li>
+                        <li class="d-flex justify-content-between mb-3">
+                            Satış Kapatma Tarihi:
+                            <span class="badge bg-danger">
+                                @Model.ExpectedCloseDate?.ToString("dd.MM.yyyy")
+                            </span>
+                        </li>
+                        <li class="d-flex justify-content-between mb-3">
+                            Değer Teklifi:
+                            <span class="badge bg-warning text-dark">
+                                @Model.Value?.ToString("N2")
+                            </span>
+                        </li>
+                        <li class="d-flex justify-content-between mb-3">
+                            Kayıt Nereden Geldi?
+                            <span class="badge bg-primary">@Model.Source</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card mb-2">
+                <div class="card-body">
+                    <ul class="list-unstyled basic-list mb-0">
+                        <li class="d-flex justify-content-between mb-3">
+                            Sorumlu:
+                            <span class="badge bg-primary">@Model.AppUser?.NameSurname</span>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -87,18 +163,6 @@
                                         <span class="message">@Model.Customer.CustomerTitle</span>
                                     </div>
                                 </a>
-                                <br />
-                          @*       <span class="badge badge-dark text-dark border border-dark message">
-                                    Son Karar Mercii :
-                                    @if (Model.IsFinalDecisionMaker)
-                                    {
-                                        <i class="fa fa-check-circle" style="color: green;"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="fa fa-times-circle" style="color: red;"></i>
-                                    }
-                                </span> *@
                             </li>
                         </ul>
                     }
@@ -110,28 +174,89 @@
                     }
                 </div>
             </div>
+            <div class="card mb-2">
+                <div class="card-header">
+                    <h6 class="card-title">Dosyalar & Belgeler & Sözleşmeler</h6>
+                </div>
+                <div class="card-body">
+                    @* Yükleme Formu *@
+                    @using (Html.BeginForm("UploadPipelineFile", "PipelineTask", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <div class="form-group">
+                            <input type="file" name="file" class="form-control mb-2" required />
+                            <input type="hidden" name="pipelineTaskId" value="@Model.Id" />
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Yükle" class="btn btn-primary" />
+                        </div>
+                    }
+
+                    <hr />
+
+                    @* Dosya Listesi *@
+                    @if (Model.FileAttachments != null && Model.FileAttachments.Any())
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Dosya Adı</th>
+                                    <th>Boyut</th>
+                                    <th>Tarih</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var file in Model.FileAttachments.OrderByDescending(f => f.UploadedDate))
+                                {
+                                    <tr>
+                                        <td title="@file.FileName">
+                                            <div class="ellipsis">@file.FileName</div>
+                                        </td>
+                                        <td>@(Math.Round(file.FileSize / 1024.0, 2)) KB</td>
+                                        <td>@file.UploadedDate.ToString("dd.MM.yyyy")</td>
+                                        <td>
+                                            <a href="@Url.Action("DownloadPipelineFile", "PipelineTask", new { id = file.Id })" class="badge bg-success">İndir</a>
+                                            <a href="@Url.Action("DeletePipelineFile", "PipelineTask", new { id = file.Id })" class="badge bg-danger" onclick="return confirm('Silmek istediğinize emin misiniz?');">Sil</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>Henüz dosya yüklenmedi.</p>
+                    }
+                </div>
+            </div>
+
         </div>
 
         <div class="col-lg-8 col-md-12">
             <div class="card mb-2">
                 <div class="card-body">
-                    <a href="@Url.Action("EditPipelineTask", "PipelineTask", new { id = Model.Id })" class="btn btn-primary mb-3">Görevi Düzenle</a>
+                    <a href="@Url.Action("PipelineEdit", "PipelineTask", new { id = Model.Id })" class="btn btn-primary mb-3">Görevi Düzenle</a>
+
+                    <h5 class="mb-3">Geçmiş Değişiklikler</h5>
 
                     @if (ViewBag.Logs != null && (ViewBag.Logs as List<CrmCorner.Models.PipelineTaskLog>)?.Any() == true)
                     {
                         foreach (var log in ViewBag.Logs as List<CrmCorner.Models.PipelineTaskLog>)
                         {
-                            var timelineClass = log.LogId % 2 == 0 ? "timeline-item blue" : "timeline-item green";
+                            var timelineClass = log.LogId % 2 == 0 ? "timeline-item" : "timeline-item green";
                             <div class="@timelineClass">
-                                <div class="timeline-badge primary"><i class="glyphicon glyphicon-record"></i></div>
                                 <div class="timeline-panel">
                                     <div class="timeline-heading">
-                                        <h5><small class="text-muted">@log.UpdatedAt?.ToString("dd.MM.yyyy HH:mm")</small></h5>
                                         <h6 class="timeline-title">@log.UpdatedField</h6>
+                                        <small class="text-muted">@log.UpdatedAt?.ToString("dd.MM.yyyy HH:mm")</small>
                                     </div>
                                     <div class="timeline-body">
-                                        <p>@log.OldValue <i class="fa fa-long-arrow-right"></i> @log.NewValue</p>
-                                        <p>Düzenleyen: @log.UpdatedBy?.NameSurname</p>
+                                        <p><strong>@log.OldValue</strong> <i class="fa fa-arrow-right mx-2"></i> <strong>@log.NewValue</strong></p>
+                                        @if (!string.IsNullOrWhiteSpace(log.UpdatedBy?.NameSurname))
+                                        {
+                                            <p>Düzenleyen: @log.UpdatedBy.NameSurname</p>
+                                        }
+
                                     </div>
                                 </div>
                             </div>
@@ -139,7 +264,7 @@
                     }
                     else
                     {
-                        <p>Henüz bir değişiklik yapılmadı.</p>
+                        <p class="text-muted">Henüz bir değişiklik yapılmamış.</p>
                     }
                 </div>
             </div>

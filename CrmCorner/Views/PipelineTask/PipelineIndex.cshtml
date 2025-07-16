@@ -7,9 +7,10 @@
     var stageList = ViewBag.StatusList as Dictionary<PipelineStage, string>;
 }
 
-<!-- Yazı tipi ve ikon -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <style>
     body {
@@ -83,9 +84,7 @@
 <div class="row g-3">
     @foreach (var stage in stageList)
     {
-        var tasksInThisStage = Model
-        .Where(task => task.Stage.HasValue && task.Stage.Value == stage.Key)
-        .ToList();
+        var tasksInThisStage = Model.Where(task => task.Stage.HasValue && task.Stage.Value == stage.Key).ToList();
 
         <div class="col-lg-2 col-md-3 col-sm-6 card-column">
             <div class="card mb-4 shadow-sm" style="height: 500px;">
@@ -101,7 +100,6 @@
                         </a>
                     }
                 </div>
-
                 <div class="card-body p-2">
                     <ol class="dd-list sortable" data-statusid="@((int)stage.Key)">
                         @foreach (var task in tasksInThisStage)
@@ -119,27 +117,20 @@
                                         {
                                             <span class="badge bg-success text-white ms-1">LinkedIn</span>
                                         }
-
                                         @if (task.ContactedViaColdCall == true)
                                         {
                                             <span class="badge bg-success text-white ms-1">Cold Call</span>
                                         }
                                     </small>
                                     <div class="mt-2 task-actions">
-                                        <a href="/PipelineTask/Edit/@task.Id" class="text-primary me-2" title="Düzenle">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="/PipelineTask/Delete/@task.Id" class="text-danger me-2" title="Sil">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                        <a href="/PipelineTask/PipelineDetails/@task.Id" class="text-secondary" title="Detay">
+                                        <a href="/PipelineTask/PipelineEdit/@task.Id" class="text-primary me-2" title="Düzenle"><i class="fas fa-edit"></i></a>
+                                        <a href="javascript:void(0);" class="text-danger me-2 btn-delete-task" data-taskid="@task.Id" title="Sil"><i class="fas fa-trash-alt"></i></a>
+                                        <a href="/PipelineTask/PipelineDetails/@task.Id" class="text-warning" title="Detay">
                                             <i class="fas fa-file-alt"></i>
                                         </a>
-                                        @if (task.Stage == PipelineStage.IletisimKuruldu)
+                                        @if (task.Stage == PipelineStage.IletisimKuruldu && task.ContactedViaLinkedIn != true && task.ContactedViaColdCall != true)
                                         {
-                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-contact-method" data-id="@task.Id">
-                                                Etiketle
-                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-contact-method" data-id="@task.Id">Etiketle</button>
                                         }
                                     </div>
                                 </div>
@@ -152,14 +143,33 @@
     }
 </div>
 
-<!-- Modal -->
+<!-- MODALLAR -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Görevi Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                Bu görevi silmek istediğinizden emin misiniz?
+                <input type="hidden" id="deleteTaskId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="contactMethodModal" tabindex="-1" aria-labelledby="contactMethodModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="contactMethodForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="contactMethodModalLabel">İletişim Yöntemi Seç</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="taskId" id="modalTaskId" />
@@ -180,11 +190,14 @@
     </div>
 </div>
 
+<!-- JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     $(function () {
+        // Sürükle bırak
         $(".sortable").sortable({
             connectWith: ".sortable",
             placeholder: "sortable-placeholder",
@@ -193,44 +206,52 @@
                 var newStage = ui.item.closest(".sortable").data("statusid");
 
                 if (taskId !== undefined && newStage !== undefined) {
-                    $.ajax({
-                        type: "POST",
-                        url: "/PipelineTask/UpdateStage",
-                        data: {
-                            id: taskId,
-                            newStage: newStage
-                        },
-                        success: function () {
-                            console.log("Görev başarıyla güncellendi.");
-                        },
-                        error: function () {
-                            alert("Hata oluştu, lütfen tekrar deneyin.");
-                        }
-                    });
+                    $.post("/PipelineTask/UpdateStage", { id: taskId, newStage: newStage });
                 }
             }
         }).disableSelection();
 
+        // Silme
+        $(document).on('click', '.btn-delete-task', function () {
+            const taskId = $(this).data('taskid');
+            $('#deleteTaskId').val(taskId);
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            modal.show();
+        });
+
+        $('#confirmDeleteBtn').click(function () {
+            const taskId = $('#deleteTaskId').val();
+            $.post('/PipelineTask/DeleteConfirmed', { id: taskId }, function (response) {
+                if (response.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+                    location.reload();
+                } else {
+                    alert("Silme başarısız oldu.");
+                }
+            });
+        });
+
+        // Etiketleme
         $(document).on('click', '.btn-contact-method', function () {
-            var taskId = $(this).data('id');
+            const taskId = $(this).data('id');
             $('#modalTaskId').val(taskId);
-            $('#chkLinkedin').prop('checked', false);
-            $('#chkColdCall').prop('checked', false);
-            $('#contactMethodModal').modal('show');
+            $('#chkLinkedin, #chkColdCall').prop('checked', false);
+            const modal = new bootstrap.Modal(document.getElementById('contactMethodModal'));
+            modal.show();
         });
 
         $('#contactMethodForm').submit(function (e) {
             e.preventDefault();
-
-            var taskId = $('#modalTaskId').val();
-            var linkedin = $('#chkLinkedin').is(':checked');
-            var coldcall = $('#chkColdCall').is(':checked');
+            const taskId = $('#modalTaskId').val();
+            const linkedin = $('#chkLinkedin').is(':checked');
+            const coldcall = $('#chkColdCall').is(':checked');
 
             $.post('/PipelineTask/UpdateContactMethods', {
                 taskId: taskId,
                 contactedViaLinkedIn: linkedin,
                 contactedViaColdCall: coldcall
             }, function () {
+                bootstrap.Modal.getInstance(document.getElementById('contactMethodModal')).hide();
                 location.reload();
             });
         });

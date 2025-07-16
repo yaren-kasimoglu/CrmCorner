@@ -250,8 +250,26 @@
                                             </li>
 
                                         </ul>
-                                    </li> 
- 
+                                    </li>
+
+                                    <li class="always-open">
+                                        <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış Yeni</span></a>
+                                        <ul class="list-unstyled">
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex"><i class="fa fa-tag"></i>Tümü Yeni</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="PositivePipelineTasks"><i class="fa fa-tag"></i>Kazanılan Yeni</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="NegativePipelineTasks"><i class="fa fa-tag"></i>Kaybedilen Yeni</a>
+                                            </li>
+
+                                        </ul>
+                                    </li>
+
+
+
                                     @if (userRole == "Admin")
                                     {
                                         <li class="nav-item">

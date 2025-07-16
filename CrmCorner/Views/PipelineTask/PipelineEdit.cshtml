@@ -1,0 +1,138 @@
+﻿@model CrmCorner.Models.PipelineTask
+@using CrmCorner.Extensions
+@using CrmCorner.Models.Enums
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "PipelineEdit";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+
+    var stageList = new SelectList(Enum.GetValues(typeof(PipelineStage)).Cast<PipelineStage>(), Model.Stage);
+    var outcomeList = new SelectList(Enum.GetValues(typeof(OutcomeType)).Cast<OutcomeType>(), Model.Outcomes);
+}
+
+<h3 class="mb-4">Görev Düzenle</h3>
+
+<form asp-action="PipelineEdit" asp-controller="PipelineTask" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="Title">Başlık</label>
+                <input asp-for="Title" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Value">Değer</label>
+                <div class="input-group">
+                    <input asp-for="Value" class="form-control" />
+                    <select asp-for="Currency" class="form-select" style="max-width: 100px;">
+                        <option value="$">$</option>
+                        <option value="€">€</option>
+                        <option value="₺">₺</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Stage">Aşama</label>
+                <select asp-for="Stage" asp-items="stageList" class="form-select"></select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ExpectedCloseDate">Beklenen Kapanış Tarihi</label>
+                <input asp-for="ExpectedCloseDate" type="date" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Outcomes">Süreç Durumu</label>
+                <select asp-for="Outcomes" asp-items="outcomeList" class="form-select"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="OutcomeStatus">Sonuç</label>
+                <select asp-for="OutcomeStatus" class="form-control" asp-items="Html.GetEnumSelectList<CrmCorner.Models.Enums.OutcomeTypeSales>()">
+                    <option value="">Seçiniz</option>
+                </select>
+            </div>
+
+
+
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="contactedViaLinkedIn" name="ContactedViaLinkedIn"
+                       value="true" @(Model.ContactedViaLinkedIn == true ? "checked" : "") />
+                <input type="hidden" name="ContactedViaLinkedIn" value="false" />
+                <label class="form-check-label" for="contactedViaLinkedIn">LinkedIn ile iletişim kuruldu</label>
+            </div>
+
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="contactedViaColdCall" name="ContactedViaColdCall"
+                       value="true" @(Model.ContactedViaColdCall == true ? "checked" : "") />
+                <input type="hidden" name="ContactedViaColdCall" value="false" />
+                <label class="form-check-label" for="contactedViaColdCall">Soğuk arama yapıldı</label>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="CustomerId">Müşteri</label>
+                <select asp-for="CustomerId" asp-items="ViewBag.Customer" class="form-select">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ResponsibleUserId">Sorumlu Kullanıcı</label>
+                <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-select">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CustomerName">Ad</label>
+                <input asp-for="CustomerName" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CustomerSurname">Soyad</label>
+                <input asp-for="CustomerSurname" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CompanyName">Şirket</label>
+                <input asp-for="CompanyName" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Phone">Telefon</label>
+                <input asp-for="Phone" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Email">E-posta</label>
+                <input asp-for="Email" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="LinkedinUrl">LinkedIn URL</label>
+                <input asp-for="LinkedinUrl" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Source">Kaynak</label>
+                <input asp-for="Source" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="SourceChannel">Kanal</label>
+                <input asp-for="SourceChannel" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Güncelle</button>
+        <a href="/PipelineTask/PipelineIndex" class="btn btn-secondary">İptal</a>
+    </div>
+</form>

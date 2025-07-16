@@ -1,8 +1,9 @@
-using System;
-using System.Collections.Generic;
+using CrmCorner.Models.CrmCorner.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 
 namespace CrmCorner.Models;
 
@@ -57,6 +58,8 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
     public DbSet<PipelineTaskLog> PipelineTaskLogs { get; set; }
 
 
+    public DbSet<PipelineTaskHistory> PipelineTaskHistories { get; set; }
+    public DbSet<PipelineTaskFileAttachment> PipelineTaskFileAttachments { get; set; }
 
 
 
