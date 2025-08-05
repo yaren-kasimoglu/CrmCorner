@@ -574,6 +574,7 @@ namespace CrmCorner.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("CompanyName")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<bool?>("ContactedViaColdCall")
@@ -592,21 +593,27 @@ namespace CrmCorner.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CustomerName")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("CustomerSurname")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ExpectedCloseDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("LinkedinUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NegativeReason")
                         .HasColumnType("longtext");
 
                     b.Property<int?>("OutcomeStatus")
@@ -619,18 +626,20 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("ResponsibleUserId")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Source")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("SourceChannel")
-                        .HasColumnType("longtext");
+                    b.Property<int>("SourceChannel")
+                        .HasColumnType("int");
 
-                    b.Property<int?>("Stage")
+                    b.Property<int>("Stage")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<decimal?>("Value")
@@ -723,11 +732,10 @@ namespace CrmCorner.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Note")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("PipelineTaskId")

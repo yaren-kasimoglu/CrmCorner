@@ -1,0 +1,54 @@
+/* Authentication forms */
+.auth-main {
+    &::before {
+        background: rgba($col-dark, 0.9);
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 350px;
+        height: calc(100% - 40px);
+        z-index: -1;
+        margin: 20px;
+
+        @include media-breakpoint-down(sm) {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+    }
+    &:after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        background: url(../../assets/images/auth_bg.jpg) no-repeat top left fixed;
+    }
+}
+
+.auth-box {
+    height: auto;
+    width: 380px;
+    margin-left: 130px;
+
+    .logo {
+        width: 130px;
+        display: block;
+        path {
+            fill: var(--color-fff);
+            width: 130px;
+        }
+    }
+
+    @include media-breakpoint-down(md) {
+        width: 80%;
+        margin: 0 auto;
+    }
+
+    @include media-breakpoint-down(sm) {
+        width: 90%;
+    }
+}

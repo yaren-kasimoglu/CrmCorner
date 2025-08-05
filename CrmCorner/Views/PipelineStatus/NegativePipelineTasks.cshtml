@@ -14,8 +14,9 @@
         <tr>
             <th>Görev Adı</th>
             <th>Değer Teklifi</th>
-            <th>Olumsuz Sebep</th>
-            <th>Açıklama</th>
+            <th>Para Birimi</th>
+             <th>Olumsuz Sebep</th> 
+            <th>Kapanış Tarihi</th>
             <th>Görev Sahibi</th>
             <th>Müşteri</th>
         </tr>
@@ -24,12 +25,22 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Title</td>
+                <td>
+                    <a href="@Url.Action("PipelineDetails", "PipelineTask", new { id = item.Id })" class="text-primary">
+                        @item.Title
+                    </a>
+                </td>
+
                 <td>@item.Value?.ToString("N2")</td>
-            @*     <td>@item.NegativeReason</td> *@
-                <td>@item.Description</td>
+                <td>@item.Currency</td>
+                 <td>@item.NegativeReason</td> 
+                <td>@item.ExpectedCloseDate?.ToString("dd.MM.yyyy")</td>
                 <td>@item.AppUser?.NameSurname ?? "Bilinmiyor"</td>
-                <td>@item.Customer?.Name @item.Customer?.Surname @item.Customer?.CustomerEmail</td>
+                <td>
+                    @item.Customer?.CustomerTitle<br />
+                    @item.Customer?.CompanyName<br />
+                    @item.Customer?.CustomerEmail
+                </td>
             </tr>
         }
     </tbody>

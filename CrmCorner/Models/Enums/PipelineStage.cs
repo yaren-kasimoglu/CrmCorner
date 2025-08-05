@@ -16,8 +16,8 @@ namespace CrmCorner.Models.Enums
         [Display(Name = "Teklif Sunuldu")]
         TeklifSunuldu = 4,
 
-        [Display(Name = "Görüşme Başlatıldı")]
-        GorusmeBaslatildi = 5
+        [Display(Name = "Sonuç")]
+        Sonuc = 5
     }
 
 

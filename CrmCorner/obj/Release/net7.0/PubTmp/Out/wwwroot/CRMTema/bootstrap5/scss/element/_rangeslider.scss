@@ -1,0 +1,45 @@
+// roundslider
+.rs-control{
+  .rs-path-color,
+  .rs-bg-color{
+    background-color: var(--card-color);
+  }
+  .rs-border,
+  .rs-handle-dot{
+    border-color: var(--border-color);
+  }
+  .rs-range-color{
+    background-color: var(--primary-color);
+  }
+  .rs-handle{
+    background-color: var(--secondary-color);
+  }
+}
+// ion rangeSlider
+.irs--flat{
+  .irs-from,
+  .irs-to,
+  .irs-single{
+      background-color: var(--primary-color);
+      &:before{
+          border-top-color: var(--primary-color);
+      }
+  }
+
+  .irs-bar{
+      background-color: var(--primary-color);
+  }
+  .irs-line{
+      background-color: var(--border-color);
+  }
+  .irs-min,
+  .irs-max{
+      color: var(--color-500);
+      background-color: var(--body-color);
+  }
+  .irs-handle {
+      > i:first-child{
+          background-color: var(--primary-color);
+      }
+  }
+}

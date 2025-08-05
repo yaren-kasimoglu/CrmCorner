@@ -11,10 +11,11 @@ namespace CrmCorner.Models
 
         [ForeignKey("PipelineTask")]
         public int PipelineTaskId { get; set; }
+
+        public string? Note { get; set; }
+
+        public DateTime? CreatedAt { get; set; } = DateTime.Now;
+
         public virtual PipelineTask PipelineTask { get; set; }
-
-        public string Note { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
-
 }

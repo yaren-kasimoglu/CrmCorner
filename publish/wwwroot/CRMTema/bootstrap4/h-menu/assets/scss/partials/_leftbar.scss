@@ -1,0 +1,26 @@
+/* Side Bar Menu */
+.question{
+	li{
+        padding: 3px 0;
+        
+        &.menu-heading{
+            @extend .m-t-15;
+        }
+
+        a{
+            @extend .p-l-15;
+            position: relative;
+
+            &:before{
+                content: '--';
+                left: 0;
+                position: absolute;
+            }
+        }
+	}
+	.help-search-form{
+		i{
+			font-size: $font12;
+		}
+	}
+}

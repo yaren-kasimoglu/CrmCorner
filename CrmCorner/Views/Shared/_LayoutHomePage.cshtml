@@ -97,10 +97,27 @@
         cursor: default;
         pointer-events: none; /* Tıklanabilirliği tamamen kaldırır */
         }
+
+        /* Sidebar kapalıyken */
+.sidebar-closed {
+    transform: translateX(-250px);
+    transition: transform 0.3s ease;
+}
+
+/* Main content alanı genişlesin istenirse */
+.expanded-content {
+    margin-left: 0 !important;
+    transition: margin-left 0.3s ease;
+}
+
+
+
     </style>
     <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon">
     <!-- MAIN CSS -->
     <link href="~/CRMTema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     @RenderSection("Styles", required: false)
 
 
@@ -136,9 +153,10 @@
 
                     </div>
 
-                    <div class="navbar-btn">
-                        <button type="button" class="btn-toggle-offcanvas"><i class="fa fa-bars"></i></button>
-                    </div>
+                    <button type="button" class="btn-toggle-offcanvas btn btn-outline-secondary ms-2">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
                     <div id="notificationDiv" class="flex-grow-1">
                         <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
              @*                <li class="d-none d-sm-block"><a href="/Calendar/Calendar" class="icon-menu"><i class="fa fa-calendar"></i></a></li> *@
@@ -236,7 +254,7 @@
                                     </li>
 
 
-                                    <li class="always-open">
+                       @*              <li class="always-open">
                                         <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
                                         <ul class="list-unstyled">
                                             <li class="nav-item">
@@ -250,7 +268,7 @@
                                             </li>
 
                                         </ul>
-                                    </li>
+                                    </li> *@
 
                                     <li class="always-open">
                                         <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış Yeni</span></a>
@@ -392,6 +410,13 @@
             $('#messageDropdown').hide();
         }
 
+
+             $(document).ready(function () {
+            $(".btn-toggle-offcanvas").on("click", function () {
+                $("#left-sidebar").toggleClass("sidebar-closed");
+                $("#main-content").toggleClass("expanded-content");
+            });
+        });
 
         $(document).ready(function () {
 

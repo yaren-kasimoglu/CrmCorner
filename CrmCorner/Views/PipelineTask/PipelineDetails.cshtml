@@ -229,6 +229,49 @@
                     }
                 </div>
             </div>
+            <div class="card mb-2">
+                <div class="card-header">
+                    <h6 class="card-title">Not Ekle</h6>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddNote", "PipelineTask", FormMethod.Post))
+                    {
+                        <div class="form-group">
+                            <textarea name="note" class="form-control" rows="3" placeholder="Not giriniz..."></textarea>
+                            <input type="hidden" name="taskId" value="@Model.Id" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <input type="submit" value="Kaydet" class="btn btn-primary" />
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (Model.Notes != null && Model.Notes.Any())
+            {
+                <div class="card mb-2">
+                    <div class="card-header">
+                        <h6 class="card-title">Notlar</h6>
+                    </div>
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        @foreach (var note in Model.Notes.OrderByDescending(n => n.CreatedAt))
+                        {
+                            <div class="border-bottom mb-2 pb-2">
+                                <small class="text-muted">@note.CreatedAt?.ToString("dd.MM.yyyy HH:mm")</small>
+                                <p class="mb-0">@note.Note</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <p class="text-muted">Henüz not eklenmedi.</p>
+                    </div>
+                </div>
+            }
+
 
         </div>
 
@@ -269,6 +312,10 @@
                 </div>
             </div>
         </div>
+
+ 
+
+      
     </div>
 </div>
 

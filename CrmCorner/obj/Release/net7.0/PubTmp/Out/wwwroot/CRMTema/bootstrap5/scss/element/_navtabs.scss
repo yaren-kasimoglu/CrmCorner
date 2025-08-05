@@ -1,0 +1,27 @@
+.nav-tabs {
+  &.nav-tabs-new2 {
+    border-bottom: 1px solid ar(--border-color);
+
+    > li {
+      > a {
+        color: var(--color-600);
+        padding: 7px 20px;
+        margin-right: 5px;
+        background-color: transparent;
+        border: 0;
+        font-size: 15px;
+
+        &:hover,
+        &:focus {
+          color: var(--primary-color);
+          border-bottom: 2px solid var(--primary-color) !important;
+        }
+        &.active {
+          color: var(--primary-color);
+          border-bottom: 2px solid var(--primary-color) !important;
+          background-color: transparent;
+        }
+      }
+    }
+  }
+}

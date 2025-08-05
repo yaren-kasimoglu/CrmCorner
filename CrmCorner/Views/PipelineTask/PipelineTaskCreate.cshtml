@@ -30,6 +30,7 @@
             <div class="form-group">
                 <label asp-for="Title">Başlık</label>
                 <input asp-for="Title" class="form-control" required />
+                <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="form-group">
@@ -51,12 +52,11 @@
 
             <div class="form-group">
                 <label asp-for="Stage">Aşama</label>
-                <select asp-for="Stage" asp-items="ViewBag.StageList" class="form-control">
+                <select asp-for="Stage" asp-items="ViewBag.StageList" class="form-control" required>
                     <option value="">Lütfen seçiniz</option>
                 </select>
+                <span asp-validation-for="Stage" class="text-danger"></span>
             </div>
-
-
 
             <div class="form-group">
                 <label asp-for="ExpectedCloseDate">Planlanan Satış Tarihi</label>
@@ -69,16 +69,19 @@
             <div class="form-group">
                 <label asp-for="CustomerName">Ad</label>
                 <input asp-for="CustomerName" class="form-control" required />
+                <span asp-validation-for="CustomerName" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="CustomerSurname">Soyad</label>
                 <input asp-for="CustomerSurname" class="form-control" required />
+                <span asp-validation-for="CustomerSurname" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="CompanyName">Şirket Adı</label>
-                <input asp-for="CompanyName" class="form-control" />
+                <input asp-for="CompanyName" class="form-control" required />
+                <span asp-validation-for="CompanyName" class="text-danger"></span>
             </div>
 
             <div class="form-group">
@@ -88,7 +91,8 @@
 
             <div class="form-group">
                 <label asp-for="Email">E-posta</label>
-                <input asp-for="Email" type="email" class="form-control" />
+                <input asp-for="Email" type="email" class="form-control" required />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="form-group">
@@ -98,14 +102,18 @@
 
             <div class="form-group">
                 <label asp-for="SourceChannel">Bu görüşme kaydını nereden edindiniz?</label>
-                <input asp-for="SourceChannel" class="form-control" />
+                <select asp-for="SourceChannel" asp-items="ViewBag.SourceChannels" class="form-control" required>
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+                <span asp-validation-for="SourceChannel" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="ResponsibleUserId">Görüşmeyi Alan</label>
-                <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-control">
+                <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-control" required>
                     <option value="">Lütfen seçiniz</option>
                 </select>
+                <span asp-validation-for="ResponsibleUserId" class="text-danger"></span>
             </div>
         </div>
     </div>
@@ -115,3 +123,11 @@
         <input type="submit" value="EKLE" class="btn btn-primary" />
     </div>
 </form>
+
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
