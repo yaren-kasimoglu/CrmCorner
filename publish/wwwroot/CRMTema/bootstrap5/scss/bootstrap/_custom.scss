@@ -1,0 +1,332 @@
+// bootstrap class overwrite css
+.border,
+.border-top,
+.border-right,
+.border-bottom,
+.border-left,
+.dropdown-divider {
+  border-color: var(--border-color) !important;
+}
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+.border-success {
+  border-color: $color-success !important;
+}
+.border-danger {
+  border-color: $color-danger !important;
+}
+.border-warning {
+  border-color: $color-warning !important;
+}
+.border-info {
+  border-color: $color-info !important;
+}
+
+.link-primary,
+.link-primary a {
+  color: var(--primary-color) !important;
+}
+
+// form-control
+.form-control {
+  border-color: var(--border-color);
+  background-color: var(--card-color);
+  color: var(--color-900);
+
+  &::placeholder {
+    color: var(--color-400);
+  }
+  &:focus {
+    box-shadow: 0 0 10px rgba($dark, 0.15);
+    background-color: var(--card-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  &.form-control-lg {
+    min-height: calc(1.5em + 1.8rem + 2px);
+    &[type="file"] {
+      line-height: 34px;
+    }
+  }
+}
+.form-select {
+  border-color: var(--border-color);
+  background-color: var(--card-color);
+  color: var(--color-900);
+  &::placeholder {
+    color: var(--color-400);
+  }
+}
+// form Switches css
+.form-check-input {
+  &:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+}
+.input-group-text {
+  border-color: var(--border-color);
+  background-color: var(--border-color);
+  color: var(--color-500);
+}
+
+.todo_list {
+  .form-check-input {
+    &:checked {
+      + label {
+        text-decoration: line-through;
+      }
+    }
+  }
+}
+
+// bottom
+.btn {
+  font-size: $font-size;
+
+  &.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  &.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+
+    &:hover {
+      color: $white;
+      background-color: var(--primary-color);
+    }
+  }
+  &.btn-outline-secondary {
+    border-color: var(--border-color);
+  }
+  &.btn-outline-success {
+    color: $color-success;
+    border-color: $color-success;
+    &:hover {
+      background-color: $color-success;
+      color: $white;
+    }
+  }
+  &.btn-outline-danger {
+    color: $color-danger;
+    border-color: $color-danger;
+    &:hover {
+      background-color: $color-danger;
+      color: $white;
+    }
+  }
+  &.btn-outline-info {
+    color: $color-info;
+    border-color: $color-info;
+    &:hover {
+      background-color: $color-info;
+      color: $white;
+    }
+  }
+
+  &.btn-white {
+    background-color: var(--color-fff);
+    border-color: var(--color-fff);
+    color: var(--color-700);
+  }
+  &.btn-dark {
+    background-color: var(--color-900);
+    border-color: var(--color-900);
+    color: var(--color-400);
+  }
+
+  &.btn-lg {
+    padding: 0.7rem 1rem;
+  }
+}
+
+// dropdown menu
+.dropdown-item{
+  color: var(--color-700);
+  &:hover,
+  &:focus,
+  &.active {
+    background-color: var(--primary-color);
+    color: $white;
+  }
+}
+
+.dropdown-menu {
+  border-color: var(--border-color);
+  background: var(--card-color);
+  color: var(--color-700);
+  font-size: $font-size;
+}
+.after-none::after {
+  display: none;
+}
+
+// navbar
+.navbar-light {
+  .navbar-nav {
+    .nav-link {
+      color: var(--color-500);
+      &:hover,
+      &:focus {
+        color: var(--primary-color);
+      }
+    }
+  }
+}
+
+// custom tab ui
+.nav-tabs {
+  border-color: var(--border-color);
+  .nav-link.active,
+  .nav-item.show .nav-link{
+    color: var(--color-500);
+    background-color: var(--card-color);
+    border-color: var(--border-color) var(--border-color) var(--card-color);
+  }
+  .nav-link{
+    color: var(--primary-color);
+  }
+}
+
+// nav pill
+.nav-pills {
+  .nav-link.active,
+  .show > .nav-link {
+    background-color: var(--primary-color);
+  }
+  .nav-link {
+    color: var(--primary-color);
+  }
+}
+
+// list-group design
+.list-group-custom {
+    .list-group-item {
+        background-color: var(--card-color);
+        border-color: var(--border-color);
+        color: var(--color-700);
+        
+        &.active {
+            background-color: var(--primary-color);
+            color: $white;
+        }
+    }
+}
+
+// progress bar design
+.progress {
+  background-color: var(--color-200);
+}
+
+// table
+.table {
+  border-color: var(--border-color);
+  width: 100% !important;
+  >:not(:first-child){
+    border-color: var(--primary-color);
+  }
+  tr {
+    th {
+      border-color: var(--border-color);
+      background-color: var(--border-color);
+      color: var(--color-800);
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+    td {
+      border-color: var(--border-color);
+      color: var(--color-500);
+      background-color: transparent;
+      padding: 0.8rem 0.6rem;
+    }
+    &:hover {
+      td {
+        color: var(--color-900);
+      }
+    }
+  }
+  &.border-primary {
+    tr {
+      td {
+        border-color: var(--primary-color);
+      }
+    }
+  }
+  &.table-dark {
+    color: var(--color-fff) !important;
+    tr {
+      th,
+      td {
+        color: var(--color-fff) !important;
+      }
+    }
+  }
+  &.table-striped>tbody>tr:nth-of-type(odd)>*{
+    color: var(--color-500);
+    &:hover{
+      color: var(--color-900);
+    }
+  }
+}
+
+// pagination
+.page-item {
+  &.disabled {
+    .page-link {
+      background-color: var(--border-color);
+      border-color: var(--border-color);
+    }
+  }
+  .page-link {
+    background-color: var(--card-color);
+    border-color: var(--border-color);
+  }
+}
+
+// ProgressBar
+.progress {
+  &.vertical {
+    width: 20px;
+    height: 100%;
+    float: left;
+    margin-right: 20px;
+  }
+  &.wide {
+    width: 60px;
+  }
+}
+
+//
+.modal-content{
+  background-color: var(--card-color);
+  .modal-header,
+  .modal-footer{
+    border-color: var(--border-color);
+    color: var(--color-700);
+  }
+}
+
+//
+.accordion{
+  .accordion-item{
+    background-color: var(--card-color);
+    border-color: var(--border-color);
+  }
+  .accordion-button{
+    background-color: var(--border-color);
+    color: var(--color-500);
+    &:not(.collapsed){
+      color: var(--primary-color);
+      background-color: var(--border-color);
+    }
+  }  
+}
+
+.offcanvas{
+  background-color: var(--body-color);
+  color: var(--color-800);
+}

@@ -327,7 +327,7 @@ namespace CrmCorner.Controllers
                     CustomerId = customer.Id,
                     Stage = PipelineStage.Degerlendirilen, // varsayılan ilk aşama
                     Source = "Apollo",
-                    SourceChannel = "Apollo"
+                    SourceChannel = SourceChannelType.Apollo
                 };
 
                 _context.PipelineTasks.Add(pipelineTask);

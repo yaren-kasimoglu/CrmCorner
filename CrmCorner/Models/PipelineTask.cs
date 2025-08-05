@@ -1,5 +1,6 @@
 ﻿using CrmCorner.Models.CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace CrmCorner.Models
 {
@@ -8,26 +9,43 @@ namespace CrmCorner.Models
         public int Id { get; set; }
 
         // Görev Bilgileri
+        [Required(ErrorMessage = "Başlık alanı zorunludur.")]
         public string? Title { get; set; }
         public string? Description { get; set; }
         public decimal? Value { get; set; }
         public string? Currency { get; set; }
+
+        [Required(ErrorMessage = "Aşama seçimi zorunludur.")]
         public PipelineStage? Stage { get; set; }
         public DateTime? ExpectedCloseDate { get; set; }
 
+        [Required(ErrorMessage = "Ad alanı zorunludur.")]
         public string? CustomerName { get; set; }
+
+        [Required(ErrorMessage = "Soyad alanı zorunludur.")]
         public string? CustomerSurname { get; set; }
+
+        [Required(ErrorMessage = "Şirket adı alanı zorunludur.")]
         public string? CompanyName { get; set; }
         public string? Phone { get; set; }
+
+        [Required(ErrorMessage = "E-posta alanı zorunludur.")]
         public string? Email { get; set; }
         public string? LinkedinUrl { get; set; }
         public string? Source { get; set; }
-        public string? SourceChannel { get; set; }
+
+        [Required(ErrorMessage = "Görüşmeyi alan kişi seçilmelidir.")]
         public string? ResponsibleUserId { get; set; }
         public OutcomeType? Outcomes { get; set; }
 
         public bool? ContactedViaLinkedIn { get; set; }
         public bool? ContactedViaColdCall { get; set; }
+
+        public string? NegativeReason { get; set; }
+
+        [Required(ErrorMessage = "Bu görüşme kaydının edinildiği kanal seçilmelidir.")]
+        public SourceChannelType? SourceChannel { get; set; }
+
 
 
         public OutcomeTypeSales? OutcomeStatus { get; set; } = OutcomeTypeSales.None;
@@ -36,7 +54,7 @@ namespace CrmCorner.Models
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         // Outcome durumu
-    
+
         // Görev sahibi
         [ForeignKey("AppUserId")]
         public AppUser? AppUser { get; set; }

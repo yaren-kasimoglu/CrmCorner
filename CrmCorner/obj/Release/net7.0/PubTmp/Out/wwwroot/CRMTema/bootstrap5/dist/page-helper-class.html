@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <title>:: Lucid HR BS5 :: Helper Class</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
+    <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
+
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+
+<body>
+
+<div id="layout" class="theme-cyan">
+
+    <!-- Page Loader -->
+    <div class="page-loader-wrapper text-center">
+        <div class="loader">
+            <svg class="p-3 bg-light rounded" width="120px" viewBox="0 0 85 25">
+                <path d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
+                z M29,18.5v-14h1.6v12.6h6.2v1.5H29V18.5z M49.6,4.5v9.1c0,1.6-0.5,2.9-1.5,3.8s-2.3,1.4-4,1.4s-3-0.5-3.9-1.4s-1.4-2.2-1.4-3.8V4.5
+                h1.6v9.1c0,1.2,0.3,2.1,1,2.7c0.6,0.6,1.6,0.9,2.8,0.9s2.1-0.3,2.7-0.9c0.6-0.6,1-1.5,1-2.7V4.5H49.6z M59.4,5.7
+                c-1.5,0-2.8,0.5-3.7,1.5s-1.3,2.4-1.3,4.2s0.4,3.3,1.3,4.3c0.9,1,2.1,1.5,3.7,1.5c1,0,2.1-0.2,3.4-0.5v1.4c-1,0.4-2.2,0.5-3.6,0.5
+                c-2.1,0-3.7-0.6-4.8-1.9s-1.7-3-1.7-5.4c0-1.4,0.3-2.7,0.8-3.8c0.5-0.9,1.3-1.8,2.3-2.4s2.2-0.9,3.6-0.9c1.5,0,2.8,0.3,3.9,0.8
+                l-0.7,1.4C61.5,6,60.4,5.7,59.4,5.7z M65.8,18.5v-14h1.6v14.1h-1.6V18.5z M82.5,11.3c0,2.3-0.6,4.1-1.9,5.3s-3.1,1.8-5.4,1.8h-3.9
+                V4.5h4.3c2.2,0,3.9,0.6,5.1,1.8S82.5,9.2,82.5,11.3z M80.8,11.4c0-1.8-0.5-3.2-1.4-4.1s-2.3-1.4-4.1-1.4h-2.4v11.2h2
+                c1.9,0,3.4-0.5,4.4-1.4S80.8,13.3,80.8,11.4z" />
+            </svg>
+            <div class="h5 fw-light mt-3">Please wait</div>
+        </div>
+    </div>
+
+    <div id="wrapper">
+
+        <!-- top navbar -->
+        <nav class="navbar navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-btn">
+                    <button type="button" class="btn-toggle-offcanvas"><i class="fa fa-bars"></i></button>
+                </div>
+
+                <div class="navbar-brand ps-2">
+                    <a href="index.html" class="d-flex">
+                        <svg width="85px" viewBox="0 0 85 25">
+                            <path class="fill-primary" d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
+                            z M29,18.5v-14h1.6v12.6h6.2v1.5H29V18.5z M49.6,4.5v9.1c0,1.6-0.5,2.9-1.5,3.8s-2.3,1.4-4,1.4s-3-0.5-3.9-1.4s-1.4-2.2-1.4-3.8V4.5
+                            h1.6v9.1c0,1.2,0.3,2.1,1,2.7c0.6,0.6,1.6,0.9,2.8,0.9s2.1-0.3,2.7-0.9c0.6-0.6,1-1.5,1-2.7V4.5H49.6z M59.4,5.7
+                            c-1.5,0-2.8,0.5-3.7,1.5s-1.3,2.4-1.3,4.2s0.4,3.3,1.3,4.3c0.9,1,2.1,1.5,3.7,1.5c1,0,2.1-0.2,3.4-0.5v1.4c-1,0.4-2.2,0.5-3.6,0.5
+                            c-2.1,0-3.7-0.6-4.8-1.9s-1.7-3-1.7-5.4c0-1.4,0.3-2.7,0.8-3.8c0.5-0.9,1.3-1.8,2.3-2.4s2.2-0.9,3.6-0.9c1.5,0,2.8,0.3,3.9,0.8
+                            l-0.7,1.4C61.5,6,60.4,5.7,59.4,5.7z M65.8,18.5v-14h1.6v14.1h-1.6V18.5z M82.5,11.3c0,2.3-0.6,4.1-1.9,5.3s-3.1,1.8-5.4,1.8h-3.9
+                            V4.5h4.3c2.2,0,3.9,0.6,5.1,1.8S82.5,9.2,82.5,11.3z M80.8,11.4c0-1.8-0.5-3.2-1.4-4.1s-2.3-1.4-4.1-1.4h-2.4v11.2h2
+                            c1.9,0,3.4-0.5,4.4-1.4S80.8,13.3,80.8,11.4z" />
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="d-flex flex-grow-1 align-items-center">
+                    <div class="d-flex">
+                        <ul class="nav nav-pills me-4 ms-2">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Menu Version</a>
+                                <ul class="dropdown-menu shadow-sm">
+                                    <li><a class="dropdown-item" href="index.html">Sidebar menu</a></li>
+                                    <li><a class="dropdown-item" href="horizontal/index.html">Horizontal menu</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="sidebar-mini/index.html">Sidebar mini</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <form id="navbar-search" class="navbar-form search-form position-relative d-none d-md-block">
+                            <input value="" class="form-control" placeholder="Search here..." type="text">
+                            <button type="button" class="btn btn-secondary"><i class="fa fa-search"></i></button>
+                        </form>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
+                            <li class="d-none d-sm-block"><a href="app-events.html" class="icon-menu"><i class="fa fa-calendar"></i></a></li>
+                            <li class="d-none d-sm-block"><a href="app-chat.html" class="icon-menu"><i class="fa fa-comments"></i></a></li>
+                            <li><a href="app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a></li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle icon-menu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-bell"></i>
+                                    <span class="notification-dot"></span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end p-0 shadow notification">
+                                    <ul class="list-unstyled feeds_widget">
+                                        <li class="d-flex">
+                                            <div class="feeds-left"><i class="fa fa-thumbs-o-up"></i></div>
+                                            <div class="feeds-body flex-grow-1">
+                                                <h6 class="mb-1">7 New Feedback <small class="float-end text-muted small">Today</small></h6>
+                                                <span class="text-muted">It will give a smart finishing to your site</span>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex">
+                                            <div class="feeds-left"><i class="fa fa-user"></i></div>
+                                            <div class="feeds-body flex-grow-1">
+                                                <h6 class="mb-1">New User <small class="float-end text-muted small">10:45</small></h6>
+                                                <span class="text-muted">I feel great! Thanks team</span>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex">
+                                            <div class="feeds-left"><i class="fa fa-question-circle"></i></div>
+                                            <div class="feeds-body flex-grow-1">
+                                                <h6 class="mb-1 text-warning">Server Warning <small class="float-end text-muted small">10:50</small></h6>
+                                                <span class="text-muted">Your connection is not private</span>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex">
+                                            <div class="feeds-left"><i class="fa fa-check"></i></div>
+                                            <div class="feeds-body flex-grow-1">
+                                                <h6 class="mb-1 text-danger">Issue Fixed <small class="float-end text-muted small">11:05</small></h6>
+                                                <span class="text-muted">WE have fix all Design bug with Responsive</span>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex">
+                                            <div class="feeds-left"><i class="fa fa-shopping-basket"></i></div>
+                                            <div class="feeds-body flex-grow-1">
+                                                <h6 class="mb-1">7 New Orders <small class="float-end text-muted small">11:35</small></h6>
+                                                <span class="text-muted">You received a new oder from Tina.</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <!-- more link -->
+                            <li class="dropdown">
+                                <a class="dropdown-toggle icon-menu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-sliders"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-end p-2 shadow">
+                                    <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-pencil-square-o"></i> <span>Basic</span></a></li>
+                                    <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-sliders fa-rotate-90"></i> <span>Preferences</span></a></li>
+                                    <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-lock"></i> <span>Privacy</span></a></li>
+                                    <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-bell"></i> <span>Notifications</span></a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-credit-card"></i> <span>Payments</span></a></li>
+                                    <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-print"></i> <span>Invoices</span></a></li>
+                                    <li><a class="dropdown-item rounded-pill" href="javascript:void(0);"><i class="me-2 fa fa-refresh"></i> <span>Renewals</span></a></li>
+                                </ul>
+                            </li>
+                            <li><a href="page-login.html" class="icon-menu"><i class="fa fa-sign-out"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidbar menu -->
+        <div id="left-sidebar" class="sidebar">
+            <div class="user-account p-3 mb-3">
+                <div class="d-flex mb-3 pb-3 border-bottom align-items-center">
+                    <img src="../dist/assets/images/user.png" class="avatar lg rounded me-3" alt="User Profile Picture">
+                    <div class="dropdown flex-grow-1">
+                        <span>Welcome,</span>
+                        <a href="#" class="dropdown-toggle user-name" data-bs-toggle="dropdown"><strong>Jessica Doe</strong></a>
+                        <ul class="dropdown-menu p-2 shadow-sm">
+                            <li><a href="page-profile2.html"><i class="fa fa-user me-2"></i>My Profile</a></li>
+                            <li><a href="app-inbox.html"><i class="fa fa-envelope-open me-2"></i>Messages</a></li>
+                            <li><a href="javascript:void(0);"><i class="fa fa-cog me-2"></i>Settings</a></li>
+                            <li class="divider"></li>
+                            <li><a href="page-login.html"><i class="fa fa-power-off me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col">
+                        <h6 class="mb-0">5+</h6>
+                        <small class="text-muted">Experience</small>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-0">400+</h6>
+                        <small class="text-muted">Employees</small>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-0">80+</h6>
+                        <small class="text-muted">Clients</small>
+                    </div>
+                </div>
+            </div>
+            <!-- nav tab: menu list -->
+            <ul class="nav nav-tabs text-center mb-2" role="tablist">
+                <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#hr_menu" role="tab">HR</a></li>
+                <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#project_menu" role="tab">Project</a></li>
+                <li class="nav-item flex-fill"><a class="nav-link active" data-bs-toggle="tab" href="#sub_menu" role="tab"><i class="fa fa-th-large"></i></a></li>
+                <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#setting_menu" role="tab"><i class="fa fa-cog"></i></a></li>
+            </ul>
+
+            <!-- nav tab: content -->
+            <div class="tab-content px-0">
+                <div class="tab-pane" id="hr_menu">
+                    <nav class="sidebar-nav">
+                        <ul class="main-menu metismenu list-unstyled">
+                            <li><a href="index.html"><i class="fa fa-tachometer"></i><span>HR
+                                        Dashboard</span></a></li>
+                            <li><a href="app-holidays.html"><i class="fa fa-list-ul"></i><span>Holidays</span></a></li>
+                            <li><a href="app-events.html"><i class="fa fa-calendar"></i><span>Events</span></a></li>
+                            <li><a href="app-activities.html"><i class="fa fa-file-text-o"></i><span>Activities</span></a></li>
+                            <li><a href="app-social.html"><i class="fa fa-globe"></i><span>HR Social</span></a></li>
+                            <li>
+                                <a href="#Employees" class="has-arrow"><i class="fa fa-users"></i><span>Employees</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="emp-all.html">All Employees</a></li>
+                                    <li><a href="emp-leave.html">Leave Requests</a></li>
+                                    <li><a href="emp-attendance.html">Attendance</a></li>
+                                    <li><a href="emp-departments.html">Departments</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#Accounts" class="has-arrow"><i class="fa fa-briefcase"></i><span>Accounts</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="acc-payments.html">Payments</a></li>
+                                    <li><a href="acc-expenses.html">Expenses</a></li>
+                                    <li><a href="acc-invoices.html">Invoices</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#Payroll" class="has-arrow"><i class="fa fa-credit-card"></i><span>Payroll</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="payroll-payslip.html">Payslip</a></li>
+                                    <li><a href="payroll-salary.html">Employee Salary</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#Report" class="has-arrow"><i class="fa fa-bar-chart"></i><span>Report</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="report-expense.html">Expense Report</a></li>
+                                    <li><a href="report-invoice.html">Invoice Report</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="app-users.html"><i class="fa fa-user"></i><span>Users</span></a></li>
+                            <li>
+                                <a href="#Authentication" class="has-arrow"><i class="fa fa-lock"></i><span>Authentication</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="page-login.html">Login</a></li>
+                                    <li><a href="page-register.html">Register</a></li>
+                                    <li><a href="page-lockscreen.html">Lockscreen</a></li>
+                                    <li><a href="page-forgot-password.html">Forgot Password</a></li>
+                                    <li><a href="page-404.html">Page 404</a></li>
+                                    <li><a href="page-403.html">Page 403</a></li>
+                                    <li><a href="page-500.html">Page 500</a></li>
+                                    <li><a href="page-503.html">Page 503</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="tab-pane fade" id="project_menu" role="tabpanel" >
+                    <nav class="sidebar-nav">
+                        <ul class="main-menu metismenu list-unstyled">
+                            <li><a href="index2.html"><i class="fa fa-tachometer"></i><span>Dashboard</span></a></li>
+                            <li><a href="app-inbox.html"><i class="fa fa-envelope-o"></i><span>Inbox App</span></a></li>
+                            <li><a href="app-chat.html"><i class="fa fa-comments"></i><span>Chat App</span></a></li>
+                            <li>
+                                <a href="#Projects" class="has-arrow"><i class="fa fa-list-ul"></i><span>Projects</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="project-add.html">Add Projects</a></li>
+                                    <li><a href="project-list.html">Projects List</a></li>
+                                    <li><a href="project-grid.html">Projects Grid</a></li>
+                                    <li><a href="project-detail.html">Projects Detail</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#Clients" class="has-arrow"><i class="fa fa-user"></i><span>Clients</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="client-add.html">Add Clients</a></li>
+                                    <li><a href="client-list.html">Clients List</a></li>
+                                    <li><a href="client-detail.html">Clients Detail</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="project-team.html"><i class="fa fa-users"></i><span>Team</span></a></li>
+                            <li><a href="app-taskboard.html"><i class="fa fa-tag"></i><span>Taskboard</span></a></li>
+                            <li><a href="app-tickets.html"><i class="fa fa-ticket"></i><span>Tickets</span></a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="tab-pane active" id="sub_menu">
+                    <nav class="sidebar-nav">
+                        <ul class="main-menu metismenu list-unstyled">
+                            <li>
+                                <a href="#Blog" class="has-arrow"><i class="fa fa-globe"></i>
+                                    <span>Blog</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="blog-dashboard.html">Dashboard</a></li>
+                                    <li><a href="blog-post.html">New Post</a></li>
+                                    <li><a href="blog-list.html">Blog List</a></li>
+                                    <li><a href="blog-details.html">Blog Detail</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#FileManager" class="has-arrow"><i
+                                        class="fa fa-folder"></i><span>File Manager</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="file-dashboard.html">Dashboard</a></li>
+                                    <li><a href="file-documents.html">Documents</a></li>
+                                    <li><a href="file-media.html">Media</a></li>
+                                    <li><a href="file-images.html">Images</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#Widgets" class="has-arrow"><i
+                                        class="fa fa-puzzle-piece"></i><span>Widgets</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="widgets-statistics.html">Statistics Widgets</a></li>
+                                    <li><a href="widgets-data.html">Data Widgets</a></li>
+                                    <li><a href="widgets-chart.html">Chart Widgets</a></li>
+                                    <li><a href="widgets-weather.html">Weather Widgets</a></li>
+                                    <li><a href="widgets-social.html">Social Widgets</a></li>
+                                </ul>
+                            </li>
+                            <li class="active mm-active">
+                                <a href="#Pages" class="has-arrow"><i class="fa fa-files-o"></i><span>Extra
+                                        Pages</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="page-blank.html">Blank Page</a></li>
+                                    <li><a href="page-profile2.html">Profile</a></li>
+                                    <li><a href="page-gallery.html">Image Gallery <span
+                                                class="badge bg-secondary float-end">v1</span></a></li>
+                                    <li><a href="page-gallery2.html">Image Gallery <span
+                                                class="badge bg-warning float-end">v2</span></a></li>
+                                    <li><a href="page-timeline.html">Timeline</a></li>
+                                    <li><a href="page-timeline-h.html">Horizontal Timeline</a></li>
+                                    <li><a href="page-pricing.html">Pricing</a></li>
+                                    <li><a href="page-invoices.html">Invoices</a></li>
+                                    <li><a href="page-invoices2.html">Invoices <span
+                                                class="badge bg-warning float-end">v2</span></a></li>
+                                    <li><a href="page-search-results.html">Search Results</a></li>
+                                    <li class="active"><a href="page-helper-class.html">Helper Classes</a></li>
+                                    <li><a href="page-maintenance.html">Maintenance</a></li>
+                                    <li><a href="page-testimonials.html">Testimonials</a></li>
+                                    <li><a href="page-faq.html">FAQs</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#uiElements" class="has-arrow"><i class="fa fa-diamond"></i>
+                                    <span>UI Elements</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="ui-typography.html">Typography</a></li>
+                                    <li><a href="ui-tabs.html">Tabs</a></li>
+                                    <li><a href="ui-buttons.html">Buttons</a></li>
+                                    <li><a href="ui-bootstrap.html">Bootstrap UI</a></li>
+                                    <li><a href="ui-icons.html">Icons</a></li>
+                                    <li><a href="ui-notifications.html">Notifications</a></li>
+                                    <li><a href="ui-colors.html">Colors</a></li>
+                                    <li><a href="ui-dialogs.html">Dialogs</a></li>
+                                    <li><a href="ui-list-group.html">List Group</a></li>
+                                    <li><a href="ui-media-object.html">Media Object</a></li>
+                                    <li><a href="ui-modals.html">Modals</a></li>
+                                    <li><a href="ui-nestable.html">Nestable</a></li>
+                                    <li><a href="ui-progressbars.html">Progress Bars</a></li>
+                                    <li><a href="ui-range-sliders.html">Range Sliders</a></li>
+                                    <li><a href="ui-treeview.html">Treeview</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#forms" class="has-arrow"><i class="fa fa-pencil"></i>
+                                    <span>Forms</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="forms-validation.html">Form Validation</a></li>
+                                    <li><a href="forms-advanced.html">Advanced Elements</a></li>
+                                    <li><a href="forms-basic.html">Basic Elements</a></li>
+                                    <li><a href="forms-wizard.html">Form Wizard</a></li>
+                                    <li><a href="forms-dragdropupload.html">Drag &amp; Drop Upload</a></li>
+                                    <li><a href="forms-cropping.html">Image Cropping</a></li>
+                                    <li><a href="forms-summernote.html">Summernote</a></li>
+                                    
+                                    
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#Tables" class="has-arrow"><i class="fa fa-tag"></i>
+                                    <span>Tables</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="table-basic.html">Tables Example<span
+                                                class="badge bg-info float-end">New</span></a></li>
+                                    <li><a href="table-normal.html">Normal Tables</a></li>
+                                    <li><a href="table-jquery-datatable.html">Jquery Datatables</a></li>
+                                    <li><a href="table-editable.html">Editable Tables</a></li>
+                                    <li><a href="table-color.html">Tables Color</a></li>
+                                    <li><a href="table-filter.html">Table Filter <span
+                                                class="badge bg-info float-end">New</span></a></li>
+                                    <li><a href="table-dragger.html">Table dragger <span
+                                                class="badge bg-info float-end">New</span></a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#charts" class="has-arrow"><i class="fa fa-bar-chart"></i>
+                                    <span>Charts</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="chart-morris.html">Morris</a></li>
+                                    <li><a href="chart-flot.html">Flot</a></li>
+                                    <li><a href="chart-chartjs.html">ChartJS</a></li>
+                                    <li><a href="chart-jquery-knob.html">Jquery Knob</a></li>
+                                    <li><a href="chart-sparkline.html">Sparkline Chart</a></li>
+                                    <li><a href="chart-peity.html">Peity</a></li>
+                                    <li><a href="chart-apex.html">Apex Charts</a></li>
+                                    <li><a href="chart-gauges.html">Gauges</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#Maps" class="has-arrow"><i
+                                        class="fa fa-map-o"></i><span>Maps</span></a>
+                                <ul class="list-unstyled">
+                                    <li><a href="map-yandex.html">Yandex Map</a></li>
+                                    
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="tab-pane fade" id="setting_menu" role="tabpanel" >
+                    <div class="px-3">
+                    <h6>Choose Skin</h6>
+                    <ul class="choose-skin list-unstyled">
+                        <li data-theme="purple" class="mb-2"><div class="purple"></div><span>Purple</span></li>
+                        <li data-theme="blue" class="mb-2"><div class="blue"></div><span>Blue</span></li>
+                        <li data-theme="cyan" class="active mb-2"><div class="cyan"></div><span>Cyan</span></li>
+                        <li data-theme="green" class="mb-2"><div class="green"></div><span>Green</span></li>
+                        <li data-theme="orange" class="mb-2"><div class="orange"></div><span>Orange</span></li>
+                        <li data-theme="blush" class="mb-2"><div class="blush"></div><span>Blush</span></li>
+                    </ul>
+                    <hr>
+                    <h6>Theme Option</h6>
+                    <ul class="list-unstyled">
+                        <li class="d-flex align-items-center mb-1">
+                            <div class="form-check form-switch theme-switch">
+                                <input class="form-check-input" type="checkbox" id="theme-switch">
+                                <label class="form-check-label" for="theme-switch">Enable Dark Mode!</label>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-1">
+                            <div class="form-check form-switch theme-high-contrast">
+                                <input class="form-check-input" type="checkbox" id="theme-high-contrast">
+                                <label class="form-check-label" for="theme-high-contrast">Enable High Contrast</label>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-1">
+                            <div class="form-check form-switch theme-rtl">
+                                <input class="form-check-input" type="checkbox" id="theme-rtl">
+                                <label class="form-check-label" for="theme-rtl">Enable RTL Mode!</label>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-1">
+                            <div class="form-check form-switch minisidebar-active">
+                                <input class="form-check-input" type="checkbox" id="mini-active">
+                                <label class="form-check-label" for="mini-active">Mini Sidebar</label>
+                            </div>
+                        </li>
+                    </ul>
+                    <hr>
+                    <h6>General Settings</h6>
+                    <ul class="setting-list list-unstyled">
+                        <li>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">Default checkbox</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault1">
+                                <label class="form-check-label" for="flexCheckDefault1">Email Redirect</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault2" checked>
+                                <label class="form-check-label" for="flexCheckDefault2">Notifications</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault3">
+                                <label class="form-check-label" for="flexCheckDefault3">Auto Updates</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault4">
+                                <label class="form-check-label" for="flexCheckDefault4">Offline</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault5">
+                                <label class="form-check-label" for="flexCheckDefault5">Location Permission</label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-content">
+            <div class="container-fluid">
+
+                <div class="block-header py-lg-4 py-3">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-sm-12">
+                            <h2 class="m-0 fs-5"><a href="javascript:void(0);" class="btn btn-sm btn-link ps-0 btn-toggle-fullwidth"><i class="fa fa-arrow-left"></i></a> Helper Class</h2>
+                            <ul class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="index.html">Lucid</a></li>
+                                <li class="breadcrumb-item">Pages</li>
+                                <li class="breadcrumb-item active">Helper Class</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 col-sm-12 text-md-end">
+                            <div class="d-inline-flex text-start">
+                                <div class="me-2">
+                                    <h6 class="mb-0"><i class="fa fa-user"></i> 1,784</h6>
+                                    <small>Visitors</small>
+                                </div>
+                                <span id="bh_visitors"></span>
+                            </div>
+                            <div class="d-inline-flex text-start ms-lg-3 me-lg-3 ms-1 me-1">
+                                <div class="me-2">
+                                    <h6 class="mb-0"><i class="fa fa-globe"></i> 325</h6>
+                                    <small>Visits</small>
+                                </div>
+                                <span id="bh_visits"></span>
+                            </div>
+                            <div class="d-inline-flex text-start">
+                                <div class="me-2">
+                                    <h6 class="mb-0"><i class="fa fa-comments"></i> 13</h6>
+                                    <small>Chats</small>
+                                </div>
+                                <span id="bh_chats"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row clearfix">
+                    <div class="col-lg-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title">Float Classes</h6>
+                                <ul class="header-dropdown">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Another Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Something else</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-nowrap w-25">Class</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-nowrap"> <code>.float-start</code> </td>
+                                            <td>Element to the left (float:left).</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"> <code>.float-end</code> </td>
+                                            <td>Element to the right(float:right).</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"> <code>.clearfix</code> </td>
+                                            <td>To Clear floats.(clreafix)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-nowrap w-25">Class</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-nowrap"> <code>.d-block</code> </td>
+                                            <td>Element to Show (display: block)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"> <code>.d-none</code> </td>
+                                            <td>Element to hide (display: none)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title">Text Align</h6>
+                                <small>You can use classes which names are <code>.text-start, .text-center, .text-end, .text-justify</code></small>
+                                <ul class="header-dropdown">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Another Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Something else</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="row clearfix">
+                                    <div class="col-md-3">
+                                        <p class="text-start"> <strong> Align Left</strong> </p>
+                                        <div class="text-start"> Lorem ipsum dolor sit amet, consectetur adipisicing
+                                            elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+                                            ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+                                            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                                            qui officia deserunt mollit anim id est laborum. </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <p class="text-center"> <strong> Align Center</strong> </p>
+                                        <div class="text-center"> Lorem ipsum dolor sit amet, consectetur
+                                            adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                                            magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                                            laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
+                                            in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                                            qui officia deserunt mollit anim id est laborum. </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <p class="text-end"> <strong> Align Right</strong> </p>
+                                        <div class="text-end"> Lorem ipsum dolor sit amet, consectetur adipisicing
+                                            elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+                                            ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+                                            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                                            qui officia deserunt mollit anim id est laborum. </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <p class="text-justify"> <strong> Align Justify</strong> </p>
+                                        <div class="text-justify"> Lorem ipsum dolor sit amet, consectetur
+                                            adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                                            magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                                            laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
+                                            in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                                            qui officia deserunt mollit anim id est laborum. </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title">Margin and padding</h6>
+                                <ul class="header-dropdown">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Another Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Something else</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body ">
+                                <p>Where <em>property</em> is one of:</p>
+                                <ul>
+                                    <li><code>m</code> - for classes that set <code>margin</code></li>
+                                    <li><code>p</code> - for classes that set <code>padding</code></li>
+                                </ul>
+                                <p>Where <em>sides</em> is one of:</p>
+                                <ul>
+                                    <li><code>t</code> - for classes that set <code>margin-top</code> or <code>padding-top</code></li>
+                                    <li><code>b</code> - for classes that set <code>margin-bottom</code> or <code>padding-bottom</code></li>
+                                    <li><code>s</code> - for classes that set <code>margin-left</code> or <code>padding-left</code> in LTR,
+                                        <code>margin-right</code> or <code>padding-right</code> in RTL
+                                    </li>
+                                    <li><code>e</code> - for classes that set <code>margin-right</code> or
+                                        <code>padding-right</code> in LTR,
+                                        <code>margin-left</code> or <code>padding-left</code> in RTL
+                                    </li>
+                                    <li><code>x</code> - for classes that set both <code>*-left</code> and
+                                        <code>*-right</code></li>
+                                    <li><code>y</code> - for classes that set both <code>*-top</code> and
+                                        <code>*-bottom</code></li>
+                                    <li>blank - for classes that set a <code>margin</code> or <code>padding</code>
+                                        on all 4 sides of the element</li>
+                                </ul>
+                                <p>Where <em>size</em> is one of:</p>
+                                <ul>
+                                    <li><code>0</code> - for classes that eliminate the <code>margin</code> or
+                                        <code>padding</code> by setting it to
+                                        <code>0</code>
+                                    </li>
+                                    <li><code>1</code> - (by default) for classes that set the <code>margin</code>
+                                        or <code>padding</code> to
+                                        <code>$spacer * .25</code>
+                                    </li>
+                                    <li><code>2</code> - (by default) for classes that set the <code>margin</code>
+                                        or <code>padding</code> to
+                                        <code>$spacer * .5</code>
+                                    </li>
+                                    <li><code>3</code> - (by default) for classes that set the <code>margin</code>
+                                        or <code>padding</code> to
+                                        <code>$spacer</code>
+                                    </li>
+                                    <li><code>4</code> - (by default) for classes that set the <code>margin</code>
+                                        or <code>padding</code> to
+                                        <code>$spacer * 1.5</code>
+                                    </li>
+                                    <li><code>5</code> - (by default) for classes that set the <code>margin</code>
+                                        or <code>padding</code> to
+                                        <code>$spacer * 3</code>
+                                    </li>
+                                    <li><code>auto</code> - for classes that set the <code>margin</code> to auto
+                                    </li>
+                                </ul>
+                                <p>(You can add more sizes by adding entries to the <code>$spacers</code> Sass map
+                                    variable.)</p>
+                                <h3 id="examples">Examples<a class="anchorjs-link " aria-label="Anchor"
+                                        data-anchorjs-icon="#" href="#examples" style="padding-left: 0.375em;"></a>
+                                </h3>
+                                <p>Here are some representative examples of these classes:</p>
+                                <div class="highlight">
+                                    <pre class="chroma"><code class="language-scss" data-lang="scss"><span class="nc">.mt-0</span> <span class="p">{</span>
+<span class="nt">margin-top</span><span class="nd">:</span> <span class="nt">0</span> <span class="o">!</span><span class="nt">important</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.ms-1</span> <span class="p">{</span>
+<span class="nt">margin-left</span><span class="nd">:</span> <span class="o">(</span><span class="err">$</span><span class="nt">spacer</span> <span class="o">*</span> <span class="nc">.25</span><span class="o">)</span> <span class="o">!</span><span class="nt">important</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.px-2</span> <span class="p">{</span>
+<span class="nt">padding-left</span><span class="nd">:</span> <span class="o">(</span><span class="err">$</span><span class="nt">spacer</span> <span class="o">*</span> <span class="nc">.5</span><span class="o">)</span> <span class="o">!</span><span class="nt">important</span><span class="p">;</span>
+<span class="nt">padding-right</span><span class="nd">:</span> <span class="o">(</span><span class="err">$</span><span class="nt">spacer</span> <span class="o">*</span> <span class="nc">.5</span><span class="o">)</span> <span class="o">!</span><span class="nt">important</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.p-3</span> <span class="p">{</span>
+<span class="nt">padding</span><span class="nd">:</span> <span class="err">$</span><span class="nt">spacer</span> <span class="o">!</span><span class="nt">important</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                Grid options
+                                <ul class="header-dropdown">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button"
+                                            aria-haspopup="true" aria-expanded="false"></a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Another Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Something else</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <table class="table mb-4">
+                                    <thead>
+                                        <tr>
+                                            <th scope="row"></th>
+                                            <th scope="row">
+                                                xs<br>
+                                                <span class="fw-normal">&lt;576px</span>
+                                            </th>
+                                            <th scope="row">
+                                                sm<br>
+                                                <span class="fw-normal">≥576px</span>
+                                            </th>
+                                            <th scope="row">
+                                                md<br>
+                                                <span class="fw-normal">≥768px</span>
+                                            </th>
+                                            <th scope="row">
+                                                lg<br>
+                                                <span class="fw-normal">≥992px</span>
+                                            </th>
+                                            <th scope="row">
+                                                xl<br>
+                                                <span class="fw-normal">≥1200px</span>
+                                            </th>
+                                            <th scope="row">
+                                                xxl<br>
+                                                <span class="fw-normal">≥1400px</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-nowrap"><strong> Container</strong> <code
+                                                    class="fw-normal">max-width</code></td>
+                                            <td>None (auto)</td>
+                                            <td>540px</td>
+                                            <td>720px</td>
+                                            <td>960px</td>
+                                            <td>1140px</td>
+                                            <td>1320px</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"><strong>Class prefix</strong></td>
+                                            <td><code>.col-</code></td>
+                                            <td><code>.col-sm-</code></td>
+                                            <td><code>.col-md-</code></td>
+                                            <td><code>.col-lg-</code></td>
+                                            <td><code>.col-xl-</code></td>
+                                            <td><code>.col-xxl-</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"><strong># of columns</strong></td>
+                                            <td colspan="6">12</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"><strong>Gutter width</strong></td>
+                                            <td colspan="6">1.5rem (.75rem on left and right)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"><strong>Custom gutters</strong></td>
+                                            <td colspan="6"><a href="/docs/5.0/layout/gutters/">Yes</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"><strong>Nestable</strong></td>
+                                            <td colspan="6"><a href="#nesting">Yes</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap"><strong>Column ordering</strong>
+                                            </td>
+                                            <td colspan="6"><a href="/docs/5.0/layout/columns/#reordering">Yes</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                Image Radious
+                                <ul class="header-dropdown">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button"
+                                            aria-haspopup="true" aria-expanded="false"></a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Another Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Something else</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="bd-example bd-example-images">
+                                    <img src="http://via.placeholder.com/75x75" class="rounded" alt="75x75">
+                                    <img src="http://via.placeholder.com/75x75" class="rounded-top" alt="75x75">
+                                    <img src="http://via.placeholder.com/75x75" class="rounded-end" alt="75x75">
+                                    <img src="http://via.placeholder.com/75x75" class="rounded-bottom" alt="75x75">
+                                    <img src="http://via.placeholder.com/75x75" class="rounded-start" alt="75x75">
+                                    <img src="http://via.placeholder.com/75x75" class="rounded-circle" alt="75x75">
+                                    <img src="https://via.placeholder.com/140x75" class="rounded-pill" alt="140x75">
+                                </div>
+                                <figure class="highlight">
+                                    <pre><code class="language-html" data-lang="html">
+&lt;img src=&quot;...; class=&quot;rounded&quot; alt=&quot;75x75&quot;&gt;
+&lt;img src=&quot;...; class=&quot;rounded-top&quot; alt=&quot;75x75&quot;&gt;
+&lt;img src=&quot;...; class=&quot;rounded-end&quot; alt=&quot;75x75&quot;&gt;
+&lt;img src=&quot;...; class=&quot;rounded-bottom&quot; alt=&quot;75x75&quot;&gt;
+&lt;img src=&quot;...; class=&quot;rounded-start&quot; alt=&quot;75x75&quot;&gt;
+&lt;img src=&quot;...; class=&quot;rounded-circle&quot; alt=&quot;75x75&quot;&gt;
+&lt;img src=&quot;...; class=&quot;rounded-pill&quot; alt=&quot;140x75&quot;&gt;</code></pre>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header">Border Color
+                                <ul class="header-dropdown">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button"
+                                            aria-haspopup="true" aria-expanded="false"></a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Another Action</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Something else</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="bd-example">
+                                    <span class="border border-primary mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-secondary mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-success mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-danger mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-warning mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-info mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-light mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-dark mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                    <span class="border border-white mx-1 d-inline-block"><img
+                                            src="http://via.placeholder.com/75x75" class="" alt="Border"></span>
+                                </div>
+                                <pre>
+<code class="language-html" data-lang="html">
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-primary"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-secondary"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-success"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-danger"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-warning"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-info"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-light"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-dark"</span><span class="nt">&gt;&lt;/span&gt;</span>
+<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"border border-white"</span><span class="nt">&gt;&lt;/span&gt;</span>
+</code>
+                            </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<!-- core js file -->
+<script src="assets/bundles/libscripts.bundle.js"></script>
+
+    <!-- page js file -->
+<script src="assets/bundles/mainscripts.bundle.js"></script>
+</body>
+</html>

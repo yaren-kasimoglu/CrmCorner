@@ -104,7 +104,9 @@
                     <ol class="dd-list sortable" data-statusid="@((int)stage.Key)">
                         @foreach (var task in tasksInThisStage)
                         {
-                            <li class="dd-item" data-taskid="@task.Id">
+                            <li class="dd-item" data-taskid="@task.Id" data-outcome="@task.OutcomeStatus"
+                                data-value="@task.Value"
+                                data-contract="@task.FileAttachments">
                                 <div class="dd-handle">
                                     <strong>@task.Title</strong><br />
                                     <small class="text-muted">
@@ -201,14 +203,32 @@
         $(".sortable").sortable({
             connectWith: ".sortable",
             placeholder: "sortable-placeholder",
-            update: function (event, ui) {
-                var taskId = ui.item.data("taskid");
-                var newStage = ui.item.closest(".sortable").data("statusid");
+               update: function (event, ui) {
+        var taskId = ui.item.data("taskid");
+        var newStage = ui.item.closest(".sortable").data("statusid");
+        var outcome = ui.item.data("outcome");
+        var offerValue = ui.item.data("value");
+        var contract = ui.item.data("contract");
 
-                if (taskId !== undefined && newStage !== undefined) {
-                    $.post("/PipelineTask/UpdateStage", { id: taskId, newStage: newStage });
-                }
-            }
+        // TEKLİF SUNULDU AŞAMASINA GEÇİŞTE KONTROL
+        if (newStage == 4 && (!offerValue || !contract)) {
+            alert("Teklif Sunuldu aşamasına geçmek için 'Değer' girmeli ve sözleşme yüklemelisiniz.");
+            $(this).sortable('cancel');
+            return;
+        }
+
+        // SONUÇ AŞAMASINA GEÇİŞTE KONTROL
+        if (newStage == 5 && (!outcome || outcome === "None" || outcome === "Unknown")) {
+            alert("Sonuç aşamasına geçmek için lütfen sonucu seçiniz (Kazanıldı/Kaybedildi).");
+            $(this).sortable('cancel');
+            return;
+        }
+
+        if (taskId !== undefined && newStage !== undefined) {
+            $.post("/PipelineTask/UpdateStage", { id: taskId, newStage: newStage });
+        }
+    }
+
         }).disableSelection();
 
         // Silme

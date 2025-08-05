@@ -1,0 +1,80 @@
+// Fonts
+$font-family: 'Ubuntu', sans-serif;
+$font-size: 14px;
+$line-color: #E8E8E8;
+$dark-line-color: #1F2125;
+
+// Bootstrap colors
+$color-success:		#4DCA88;
+$color-danger:		#FC5A69;
+$color-warning:		#FFBA33;
+$color-info:		#4FB8C9;
+
+// Custom colors
+$col-blue:			#0078FF;
+$col-green:			#28A745;
+$col-orange:		#F68C1F;
+$color-red:			#B54D4D;
+$col-red:			#EE2558;
+$col-dark:			#17191C;
+$col-white:			#FFFFFF;
+
+$grey-50:			#F4F7F6 !default;
+$grey-100:			#F7F7F7 !default;
+$grey-200:			#F0F0F0 !default;
+$grey-300:			#EEEEEE !default;
+$grey-400:			#BDBDBD !default;
+$grey-500:			#999999 !default;
+$grey-600:			#777777 !default;
+$grey-700:			#666666 !default;
+$grey-800:			#444444 !default;
+$grey-900:			#222222 !default;
+
+$purple:			#3B185F !default;
+$blue:				#0061A8 !default;
+$cyann:				#2eacb3 !default;
+$green:				#28a745 !default;
+$orange:			#f68c1f !default;
+$blush:				#FF5C58 !default;
+
+
+$sidebar-width: 				  250px;
+$sidebar-color: 				#F8F8F8;
+
+
+$font-weight-300:				300 !default;
+$font-weight-400:				400 !default;
+$font-weight-500:				500 !default;
+$font-weight-600:				600 !default;
+$font-weight-700:				700 !default;
+
+$font12:						12px;
+$font13:						13px;
+$font15:						15px;
+$font16:						16px;
+$font20:						20px;
+
+$border-radius-extra-small:     0.125rem    !default;
+$border-radius-small:           0.1875rem   !default;
+$border-radius-large:           0.550rem     !default;
+$border-radius-extreme:         0.875rem    !default;
+
+
+// Breakpoints
+$break-xsmall: 640px;
+$break-small: 768px;
+$break-medium: 992px;
+$break-1024: 1024px;
+$break-large: 1200px;
+$break-1280: 1280px;
+$break-xlarge: 1440px;
+
+// custom colors
+$custom-colors: (
+	"purple": #AB7DF6,
+	"blue": #0078ff,
+	"green": #7CAC25,
+	"orange": #FF4402,
+	"yellow": #F3BB23,
+	"lightseagreen": #20B2AA
+);

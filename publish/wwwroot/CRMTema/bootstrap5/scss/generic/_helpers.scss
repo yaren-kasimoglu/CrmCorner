@@ -1,0 +1,65 @@
+﻿.no-resize {
+  resize: none;
+}
+
+.color-inherit          {color: inherit;}
+.text-primary           {color: var(--primary-color) !important;}
+.text-secondary         {color: var(--secondary-color) !important;}
+.text-muted             {color: #8c9db5 !important;}
+.text-gradient          {background: linear-gradient(145deg, var(--primary-color), var(--dark-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+
+.bg-primary             {background: var(--primary-color) !important;}
+.bg-secondary           {background: var(--secondary-color) !important;}
+.bg-primary-gradient    {background: var(--primary-gradient) !important; color: $white;}
+//.bg-dark                {background: var(--color-900) !important;}
+.bg-light               {background: var(--color-200) !important;}
+
+.btn-success            {background-color: $color-success; border-color: $color-success;}
+.btn-danger             {background-color: $color-danger; border-color: $color-danger;}
+.btn-warning            {background-color: $color-warning; border-color: $color-warning;}
+.btn-info               {background-color: $color-info; border-color: $color-info;}
+
+.fill-primary           {fill: var(--primary-color) !important;}
+.fill-danger            {fill: var(--bs-danger) !important;}
+.fill-warning           {fill: var(--bs-warning) !important;}
+.fill-success           {fill: var(--bs-success) !important;}
+.fill-white             {fill: $white !important;}
+.fill-muted             {fill: #8c9db5 !important;}
+
+.chart-color1           {background-color: var(--chart-color1) !important}
+.chart-color2           {background-color: var(--chart-color2) !important}
+.chart-color3           {background-color: var(--chart-color3) !important}
+.chart-color4           {background-color: var(--chart-color4) !important}
+.chart-color5           {background-color: var(--chart-color5) !important}
+
+.chart-text-color1      {color: var(--chart-color1) !important}
+.chart-text-color2      {color: var(--chart-color2) !important}
+.chart-text-color3      {color: var(--chart-color3) !important}
+.chart-text-color4      {color: var(--chart-color4) !important}
+.chart-text-color5      {color: var(--chart-color5) !important}
+
+.dividers {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  &:after,
+  &:before {
+    -ms-flex: 1 1 0%;
+    flex: 1 1 0%;
+    border-top: 0.0625rem solid var(--border-color);
+    content: "";
+    margin-top: 0.0625rem;
+  }
+  &::before {
+    margin-right: 1.5rem;
+  }
+  &::after {
+    margin-left: 1.5rem;
+  }
+}
+
+.btn-check:focus + .btn,
+.btn:focus {
+  box-shadow: none;
+}

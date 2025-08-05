@@ -14,7 +14,9 @@
         <tr>
             <th>Görev Adı</th>
             <th>Değer Teklifi</th>
+            <th>Para Birimi</th>
             <th>Açıklama</th>
+            <th>Kapanış Tarihi</th>
             <th>Görev Sahibi</th>
             <th>Müşteri</th>
         </tr>
@@ -25,9 +27,15 @@
             <tr>
                 <td>@item.Title</td>
                 <td>@item.Value?.ToString("N2")</td>
+                <td>@item.Currency</td>
                 <td>@item.Description</td>
+                <td>@item.ExpectedCloseDate?.ToString("dd.MM.yyyy")</td>
                 <td>@item.AppUser?.NameSurname ?? "Bilinmiyor"</td>
-                <td>@item.Customer?.CustomerTitle @item.Customer?.CustomerEmail</td>
+                <td>
+                    @item.Customer?.CustomerTitle<br />
+                    @item.Customer?.CompanyName<br />
+                    @item.Customer?.CustomerEmail
+                </td>
             </tr>
         }
     </tbody>

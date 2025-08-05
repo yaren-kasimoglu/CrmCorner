@@ -37,7 +37,7 @@
 
             <div class="form-group mb-3">
                 <label asp-for="Stage">Aşama</label>
-                <select asp-for="Stage" asp-items="stageList" class="form-select"></select>
+                <select asp-for="Stage" asp-items="stageList" class="form-select" id="Stage"></select>
             </div>
 
             <div class="form-group mb-3">
@@ -51,13 +51,24 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="OutcomeStatus">Sonuç</label>
-                <select asp-for="OutcomeStatus" class="form-control" asp-items="Html.GetEnumSelectList<CrmCorner.Models.Enums.OutcomeTypeSales>()">
-                    <option value="">Seçiniz</option>
-                </select>
+                <label asp-for="Description" class="control-label">Açıklama</label>
+                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
+            <div class="form-group">
+                <label for="OutcomeStatus">Sonuç</label>
+                @Html.DropDownListFor(model => model.OutcomeStatus,
+                new SelectList(Enum.GetValues(typeof(OutcomeTypeSales)).Cast<OutcomeTypeSales>().Select(e =>
+                new SelectListItem { Text = EnumExtensions.GetDisplayName(e), Value = e.ToString() }), "Value", "Text"),
+                                "Seçiniz", new { @class = "form-control", id = "outcomeStatusDropdown" })
+            </div>
 
+            <div class="form-group" id="negativeReasonGroup" style="display:none;">
+                <label for="NegativeReason">Olumsuz Sebep</label>
+                @Html.TextBoxFor(model => model.NegativeReason, new { @class = "form-control", placeholder = "Neden kaybedildi?" })
+                <span asp-validation-for="NegativeReason" class="text-danger"></span>
+            </div>
 
             <div class="form-check mb-2">
                 <input class="form-check-input" type="checkbox" id="contactedViaLinkedIn" name="ContactedViaLinkedIn"
@@ -126,8 +137,12 @@
 
             <div class="form-group mb-3">
                 <label asp-for="SourceChannel">Kanal</label>
-                <input asp-for="SourceChannel" class="form-control" />
+                <select asp-for="SourceChannel" asp-items="ViewBag.SourceChannels" class="form-select">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+                <span asp-validation-for="SourceChannel" class="text-danger"></span>
             </div>
+
         </div>
     </div>
 
@@ -136,3 +151,25 @@
         <a href="/PipelineTask/PipelineIndex" class="btn btn-secondary">İptal</a>
     </div>
 </form>
+
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function toggleNegativeReason() {
+                var outcome = $('#outcomeStatusDropdown').val();
+                if (outcome === 'Lost') {
+                    $('#negativeReasonGroup').show();
+                } else {
+                    $('#negativeReasonGroup').hide();
+                    $('#NegativeReason').val('');
+                }
+            }
+
+            $('#outcomeStatusDropdown').change(toggleNegativeReason);
+            toggleNegativeReason();
+        });
+    </script>
+}
