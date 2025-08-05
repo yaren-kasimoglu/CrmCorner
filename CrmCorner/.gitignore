@@ -1,1 +1,18 @@
-﻿.vs/
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build outputs
+bin/
+obj/
+*.cache
+*.log
+*.tlog
+*.rar
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
