@@ -2,6 +2,7 @@
 using CrmCorner.Models;
 using CrmCorner.Models.CrmCorner.Models;
 using CrmCorner.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using PipelineStage = CrmCorner.Models.Enums.PipelineStage;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize]
     public class PipelineTaskController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -344,6 +346,21 @@ namespace CrmCorner.Controllers
             existing.ContactedViaLinkedIn = model.ContactedViaLinkedIn;
             existing.ContactedViaColdCall = model.ContactedViaColdCall;
             existing.CustomerId = model.CustomerId;
+
+
+            // Eğer outcome kazanıldı ise PostSaleInfo kaydı oluştur
+            if (existing.OutcomeStatus == OutcomeTypeSales.Won)
+            {
+                var existingPostSale = _context.PostSaleInfos.FirstOrDefault(p => p.PipelineTaskId == existing.Id);
+                if (existingPostSale == null)
+                {
+                    var newPostSale = new PostSaleInfo
+                    {
+                        PipelineTaskId = existing.Id
+                    };
+                    _context.PostSaleInfos.Add(newPostSale);
+                }
+            }
 
             _context.SaveChanges();
 

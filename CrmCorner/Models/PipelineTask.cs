@@ -65,6 +65,9 @@ namespace CrmCorner.Models
         public CustomerN? Customer { get; set; }
         public int? CustomerId { get; set; }  // Foreign key
 
+        public virtual PostSaleInfo? PostSaleInfo { get; set; }
+
+
         public virtual ICollection<PipelineTaskNote> Notes { get; set; } = new List<PipelineTaskNote>();
 
         public virtual ICollection<PipelineTaskFileAttachment> FileAttachments { get; set; } = new List<PipelineTaskFileAttachment>();

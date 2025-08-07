@@ -6233,3 +6233,5 @@ wwwroot\userprofilepicture\d9f0c766-06a0-42bb-9211-3ec9d797b960.jpg
 wwwroot\userprofilepicture\defaultpp.png
 wwwroot\userprofilepicture\ebd82f56-bc1e-44ed-91cd-f3841f142ed8.png
 wwwroot\userprofilepicture\firm.png
+wwwroot\userprofilepicture\34855915-36e2-40e4-bd0e-f7295c5b94e3.png
+wwwroot\userprofilepicture\7d8535e8-e5b2-4a8e-b70a-6d8a4b5bffd9.png

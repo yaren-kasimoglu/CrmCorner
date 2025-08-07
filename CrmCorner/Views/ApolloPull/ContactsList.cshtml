@@ -72,31 +72,6 @@
 
 <script>
     $(document).ready(function () {
-        // ✅ DataTable ayarları
-        $('#contactsTable').DataTable({
-            dom: 'Bfrtip',
-            pageLength: 20,
-            responsive: true,
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"
-            },
-            buttons: [
-                'copyHtml5',
-                'excelHtml5',
-                'csvHtml5',
-                'pdfHtml5',
-                'colvis'
-            ]
-        });
-
-        // ✅ Toplu seçim scripti
-        $('#selectAll').on('change', function () {
-            $('.selectCheckbox').prop('checked', this.checked);
-        });
-    });
-
-  
-    $(document).ready(function () {
         var table = $('#contactsTable').DataTable({
             dom: 'Bfrtip',
             pageLength: 20,
@@ -119,15 +94,13 @@
             $('input[type="checkbox"].selectCheckbox', rows).prop('checked', this.checked);
         });
 
-        // ✅ Tek tek seçildiğinde "Hepsini Seç" kutusunu kontrol et
+        // ✅ Tek tek kutu seçildiğinde "Hepsini Seç" kutusunu kontrol et
         $('#contactsTable tbody').on('change', 'input[type="checkbox"].selectCheckbox', function () {
-            if (!this.checked) {
-                var el = $('#selectAll').get(0);
-                if (el && el.checked && ('indeterminate' in el)) {
-                    el.indeterminate = true;
-                }
+            var el = $('#selectAll').get(0);
+            if (el && el.checked && ('indeterminate' in el)) {
+                el.indeterminate = true;
             }
         });
     });
-
 </script>
+
