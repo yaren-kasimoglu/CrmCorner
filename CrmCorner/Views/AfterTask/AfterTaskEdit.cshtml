@@ -2,16 +2,16 @@
 
 @{
     ViewData["Title"] = "Satış Sonrası Bilgi Düzenleme";
-    Layout = "~/Views/Shared/_LayoutHomePage.cshtml"; // Tek bir layout kullanıyoruz ✅
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml"; 
 }
 
 <h2>Satış Sonrası Bilgi Düzenleme</h2>
 
 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-<form asp-action="AfterTaskEdit" method="post">
+<form asp-action="AfterTaskEdit" asp-route-id="@Model.Id" method="post">
     <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="TaskCompId" />
+    <input type="hidden" asp-for="PipelineTaskId" />
 
     <div class="form-group">
         <label asp-for="IsFirstPaymentMade" class="control-label">İlk Ödeme Yapıldı mı?</label>
@@ -68,6 +68,7 @@
     <div class="form-group mt-3">
         <input type="submit" value="Kaydet" class="btn btn-primary" />
         <a asp-action="ListPositiveSales" asp-controller="AfterTask" class="btn btn-secondary">İptal</a>
+
     </div>
 </form>
 

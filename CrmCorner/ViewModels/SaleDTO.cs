@@ -3,7 +3,7 @@
     public class SaleDTO
     {
         public int Id { get; set; }
-        public int TaskCompId { get; set; } // Eğer yeni alan eklerseniz
+        public int TaskCompId { get; set; } 
         public string TaskCompTitle { get; set; }
         public bool IsFirstPaymentMade { get; set; }
         public bool IsThereAProblem { get; set; }
@@ -12,5 +12,7 @@
         public bool IsTrustpilotReviewed { get; set; }
         public string? TrustPilotComment { get; set; }
         public bool CanUseLogo { get; set; }
+
+        public bool HasPostSaleInfo => Id != 0;
     }
 }

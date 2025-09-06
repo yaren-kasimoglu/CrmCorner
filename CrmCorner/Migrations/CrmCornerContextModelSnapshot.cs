@@ -769,18 +769,18 @@ namespace CrmCorner.Migrations
                     b.Property<bool>("IsTrustpilotReviewed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int>("PipelineTaskId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ProblemDescription")
                         .HasColumnType("longtext");
-
-                    b.Property<int>("TaskCompId")
-                        .HasColumnType("int");
 
                     b.Property<string>("TrustPilotComment")
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TaskCompId");
+                    b.HasIndex("PipelineTaskId");
 
                     b.ToTable("PostSaleInfos");
                 });
@@ -1304,13 +1304,13 @@ namespace CrmCorner.Migrations
 
             modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
                 {
-                    b.HasOne("CrmCorner.Models.TaskComp", "TaskComp")
+                    b.HasOne("CrmCorner.Models.PipelineTask", "PipelineTask")
                         .WithMany()
-                        .HasForeignKey("TaskCompId")
+                        .HasForeignKey("PipelineTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TaskComp");
+                    b.Navigation("PipelineTask");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.SocialMediaContent", b =>

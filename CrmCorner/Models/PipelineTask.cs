@@ -3,6 +3,7 @@ using CrmCorner.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace CrmCorner.Models
+
 {
     public class PipelineTask
     {
@@ -64,6 +65,9 @@ namespace CrmCorner.Models
         [ForeignKey("CustomerId")]
         public CustomerN? Customer { get; set; }
         public int? CustomerId { get; set; }  // Foreign key
+
+        public virtual PostSaleInfo? PostSaleInfo { get; set; }
+
 
         public virtual ICollection<PipelineTaskNote> Notes { get; set; } = new List<PipelineTaskNote>();
 

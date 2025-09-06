@@ -1,0 +1,251 @@
+﻿@model CrmCorner.Controllers.PipelineAnalysisPageViewModel
+@using CrmCorner.Extensions
+@using CrmCorner.Models.Enums
+
+@{
+    ViewData["Title"] = "Pipeline Analizi";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+
+    int usersCount = Model.Rows.Count;
+    int totalAll = Model.Rows.Sum(r => r.Total);
+    int wonAll = Model.Rows.Sum(r => r.OutcomeCounts.TryGetValue(OutcomeTypeSales.Won, out var w) ? w : 0);
+    double winRateAll = totalAll == 0 ? 0 : (wonAll * 100.0 / totalAll);
+
+    // Toplamlar (Rows — büyük R!)
+    var stageTotals = Model.AllStages.ToDictionary(
+        s => s,
+        s => Model.Rows.Sum(r => r.StageCounts.TryGetValue(s, out var v) ? v : 0)
+    );
+
+    var outcomeTotals = Model.AllOutcomes.ToDictionary(
+        o => o,
+        o => Model.Rows.Sum(r => r.OutcomeCounts.TryGetValue(o, out var v) ? v : 0)
+    );
+}
+
+<div class="space-y-3">
+    <!-- KPI ŞERİDİ -->
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">Toplam Görev</div>
+                        <div class="h4 mb-0">@totalAll</div>
+                    </div>
+                    <i class="fa fa-list h3 mb-0 text-secondary"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">Kullanıcı Sayısı</div>
+                        <div class="h4 mb-0">@usersCount</div>
+                    </div>
+                    <i class="fa fa-users h3 mb-0 text-secondary"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-muted small">Genel Kazanma Oranı</div>
+                            <div class="h4 mb-0">@winRateAll.ToString("0.0")%</div>
+                        </div>
+                        <i class="fa fa-trophy h3 mb-0 text-success"></i>
+                    </div>
+                    <div class="progress mt-2" role="progressbar" aria-label="Genel kazanma oranı">
+                        <div class="progress-bar bg-success" style="width:@winRateAll.ToString("0.0")%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAGE TABLOSU -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+            <h5 class="mb-0">Aşamalar (Stage)</h5>
+            <span class="text-muted small">Her hücre: Adet ve göreceli yüzde</span>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th style="min-width:220px">Kullanıcı</th>
+                        <th class="text-end">Toplam</th>
+                        @foreach (var st in Model.AllStages)
+                        {
+                            <th class="text-end" title="@st.ToString()">@st.GetDisplayName()</th>
+                        }
+                        <th style="min-width:180px">Dağılım</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <strong>@(string.IsNullOrWhiteSpace(row.NameSurname) ? row.UserName : row.NameSurname)</strong>
+                                    <small class="text-muted">@row.UserName</small>
+                                </div>
+                            </td>
+                            <td class="text-end fw-bold">@row.Total</td>
+
+                            @foreach (var st in Model.AllStages)
+                            {
+                                var count = row.StageCounts.TryGetValue(st, out var v) ? v : 0;
+                                var pct = row.Total == 0 ? 0 : (count * 100.0 / row.Total);
+                                <td class="text-end" title="@($"{count} / {row.Total}")">
+                                    <div>@count <span class="text-muted small">(@pct.ToString("0.#")%)</span></div>
+                                </td>
+                            }
+
+                            <td>
+                                @* satır içi mini dağılım barı *@
+                                @{
+                                    // her stage için toplam pay kadar gradient
+                                    var pieces = new List<string>();
+                                    double acc = 0;
+                                    foreach (var st in Model.AllStages)
+                                    {
+                                        var c = row.StageCounts.TryGetValue(st, out var v) ? v : 0;
+                                        var p = row.Total == 0 ? 0 : (c * 100.0 / row.Total);
+                                        if (p > 0)
+                                        {
+                                            // farklı tonlar: HSL ile ayrıştır
+                                            var idx = Array.IndexOf(Model.AllStages, st);
+                                            var hue = (360.0 / Math.Max(1, Model.AllStages.Length)) * idx;
+                                            pieces.Add($"hsl({hue}deg 60% 65%) {acc.ToString("0.##")}% {(acc + p).ToString("0.##")}%");
+                                            acc += p;
+                                        }
+                                    }
+                                    var bg = pieces.Count == 0 ? "#eee" : $"linear-gradient(90deg, {string.Join(", ", pieces)})";
+                                }
+                                <div class="progress" style="height:10px;">
+                                    <div class="progress-bar" style="width:100%;background:@bg"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <th>Genel Toplam</th>
+                        <th class="text-end">@totalAll</th>
+                        @foreach (var st in Model.AllStages)
+                        {
+                            var t = stageTotals[st];
+                            var p = totalAll == 0 ? 0 : (t * 100.0 / totalAll);
+                            <th class="text-end">@t <span class="text-muted small">(@p.ToString("0.#")%)</span></th>
+                        }
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- OUTCOME TABLOSU -->
+    <div class="card mt-3">
+        <div class="card-header d-flex align-items-center gap-2">
+            <h5 class="mb-0">Sonuçlar (Outcome)</h5>
+            <span class="text-muted small">Kazanma oranı ayrı sütunda</span>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th style="min-width:220px">Kullanıcı</th>
+                        <th class="text-end">Toplam</th>
+                        @foreach (var oc in Model.AllOutcomes)
+                        {
+                            <th class="text-end">@oc.GetDisplayName()</th>
+                        }
+                        <th class="text-end">Kazanma Oranı</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    @foreach (var row in Model.Rows)
+                    {
+                        var won = row.OutcomeCounts.TryGetValue(OutcomeTypeSales.Won, out var w) ? w : 0;
+                        var winRate = row.Total == 0 ? 0 : (w * 100.0 / row.Total);
+
+                        <tr>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <strong>@(string.IsNullOrWhiteSpace(row.NameSurname) ? row.UserName : row.NameSurname)</strong>
+                                    <small class="text-muted">@row.UserName</small>
+                                </div>
+                            </td>
+                            <td class="text-end fw-bold">@row.Total</td>
+
+                            @foreach (var oc in Model.AllOutcomes)
+                            {
+                                var count = row.OutcomeCounts.TryGetValue(oc, out var v) ? v : 0;
+                                var pct = row.Total == 0 ? 0 : (count * 100.0 / row.Total);
+                                <td class="text-end" title="@($"{count} / {row.Total}")">
+                                    <div>@count <span class="text-muted small">(@pct.ToString("0.#")%)</span></div>
+                                </td>
+                            }
+
+                            <td class="text-end">
+                                <div class="d-inline-flex align-items-center gap-2" style="min-width:140px;">
+                                    <span class="fw-semibold">@winRate.ToString("0.0")%</span>
+                                    <div class="progress flex-fill" style="height:8px;">
+                                        <div class="progress-bar bg-success" style="width:@winRate.ToString("0.0")%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <th>Genel Toplam</th>
+                        <th class="text-end">@totalAll</th>
+                        @foreach (var oc in Model.AllOutcomes)
+                        {
+                            var t = outcomeTotals[oc];
+                            var p = totalAll == 0 ? 0 : (t * 100.0 / totalAll);
+                            <th class="text-end">@t <span class="text-muted small">(@p.ToString("0.#")%)</span></th>
+                        }
+                        <th class="text-end">
+                            <div class="d-inline-flex align-items-center gap-2" style="min-width:140px;">
+                                <span class="fw-semibold">@winRateAll.ToString("0.0")%</span>
+                                <div class="progress flex-fill" style="height:8px;">
+                                    <div class="progress-bar bg-success" style="width:@winRateAll.ToString("0.0")%"></div>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .table thead th, .table tfoot th {
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        white-space: nowrap;
+    }
+
+    .space-y-3 > * + * {
+        margin-top: 1rem;
+    }
+</style>

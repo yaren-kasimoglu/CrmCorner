@@ -69,6 +69,14 @@ builder.Services.AddIdentity<AppUser, AppRole>()
     .AddEntityFrameworkStores<CrmCornerContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<SetUserPictureFilter>();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<SetUserPictureFilter>();
+});
+
+
 builder.Services.AddScoped<IEmailServices, EmailServices>();
 
 builder.Services.Configure<IdentityOptions>(options =>
@@ -97,7 +105,7 @@ builder.Services.ConfigureApplicationCookie(opt =>
 });
 
 // Dosya yükleme seçeneklerini yapılandırın
-builder.Services.Configure<FileUploadOptions>(builder.Configuration.GetSection("FileUploadOptions"));
+//builder.Services.Configure<FileUploadOptions>(builder.Configuration.GetSection("FileUploadOptions"));
 
 
 

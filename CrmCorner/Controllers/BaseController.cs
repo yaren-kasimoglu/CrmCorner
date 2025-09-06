@@ -33,5 +33,7 @@ namespace CrmCorner.Controllers
                 ViewData["Layout"] = "~/Views/Shared/_LayoutHomePage.cshtml";
             }
         }
+
+
     }
 }

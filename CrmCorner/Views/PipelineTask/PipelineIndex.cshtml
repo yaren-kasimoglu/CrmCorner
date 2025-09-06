@@ -1,4 +1,6 @@
 ﻿@using CrmCorner.Models.Enums
+@using CrmCorner.Extensions
+
 @model List<PipelineTask>
 
 @{
@@ -6,11 +8,6 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
     var stageList = ViewBag.StatusList as Dictionary<PipelineStage, string>;
 }
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <style>
     body {
@@ -36,6 +33,15 @@
         .dd-item:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+
+        .dd-item.border-success {
+            border: 2px solid #28a745 !important; /* Yeşil çerçeve */
+        }
+
+        .dd-item.border-danger {
+            border: 2px solid #dc3545 !important; /* Kırmızı çerçeve */
+        }
+
 
     .dd-handle {
         cursor: grab;
@@ -104,20 +110,38 @@
                     <ol class="dd-list sortable" data-statusid="@((int)stage.Key)">
                         @foreach (var task in tasksInThisStage)
                         {
-                            <li class="dd-item" data-taskid="@task.Id" data-outcome="@task.OutcomeStatus"
+                            var outcomeBorderClass = "";
+                            if (task.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Won)
+                            {
+                                outcomeBorderClass = "border-success";
+                            }
+                            else if (task.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Lost)
+                            {
+                                outcomeBorderClass = "border-danger";
+                            }
+
+                            <li class="dd-item @outcomeBorderClass"
+                                data-taskid="@task.Id"
+                                data-outcome="@task.OutcomeStatus"
                                 data-value="@task.Value"
                                 data-contract="@task.FileAttachments">
                                 <div class="dd-handle">
                                     <strong>@task.Title</strong><br />
                                     <small class="text-muted">
                                         @task.CompanyName - @task.CustomerName @task.CustomerSurname
-                                        @if (!string.IsNullOrEmpty(task.Source))
+                                        @if (task.SourceChannel.HasValue)
                                         {
-                                            <span class="badge bg-info text-dark ms-2">Apollo</span>
+                                            <span class="badge bg-warning text-dark ms-1">
+                                                @task.SourceChannel.Value.GetDisplayName()
+                                            </span>
+                                        }
+                                        else if (!string.IsNullOrEmpty(task.Source))
+                                        {
+                                            <span class="badge bg-info text-dark ms-2">@task.Source</span>
                                         }
                                         @if (task.ContactedViaLinkedIn == true)
                                         {
-                                            <span class="badge bg-success text-white ms-1">LinkedIn</span>
+                                            <span class="badge bg-primary ms-1">LinkedIn</span>
                                         }
                                         @if (task.ContactedViaColdCall == true)
                                         {
@@ -138,6 +162,9 @@
                                 </div>
                             </li>
                         }
+
+
+
                     </ol>
                 </div>
             </div>
@@ -192,10 +219,29 @@
     </div>
 </div>
 
+
+@* <!-- CSS -->
+<link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/plugins/fontawesome/css/all.min.css" />
+<link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.css" />
+<link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/css/bootstrap.min.css" />
+
 <!-- JS -->
+<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery/jquery.min.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/js/bootstrap.bundle.min.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script> *@
+
+<!-- 1. jQuery (sadece 1 kez yüklenecek) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- 2. jQuery UI (sortable için gerekli) -->
 <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+
+<!-- 3. Bootstrap (isteğe bağlı) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
 
 <script>
     $(function () {

@@ -33,85 +33,144 @@
 
     <style>
         .logo-container {
-        max-width: 100px; /* Maksimum genişlik */
-        max-height: 50px; /* Maksimum yükseklik */
-        display: flex;
-        justify-content: center; /* Merkeze hizalama */
-        align-items: center; /* Dikey hizalama */
+            max-width: 100px; /* Maksimum genişlik */
+            max-height: 50px; /* Maksimum yükseklik */
+            display: flex;
+            justify-content: center; /* Merkeze hizalama */
+            align-items: center; /* Dikey hizalama */
         }
 
-        .logo-container img {
-        width: 100%;
-        height: auto;
-        object-fit: contain; /* Oranı koruma */
-        }
+            .logo-container img {
+                width: 100%;
+                height: auto;
+                object-fit: contain; /* Oranı koruma */
+            }
 
         .green-light {
-        box-shadow: 0 0 5px 2px #2eacb3; /* Yeşil bir gölge ekler */
-        border: 1px solid #2eacb3; /* Yeşil bir kenarlık ekler */
+            box-shadow: 0 0 5px 2px #2eacb3; /* Yeşil bir gölge ekler */
+            border: 1px solid #2eacb3; /* Yeşil bir kenarlık ekler */
         }
 
         .pink-light {
-        box-shadow: 0 0 5px 2px white; /* Yeşil bir gölge ekler */
-        border: 1px solid white; /* Yeşil bir kenarlık ekler */
+            box-shadow: 0 0 5px 2px white; /* Yeşil bir gölge ekler */
+            border: 1px solid white; /* Yeşil bir kenarlık ekler */
         }
 
         .notification-count {
-        position: absolute;
-        bottom: -5px;
-        right: 0;
-        color: red;
-        font-size: 12px;
-        font-weight: bold;
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            color: red;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         #messageDropdown {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background-color: white;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        z-index: 1;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        width: 200px; /* Genişlik ayarlanabilir */
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 200px; /* Genişlik ayarlanabilir */
         }
 
-        #messageDropdown li {
-        padding: 8px 16px;
-        border-bottom: 1px solid #ddd;
-        }
+            #messageDropdown li {
+                padding: 8px 16px;
+                border-bottom: 1px solid #ddd;
+            }
 
-        #messageDropdown li:hover {
-        background-color: #f1f1f1;
-        }
+                #messageDropdown li:hover {
+                    background-color: #f1f1f1;
+                }
 
 
         .always-open > ul {
-        display: block !important;
+            display: block !important;
         }
 
         .always-open > a {
-        cursor: default;
-        pointer-events: none; /* Tıklanabilirliği tamamen kaldırır */
+            cursor: default;
+            pointer-events: none; /* Tıklanabilirliği tamamen kaldırır */
         }
 
         /* Sidebar kapalıyken */
-.sidebar-closed {
-    transform: translateX(-250px);
-    transition: transform 0.3s ease;
-}
+        .sidebar-closed {
+            transform: translateX(-250px);
+            transition: transform 0.3s ease;
+        }
 
-/* Main content alanı genişlesin istenirse */
-.expanded-content {
-    margin-left: 0 !important;
-    transition: margin-left 0.3s ease;
-}
+        /* Main content alanı genişlesin istenirse */
+        .expanded-content {
+            margin-left: 0 !important;
+            transition: margin-left 0.3s ease;
+        }
+
+        body {
+            padding-top: 60px; /* navbar yüksekliği kadar */
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        #wrapper {
+            display: flex;
+        }
+
+        #main-content {
+            flex: 1;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+            margin-left: 250px;
+            width: calc(100% - 250px); /* sidebar açıkken */
+        }
+
+            #main-content.expanded-content {
+                margin-left: 0 !important;
+                width: 100%;
+            }
 
 
+        #left-sidebar {
+            position: fixed;
+            width: 250px;
+            height: 100%;
+            background: #fff;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
 
+
+            #left-sidebar.sidebar-closed {
+                transform: translateX(-250px);
+            }
+
+
+        @@media (max-width: 768px) {
+            #left-sidebar
+
+        {
+            transform: translateX(-250px); /* Başlangıçta gizli */
+        }
+
+        #left-sidebar.sidebar-open {
+            transform: translateX(0);
+        }
+
+        #main-content {
+            margin-left: 0 !important;
+            width: 100%;
+        }
+
+        }
     </style>
     <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon">
     <!-- MAIN CSS -->
@@ -148,7 +207,7 @@
             <nav class="navbar navbar-fixed-top">
                 <div class="container-fluid">
                     <div class="logo-container">
-                       @*  <a class="nav-link" asp-controller="Home" asp-action="Index"><img src="/CRMTema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo"></a> AÇILACAK*@ 
+                        @*  <a class="nav-link" asp-controller="Home" asp-action="Index"><img src="/CRMTema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo"></a> AÇILACAK*@ 
                        <img src="/CRMTema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo">
 
                     </div>
@@ -159,9 +218,9 @@
 
                     <div id="notificationDiv" class="flex-grow-1">
                         <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
-             @*                <li class="d-none d-sm-block"><a href="/Calendar/Calendar" class="icon-menu"><i class="fa fa-calendar"></i></a></li> *@
+                            @*                <li class="d-none d-sm-block"><a href="/Calendar/Calendar" class="icon-menu"><i class="fa fa-calendar"></i></a></li> *@
                             <li id="messageIcon" class="d-none d-sm-block" style="position: relative;">
-                              @*   <a href="javascript:void(0);" class="icon-menu" id="messageIconLink" onclick="toggleDropdown(event)"><i class="fa fa-comments"></i></a> *@
+                                @*   <a href="javascript:void(0);" class="icon-menu" id="messageIconLink" onclick="toggleDropdown(event)"><i class="fa fa-comments"></i></a> *@
                                 <span id="notificationCount" class="notification-count"></span>
                                 <ul id="messageDropdown" class="dropdown-menu"></ul>
                             </li>
@@ -254,7 +313,7 @@
                                     </li>
 
 
-                       @*              <li class="always-open">
+                                    @*              <li class="always-open">
                                         <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
                                         <ul class="list-unstyled">
                                             <li class="nav-item">
@@ -271,16 +330,16 @@
                                     </li> *@
 
                                     <li class="always-open">
-                                        <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış Yeni</span></a>
+                                        <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
                                         <ul class="list-unstyled">
                                             <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex"><i class="fa fa-tag"></i>Tümü Yeni</a>
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex"><i class="fa fa-tag"></i>Tümü</a>
                                             </li>
                                             <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="PositivePipelineTasks"><i class="fa fa-tag"></i>Kazanılan Yeni</a>
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="PositivePipelineTasks"><i class="fa fa-tag"></i>Kazanılan</a>
                                             </li>
                                             <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="NegativePipelineTasks"><i class="fa fa-tag"></i>Kaybedilen Yeni</a>
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="NegativePipelineTasks"><i class="fa fa-tag"></i>Kaybedilen</a>
                                             </li>
 
                                         </ul>
@@ -295,7 +354,7 @@
                                                 <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
                                             </a>
                                         </li>
-                                    } 
+                                    }
 
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="AfterTask" asp-action="ListPositiveSales"><i class="fa fa-tag"></i>Satış Sonrası Takibasyon</a>
@@ -310,12 +369,12 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-users"></i>Çalışanlarımız</a>
                                     </li>
-                                    <li class="nav-item">
+                                 @*    <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="EmailList" asp-action="EmailList"><i class="fa fa-envelope-o"></i>Gelen Kutusu</a>
-                                    </li>
+                                    </li> *@
                                     <li class="nav-item">
                                         <a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a>
                                     </li>
@@ -386,9 +445,10 @@
 
                 </div>
             }
-            <div>&nbsp;</div>
-            <div>&nbsp;</div>
+   
+          
             <div id="main-content">
+                @RenderSection("BodyContent", required: false)
                 @RenderBody()
             </div>
 
