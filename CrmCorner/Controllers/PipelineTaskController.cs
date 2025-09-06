@@ -5,6 +5,8 @@ using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
+
 using Microsoft.EntityFrameworkCore;
 
 using PipelineStage = CrmCorner.Models.Enums.PipelineStage;
@@ -24,90 +26,465 @@ namespace CrmCorner.Controllers
         // 1. Görevleri Listeleme
         public IActionResult PipelineIndex()
         {
-            // Enum değerlerini al ve ViewBag'e ata (PipelineStage enum'unun DisplayName varsa onu kullan, yoksa ToString())
-            ViewBag.StatusList = Enum.GetValues(typeof(PipelineStage))
-                                     .Cast<PipelineStage>()
-                                     .ToDictionary(
-                                         e => e,
-                                         e => e.ToString() // veya e.GetDisplayName() eğer uzantı metodun varsa
-                                     );
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
+            if (me == null) return Unauthorized();
 
-            // Görevleri tarihe göre getir
+            ViewBag.StatusList = Enum.GetValues(typeof(PipelineStage))
+                .Cast<PipelineStage>()
+                .ToDictionary(e => e, e => e.GetDisplayName());
+
+            var companyUsers = _context.Users.AsNoTracking()
+                .Where(u => u.EmailDomain == me.EmailDomain)
+                .Select(u => new { u.Id, u.UserName, u.NameSurname })
+                .ToList();
+
+            // Id -> Görünen Ad (NameSurname varsa onu, yoksa UserName)
+            ViewBag.UserMap = companyUsers.ToDictionary(
+                x => x.Id,
+                x => string.IsNullOrWhiteSpace(x.NameSurname) ? x.UserName : x.NameSurname
+            );
+
+            var companyUserIds = companyUsers.Select(u => u.Id).ToList();
+
             var tasks = _context.PipelineTasks
-                                .OrderByDescending(t => t.CreatedDate)
-                                .ToList();
+                .AsNoTracking()
+                .Where(t =>
+                    (t.AppUserId != null && companyUserIds.Contains(t.AppUserId)) ||
+                    (t.ResponsibleUserId != null && companyUserIds.Contains(t.ResponsibleUserId))
+                )
+                .OrderByDescending(t => t.CreatedDate)
+                .ToList();
+            ViewBag.PipelineTaskCount = _context.PipelineTasks.Count(t =>
+        t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId);
 
             return View(tasks);
         }
 
-
+        #region GÖREV EKLEME
         // 2. Yeni Görev Formu (GET)
         public IActionResult PipelineTaskCreate()
         {
             ViewBag.StageList = Enum.GetValues(typeof(PipelineStage))
-         .Cast<PipelineStage>()
-         .Select(e => new SelectListItem
-         {
-             Value = ((int)e).ToString(),
-             Text = e.GetDisplayName()
-         }).ToList();
+                .Cast<PipelineStage>()
+                .Select(e => new SelectListItem
+                {
+                    Value = ((int)e).ToString(),
+                    Text = e.GetDisplayName()
+                }).ToList();
 
-            // Eğer kullanıcı listesi gerekiyorsa:
-            var users = _context.Users.ToList();
-            ViewBag.Users = users.Select(u => new SelectListItem
-            {
-                Value = u.Id,
-                Text = u.UserName
-            }).ToList();
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // 🔒 sadece aynı domain kullanıcıları
+            ViewBag.Users = BuildCompanyUsersSelectList(currentUserId ?? string.Empty);
 
             ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
-    .Cast<SourceChannelType>()
-    .Select(e => new SelectListItem
-    {
-        Text = e.GetDisplayName(),  // Display(Name) için
-        Value = e.ToString()
-    }).ToList();
+                .Cast<SourceChannelType>()
+                .Select(e => new SelectListItem
+                {
+                    Text = e.GetDisplayName(),
+                    Value = e.ToString()
+                }).ToList();
 
+            // Görüşmeyi alan varsayılan olarak mevcut kullanıcı
+            var model = new PipelineTask { AppUserId = currentUserId };
 
-            return View();
+            return View(model);
         }
 
-        // 3. Yeni Görev Kaydı (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult PipelineTaskCreate(PipelineTask task)
         {
-            if (ModelState.IsValid)
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // 🧠 “Görüşmeyi alan” boş ise mevcut kullanıcıyı ata
+            if (string.IsNullOrWhiteSpace(task.AppUserId))
+                task.AppUserId = currentUserId;
+
+            // 🔒 Sunucu tarafı domain güvenliği
+            var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
+            if (me == null) return Unauthorized();
+
+            bool IsCompanyUser(string? uid) =>
+                !string.IsNullOrWhiteSpace(uid) &&
+                _context.Users.Any(u => u.Id == uid && u.EmailDomain == me.EmailDomain);
+
+            if (!IsCompanyUser(task.AppUserId))
+                ModelState.AddModelError(nameof(task.AppUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
+
+            if (!IsCompanyUser(task.ResponsibleUserId))
+                ModelState.AddModelError(nameof(task.ResponsibleUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
+
+            if (!ModelState.IsValid)
             {
-                // 1. Müşteri bilgilerini CustomerN tablosuna kaydet
-                var newCustomer = new CustomerN
-                {
-                    Name = task.CustomerName,
-                    Surname = task.CustomerSurname,
-                    CompanyName = task.CompanyName,
-                    PhoneNumber = task.Phone,
-                    CustomerEmail = task.Email,
-                    LinkedinUrl = task.LinkedinUrl, // veya ayrıysa task.LinkedinUrl olarak da olabilir
-                    CreatedDate = DateTime.Now,
-                    AppUserId = task.ResponsibleUserId
-                };
+                // ViewBag'leri tekrar doldur (filtreli!)
+                ViewBag.StageList = Enum.GetValues(typeof(PipelineStage))
+                    .Cast<PipelineStage>()
+                    .Select(e => new SelectListItem { Value = ((int)e).ToString(), Text = e.GetDisplayName() })
+                    .ToList();
 
-                task.CustomerId=newCustomer.Id;
+                ViewBag.Users = BuildCompanyUsersSelectList(currentUserId ?? string.Empty);
 
-                _context.CustomerNs.Add(newCustomer);
-                _context.SaveChanges();
+                ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
+                    .Cast<SourceChannelType>()
+                    .Select(e => new SelectListItem { Text = e.GetDisplayName(), Value = e.ToString() })
+                    .ToList();
 
-                // 2. Görevi PipelineTasks tablosuna kaydet
-                task.CreatedDate = DateTime.Now;
-                _context.PipelineTasks.Add(task);
-                _context.SaveChanges();
-
-                TempData["SuccessMessage"] = "Görev ve müşteri başarıyla eklendi.";
-                return RedirectToAction("PipelineIndex");
+                return View(task);
             }
+
+            // 1) Müşteriyi oluştur (müşterinin sahibi = sorumlu kişi)
+            var newCustomer = new CustomerN
+            {
+                Name = task.CustomerName,
+                Surname = task.CustomerSurname,
+                CompanyName = task.CompanyName,
+                PhoneNumber = task.Phone,
+                CustomerEmail = task.Email,
+                LinkedinUrl = task.LinkedinUrl,
+                CreatedDate = DateTime.Now,
+                AppUserId = task.ResponsibleUserId
+            };
+
+            _context.CustomerNs.Add(newCustomer);
+            _context.SaveChanges();
+
+            // 2) Görevi kaydet
+            task.CustomerId = newCustomer.Id;
+            task.CreatedDate = DateTime.Now;
+
+            _context.PipelineTasks.Add(task);
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Görev ve müşteri başarıyla eklendi.";
+            return RedirectToAction("PipelineIndex");
+        }
+        #endregion
+
+
+        #region GÖREV GÜNCELLEME
+        [HttpGet]
+        public IActionResult PipelineEdit(int id)
+        {
+            var task = _context.PipelineTasks.FirstOrDefault(t => t.Id == id);
+            if (task == null)
+                return NotFound();
+
+            // Aktif kullanıcı + domain
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
+            if (me == null) return Unauthorized();
+
+            // --- Kullanıcı listesi: yalnızca aynı domain ---
+            var companyUsers = _context.Users.AsNoTracking()
+                .Where(u => u.EmailDomain == me.EmailDomain)
+                .OrderBy(u => u.UserName)
+                .Select(u => new SelectListItem
+                {
+                    Value = u.Id,
+                    Text = u.Id == currentUserId ? $"{u.UserName} (ben)" : u.UserName
+                })
+                .ToList();
+
+            // Seçili kullanıcılar domain dışında ise görünür kıl (gizli)
+            if (!string.IsNullOrWhiteSpace(task.AppUserId) &&
+                !companyUsers.Any(x => x.Value == task.AppUserId))
+            {
+                var au = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == task.AppUserId);
+                companyUsers.Insert(0, new SelectListItem
+                {
+                    Value = task.AppUserId,
+                    Text = au != null ? $"{au.UserName} (gizli)" : $"{task.AppUserId} (gizli)"
+                });
+            }
+            if (!string.IsNullOrWhiteSpace(task.ResponsibleUserId) &&
+                !companyUsers.Any(x => x.Value == task.ResponsibleUserId))
+            {
+                var ru = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == task.ResponsibleUserId);
+                companyUsers.Insert(0, new SelectListItem
+                {
+                    Value = task.ResponsibleUserId,
+                    Text = ru != null ? $"{ru.UserName} (gizli)" : $"{task.ResponsibleUserId} (gizli)"
+                });
+            }
+            ViewBag.Users = companyUsers;
+
+            // --- Müşteri listesi: sadece aynı domain kullanıcılarının sahip oldukları müşteriler ---
+            var companyUserIds = _context.Users.AsNoTracking()
+                .Where(u => u.EmailDomain == me.EmailDomain)
+                .Select(u => u.Id)
+                .ToList();
+
+            var customerItems = _context.CustomerNs.AsNoTracking()
+                .Where(c => c.AppUserId != null && companyUserIds.Contains(c.AppUserId))
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.Name} {c.Surname} / {c.CompanyName}"
+                })
+                .ToList();
+
+            // Seçili müşteri listede yoksa görünür kıl (gizli)
+            if (task.CustomerId != null && !customerItems.Any(x => x.Value == task.CustomerId.ToString()))
+            {
+                var missingCustomer = _context.CustomerNs.AsNoTracking().FirstOrDefault(c => c.Id == task.CustomerId);
+                if (missingCustomer != null)
+                {
+                    customerItems.Insert(0, new SelectListItem
+                    {
+                        Value = missingCustomer.Id.ToString(),
+                        Text = $"{missingCustomer.Name} {missingCustomer.Surname} / {missingCustomer.CompanyName} (gizli)"
+                    });
+                }
+            }
+            ViewBag.Customer = new SelectList(customerItems, "Value", "Text", task.CustomerId?.ToString());
+
+            // Kaynak kanalları
+            ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
+                .Cast<SourceChannelType>()
+                .Select(e => new SelectListItem
+                {
+                    Text = e.GetDisplayName(),
+                    Value = e.ToString()
+                }).ToList();
+
+            // (Edit view'in Stage için items kullanması gerekiyorsa aç)
+            ViewBag.StageList = Enum.GetValues(typeof(PipelineStage))
+                .Cast<PipelineStage>()
+                .Select(e => new SelectListItem
+                {
+                    Value = ((int)e).ToString(),
+                    Text = e.GetDisplayName()
+                }).ToList();
 
             return View(task);
         }
+
+
+        // EDIT (POST)
+        [HttpPost]
+        public IActionResult PipelineEdit(PipelineTask model)
+        {
+            var existing = _context.PipelineTasks.FirstOrDefault(t => t.Id == model.Id);
+            if (existing == null)
+            {
+                TempData["ErrorMessage"] = "Görev bulunamadı.";
+                return RedirectToAction("PipelineIndex");
+            }
+
+            // Aktif kullanıcı + domain
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
+            if (me == null) return Unauthorized();
+
+            // --- Domain güvenliği ---
+            bool IsCompanyUser(string? uid) =>
+                !string.IsNullOrWhiteSpace(uid) &&
+                _context.Users.Any(u => u.Id == uid && u.EmailDomain == me.EmailDomain);
+
+            if (!IsCompanyUser(model.AppUserId))
+                ModelState.AddModelError(nameof(model.AppUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
+
+            if (!IsCompanyUser(model.ResponsibleUserId))
+                ModelState.AddModelError(nameof(model.ResponsibleUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
+
+            // Müşteri domain kontrolü
+            var companyUserIds = _context.Users.AsNoTracking()
+                .Where(u => u.EmailDomain == me.EmailDomain)
+                .Select(u => u.Id)
+                .ToList();
+
+            bool IsCompanyCustomer(int? cid) =>
+                cid != null &&
+                _context.CustomerNs.Any(c => c.Id == cid && c.AppUserId != null && companyUserIds.Contains(c.AppUserId));
+
+            if (!IsCompanyCustomer(model.CustomerId))
+                ModelState.AddModelError(nameof(model.CustomerId), "Sadece kendi şirketinizdeki müşterileri seçebilirsiniz.");
+
+            // Stage/Outcome validasyonları
+            if (model.Stage == PipelineStage.Sonuc &&
+                model.OutcomeStatus != OutcomeTypeSales.Won &&
+                model.OutcomeStatus != OutcomeTypeSales.Lost)
+            {
+                ModelState.AddModelError(nameof(model.OutcomeStatus), "Sonuç aşamasına geçmek için lütfen 'Kazanıldı' veya 'Kaybedildi' seçiniz.");
+            }
+
+            if (model.OutcomeStatus == OutcomeTypeSales.Lost &&
+                string.IsNullOrWhiteSpace(model.NegativeReason))
+            {
+                ModelState.AddModelError(nameof(model.NegativeReason), "Olumsuz sebep girilmesi zorunludur.");
+            }
+
+            // Hatalıysa view'ı filtreli listelerle geri yükle
+            if (!ModelState.IsValid)
+            {
+                // Kullanıcı listesi (filtreli) + gizli kullanıcılar
+                var usersSelect = _context.Users.AsNoTracking()
+                    .Where(u => u.EmailDomain == me.EmailDomain)
+                    .OrderBy(u => u.UserName)
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.Id,
+                        Text = u.Id == currentUserId ? $"{u.UserName} (ben)" : u.UserName
+                    })
+                    .ToList();
+
+                if (!string.IsNullOrWhiteSpace(model.AppUserId) &&
+                    !usersSelect.Any(x => x.Value == model.AppUserId))
+                {
+                    var au = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == model.AppUserId);
+                    usersSelect.Insert(0, new SelectListItem
+                    {
+                        Value = model.AppUserId,
+                        Text = au != null ? $"{au.UserName} (gizli)" : $"{model.AppUserId} (gizli)"
+                    });
+                }
+                if (!string.IsNullOrWhiteSpace(model.ResponsibleUserId) &&
+                    !usersSelect.Any(x => x.Value == model.ResponsibleUserId))
+                {
+                    var ru = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == model.ResponsibleUserId);
+                    usersSelect.Insert(0, new SelectListItem
+                    {
+                        Value = model.ResponsibleUserId,
+                        Text = ru != null ? $"{ru.UserName} (gizli)" : $"{model.ResponsibleUserId} (gizli)"
+                    });
+                }
+                ViewBag.Users = usersSelect;
+
+                // Müşteri listesi (filtreli) + gizli müşteri
+                var customerItems = _context.CustomerNs.AsNoTracking()
+                    .Where(c => c.AppUserId != null && companyUserIds.Contains(c.AppUserId))
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = $"{c.Name} {c.Surname} / {c.CompanyName}"
+                    })
+                    .ToList();
+
+                if (model.CustomerId != null && !customerItems.Any(x => x.Value == model.CustomerId.ToString()))
+                {
+                    var missingCustomer = _context.CustomerNs.AsNoTracking().FirstOrDefault(c => c.Id == model.CustomerId);
+                    if (missingCustomer != null)
+                    {
+                        customerItems.Insert(0, new SelectListItem
+                        {
+                            Value = missingCustomer.Id.ToString(),
+                            Text = $"{missingCustomer.Name} {missingCustomer.Surname} / {missingCustomer.CompanyName} (gizli)"
+                        });
+                    }
+                }
+                ViewBag.Customer = new SelectList(customerItems, "Value", "Text", model.CustomerId?.ToString());
+
+                ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
+                    .Cast<SourceChannelType>()
+                    .Select(e => new SelectListItem
+                    {
+                        Text = e.GetDisplayName(),
+                        Value = e.ToString()
+                    }).ToList();
+
+                ViewBag.StageList = Enum.GetValues(typeof(PipelineStage))
+                    .Cast<PipelineStage>()
+                    .Select(e => new SelectListItem
+                    {
+                        Value = ((int)e).ToString(),
+                        Text = e.GetDisplayName()
+                    }).ToList();
+
+                return View(model);
+            }
+
+            // --- LOG setup ---
+            var now = DateTime.Now;
+            var updaterUserId = currentUserId; // güncelleyen kişi (AppUserId'yi değiştirmiyoruz; o "görüşmeyi alan")
+
+            void LogIfChanged(string fieldName, object? oldVal, object? newVal)
+            {
+                var oldStr = oldVal?.ToString();
+                var newStr = newVal?.ToString();
+
+                if (oldStr == newStr || (string.IsNullOrWhiteSpace(oldStr) && string.IsNullOrWhiteSpace(newStr)))
+                    return;
+
+                _context.PipelineTaskLogs.Add(new PipelineTaskLog
+                {
+                    PipelineTaskId = model.Id,
+                    UpdatedField = fieldName,
+                    OldValue = oldStr,
+                    NewValue = newStr,
+                    UpdatedAt = now,
+                    UpdatedById = updaterUserId
+                });
+            }
+
+            // --- Log'lanacak alanlar (AppUserId dahil!) ---
+            LogIfChanged(nameof(model.AppUserId), existing.AppUserId, model.AppUserId);
+            LogIfChanged(nameof(model.ResponsibleUserId), existing.ResponsibleUserId, model.ResponsibleUserId);
+            LogIfChanged(nameof(model.Title), existing.Title, model.Title);
+            LogIfChanged(nameof(model.Description), existing.Description, model.Description);
+            LogIfChanged(nameof(model.Value), existing.Value?.ToString("N2"), model.Value?.ToString("N2"));
+            LogIfChanged(nameof(model.Currency), existing.Currency, model.Currency);
+            LogIfChanged(nameof(model.Stage), existing.Stage?.ToString(), model.Stage?.ToString());
+            LogIfChanged(nameof(model.ExpectedCloseDate), existing.ExpectedCloseDate?.ToString("yyyy-MM-dd"), model.ExpectedCloseDate?.ToString("yyyy-MM-dd"));
+            LogIfChanged(nameof(model.CustomerName), existing.CustomerName, model.CustomerName);
+            LogIfChanged(nameof(model.CustomerSurname), existing.CustomerSurname, model.CustomerSurname);
+            LogIfChanged(nameof(model.CompanyName), existing.CompanyName, model.CompanyName);
+            LogIfChanged(nameof(model.Phone), existing.Phone, model.Phone);
+            LogIfChanged(nameof(model.Email), existing.Email, model.Email);
+            LogIfChanged(nameof(model.LinkedinUrl), existing.LinkedinUrl, model.LinkedinUrl);
+            LogIfChanged(nameof(model.OutcomeStatus), existing.OutcomeStatus?.ToString(), model.OutcomeStatus?.ToString());
+            LogIfChanged(nameof(model.NegativeReason), existing.NegativeReason, model.NegativeReason);
+            LogIfChanged(nameof(model.Source), existing.Source, model.Source);
+            LogIfChanged(nameof(model.SourceChannel), existing.SourceChannel, model.SourceChannel);
+            LogIfChanged(nameof(model.Outcomes), existing.Outcomes?.ToString(), model.Outcomes?.ToString());
+            LogIfChanged(nameof(model.ContactedViaLinkedIn), existing.ContactedViaLinkedIn?.ToString(), model.ContactedViaLinkedIn?.ToString());
+            LogIfChanged(nameof(model.ContactedViaColdCall), existing.ContactedViaColdCall?.ToString(), model.ContactedViaColdCall?.ToString());
+            LogIfChanged(nameof(model.CustomerId), existing.CustomerId?.ToString(), model.CustomerId?.ToString());
+
+            // --- Güncelleme ---
+            existing.AppUserId = model.AppUserId;          // Görüşmeyi Alan (edit edilebilir)
+            existing.ResponsibleUserId = model.ResponsibleUserId;  // Sorumlu Kişi
+            existing.Title = model.Title;
+            existing.Description = model.Description;
+            existing.Value = model.Value;
+            existing.Currency = model.Currency;
+            existing.Stage = model.Stage;
+            existing.ExpectedCloseDate = model.ExpectedCloseDate;
+            existing.CustomerName = model.CustomerName;
+            existing.CustomerSurname = model.CustomerSurname;
+            existing.CompanyName = model.CompanyName;
+            existing.Phone = model.Phone;
+            existing.Email = model.Email;
+            existing.LinkedinUrl = model.LinkedinUrl;
+            existing.OutcomeStatus = model.OutcomeStatus;
+            existing.NegativeReason = model.NegativeReason;
+            existing.Source = model.Source;
+            existing.SourceChannel = model.SourceChannel;
+            existing.Outcomes = model.Outcomes;
+            existing.ContactedViaLinkedIn = model.ContactedViaLinkedIn;
+            existing.ContactedViaColdCall = model.ContactedViaColdCall;
+            existing.CustomerId = model.CustomerId;
+
+            // Outcome kazanıldıysa PostSaleInfo kaydı oluştur
+            if (existing.OutcomeStatus == OutcomeTypeSales.Won)
+            {
+                var existingPostSale = _context.PostSaleInfos.FirstOrDefault(p => p.PipelineTaskId == existing.Id);
+                if (existingPostSale == null)
+                {
+                    var newPostSale = new PostSaleInfo
+                    {
+                        PipelineTaskId = existing.Id
+                    };
+                    _context.PostSaleInfos.Add(newPostSale);
+                }
+            }
+
+            _context.SaveChanges();
+
+            return RedirectToAction("PipelineIndex");
+        }
+        #endregion
 
         [HttpPost]
         public IActionResult UpdateContactMethods(int taskId, bool contactedViaLinkedIn, bool contactedViaColdCall)
@@ -144,7 +521,6 @@ namespace CrmCorner.Controllers
      .Include(t => t.Notes)
      .Include(t => t.AppUser)
      .Include(t => t.Customer)
-     .Include(t => t.FileAttachments)
      .Include(t => t.FileAttachments)
      .FirstOrDefault(t => t.Id == id);
 
@@ -186,186 +562,6 @@ namespace CrmCorner.Controllers
         }
 
 
-        [HttpGet]
-        public IActionResult PipelineEdit(int id)
-        {
-            var task = _context.PipelineTasks.FirstOrDefault(t => t.Id == id);
-            if (task == null)
-                return NotFound();
-
-            // Kullanıcı listesi
-            ViewBag.Users = _context.Users
-                .Select(u => new SelectListItem
-                {
-                    Text = u.UserName,
-                    Value = u.Id
-                }).ToList();
-
-            // Kullanıcının müşterileri (örnek olarak filtreli liste)
-            var companyUserIds = _context.Users.Select(u => u.Id).ToList();
-
-            var customerItems = _context.CustomerNs
-                .Where(c => companyUserIds.Contains(c.AppUserId))
-                .Select(c => new SelectListItem
-                {
-                    Text = $"{c.Name} {c.Surname} / {c.CompanyName}",
-                    Value = c.Id.ToString()
-                })
-                .ToList();
-
-            // Eğer görevdeki müşteri listede yoksa ekle (örneğin görev arşivden geliyor ama müşteri silinmiş olabilir)
-            if (task.CustomerId != null && !customerItems.Any(x => x.Value == task.CustomerId.ToString()))
-            {
-                var missingCustomer = _context.CustomerNs.FirstOrDefault(c => c.Id == task.CustomerId);
-                if (missingCustomer != null)
-                {
-                    customerItems.Insert(0, new SelectListItem
-                    {
-                        Text = $"{missingCustomer.Name} {missingCustomer.Surname} / {missingCustomer.CompanyName} (gizli)",
-                        Value = missingCustomer.Id.ToString()
-                    });
-                }
-            }
-
-            // ViewBag'lere ata
-            ViewBag.Customer = new SelectList(customerItems, "Value", "Text", task.CustomerId?.ToString());
-
-            ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
-                .Cast<SourceChannelType>()
-                .Select(e => new SelectListItem
-                {
-                    Text = e.GetDisplayName(),
-                    Value = e.ToString()
-                }).ToList();
-
-            return View(task);
-        }
-
-
-        [HttpPost]
-        public IActionResult PipelineEdit(PipelineTask model)
-        {
-            var existing = _context.PipelineTasks.FirstOrDefault(t => t.Id == model.Id);
-            if (existing == null)
-            {
-                TempData["ErrorMessage"] = "Görev bulunamadı.";
-                return RedirectToAction("PipelineIndex");
-            }
-
-            // 1. Validasyon: Son aşamaya sadece Kazanıldı veya Kaybedildi ile geçilebilir
-            if (model.Stage == PipelineStage.Sonuc &&
-                model.OutcomeStatus != OutcomeTypeSales.Won &&
-                model.OutcomeStatus != OutcomeTypeSales.Lost)
-            {
-                ModelState.AddModelError("OutcomeStatus", "Sonuç aşamasına geçmek için lütfen 'Kazanıldı' veya 'Kaybedildi' seçiniz.");
-            }
-
-            // 2. Validasyon: Kaybedildiyse Olumsuz Sebep girilmeli
-            if (model.OutcomeStatus == OutcomeTypeSales.Lost &&
-                string.IsNullOrWhiteSpace(model.NegativeReason))
-            {
-                ModelState.AddModelError("NegativeReason", "Olumsuz sebep girilmesi zorunludur.");
-            }
-
-
-            // Eğer validasyon hatası varsa View'a geri dön
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Customer = new SelectList(_context.CustomerNs, "Id", "FullName", model.CustomerId);
-                ViewBag.Users = new SelectList(_context.Users, "Id", "UserName", model.ResponsibleUserId);
-                return View(model);
-            }
-
-            // Kullanıcı bilgisi
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            existing.AppUserId = userId;
-            var now = DateTime.Now;
-
-            // Değişiklikleri logla
-            void LogIfChanged(string fieldName, object? oldVal, object? newVal)
-            {
-                var oldStr = oldVal?.ToString();
-                var newStr = newVal?.ToString();
-
-                if (oldStr == newStr || string.IsNullOrWhiteSpace(oldStr) && string.IsNullOrWhiteSpace(newStr))
-                    return;
-
-                _context.PipelineTaskLogs.Add(new PipelineTaskLog
-                {
-                    PipelineTaskId = model.Id,
-                    UpdatedField = fieldName,
-                    OldValue = oldStr,
-                    NewValue = newStr,
-                    UpdatedAt = now,
-                    UpdatedById = userId
-                });
-            }
-
-            // Loglanacak alanlar
-            LogIfChanged(nameof(model.Title), existing.Title, model.Title);
-            LogIfChanged(nameof(model.Description), existing.Description, model.Description);
-            LogIfChanged(nameof(model.Value), existing.Value?.ToString("N2"), model.Value?.ToString("N2"));
-            LogIfChanged(nameof(model.Currency), existing.Currency, model.Currency);
-            LogIfChanged(nameof(model.Stage), existing.Stage?.ToString(), model.Stage?.ToString());
-            LogIfChanged(nameof(model.ExpectedCloseDate), existing.ExpectedCloseDate?.ToString("yyyy-MM-dd"), model.ExpectedCloseDate?.ToString("yyyy-MM-dd"));
-            LogIfChanged(nameof(model.CustomerName), existing.CustomerName, model.CustomerName);
-            LogIfChanged(nameof(model.CustomerSurname), existing.CustomerSurname, model.CustomerSurname);
-            LogIfChanged(nameof(model.CompanyName), existing.CompanyName, model.CompanyName);
-            LogIfChanged(nameof(model.Phone), existing.Phone, model.Phone);
-            LogIfChanged(nameof(model.Email), existing.Email, model.Email);
-            LogIfChanged(nameof(model.LinkedinUrl), existing.LinkedinUrl, model.LinkedinUrl);
-            LogIfChanged(nameof(model.OutcomeStatus), existing.OutcomeStatus?.ToString(), model.OutcomeStatus?.ToString());
-            LogIfChanged(nameof(model.NegativeReason), existing.NegativeReason, model.NegativeReason);
-            LogIfChanged(nameof(model.Source), existing.Source, model.Source);
-            LogIfChanged(nameof(model.SourceChannel), existing.SourceChannel, model.SourceChannel);
-            LogIfChanged(nameof(model.ResponsibleUserId), existing.ResponsibleUserId, model.ResponsibleUserId);
-            LogIfChanged(nameof(model.Outcomes), existing.Outcomes?.ToString(), model.Outcomes?.ToString());
-            LogIfChanged(nameof(model.ContactedViaLinkedIn), existing.ContactedViaLinkedIn?.ToString(), model.ContactedViaLinkedIn?.ToString());
-            LogIfChanged(nameof(model.ContactedViaColdCall), existing.ContactedViaColdCall?.ToString(), model.ContactedViaColdCall?.ToString());
-            LogIfChanged(nameof(model.CustomerId), existing.CustomerId?.ToString(), model.CustomerId?.ToString());
-
-            // Verileri güncelle
-            existing.Title = model.Title;
-            existing.Description = model.Description;
-            existing.Value = model.Value;
-            existing.Currency = model.Currency;
-            existing.Stage = model.Stage;
-            existing.ExpectedCloseDate = model.ExpectedCloseDate;
-            existing.CustomerName = model.CustomerName;
-            existing.CustomerSurname = model.CustomerSurname;
-            existing.CompanyName = model.CompanyName;
-            existing.Phone = model.Phone;
-            existing.Email = model.Email;
-            existing.LinkedinUrl = model.LinkedinUrl;
-            existing.OutcomeStatus = model.OutcomeStatus;
-            existing.NegativeReason = model.NegativeReason;
-            existing.Source = model.Source;
-            existing.SourceChannel = model.SourceChannel;
-            existing.ResponsibleUserId = model.ResponsibleUserId;
-            existing.Outcomes = model.Outcomes;
-            existing.ContactedViaLinkedIn = model.ContactedViaLinkedIn;
-            existing.ContactedViaColdCall = model.ContactedViaColdCall;
-            existing.CustomerId = model.CustomerId;
-
-
-            // Eğer outcome kazanıldı ise PostSaleInfo kaydı oluştur
-            if (existing.OutcomeStatus == OutcomeTypeSales.Won)
-            {
-                var existingPostSale = _context.PostSaleInfos.FirstOrDefault(p => p.PipelineTaskId == existing.Id);
-                if (existingPostSale == null)
-                {
-                    var newPostSale = new PostSaleInfo
-                    {
-                        PipelineTaskId = existing.Id
-                    };
-                    _context.PostSaleInfos.Add(newPostSale);
-                }
-            }
-
-            _context.SaveChanges();
-
-            return RedirectToAction("PipelineIndex");
-        }
 
 
 
@@ -393,10 +589,6 @@ namespace CrmCorner.Controllers
 
             return Json(new { isValid = true });
         }
-
-
-
-
 
 
         [HttpPost]
@@ -508,5 +700,27 @@ namespace CrmCorner.Controllers
 
             return Json(new { success = true });
         }
+
+
+
+
+
+        private List<SelectListItem> BuildCompanyUsersSelectList(string currentUserId)
+        {
+            var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
+            if (me == null) return new();
+
+            return _context.Users.AsNoTracking()
+                .Where(u => u.EmailDomain == me.EmailDomain)             // 🔒 sadece aynı domain
+                .OrderBy(u => u.UserName)
+                .Select(u => new SelectListItem
+                {
+                    Value = u.Id,
+                    Text = u.Id == currentUserId ? $"{u.UserName} (ben)" : u.UserName
+                })
+                .ToList();
+        }
+
+
     }
 }

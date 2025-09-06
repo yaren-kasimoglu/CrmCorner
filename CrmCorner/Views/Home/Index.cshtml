@@ -97,10 +97,10 @@
                         </div>
                     </div>
                     <div class="list-group-item d-flex align-items-center py-3">
-                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-users"></i></a> </div>
+                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex"><i class="fa fa-users"></i></a> </div>
                         <div class="content">
                             <div>Sahip Olduğum Görev Sayısı</div>
-                            <h5 class="mb-0">@Model.CurrentUser.TaskComps.Count</h5>
+                            <h5 class="mb-0">@Model.PipelineTaskCount</h5>
                         </div>
                     </div>
                     <div class="list-group-item d-flex align-items-center py-3">
@@ -147,7 +147,7 @@
 
 
 
-<div class="row">
+@* <div class="row"> *@
     @*    <div class="col-xl-4 col-lg-4 col-md-12">
     <div class="custom-card" style="width: 100%;">
     <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
@@ -156,7 +156,7 @@
     </div>
     </div>
     </div>*@
-    <div class="col-xl-4 col-lg-4 col-md-12">
+    @* <div class="col-xl-4 col-lg-4 col-md-12">
         <div class="chart-container" style="position: relative; height:40vh; width:100%;">
             <canvas id="valueOfferChartTL"></canvas>
         </div>
@@ -171,14 +171,14 @@
             <canvas id="valueOfferChart$"></canvas>
         </div>
     </div>
-</div>
+</div> *@
 
 
 <div class="container">
     <div class="row no-gutters">
         <div class="col-xl-4 col-lg-4 col-md-12">
             <div class="custom-card">
-                <div class="chart-title">Görevlerin Durumlarına Göre Dağılımları</div>
+                <div class="chart-title">Kazanıldı/Kaybedildi</div>
                 <div class="card-body">
                     <canvas id="outcomeStatusChart"></canvas>
                 </div>
@@ -186,24 +186,27 @@
         </div>
         <div class="col-xl-4 col-lg-4 col-md-12">
             <div class="custom-card">
-                <div class="chart-title">Son Karar Mercii İle Görüşme Durumları</div>
+                <div class="chart-title">Müşteriye Ulaşılan Kanal</div>
                 <div class="card-body">
                     <canvas id="isFinalDecisionMaker"></canvas>
                 </div>
             </div>
         </div>
+    
         <div class="col-xl-4 col-lg-4 col-md-12">
             <div class="custom-card">
-                <div class="chart-title">Müşterilerin Sektörel Dağılımları</div>
+                <div class="chart-title">Müşteriye Ulaşılan Kanal</div>
                 <div class="card-body">
-                    <canvas id="industuryChart"></canvas>
+                    <canvas id="sourceChannelChart"></canvas>
                 </div>
             </div>
         </div>
+
+
     </div>
 </div>
 
-
+@* 
 <div class="col-xl-4 col-lg-4 col-md-12">
     <div class="custom-card">
         <div class="chart-title">Müşteri Bilgisine Nereden Ulaşıldı?</div>
@@ -211,7 +214,7 @@
             <canvas id="heardFromChart"></canvas>
         </div>
     </div>
-</div>
+</div> *@
 
 
 <!-- core js file -->
@@ -542,17 +545,13 @@
                                     }
                                 }
                             },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        var index = context.dataIndex;
-                                        var count = dataValues[index];
-                                        var customers = customerNames[index];
-                                        var label = labels[index] + ': ' + count;
-                                        var lines = [label].concat(customers); // Müşteri isimlerini ekle
-                                        return lines;
-                                    }
-                                }
+                              tooltip: {
+      callbacks: {
+        label: function (context) {
+          const i = context.dataIndex;
+          return `${labels[i]}: ${dataValues[i]}`;
+        }
+      }
                             },
                             datalabels: {
                                 color: 'rgba(0, 0, 0, 0.6)',
@@ -772,18 +771,18 @@
     $(document).ready(function () {
         $.ajax({
             type: "GET",
-            url: "/Home/HeardFromChart", // Controller metoduna yapılan istek
+            url: "/Home/SourceChannelChart", // Controller metoduna yapılan istek
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
                 console.log(data); // Gelen veriyi kontrol etmek için
-                var ctx = document.getElementById('heardFromChart').getContext('2d');
+                var ctx = document.getElementById('sourceChannelChart').getContext('2d');
 
                 // Renkleri dinamik olarak belirleyelim
                 var colors = generateColors(data.labels.length);
 
                 new Chart(ctx, {
-                    type: 'doughnut', // Burada chart tipini doughnut yapıyoruz
+                    type: 'pie', // sektörel dağılım grafiğiyle aynı tip
                     data: {
                         labels: data.labels,
                         datasets: [{
@@ -793,72 +792,68 @@
                         }]
                     },
                     options: {
+                        layout: {
+                            padding: { top: 10, bottom: 0 }
+                        },
                         plugins: {
                             legend: {
                                 position: 'right',
                                 align: 'center',
                                 labels: {
-                                    boxWidth: 20,
-                                    padding: 8,
-                                    font: {
-                                        size: 11,
-                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-                                        style: 'normal'
-                                    }
+                                    boxWidth: 12,
+                                    padding: 5,
+                                    font: { size: 10 }
                                 }
                             },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        var label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        label += context.raw;
-
-                                        var index = context.dataIndex;
-                                        var taskNames = data.taskNames[index];
-                                        var lines = [label].concat(taskNames); // Görev isimlerini ekle
-                                        return lines;
-                                    }
-                                }
+                      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const i = context.dataIndex;
+            const label = `${data.labels[i]}: ${data.data[i]}`;
+            const tasks = (data.taskNames && data.taskNames[i]) ? data.taskNames[i] : [];
+            const max = 8; // tooltip'te en fazla kaç görev adı gösterilsin
+            const shown = tasks.slice(0, max).map(t => `• ${t}`);
+            if (tasks.length > max) shown.push(`+${tasks.length - max} daha…`);
+            // Çok satır için dizi döndür
+            return [label, ...shown];
+          }
+        }
+      },
+                            datalabels: {
+                                color: 'rgba(0,0,0,0.6)',
+                                formatter: function (value, context) {
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    return percentage > 0 ? percentage + '%' : '';
+                                },
+                                font: { weight: 'bold', size: 8 },
+                                anchor: 'center',
+                                align: 'center',
+                                offset: 10
                             }
-                        },
-                        // Scales'ı kaldırıyoruz çünkü doughnut grafiklerde eksen yok
-                        scales: {
-                            x: { display: false },
-                            y: { display: false }
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels]
                 });
 
             },
             error: function (xhr, status, error) {
-                console.error('HeardFrom chart verisi getirilirken hata oluştu:', error);
+                console.error('SourceChannel chart verisi getirilirken hata oluştu:', error);
             }
         });
 
         // Dinamik renk üretimi
         function generateColors(count) {
             var predefinedColors = [
-                '#A3D9A5',
-                '#FFDAC1',
-                '#BAFFB3',
-                '#C2C2F0',
-                '#B3F3D0',
-                '#BAE1FF',
-                '#FFB3BA',
-                '#FFDFBA',
-                '#FFFFBA',
-                '#D5AAFF',
-                '#FFB3E6'
+                '#A3D9A5', '#FFDAC1', '#BAFFB3', '#C2C2F0',
+                '#B3F3D0', '#BAE1FF', '#FFB3BA', '#FFDFBA',
+                '#FFFFBA', '#D5AAFF', '#FFB3E6'
             ];
-
-            // Gerekli renk sayısına göre renkleri döndür
             return predefinedColors.slice(0, count);
         }
     });
 </script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>

@@ -44,6 +44,7 @@ namespace CrmCorner.Controllers
         }
      
         public async Task<IActionResult> Index()
+        
         {
             await SetLayout();//areadamı değilmi onu  nalayıp layout set ediyor
             try
@@ -104,12 +105,15 @@ namespace CrmCorner.Controllers
                                       .Distinct()
                                       .Count();
 
+                    var pipelineTaskCount = await _context.PipelineTasks.CountAsync(t =>
+    t.AppUserId == currentUser.Id || t.ResponsibleUserId == currentUser.Id);
+
                     var viewModel = new CompanyUsersViewModel
                     {
                         CurrentUser = currentUser,
                         CompanyUsers = companyUsers,
-                        TaskComps = taskComps, // ViewModel'e TaskComps ekleyin
-                        SectorCount = sectorCount // Sektör sayısını ViewModel'e ekleyin
+                        PipelineTaskCount = pipelineTaskCount,
+                        SectorCount = sectorCount
                     };
 
                     ViewData["UserEmail"] = email;
@@ -169,43 +173,41 @@ namespace CrmCorner.Controllers
         }
 
         #region CHARTS
-
-
         //[Authorize]
-        public async Task<IActionResult> HeardFromChart()
+        [HttpGet]
+        public async Task<IActionResult> SourceChannelChart()
         {
-            try
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
+
+            // SADECE bana bağlı görevler
+            var items = await _context.PipelineTasks
+                .AsNoTracking()
+                .Where(t =>
+                    t.SourceChannel != null &&
+                    (t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId))
+                .Select(t => new { t.SourceChannel, t.Title })
+                .ToListAsync();
+
+            var grouped = items
+                .GroupBy(x => x.SourceChannel!.Value)
+                .Select(g => new
+                {
+                    Label = g.Key.GetDisplayName() ?? g.Key.ToString(), // enum DisplayName varsa
+                    Count = g.Count(),
+                    TaskNames = g.Select(x => x.Title).ToList()
+                })
+                .OrderByDescending(x => x.Count)
+                .ToList();
+
+            return Json(new
             {
-                var userId = _userManager.GetUserId(User);
-
-                // Kullanıcının AppUser ve AssignedUser olduğu görevleri birleştir
-                var taskComps = await _context.TaskComps
-                                              .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
-                                              .Where(tc => !string.IsNullOrEmpty(tc.HeardFrom)) // HeardFrom boş olmayanları filtrele
-                                              .ToListAsync();
-
-                var chartData = taskComps
-                                .GroupBy(tc => tc.HeardFrom.ToLower()) // Küçük harf ile gruplandır
-                                .Select(group => new
-                                {
-                                    HeardFrom = group.Key,
-                                    Count = group.Count(),
-                                    TaskNames = group.Select(tc => tc.Title).ToList()
-                                })
-                                .ToList();
-
-                var labels = chartData.Select(data => data.HeardFrom).ToArray();
-                var dataValues = chartData.Select(data => data.Count).ToArray();
-                var taskNames = chartData.Select(data => data.TaskNames).ToArray();
-
-                return Json(new { labels, data = dataValues, taskNames });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "HeardFrom chart verileri getirilirken bir hata oluştu.");
-                return StatusCode(500, "İşleminiz sırasında bir hata oluştu.");
-            }
+                labels = grouped.Select(x => x.Label).ToList(),
+                data = grouped.Select(x => x.Count).ToList(),
+                taskNames = grouped.Select(x => x.TaskNames).ToList()
+            });
         }
+
         //[Authorize]
         public async Task<IActionResult> ValueOfferChart()
         {
@@ -348,192 +350,169 @@ namespace CrmCorner.Controllers
 
 
         //[Authorize]
+        // /Home/IndustryChart
         public async Task<IActionResult> IndustryChart()
         {
             try
             {
                 var userId = _userManager.GetUserId(User);
 
-        
+                var tasks = await _context.PipelineTasks
+                    .Include(p => p.Customer)
+                    .Where(p => (p.AppUserId == userId || p.ResponsibleUserId == userId) && p.CustomerId != null)
+                    .ToListAsync();
 
-                var user = await _context.Users
-                                          .Include(u => u.Customers)
-                                          .FirstOrDefaultAsync(u => u.Id == userId);
-                var roles = await _userManager.GetRolesAsync(user);
+                // Customer veya Industry null olabilir; filtrele
+                var chartData = tasks
+                    .Where(p => p.Customer != null)
+                    .GroupBy(p => p.Customer!.Industry)
+                    .Select(g => new
+                    {
+                        Industry = g.Key, // enum? olabilir
+                        Count = g.Count(),
+                        CustomerNames = g.Select(x => x.CompanyName ?? x.Customer!.CompanyName ?? $"#{x.CustomerId}").Distinct().ToList()
+                    })
+                    .ToList();
 
-                bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
+                var labels = chartData
+                    .Select(x => x.Industry == null ? "Undefined" : x.Industry.GetDisplayName().ToString())
+                    .ToArray();
 
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
-
-                List<CustomerN> customers;
-
-                if (isAdminOrManager)
-                {
-                    // Admin veya Manager ise, aynı email domainine sahip kullanıcıların müşterilerini getir
-                    var emailDomain = user.EmailDomain;
-                    var companyUsers = await _context.Users
-                                                     .Where(u => u.EmailDomain == emailDomain)
-                                                     .Include(u => u.Customers)
-                                                     .ToListAsync();
-                    customers = companyUsers.SelectMany(u => u.Customers).ToList();
-                }
-                else
-                {
-                    // Değilse, sadece kullanıcının kendi müşterilerini getir
-                    customers = user.Customers.ToList();
-                }
-
-                // Sektörleri gruplayıp sayılarına göre chart verisi oluşturma
-                var chartData = customers
-                                 .GroupBy(c => c.Industry)
-                                 .Select(group => new { Industry = group.Key, Count = group.Count(), CustomerNames = group.Select(c => c.CompanyName).ToList() })
-                                 .ToList();
-
-                // labels ve data alanlarını doldur
-                var labels = chartData.Select(data => data.Industry.GetDisplayName().ToString()).ToArray();
-                var dataValues = chartData.Select(data => data.Count).ToArray();
-                var customerNames = chartData.Select(data => data.CustomerNames).ToArray();
+                var dataValues = chartData.Select(x => x.Count).ToArray();
+                var customerNames = chartData.Select(x => x.CustomerNames).ToArray();
 
                 return Json(new { labels, data = dataValues, customerNames });
             }
             catch (Exception ex)
             {
-                // Hata günlüğüne yaz
                 _logger.LogError(ex, "An error occurred while fetching industry chart data.");
-
-                // Hata mesajıyla birlikte bir server hatası döndür
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
 
 
+
         //[Authorize]
+        // /Home/IsFinalDecisionMaker  -> İletişim yöntemi grafiği
         public async Task<IActionResult> IsFinalDecisionMaker()
         {
             var userId = _userManager.GetUserId(User);
 
-            // Kullanıcının AppUser veya AssignedUser olduğu görevleri bul
-            var userTaskComps = await _context.TaskComps
-                                              .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
-                                              .ToListAsync();
+            var tasks = await _context.PipelineTasks
+                .Where(p => p.AppUserId == userId || p.ResponsibleUserId == userId)
+                .ToListAsync();
 
-            if (userTaskComps == null || !userTaskComps.Any())
-            {
-                return NotFound();
-            }
+            var both = tasks
+                .Where(p => (p.ContactedViaLinkedIn ?? false) && (p.ContactedViaColdCall ?? false))
+                .Select(x => x.Title ?? $"#{x.Id}")
+                .Distinct()
+                .ToList();
 
-            // Görevleri benzersiz olarak saymak için filtre uygula
-            var distinctTasks = userTaskComps.GroupBy(tc => tc.TaskId).Select(group => group.First()).ToList();
+            var onlyLinkedIn = tasks
+                .Where(p => (p.ContactedViaLinkedIn ?? false) && !(p.ContactedViaColdCall ?? false))
+                .Select(x => x.Title ?? $"#{x.Id}")
+                .Distinct()
+                .ToList();
 
-            var finalDecisionMakerTasks = distinctTasks.Where(tc => tc.IsFinalDecisionMaker).Select(tc => tc.Title).Distinct().ToList();
-            var notFinalDecisionMakerTasks = distinctTasks.Where(tc => !tc.IsFinalDecisionMaker).Select(tc => tc.Title).Distinct().ToList();
+            var onlyColdCall = tasks
+                .Where(p => (p.ContactedViaColdCall ?? false) && !(p.ContactedViaLinkedIn ?? false))
+                .Select(x => x.Title ?? $"#{x.Id}")
+                .Distinct()
+                .ToList();
 
-            var chartData = new
-            {
-                labels = new[] { "Evet", "Hayır" },
-                data = new[] { finalDecisionMakerTasks.Count, notFinalDecisionMakerTasks.Count },
-                taskNames = new[] { finalDecisionMakerTasks, notFinalDecisionMakerTasks }
-            };
+            var none = tasks
+                .Where(p => !(p.ContactedViaLinkedIn ?? false) && !(p.ContactedViaColdCall ?? false))
+                .Select(x => x.Title ?? $"#{x.Id}")
+                .Distinct()
+                .ToList();
 
-            return Json(chartData);
+            var labels = new[] { "LinkedIn", "Cold Call", "Her ikisi", "Hiçbiri" };
+            var data = new[] { onlyLinkedIn.Count, onlyColdCall.Count, both.Count, none.Count };
+            var taskNames = new List<List<string>> { onlyLinkedIn, onlyColdCall, both, none };
+
+            return Json(new { labels, data, taskNames });
         }
 
 
+
         //[Authorize]
+        // /Home/OutcomeStatusChart
         public async Task<IActionResult> OutcomeStatusChart()
         {
             var userId = _userManager.GetUserId(User);
 
-            // AppUser ve AssignedUser olarak atanan TaskComps'ı bul ve birleşik bir liste oluştur
-            var combinedTasks = await _context.TaskComps
-                                              .Include(tc => tc.Status)
-                                              .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
-                                              .ToListAsync();
+            var tasks = await _context.PipelineTasks
+                .Where(p => p.AppUserId == userId || p.ResponsibleUserId == userId)
+                .ToListAsync();
 
-            // Görevleri benzersiz olarak saymak için filtre uygula
-            var distinctTasks = combinedTasks.GroupBy(tc => tc.TaskId).Select(group => group.First()).ToList();
+            // Grupla
+            var grouped = tasks
+                .GroupBy(p => (p.OutcomeStatus?.ToString() ?? "None"))
+                .Select(g => new
+                {
+                    Outcome = g.Key,
+                    Count = g.Count(),
+                    TaskNames = g.Select(x => x.Title ?? $"#{x.Id}").Distinct().ToList()
+                })
+                .ToList();
 
-            if (!distinctTasks.Any())
-            {
-                return NotFound();
-            }
+            // Enum isim listesini stabil sırayla üret (mevcut enum tipine göre)
+            var allLabels = Enum.GetNames(typeof(OutcomeTypeSales)).ToList();
+            if (!allLabels.Contains("None")) allLabels.Insert(0, "None");
 
-            var outcomeGroups = distinctTasks.GroupBy(tc => tc.Outcomes)
-                                             .Select(group => new {
-                                                 Outcome = group.Key.ToString(),
-                                                 Count = group.Count(),
-                                                 TaskNames = group.Select(tc => tc.Title).Distinct().ToList()
-                                             }).ToList();
-
-            // Tüm olası enum değerlerini döngü ile işle
-            var labels = Enum.GetNames(typeof(OutcomeType)).ToList();
             var data = new List<int>();
             var taskNames = new List<List<string>>();
 
-            foreach (var label in labels)
+            foreach (var label in allLabels)
             {
-                var group = outcomeGroups.FirstOrDefault(g => g.Outcome == label);
-                if (group != null)
-                {
-                    data.Add(group.Count);
-                    taskNames.Add(group.TaskNames);
-                }
-                else
+                var grp = grouped.FirstOrDefault(x => x.Outcome == label);
+                if (grp == null)
                 {
                     data.Add(0);
                     taskNames.Add(new List<string>());
                 }
+                else
+                {
+                    data.Add(grp.Count);
+                    taskNames.Add(grp.TaskNames);
+                }
             }
 
-            var chartData = new
+            return Json(new
             {
-                labels = labels.ToArray(),
+                labels = allLabels.ToArray(),
                 data = data.ToArray(),
-                taskNames = taskNames
-            };
-
-            return Json(chartData);
+                taskNames
+            });
         }
+
 
         //[Authorize]
+        // /Home/UserTaskStatusChart
         public async Task<IActionResult> UserTaskStatusChart()
-       {
-            // Aktif kullanıcının ID'sini al
+        {
             var userId = _userManager.GetUserId(User);
 
-            // AppUser olarak atanan TaskComps'ı bul
-            var appUserTasks = await _context.TaskComps
-                                              .Include(tc => tc.Status)
-                                              .OrderBy(tc=>tc.StatusId)
-                                              .Where(tc => tc.UserId == userId)
-                                              .ToListAsync();
+            // Kullanıcının AppUser veya ResponsibleUser olarak yer aldığı PipelineTask'lar
+            var tasks = await _context.PipelineTasks
+                .Where(p => p.AppUserId == userId || p.ResponsibleUserId == userId)
+                .ToListAsync();
 
-            // AssignedUser olarak atanan TaskComps'ı bul
-            var assignedUserTasks = await _context.TaskComps
-                                                   .Include(tc => tc.Status)
-                                                   .Where(tc => tc.AssignedUserId == userId)
-                                                   .OrderBy(tc => tc.StatusId)
-                                                   .ToListAsync();
+            // Null Stage'leri “Undefined” gibi bir sanal kategoriye çekmek istersen:
+            var data = tasks
+                .GroupBy(p => p.Stage?.ToString() ?? "Undefined")
+                .Select(g => new
+                {
+                    statusName = g.Key,
+                    TaskNames = g.Select(x => x.Title ?? $"#{x.Id}").Distinct().ToList(),
+                    Count = g.Select(x => x.Title ?? $"#{x.Id}").Distinct().Count()
+                })
+                .OrderBy(x => x.statusName)
+                .ToList();
 
-            // İki listeyi birleştir ve belirli kullanıcılar için filtre uygula
-            var combinedTasks = appUserTasks.Concat(assignedUserTasks)
-                                            .Where(tc => tc.UserId == userId || tc.AssignedUserId == userId)
-                                            .OrderBy(tc => tc.StatusId)
-                                            .ToList();
-
-            var chartData = combinedTasks.GroupBy(tc => tc.Status.StatusName)
-                                         .Select(group => new {
-                                             StatusName = group.Key,
-                                             TaskNames = group.Select(tc => tc.Title).Distinct().ToList(), // Görev isimlerini ayırt et
-                                             Count = group.Select(tc => tc.Title).Distinct().Count() // Görev isimlerini ayırt et ve sayısını al
-                                         }).ToList();
-
-            return Json(chartData);
+            return Json(data);
         }
+
 
 
         #endregion

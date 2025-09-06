@@ -49,7 +49,6 @@ namespace CrmCorner.Controllers.Admin
                 }
 
                 var currentUser = await _userManager.GetUserAsync(User);
-
                 if (currentUser == null)
                 {
                     return View();
@@ -57,88 +56,92 @@ namespace CrmCorner.Controllers.Admin
 
                 try
                 {
+                    // ESKİDE: .Include(u => u.TaskComps)
                     currentUser = await _context.Users
-                                            .Include(u => u.Customers)
-                                            .Include(u => u.TaskComps)
-                                            .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
+                        .Include(u => u.Customers)
+                        // .Include(u => u.PipelineTasks) // View tarafında direkt navigasyon kullanacaksan açabilirsin
+                        .FirstOrDefaultAsync(u => u.Id == currentUser.Id);
 
                     var companyUsers = await _context.Users
-                                                     .Where(u => u.EmailDomain == currentUser.EmailDomain)
-                                                     .Include(u => u.Customers)
-                                                     .ToListAsync();
+                        .Where(u => u.EmailDomain == currentUser.EmailDomain)
+                        .Include(u => u.Customers)
+                        .ToListAsync();
 
-                    var taskComps = await _context.TaskComps.ToListAsync(); // Bu satırı görevleri yüklemek için ekledim
+                    // ESKİ: TaskComps çekiliyordu -> KALDIRILDI
+                    // var taskComps = await _context.TaskComps.ToListAsync();
+
                     var email = currentUser?.Email;
 
                     List<CustomerN> customers;
-
                     if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                     {
-                        // Admin veya Manager ise aynı email domainine sahip tüm kullanıcıların müşterilerini getir
                         customers = companyUsers
-                                    .Where(u => u.Customers != null)
-                                    .SelectMany(u => u.Customers)
-                                    .ToList();
+                            .Where(u => u.Customers != null)
+                            .SelectMany(u => u.Customers)
+                            .ToList();
                     }
                     else
                     {
-                        // Değilse, sadece kullanıcının kendi müşterilerini getir
-                        customers = currentUser.Customers.ToList();
+                        customers = currentUser.Customers?.ToList() ?? new List<CustomerN>();
                     }
 
-
-                    // Kullanıcının sahip olduğu müşterilerde kaç farklı sektör olduğunu hesapla
+                    // Sektör sayısı
                     var sectorCount = customers
-                                      .Select(c => c.Industry)
-                                      .Distinct()
-                                      .Count();
+      .Where(c => c.Industry != null)
+      .Select(c => c.Industry.ToString())  // <-- enum → string
+      .Distinct()
+      .Count();
 
+                    // YENİ: Kullanıcıya ait PipelineTask sayısı
+                    var pipelineTaskCount = await _context.PipelineTasks.CountAsync(t =>
+                        t.AppUserId == currentUser.Id || t.ResponsibleUserId == currentUser.Id);
+
+                    // ViewModel (önceki mesajda önerdiğimiz güncel VM’i kullandığını varsayıyorum)
                     var viewModel = new CompanyUsersViewModel
                     {
                         CurrentUser = currentUser,
                         CompanyUsers = companyUsers,
-                        TaskComps = taskComps, // ViewModel'e TaskComps ekleyin
-                        SectorCount = sectorCount // Sektör sayısını ViewModel'e ekleyin
+                        PipelineTaskCount = pipelineTaskCount, // ✔ doğru
+                        SectorCount = sectorCount
                     };
+
 
                     ViewData["UserEmail"] = email;
                     ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
+                    // ToDoList birleşimi (aynı bırakıldı)
                     var todoList = _context.ToDoList
-                         .Where(e => e.UserId == currentUser.Id && e.NotDoneList != null)
+                        .Where(e => e.UserId == currentUser.Id && e.NotDoneList != null)
                         .Select(e => new ToDo { Id = e.Id, CreatedDate = e.CreatedDate, NotDoneList = e.NotDoneList })
-     .ToList();
+                        .ToList();
+
                     var todoListToday = _context.ToDos
-                         .Where(e => e.UserId == currentUser.Id && e.NotDoneList != null)
-                         .ToList();
+                        .Where(e => e.UserId == currentUser.Id && e.NotDoneList != null)
+                        .ToList();
 
                     var combinedData = todoList.Concat(todoListToday)
                         .OrderBy(data => data.CreatedDate - DateTime.Now)
                         .Take(5)
                         .ToList();
-                    List<Tuple<string, string>> updatedList = new List<Tuple<string, string>>();
-                    for (var item = 0; item < combinedData.Count; item++)
+
+                    List<Tuple<string, string>> updatedList = new();
+                    for (var i = 0; i < combinedData.Count; i++)
                     {
-                        var url = "https://crmcorner.co/ToDoList/ToDoList/" + combinedData[item].Id.ToString();
-                        if (combinedData[item].NotDoneList != null && combinedData[item].NotDoneList.Contains(','))
+                        var urlBase = "https://crmcorner.co/ToDoList/ToDoList/" + combinedData[i].Id.ToString();
+                        if (!string.IsNullOrEmpty(combinedData[i].NotDoneList) && combinedData[i].NotDoneList.Contains(','))
                         {
-                            var parts = combinedData[item].NotDoneList.Split(',');
+                            var parts = combinedData[i].NotDoneList.Split(',');
                             foreach (var part in parts)
                             {
-                                updatedList.Add(Tuple.Create(part, url)); // İkinci eleman için boş bir değer ekledim, gerekirse değiştirebilirsiniz
-                                if (updatedList.Count > 5)
-                                    break;
+                                updatedList.Add(Tuple.Create(part, urlBase));
+                                if (updatedList.Count > 5) break;
                             }
                         }
                         else
                         {
-                            var urlt = "https://crmcorner.co/ToDoList/ToDoList/" + combinedData[item].Id.ToString();
-                            updatedList.Add(Tuple.Create(combinedData[item].NotDoneList, urlt)); // İkinci eleman için boş bir değer ekledim, gerekirse değiştirebilirsiniz
-                            if (updatedList.Count > 5)
-                                break;
+                            updatedList.Add(Tuple.Create(combinedData[i].NotDoneList, urlBase));
                         }
-                        if (updatedList.Count > 5)
-                            break;
+                        if (updatedList.Count > 5) break;
                     }
                     ViewBag.ToDoList = updatedList;
 
@@ -156,6 +159,7 @@ namespace CrmCorner.Controllers.Admin
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
 
         //public async Task<IActionResult> UserList()
         //{

@@ -1,4 +1,6 @@
 ﻿@using CrmCorner.Models.Enums
+@using CrmCorner.Extensions
+
 @model List<PipelineTask>
 
 @{
@@ -127,13 +129,19 @@
                                     <strong>@task.Title</strong><br />
                                     <small class="text-muted">
                                         @task.CompanyName - @task.CustomerName @task.CustomerSurname
-                                        @if (!string.IsNullOrEmpty(task.Source))
+                                        @if (task.SourceChannel.HasValue)
                                         {
-                                            <span class="badge bg-info text-dark ms-2">Apollo</span>
+                                            <span class="badge bg-warning text-dark ms-1">
+                                                @task.SourceChannel.Value.GetDisplayName()
+                                            </span>
+                                        }
+                                        else if (!string.IsNullOrEmpty(task.Source))
+                                        {
+                                            <span class="badge bg-info text-dark ms-2">@task.Source</span>
                                         }
                                         @if (task.ContactedViaLinkedIn == true)
                                         {
-                                            <span class="badge bg-success text-white ms-1">LinkedIn</span>
+                                            <span class="badge bg-primary ms-1">LinkedIn</span>
                                         }
                                         @if (task.ContactedViaColdCall == true)
                                         {
@@ -212,7 +220,7 @@
 </div>
 
 
-<!-- CSS -->
+@* <!-- CSS -->
 <link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/plugins/fontawesome/css/all.min.css" />
 <link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.css" />
 <link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/css/bootstrap.min.css" />
@@ -222,7 +230,18 @@
 <script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/js/bootstrap.bundle.min.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script> *@
+
+<!-- 1. jQuery (sadece 1 kez yüklenecek) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- 2. jQuery UI (sortable için gerekli) -->
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+
+<!-- 3. Bootstrap (isteğe bağlı) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
 
 <script>
     $(function () {

@@ -3,6 +3,7 @@ using CrmCorner.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace CrmCorner.Models
+
 {
     public class PipelineTask
     {

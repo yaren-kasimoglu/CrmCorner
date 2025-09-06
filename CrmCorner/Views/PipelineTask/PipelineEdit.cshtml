@@ -37,7 +37,9 @@
 
             <div class="form-group mb-3">
                 <label asp-for="Stage">Aşama</label>
-                <select asp-for="Stage" asp-items="stageList" class="form-select" id="Stage"></select>
+                <select asp-for="Stage" asp-items="ViewBag.StageList" class="form-select" id="Stage">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
             </div>
 
             <div class="form-group mb-3">
@@ -59,9 +61,15 @@
             <div class="form-group">
                 <label for="OutcomeStatus">Sonuç</label>
                 @Html.DropDownListFor(model => model.OutcomeStatus,
-                new SelectList(Enum.GetValues(typeof(OutcomeTypeSales)).Cast<OutcomeTypeSales>().Select(e =>
-                new SelectListItem { Text = EnumExtensions.GetDisplayName(e), Value = e.ToString() }), "Value", "Text"),
-                                "Seçiniz", new { @class = "form-control", id = "outcomeStatusDropdown" })
+                new SelectList(
+                Enum.GetValues(typeof(OutcomeTypeSales)).Cast<OutcomeTypeSales>().Select(e =>
+                new SelectListItem { Text = EnumExtensions.GetDisplayName(e), Value = e.ToString() }
+                ),
+                "Value", "Text"
+                ),
+                                "Seçiniz",
+                                new { @class = "form-control", id = "outcomeStatusDropdown" }
+                                )
             </div>
 
             <div class="form-group" id="negativeReasonGroup" style="display:none;">
@@ -94,10 +102,19 @@
             </div>
 
             <div class="form-group mb-3">
+                <label asp-for="AppUserId">Görüşmeyi Alan</label>
+                <select asp-for="AppUserId" asp-items="ViewBag.Users" class="form-select">
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+                <span asp-validation-for="AppUserId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
                 <label asp-for="ResponsibleUserId">Sorumlu Kullanıcı</label>
                 <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-select">
                     <option value="">Lütfen seçiniz</option>
                 </select>
+                <span asp-validation-for="ResponsibleUserId" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
@@ -142,7 +159,6 @@
                 </select>
                 <span asp-validation-for="SourceChannel" class="text-danger"></span>
             </div>
-
         </div>
     </div>
 
@@ -151,6 +167,7 @@
         <a href="/PipelineTask/PipelineIndex" class="btn btn-secondary">İptal</a>
     </div>
 </form>
+
 
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>

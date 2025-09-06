@@ -108,9 +108,20 @@
                 <span asp-validation-for="SourceChannel" class="text-danger"></span>
             </div>
 
+            <!-- Kişiler -->
             <div class="form-group">
-                <label asp-for="ResponsibleUserId">Görüşmeyi Alan</label>
-                <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-control" required>
+                <label asp-for="AppUserId">Görüşmeyi Alan</label>
+                <select asp-for="AppUserId" class="form-control"
+                        asp-items="@(ViewBag.Users as List<SelectListItem>)" required>
+                    <option value="">Lütfen seçiniz</option>
+                </select>
+                <span asp-validation-for="AppUserId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ResponsibleUserId">Sorumlu Kişi</label>
+                <select asp-for="ResponsibleUserId" class="form-control"
+                        asp-items="@(ViewBag.Users as List<SelectListItem>)" required>
                     <option value="">Lütfen seçiniz</option>
                 </select>
                 <span asp-validation-for="ResponsibleUserId" class="text-danger"></span>
