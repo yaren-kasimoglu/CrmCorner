@@ -22,16 +22,17 @@ namespace CrmCorner.Controllers
         {
             try
             {
-                var currentUserName = User.Identity.Name;
-                var currentUser = await _userManager.FindByNameAsync(currentUserName);
-                var emailDomain = currentUser.EmailDomain;
+                var currentUserId = _userManager.GetUserId(User);
 
-                var positiveTasks = _context.PipelineTasks
+                var positiveTasks = await _context.PipelineTasks
                     .Include(t => t.AppUser)
+                    .Include(t => t.ResponsibleUser)
                     .Include(t => t.Customer)
-                    .Where(t => t.AppUser.EmailDomain == emailDomain)
-                    .Where(t => t.OutcomeStatus == OutcomeTypeSales.Won)
-                    .ToList();
+                    .Where(t =>
+                        (t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId) &&
+                        t.OutcomeStatus == OutcomeTypeSales.Won
+                    )
+                    .ToListAsync();
 
                 return View(positiveTasks);
             }
@@ -42,20 +43,22 @@ namespace CrmCorner.Controllers
             }
         }
 
+
         public async Task<IActionResult> NegativePipelineTasks()
         {
             try
             {
-                var currentUserName = User.Identity.Name;
-                var currentUser = await _userManager.FindByNameAsync(currentUserName);
-                var emailDomain = currentUser.EmailDomain;
+                var currentUserId = _userManager.GetUserId(User);
 
-                var negativeTasks = _context.PipelineTasks
+                var negativeTasks = await _context.PipelineTasks
                     .Include(t => t.AppUser)
+                    .Include(t => t.ResponsibleUser)
                     .Include(t => t.Customer)
-                    .Where(t => t.AppUser.EmailDomain == emailDomain)
-                    .Where(t => t.OutcomeStatus == OutcomeTypeSales.Lost)
-                    .ToList();
+                    .Where(t =>
+                        (t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId) &&
+                        t.OutcomeStatus == OutcomeTypeSales.Lost
+                    )
+                    .ToListAsync();
 
                 return View(negativeTasks);
             }
@@ -65,6 +68,7 @@ namespace CrmCorner.Controllers
                 return View("Error");
             }
         }
+
 
 
 

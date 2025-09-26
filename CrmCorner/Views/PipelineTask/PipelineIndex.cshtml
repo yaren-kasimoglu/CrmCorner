@@ -85,6 +85,23 @@
         background: transparent;
         border-bottom: none;
     }
+
+    .bg-soft-success {
+        background-color: #d4edda; /* Açık yeşil */
+    }
+
+    .bg-soft-danger {
+        background-color: #f8d7da; /* Açık kırmızı/pembe */
+    }
+
+    .border-success {
+        border: 2px solid #28a745;
+    }
+
+    .border-danger {
+        border: 2px solid #dc3545;
+    }
+
 </style>
 
 <div class="row g-3">
@@ -110,21 +127,38 @@
                     <ol class="dd-list sortable" data-statusid="@((int)stage.Key)">
                         @foreach (var task in tasksInThisStage)
                         {
-                            var outcomeBorderClass = "";
+                            var outcomeCardClass = "";
                             if (task.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Won)
+                            {
+                                outcomeCardClass = "bg-soft-success";
+                            }
+                            else if (task.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Lost)
+                            {
+                                outcomeCardClass = "bg-soft-danger";
+                            }
+
+                            // Çerçeve için ayrı class
+                            var outcomeBorderClass = "";
+                            if (task.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumlu)
                             {
                                 outcomeBorderClass = "border-success";
                             }
-                            else if (task.OutcomeStatus == CrmCorner.Models.Enums.OutcomeTypeSales.Lost)
+                            else if (task.Outcomes == CrmCorner.Models.Enums.OutcomeType.Olumsuz)
                             {
                                 outcomeBorderClass = "border-danger";
                             }
 
-                            <li class="dd-item @outcomeBorderClass"
+                            <li class="dd-item @outcomeCardClass @outcomeBorderClass"
                                 data-taskid="@task.Id"
                                 data-outcome="@task.OutcomeStatus"
                                 data-value="@task.Value"
-                                data-contract="@task.FileAttachments">
+                                data-currency="@task.Currency"
+                                data-contract="@task.FileAttachments"
+                                data-customer="@($"{task.CustomerName} {task.CustomerSurname}")"
+                                data-company="@task.CompanyName"
+                                data-desc="@task.Description"
+                                data-takenby="@task.AppUser?.NameSurname"
+                                data-doneby="@task.ResponsibleUser?.NameSurname">
                                 <div class="dd-handle">
                                     <strong>@task.Title</strong><br />
                                     <small class="text-muted">
@@ -219,6 +253,30 @@
     </div>
 </div>
 
+<div class="modal fade" id="miniTaskModal" tabindex="-1" aria-labelledby="miniTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <!-- küçük modal -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="miniTaskModalLabel">Görev Özeti</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2"><strong>Başlık:</strong> <span id="miniTitle">-</span></div>
+                <div class="mb-2"><strong>Müşteri:</strong> <span id="miniCustomer">-</span></div>
+                <div class="mb-2"><strong>Şirket:</strong> <span id="miniCompany">-</span></div>
+                <div class="mb-2"><strong>Fiyat Teklifi:</strong> <span id="miniPriceMain">-</span></div>
+                <div id="miniPriceFx" class="ms-3 small text-muted"></div>
+                <div class="mb-2"><strong>Görüşmeyi Alan:</strong> <span id="miniTakenBy">-</span></div>
+                <div class="mb-2"><strong>Gerçekleştiren:</strong> <span id="miniDoneBy">-</span></div>
+                <div class="mb-1"><strong>Açıklama:</strong></div>
+                <div id="miniDesc" style="white-space:pre-wrap;">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 @* <!-- CSS -->
 <link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/plugins/fontawesome/css/all.min.css" />
@@ -245,81 +303,138 @@
 
 <script>
     $(function () {
-        // Sürükle bırak
-        $(".sortable").sortable({
-            connectWith: ".sortable",
-            placeholder: "sortable-placeholder",
-               update: function (event, ui) {
-        var taskId = ui.item.data("taskid");
-        var newStage = ui.item.closest(".sortable").data("statusid");
-        var outcome = ui.item.data("outcome");
-        var offerValue = ui.item.data("value");
-        var contract = ui.item.data("contract");
+      // 1) Sürükle-bırak: sadece .dd-handle tutulunca sürüklensin
+      $(".sortable").sortable({
+        handle: ".dd-handle",               // <<< YENİ: Sadece tutamaçtan sürükle
+        connectWith: ".sortable",
+        placeholder: "sortable-placeholder",
+        update: function (event, ui) {
+          // Aşağıdaki kısım senin mevcut kural kontrollerin
+          var taskId = ui.item.data("taskid");
+          var newStage = ui.item.closest(".sortable").data("statusid");
+          var outcome = (ui.item.data("outcome") || "").toString();
+          var offerValue = ui.item.data("value");
+          var contract = ui.item.data("contract");
 
-        // TEKLİF SUNULDU AŞAMASINA GEÇİŞTE KONTROL
-        if (newStage == 4 && (!offerValue || !contract)) {
+          // TEKLİF SUNULDU AŞAMASINA GEÇİŞTE KONTROL
+          if (newStage == 4 && (!offerValue || !contract)) {
             alert("Teklif Sunuldu aşamasına geçmek için 'Değer' girmeli ve sözleşme yüklemelisiniz.");
             $(this).sortable('cancel');
             return;
-        }
+          }
 
-        // SONUÇ AŞAMASINA GEÇİŞTE KONTROL
-        if (newStage == 5 && (!outcome || outcome === "None" || outcome === "Unknown")) {
+          // SONUÇ AŞAMASINA GEÇİŞTE KONTROL
+          if (newStage == 5 && (outcome === "" || outcome === "None" || outcome === "Unknown")) {
             alert("Sonuç aşamasına geçmek için lütfen sonucu seçiniz (Kazanıldı/Kaybedildi).");
             $(this).sortable('cancel');
             return;
-        }
+          }
 
-        if (taskId !== undefined && newStage !== undefined) {
+          if (taskId !== undefined && newStage !== undefined) {
             $.post("/PipelineTask/UpdateStage", { id: taskId, newStage: newStage });
+          }
         }
+      }).disableSelection();
+
+      // 2) Kartın boş bir yerine tıklanınca mini detay modalını aç
+      // (Edit/Sil/Detay ikonlarına tıklayınca modal açılmasın)
+      $(document).on('click', '.dd-item', function (e) {
+        if ($(e.target).closest('a, button, .btn, i').length) return; // link/ikon tıklamasını dışla
+
+        var $item = $(this);
+
+        // Başlık: kart içindeki <strong> ilk metin
+        var title = $item.find('strong').first().text() || '-';
+
+        // Data-* alanları: <li> üzerine eklediklerin
+        var customer = $item.data('customer') || '-';
+        var company  = $item.data('company')  || '-';
+        var priceRaw = $item.data('value');
+        var currency = $item.data('currency');
+        var takenBy  = $item.data('takenby')  || '-';
+        var doneBy   = $item.data('doneby')   || '-';
+        var desc     = $item.data('desc')     || '-';
+
+       // Fiyat gösterimi
+    var priceText = '-';
+    if (priceRaw !== undefined && priceRaw !== null && priceRaw !== '') {
+      var n = Number(priceRaw);
+      if (!isNaN(n) && currency) {
+        try {
+          priceText = new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(n);
+        } catch {
+          // Currency 'TRY','USD','EUR' dışındaysa fallback
+          priceText = n.toFixed(2) + " " + currency;
+        }
+      } else {
+        priceText = String(priceRaw);
+      }
     }
 
-        }).disableSelection();
 
-        // Silme
-        $(document).on('click', '.btn-delete-task', function () {
-            const taskId = $(this).data('taskid');
-            $('#deleteTaskId').val(taskId);
-            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-            modal.show();
+
+    // Modal alanlarını doldur
+    $('#miniTitle').text(title);
+    $('#miniCustomer').text(customer);
+    $('#miniCompany').text(company);
+    $('#miniPriceMain').text(priceText);   // <<< Güncellendi
+    $('#miniTakenBy').text(takenBy);
+    $('#miniDoneBy').text(doneBy);
+    $('#miniDesc').text(desc);
+
+        // Modalı aç
+        new bootstrap.Modal(document.getElementById('miniTaskModal')).show();
+      });
+
+      // 3) SİLME – mevcut kodun
+      $(document).on('click', '.btn-delete-task', function () {
+        const taskId = $(this).data('taskid');
+        $('#deleteTaskId').val(taskId);
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+      });
+
+      $('#confirmDeleteBtn').click(function () {
+        const taskId = $('#deleteTaskId').val();
+        $.post('/PipelineTask/DeleteConfirmed', { id: taskId }, function (response) {
+          if (response.success) {
+            bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+            location.reload();
+          } else {
+            alert("Silme başarısız oldu.");
+          }
         });
+      });
 
-        $('#confirmDeleteBtn').click(function () {
-            const taskId = $('#deleteTaskId').val();
-            $.post('/PipelineTask/DeleteConfirmed', { id: taskId }, function (response) {
-                if (response.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
-                    location.reload();
-                } else {
-                    alert("Silme başarısız oldu.");
-                }
-            });
+      // 4) ETİKETLEME – mevcut kodun
+      $(document).on('click', '.btn-contact-method', function () {
+        const taskId = $(this).data('id');
+        $('#modalTaskId').val(taskId);
+        $('#chkLinkedin, #chkColdCall').prop('checked', false);
+        const modal = new bootstrap.Modal(document.getElementById('contactMethodModal'));
+        modal.show();
+      });
+
+      $('#contactMethodForm').submit(function (e) {
+        e.preventDefault();
+        const taskId = $('#modalTaskId').val();
+        const linkedin = $('#chkLinkedin').is(':checked');
+        const coldcall = $('#chkColdCall').is(':checked');
+
+        $.post('/PipelineTask/UpdateContactMethods', {
+          taskId: taskId,
+          contactedViaLinkedIn: linkedin,
+          contactedViaColdCall: coldcall
+        }, function () {
+          bootstrap.Modal.getInstance(document.getElementById('contactMethodModal')).hide();
+          location.reload();
         });
-
-        // Etiketleme
-        $(document).on('click', '.btn-contact-method', function () {
-            const taskId = $(this).data('id');
-            $('#modalTaskId').val(taskId);
-            $('#chkLinkedin, #chkColdCall').prop('checked', false);
-            const modal = new bootstrap.Modal(document.getElementById('contactMethodModal'));
-            modal.show();
-        });
-
-        $('#contactMethodForm').submit(function (e) {
-            e.preventDefault();
-            const taskId = $('#modalTaskId').val();
-            const linkedin = $('#chkLinkedin').is(':checked');
-            const coldcall = $('#chkColdCall').is(':checked');
-
-            $.post('/PipelineTask/UpdateContactMethods', {
-                taskId: taskId,
-                contactedViaLinkedIn: linkedin,
-                contactedViaColdCall: coldcall
-            }, function () {
-                bootstrap.Modal.getInstance(document.getElementById('contactMethodModal')).hide();
-                location.reload();
-            });
-        });
+      });
     });
 </script>
+

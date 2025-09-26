@@ -35,9 +35,13 @@ namespace CrmCorner.Models
         public string? LinkedinUrl { get; set; }
         public string? Source { get; set; }
 
-        [Required(ErrorMessage = "Görüşmeyi alan kişi seçilmelidir.")]
+      //  [Required(ErrorMessage = "Görüşmeyi alan kişi seçilmelidir.")]
+        [ForeignKey("ResponsibleUserId")]
+        public AppUser? ResponsibleUser { get; set; }   // <<< EKLE
         public string? ResponsibleUserId { get; set; }
-        public OutcomeType? Outcomes { get; set; }
+
+
+        public OutcomeType? Outcomes { get; set; } = OutcomeType.Surecte;
 
         public bool? ContactedViaLinkedIn { get; set; }
         public bool? ContactedViaColdCall { get; set; }

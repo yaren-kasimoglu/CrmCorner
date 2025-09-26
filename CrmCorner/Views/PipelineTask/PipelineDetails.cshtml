@@ -84,8 +84,18 @@
                 <div class="card-body">
                     <ul class="list-unstyled basic-list mb-0">
                         <li class="d-flex justify-content-between mb-3">
-                            Sorumlu:
-                            <span class="badge bg-primary">@Model.AppUser?.NameSurname</span>
+                            <div>Sorumlu:</div>
+                            <span class="badge bg-primary">
+                       @*          @Model.ResponsibleUser?.NameSurname ?? "Seçilmemiş" *@
+                            </span>
+                        </li>
+
+                        <!-- İstersen ayrıca gösterebilirsin -->
+                        <li class="d-flex justify-content-between mb-3">
+                            <div>Görüşmeyi Alan:</div>
+                            <span class="badge bg-info">
+                                @Model.AppUser?.NameSurname ?? "Seçilmemiş"
+                            </span>
                         </li>
                         <li class="d-flex justify-content-between mb-3">
                             Görev Oluşturma Tarihi:

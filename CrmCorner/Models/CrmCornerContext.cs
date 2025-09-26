@@ -193,6 +193,18 @@ public partial class CrmCornerContext : IdentityDbContext<AppUser, AppRole, stri
             .WithMany(r => r.UserRoles)
             .HasForeignKey(ur => ur.RoleId);
 
+        modelBuilder.Entity<PipelineTask>()
+               .HasOne(t => t.AppUser)
+               .WithMany() // AppUser tarafında koleksiyon tutmuyorsan böyle bırak
+               .HasForeignKey(t => t.AppUserId)
+               .OnDelete(DeleteBehavior.Restrict); // MySQL için de güvenli
+
+        modelBuilder.Entity<PipelineTask>()
+            .HasOne(t => t.ResponsibleUser)
+            .WithMany()
+            .HasForeignKey(t => t.ResponsibleUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
 
 
     }

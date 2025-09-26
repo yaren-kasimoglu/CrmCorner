@@ -48,13 +48,18 @@ namespace CrmCorner.Controllers
             var companyUserIds = companyUsers.Select(u => u.Id).ToList();
 
             var tasks = _context.PipelineTasks
-                .AsNoTracking()
-                .Where(t =>
-                    (t.AppUserId != null && companyUserIds.Contains(t.AppUserId)) ||
-                    (t.ResponsibleUserId != null && companyUserIds.Contains(t.ResponsibleUserId))
-                )
-                .OrderByDescending(t => t.CreatedDate)
-                .ToList();
+             .Include(t => t.AppUser)           
+             .Include(t => t.ResponsibleUser)   
+             .AsNoTracking()
+             .Where(t =>
+                 (t.AppUserId != null && companyUserIds.Contains(t.AppUserId)) ||
+                 (t.ResponsibleUserId != null && companyUserIds.Contains(t.ResponsibleUserId))
+             )
+             .OrderByDescending(t => t.CreatedDate)
+             .ToList();
+
+
+
             ViewBag.PipelineTaskCount = _context.PipelineTasks.Count(t =>
         t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId);
 
@@ -116,6 +121,47 @@ namespace CrmCorner.Controllers
             if (!IsCompanyUser(task.ResponsibleUserId))
                 ModelState.AddModelError(nameof(task.ResponsibleUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
 
+
+            // === Outcomes ↔ OutcomeStatus tutarlılık kuralları ===
+            bool invalid = false;
+
+            // 1) Süreçte iken sonuç Won/Lost olamaz (None olmalı)
+            if (task.Outcomes == OutcomeType.Surecte &&
+               (task.OutcomeStatus == OutcomeTypeSales.Won || task.OutcomeStatus == OutcomeTypeSales.Lost))
+            {
+                ModelState.AddModelError(nameof(task.OutcomeStatus),
+                    "Süreç durumu 'Süreçte' iken sonuç 'Kazanıldı/Kaybedildi' olamaz. Lütfen 'Hiçbiri' seçin.");
+                invalid = true;
+            }
+
+            // 2) Olumlu iken Kaybedildi olamaz
+            if (task.Outcomes == OutcomeType.Olumlu && task.OutcomeStatus == OutcomeTypeSales.Lost)
+            {
+                ModelState.AddModelError(nameof(task.OutcomeStatus),
+                    "Süreç durumu 'Olumlu' iken sonuç 'Kaybedildi' olamaz.");
+                invalid = true;
+            }
+
+            // 3) Olumsuz iken Kazanıldı olamaz
+            if (task.Outcomes == OutcomeType.Olumsuz && task.OutcomeStatus == OutcomeTypeSales.Won)
+            {
+                ModelState.AddModelError(nameof(task.OutcomeStatus),
+                    "Süreç durumu 'Olumsuz' iken sonuç 'Kazanıldı' olamaz.");
+                invalid = true;
+            }
+
+            // 4) Negatif gerekçe zorunlu: Outcomes=Olumsuz veya OutcomeStatus=Lost
+            if ((task.Outcomes == OutcomeType.Olumsuz || task.OutcomeStatus == OutcomeTypeSales.Lost)
+                && string.IsNullOrWhiteSpace(task.NegativeReason))
+            {
+                ModelState.AddModelError(nameof(task.NegativeReason),
+                    "Olumsuz durumda 'Olumsuz Sebep' alanı zorunludur.");
+                invalid = true;
+            }
+
+
+
+
             if (!ModelState.IsValid)
             {
                 // ViewBag'leri tekrar doldur (filtreli!)
@@ -171,7 +217,6 @@ namespace CrmCorner.Controllers
             if (task == null)
                 return NotFound();
 
-            // Aktif kullanıcı + domain
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
             if (me == null) return Unauthorized();
@@ -183,31 +228,32 @@ namespace CrmCorner.Controllers
                 .Select(u => new SelectListItem
                 {
                     Value = u.Id,
-                    Text = u.Id == currentUserId ? $"{u.UserName} (ben)" : u.UserName
+                    Text = (u.Id == currentUserId)
+                        ? $"{(string.IsNullOrWhiteSpace(u.NameSurname) ? u.UserName : u.NameSurname)} (ben)"
+                        : (string.IsNullOrWhiteSpace(u.NameSurname) ? u.UserName : u.NameSurname)
                 })
                 .ToList();
 
-            // Seçili kullanıcılar domain dışında ise görünür kıl (gizli)
-            if (!string.IsNullOrWhiteSpace(task.AppUserId) &&
-                !companyUsers.Any(x => x.Value == task.AppUserId))
+            // Eğer seçili AppUser ya da ResponsibleUser domain dışındaysa listeye "gizli" olarak ekle
+            var extraUserIds = new[] { task.AppUserId, task.ResponsibleUserId }
+                .Where(x => !string.IsNullOrWhiteSpace(x) && !companyUsers.Any(c => c.Value == x))
+                .Distinct()
+                .ToList();
+
+            if (extraUserIds.Any())
             {
-                var au = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == task.AppUserId);
-                companyUsers.Insert(0, new SelectListItem
-                {
-                    Value = task.AppUserId,
-                    Text = au != null ? $"{au.UserName} (gizli)" : $"{task.AppUserId} (gizli)"
-                });
+                var extras = _context.Users.AsNoTracking()
+                    .Where(u => extraUserIds.Contains(u.Id))
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.Id,
+                        Text = $"{(string.IsNullOrWhiteSpace(u.NameSurname) ? u.UserName : u.NameSurname)} (gizli)"
+                    })
+                    .ToList();
+
+                companyUsers.InsertRange(0, extras);
             }
-            if (!string.IsNullOrWhiteSpace(task.ResponsibleUserId) &&
-                !companyUsers.Any(x => x.Value == task.ResponsibleUserId))
-            {
-                var ru = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == task.ResponsibleUserId);
-                companyUsers.Insert(0, new SelectListItem
-                {
-                    Value = task.ResponsibleUserId,
-                    Text = ru != null ? $"{ru.UserName} (gizli)" : $"{task.ResponsibleUserId} (gizli)"
-                });
-            }
+
             ViewBag.Users = companyUsers;
 
             // --- Müşteri listesi: sadece aynı domain kullanıcılarının sahip oldukları müşteriler ---
@@ -249,7 +295,7 @@ namespace CrmCorner.Controllers
                     Value = e.ToString()
                 }).ToList();
 
-            // (Edit view'in Stage için items kullanması gerekiyorsa aç)
+            // Aşamalar
             ViewBag.StageList = Enum.GetValues(typeof(PipelineStage))
                 .Cast<PipelineStage>()
                 .Select(e => new SelectListItem
@@ -260,6 +306,7 @@ namespace CrmCorner.Controllers
 
             return View(task);
         }
+
 
 
         // EDIT (POST)
@@ -283,17 +330,24 @@ namespace CrmCorner.Controllers
                 !string.IsNullOrWhiteSpace(uid) &&
                 _context.Users.Any(u => u.Id == uid && u.EmailDomain == me.EmailDomain);
 
-            if (!IsCompanyUser(model.AppUserId))
+            // Burada sadece "zorunlu alan seçilmemişse" hata koy
+            if (string.IsNullOrWhiteSpace(model.AppUserId))
+                ModelState.AddModelError(nameof(model.AppUserId), "Görüşmeyi alan kişi seçilmelidir.");
+            else if (!IsCompanyUser(model.AppUserId))
                 ModelState.AddModelError(nameof(model.AppUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
 
-            if (!IsCompanyUser(model.ResponsibleUserId))
+            if (string.IsNullOrWhiteSpace(model.ResponsibleUserId))
+                ModelState.AddModelError(nameof(model.ResponsibleUserId), "Sorumlu kullanıcı seçilmelidir.");
+            else if (!IsCompanyUser(model.ResponsibleUserId))
                 ModelState.AddModelError(nameof(model.ResponsibleUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
+
 
             // Müşteri domain kontrolü
             var companyUserIds = _context.Users.AsNoTracking()
-                .Where(u => u.EmailDomain == me.EmailDomain)
-                .Select(u => u.Id)
-                .ToList();
+            .Where(u => u.EmailDomain == me.EmailDomain)
+            .Select(u => u.Id)
+            .ToList();
+
 
             bool IsCompanyCustomer(int? cid) =>
                 cid != null &&
@@ -315,6 +369,46 @@ namespace CrmCorner.Controllers
             {
                 ModelState.AddModelError(nameof(model.NegativeReason), "Olumsuz sebep girilmesi zorunludur.");
             }
+
+
+            // === Outcomes ↔ OutcomeStatus tutarlılık kuralları ===
+            bool invalid = false;
+
+            // 1) Süreçte iken sonuç Won/Lost olamaz (None olmalı)
+            if (model.Outcomes == OutcomeType.Surecte &&
+               (model.OutcomeStatus == OutcomeTypeSales.Won || model.OutcomeStatus == OutcomeTypeSales.Lost))
+            {
+                ModelState.AddModelError(nameof(model.OutcomeStatus),
+                    "Süreç durumu 'Süreçte' iken sonuç 'Kazanıldı/Kaybedildi' olamaz. Lütfen 'Hiçbiri' seçin.");
+                invalid = true;
+            }
+
+            // 2) Olumlu iken Kaybedildi olamaz
+            if (model.Outcomes == OutcomeType.Olumlu && model.OutcomeStatus == OutcomeTypeSales.Lost)
+            {
+                ModelState.AddModelError(nameof(model.OutcomeStatus),
+                    "Süreç durumu 'Olumlu' iken sonuç 'Kaybedildi' olamaz.");
+                invalid = true;
+            }
+
+            // 3) Olumsuz iken Kazanıldı olamaz
+            if (model.Outcomes == OutcomeType.Olumsuz && model.OutcomeStatus == OutcomeTypeSales.Won)
+            {
+                ModelState.AddModelError(nameof(model.OutcomeStatus),
+                    "Süreç durumu 'Olumsuz' iken sonuç 'Kazanıldı' olamaz.");
+                invalid = true;
+            }
+
+            // 4) Negatif gerekçe zorunlu: Outcomes=Olumsuz veya OutcomeStatus=Lost
+            if ((model.Outcomes == OutcomeType.Olumsuz || model.OutcomeStatus == OutcomeTypeSales.Lost)
+                && string.IsNullOrWhiteSpace(model.NegativeReason))
+            {
+                ModelState.AddModelError(nameof(model.NegativeReason),
+                    "Olumsuz durumda 'Olumsuz Sebep' alanı zorunludur.");
+                invalid = true;
+            }
+
+
 
             // Hatalıysa view'ı filtreli listelerle geri yükle
             if (!ModelState.IsValid)
@@ -374,6 +468,28 @@ namespace CrmCorner.Controllers
                         });
                     }
                 }
+
+                var errs = ModelState.Where(x => x.Value?.Errors.Any() == true)
+.Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
+                TempData["ErrorMessage"] = string.Join(" | ", errs);
+
+
+
+                var allErrors = ModelState
+        .Where(ms => ms.Value.Errors.Any())
+        .Select(ms => new {
+            Field = ms.Key,
+            Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToList()
+        });
+
+                foreach (var error in allErrors)
+                {
+                    Console.WriteLine($"Alan: {error.Field} -> Hata: {string.Join(", ", error.Errors)}");
+                }
+
+                // debug için ViewBag'e de basabilirsin
+                ViewBag.DebugErrors = allErrors;
+
                 ViewBag.Customer = new SelectList(customerItems, "Value", "Text", model.CustomerId?.ToString());
 
                 ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
@@ -391,6 +507,7 @@ namespace CrmCorner.Controllers
                         Value = ((int)e).ToString(),
                         Text = e.GetDisplayName()
                     }).ToList();
+
 
                 return View(model);
             }
@@ -443,7 +560,7 @@ namespace CrmCorner.Controllers
             LogIfChanged(nameof(model.CustomerId), existing.CustomerId?.ToString(), model.CustomerId?.ToString());
 
             // --- Güncelleme ---
-            existing.AppUserId = model.AppUserId;          // Görüşmeyi Alan (edit edilebilir)
+            existing.AppUserId = model.AppUserId;              // Görüşmeyi Alan
             existing.ResponsibleUserId = model.ResponsibleUserId;  // Sorumlu Kişi
             existing.Title = model.Title;
             existing.Description = model.Description;
@@ -484,6 +601,9 @@ namespace CrmCorner.Controllers
 
             return RedirectToAction("PipelineIndex");
         }
+
+
+
         #endregion
 
         [HttpPost]
@@ -520,6 +640,7 @@ namespace CrmCorner.Controllers
             var task = _context.PipelineTasks
      .Include(t => t.Notes)
      .Include(t => t.AppUser)
+     //.Include(t => t.ResponsibleUser)
      .Include(t => t.Customer)
      .Include(t => t.FileAttachments)
      .FirstOrDefault(t => t.Id == id);

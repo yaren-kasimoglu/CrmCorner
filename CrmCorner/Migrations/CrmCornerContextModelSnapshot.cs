@@ -627,7 +627,7 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("ResponsibleUserId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Source")
                         .HasColumnType("longtext");
@@ -650,6 +650,8 @@ namespace CrmCorner.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("ResponsibleUserId");
 
                     b.ToTable("PipelineTasks");
                 });
@@ -780,7 +782,8 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PipelineTaskId");
+                    b.HasIndex("PipelineTaskId")
+                        .IsUnique();
 
                     b.ToTable("PostSaleInfos");
                 });
@@ -1254,15 +1257,24 @@ namespace CrmCorner.Migrations
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
                         .WithMany()
-                        .HasForeignKey("AppUserId");
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("CrmCorner.Models.CustomerN", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
+                    b.HasOne("CrmCorner.Models.AppUser", "ResponsibleUser")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("AppUser");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("ResponsibleUser");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.PipelineTaskHistory", b =>
@@ -1305,8 +1317,8 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.PostSaleInfo", b =>
                 {
                     b.HasOne("CrmCorner.Models.PipelineTask", "PipelineTask")
-                        .WithMany()
-                        .HasForeignKey("PipelineTaskId")
+                        .WithOne("PostSaleInfo")
+                        .HasForeignKey("CrmCorner.Models.PostSaleInfo", "PipelineTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1429,6 +1441,8 @@ namespace CrmCorner.Migrations
                     b.Navigation("FileAttachments");
 
                     b.Navigation("Notes");
+
+                    b.Navigation("PostSaleInfo");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.SocialMediaContent", b =>

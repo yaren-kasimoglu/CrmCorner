@@ -13,6 +13,27 @@
 
 <h3 class="mb-4">Görev Düzenle</h3>
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (ViewBag.DebugErrors != null)
+{
+    <div class="alert alert-warning">
+        <ul>
+            @foreach (var err in ViewBag.DebugErrors)
+            {
+                <li>@err.Field : @string.Join(", ", err.Errors)</li>
+            }
+        </ul>
+    </div>
+}
+
+
+
 <form asp-action="PipelineEdit" asp-controller="PipelineTask" method="post">
     <input type="hidden" asp-for="Id" />
 
@@ -163,9 +184,11 @@
     </div>
 
     <div class="mt-3">
-        <button type="submit" class="btn btn-primary">Güncelle</button>
+        <button type="submit" id="submitBtn" class="btn btn-primary">Güncelle</button>
         <a href="/PipelineTask/PipelineIndex" class="btn btn-secondary">İptal</a>
+        <a href="/PipelineTask/PipelineDetails/@Model.Id" class="btn btn-info">Detay Sayfasına Git</a>
     </div>
+
 </form>
 
 
@@ -187,6 +210,116 @@
 
             $('#outcomeStatusDropdown').change(toggleNegativeReason);
             toggleNegativeReason();
+        });
+    </script>
+
+
+    <script>
+        $(function () {
+          // Elemanlar
+          const $outcomes = $('#Outcomes');                 // asp-for="Outcomes"
+          const $status   = $('#outcomeStatusDropdown');    // Sonuç (OutcomeStatus)
+          const $negGrp   = $('#negativeReasonGroup');      // Olumsuz Sebep alan grubu (div)
+          const $negTxt   = $('#NegativeReason');           // Olumsuz Sebep textbox
+          const $submit   = $('#submitBtn');                // Kaydet/Güncelle butonu
+          const bannerId  = 'reportBanner';
+
+          // Önceki değer (Tutarlılık kilidi için geri al)
+          let prevOutcome = $outcomes.val();
+
+          function ensureBanner() {
+            let $b = $('#' + bannerId);
+            if ($b.length === 0) {
+              $b = $('<div>', { id: bannerId, class: 'alert alert-warning mt-3', style: 'display:none;' });
+              // Sonuç dropdown'unun altına ekle
+              $status.closest('.form-group').append($b);
+            }
+            return $b;
+          }
+          function showBanner(msg) { const $b = ensureBanner(); $b.text(msg).show(); }
+          function hideBanner()    { const $b = ensureBanner(); $b.hide().text(''); }
+
+          function applyRules() {
+            const o = ($outcomes.val() || '').trim();  // Surecte | Olumlu | Olumsuz
+            const s = ($status.val()   || '').trim();  // None | Won | Lost | "" (Seçiniz)
+
+            // 1) Süreçte iken Sonuç kilidi: otomatik None + disable
+            if (o === 'Surecte') {
+              if (s !== 'None') { $status.val('None').trigger('change'); }
+              $status.prop('disabled', true);
+            } else {
+              $status.prop('disabled', false);
+            }
+
+            // 2) Tutarlılık kilidi: Won/Lost seçiliyken Outcomes'u "Süreçte"ye çekemez
+            if ((s === 'Won' || s === 'Lost') && o === 'Surecte') {
+              alert('Sonuç "Kazanıldı/Kaybedildi" seçiliyken "Süreçte" yapılamaz. Önce sonucu "Hiçbiri" yapın.');
+              // Geri al
+              $outcomes.val(prevOutcome).trigger('change');
+              return;
+            }
+
+            // 3) Negatif gerekçe görünürlüğü
+            if (o === 'Olumsuz' || s === 'Lost') {
+              $negGrp.show();
+            } else {
+              $negGrp.hide();
+              $negTxt.val('');
+            }
+
+            // 4) Raporlama standardı banner: Olumlu & None → uyarı
+            if (o === 'Olumlu' && s === 'None') {
+              showBanner('Uyarı: Sonuç belirlenmedi, raporlarda “Açık” görünecek.');
+            } else {
+              hideBanner();
+            }
+
+            // Submit butonu default açık kalsın (engellemeleri submit’te yapacağız)
+          }
+
+          // Submit sırasında son kontroller
+          $('form').on('submit', function (e) {
+            const o = ($outcomes.val() || '').trim();
+            const s = ($status.val()   || '').trim();
+            const neg = ($negTxt.val() || '').trim();
+
+            // Süreçte iken Sonuç Won/Lost olamaz
+            if (o === 'Surecte' && (s === 'Won' || s === 'Lost')) {
+              e.preventDefault();
+              alert('Süreçte iken sonuç "Kazanıldı/Kaybedildi" olamaz. Lütfen sonucu "Hiçbiri" yapın.');
+              return false;
+            }
+
+            // Olumlu iken Kaybedildi olamaz
+            if (o === 'Olumlu' && s === 'Lost') {
+              e.preventDefault();
+              alert('Süreç durumu "Olumlu" iken sonuç "Kaybedildi" olamaz.');
+              return false;
+            }
+
+            // Olumsuz iken Kazanıldı olamaz
+            if (o === 'Olumsuz' && s === 'Won') {
+              e.preventDefault();
+              alert('Süreç durumu "Olumsuz" iken sonuç "Kazanıldı" olamaz.');
+              return false;
+            }
+
+            // Negatif gerekçe zorunlu: Outcomes=Olumsuz veya OutcomeStatus=Lost
+            if ((o === 'Olumsuz' || s === 'Lost') && !neg) {
+              e.preventDefault();
+              alert('Olumsuz durumda "Olumsuz Sebep" zorunludur.');
+              $negGrp.show(); $negTxt.focus();
+              return false;
+            }
+          });
+
+          // Değişim yakalayıcılar
+          $outcomes.on('focus', function(){ prevOutcome = $outcomes.val(); });
+          $outcomes.on('change', function(){ applyRules(); prevOutcome = $outcomes.val(); });
+          $status.on('change', applyRules);
+
+          // İlk yüklemede uygula
+          applyRules();
         });
     </script>
 }
