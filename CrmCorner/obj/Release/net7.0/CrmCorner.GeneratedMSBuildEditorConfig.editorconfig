@@ -272,6 +272,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUm9sZU1hbmFnZW1lbnRcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/Roles/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUm9sZXNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/Roles/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUm9sZXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/Shared/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEFjY2Vzc0RlbmllZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -346,6 +354,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/ToDoList/ToDoList.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVG9Eb0xpc3RcVG9Eb0xpc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/UserRoles/AssignRole.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclJvbGVzXEFzc2lnblJvbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/UserRoles/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclJvbGVzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/_ViewImports.cshtml]

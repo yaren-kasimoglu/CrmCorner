@@ -1,15 +1,16 @@
-using CrmCorner.Models;
-using Microsoft.AspNetCore.Identity;
-using CrmCorner.Hubs;
-using Microsoft.EntityFrameworkCore;
-using CrmCorner.Extensions;
-using CrmCorner.OptionsModels;
-using CrmCorner.Services;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.Http.Features;
 using CrmCorner;
 using CrmCorner.Controllers;
+using CrmCorner.Extensions;
+using CrmCorner.Filters;
+using CrmCorner.Hubs;
+using CrmCorner.Models;
+using CrmCorner.OptionsModels;
+using CrmCorner.Services;
 using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using static CrmCorner.Hubs.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,6 +77,13 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<SetUserPictureFilter>();
 });
 
+builder.Services.AddScoped<RoleAccessFilter>();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<SetUserPictureFilter>();
+    options.Filters.Add<RoleAccessFilter>(); // 🔹 filtre global çalışır
+});
 
 builder.Services.AddScoped<IEmailServices, EmailServices>();
 
