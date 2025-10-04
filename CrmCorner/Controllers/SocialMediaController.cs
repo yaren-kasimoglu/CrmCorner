@@ -2,6 +2,7 @@
 using CrmCorner.Models.Enums;
 using CrmCorner.ViewModels;
 using Independentsoft.Graph.Contacts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -27,24 +28,28 @@ namespace CrmCorner.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
+            var roles = await _userManager.GetRolesAsync(currentUser);
             var query = _context.SocialMediaContents.AsQueryable();
 
-            // Şimdilik herkes sadece kendi şirketinin içeriklerini görecek
-            query = query.Where(x => x.CompanyId == currentUser.CompanyId);
+            // 🔹 Sadece Admin, SuperAdmin veya SocialMediaAdmin harici kullanıcılar kendi şirketini görür
+            if (!roles.Contains("SocialMediaAdmin") && !roles.Contains("Admin") && !roles.Contains("SuperAdmin"))
+            {
+                query = query.Where(x => x.CompanyId == currentUser.CompanyId);
+            }
 
-            // Arama filtresi
+            // 🔍 Arama filtresi
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(x => x.Title.Contains(search) || x.Description.Contains(search));
             }
 
-            // Tür filtresi
+            // 🧩 Tür filtresi
             if (type.HasValue)
             {
                 query = query.Where(x => x.ContentType == type.Value);
             }
 
-            // Sayfalama işlemleri
+            // 📊 Sayfalama işlemleri
             int pageSize = 6;
             var items = await PaginatedList<SocialMediaContent>.CreateAsync(
                 query.OrderByDescending(x => x.CreatedDate),
@@ -52,17 +57,21 @@ namespace CrmCorner.Controllers
                 pageSize
             );
 
-            // Özet bilgileri ViewBag’e gönder
+            // 📈 Özet bilgileri ViewBag’e gönder
             ViewBag.PendingCount = await query.CountAsync(x => x.Status == ContentStatus.OnayBekliyor);
             ViewBag.ApprovedCount = await query.CountAsync(x => x.Status == ContentStatus.Onaylandi);
             ViewBag.FeedbackCount = await query.CountAsync(x => x.Status == ContentStatus.FeedbackVerildi);
 
+            // 📌 Filtre view bilgileri
             ViewBag.Search = search;
             ViewBag.Type = type;
 
             return View(items);
         }
 
+
+
+        [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -82,6 +91,7 @@ namespace CrmCorner.Controllers
             return View(new SocialMediaContent());
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin")]
         [HttpPost]
         public async Task<IActionResult> Create(SocialMediaContent model, IFormFile mediaFile)
         {
@@ -105,7 +115,6 @@ namespace CrmCorner.Controllers
 
                     model.CreatedDate = DateTime.Now;
                     model.Status = ContentStatus.OnayBekliyor;
-                    model.CompanyId = currentUser.CompanyId;
 
                     _context.SocialMediaContents.Add(model);
                     await _context.SaveChangesAsync();
@@ -118,8 +127,13 @@ namespace CrmCorner.Controllers
                 }
             }
 
+            // Hata olursa tekrar şirket listesi yüklensin
+            var companies = await _context.Companies.ToListAsync();
+            ViewBag.CompanyList = new SelectList(companies, "CompanyId", "CompanyName");
+
             return View(model);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
@@ -178,20 +192,46 @@ namespace CrmCorner.Controllers
             return View(model);
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("SocialMedia/GetMedia/{id}")]
         public async Task<IActionResult> GetMedia(int id)
         {
-            var content = await _context.SocialMediaContents.FindAsync(id);
+            var content = await _context.SocialMediaContents
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
             if (content == null || content.MediaFile == null)
-            {
                 return NotFound();
+
+            // 🔹 Gerçek MIME türünü tahmin etmeye çalış
+            string mimeType;
+            if (content.ContentType == ContentType.Reels)
+                mimeType = "video/mp4";
+            else
+            {
+                // Dosyanın ilk birkaç byte’ına bakıp türünü otomatik tespit et
+                var header = content.MediaFile.Take(10).ToArray();
+                if (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E) // PNG
+                    mimeType = "image/png";
+                else if (header[0] == 0xFF && header[1] == 0xD8) // JPG
+                    mimeType = "image/jpeg";
+                else
+                    mimeType = "application/octet-stream";
             }
 
-            var fileExtension = GetFileExtension(content);
-            var mimeType = GetMimeType(fileExtension);
+            // 🔹 Tarayıcıya inline görüntüleme izni ver
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+            Response.Headers["Content-Disposition"] = "inline";
 
-            return File(content.MediaFile, mimeType);
+            return new FileStreamResult(new MemoryStream(content.MediaFile), mimeType);
         }
 
+
+
+        [AllowAnonymous]
         private string GetFileExtension(SocialMediaContent content)
         {
             if (content.ContentType == ContentType.Reels)
@@ -200,6 +240,7 @@ namespace CrmCorner.Controllers
                 return "jpg";
         }
 
+        [AllowAnonymous]
         private string GetMimeType(string extension)
         {
             return extension switch

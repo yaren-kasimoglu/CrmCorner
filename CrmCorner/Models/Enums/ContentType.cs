@@ -4,6 +4,7 @@
     {
         Post,
         Story,
-        Reels
+        Reels,
+        LinkedIn
     }
 }
