@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Identity;
 
 using CrmCorner.Models;
 using CrmCorner.Models.Enums;
-using CrmCorner.Models.CrmCorner.Models;
 
 // Gerek duyulursa alias (projedeki isim çakışmalarını önlemek için)
 using PipelineStageEnum = CrmCorner.Models.Enums.PipelineStage;

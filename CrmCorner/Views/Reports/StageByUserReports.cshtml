@@ -1,0 +1,136 @@
+﻿@model List<CrmCorner.ViewModels.StageByUserRowVm>
+
+@{
+    ViewData["Title"] = "Kullanıcı Bazlı Aşamalar";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h3 class="mb-4">Kullanıcı Bazlı Görev Aşamaları</h3>
+
+<!-- Tarih filtresi -->
+<form method="get" asp-action="StageByUserReports" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label for="startDate" class="form-label">Başlangıç Tarihi</label>
+        <input type="date" class="form-control" id="startDate" name="startDate"
+               value="@Context.Request.Query["startDate"]" />
+    </div>
+    <div class="col-md-3">
+        <label for="endDate" class="form-label">Bitiş Tarihi</label>
+        <input type="date" class="form-control" id="endDate" name="endDate"
+               value="@Context.Request.Query["endDate"]" />
+    </div>
+    <div class="col-md-3 align-self-end">
+        <button type="submit" class="btn btn-primary">Filtrele</button>
+    </div>
+</form>
+
+<!-- Grafik -->
+<div>
+    <canvas id="stageUserChart" height="120"></canvas>
+</div>
+
+<!-- Tablo -->
+<table id="stageUserTable" class="table table-striped table-bordered mt-4">
+    <thead>
+        <tr>
+            <th>Kullanıcı</th>
+            <th>Değerlendirilen</th>
+            <th>İletişim Kuruldu</th>
+            <th>Toplantı Düzenlendi</th>
+            <th>Teklif Sunuldu</th>
+            <th>Sonuç</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ResponsibleUserName</td>
+                <td>@item.Degerlendirilen</td>
+                <td>@item.IletisimKuruldu</td>
+                <td>@item.ToplantiDuzenlendi</td>
+                <td>@item.TeklifSunuldu</td>
+                <td>@item.Sonuc</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+    <script>
+        var data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        var users = data.map(d => d.ResponsibleUserName);
+
+        // Sabit renkler
+        var stageColors = {
+            "Değerlendirilen": "rgba(255, 99, 132, 0.7)",
+            "İletişim Kuruldu": "rgba(54, 162, 235, 0.7)",
+            "Toplantı Düzenlendi": "rgba(255, 206, 86, 0.7)",
+            "Teklif Sunuldu": "rgba(75, 192, 192, 0.7)",
+            "Sonuç": "rgba(153, 102, 255, 0.7)"
+        };
+
+        var datasets = Object.keys(stageColors).map(stageName => {
+            return {
+                label: stageName,
+                data: data.map(u => {
+                    switch (stageName) {
+                        case "Değerlendirilen": return u.Degerlendirilen;
+                        case "İletişim Kuruldu": return u.IletisimKuruldu;
+                        case "Toplantı Düzenlendi": return u.ToplantiDuzenlendi;
+                        case "Teklif Sunuldu": return u.TeklifSunuldu;
+                        case "Sonuç": return u.Sonuc;
+                        default: return 0;
+                    }
+                }),
+                // Tooltip için görev listeleri
+                taskTitles: data.map(u => u.TaskTitlesByStage[stageName] || []),
+                backgroundColor: stageColors[stageName]
+            };
+        });
+
+        new Chart(document.getElementById('stageUserChart'), {
+            type: 'bar',
+            data: {
+                labels: users,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                var dataset = context.dataset;
+                                var userIndex = context.dataIndex;
+                                var value = context.raw;
+
+                            var tasks = dataset.taskTitles[userIndex] || [];
+
+            // İlk satır: stage + sayı
+            var lines = [dataset.label + ": " + value];
+
+            // Görevler varsa her biri ayrı satır
+            if (tasks.length) {
+                lines = lines.concat(tasks);
+            }
+
+            return lines; // array döndür, alt alta çıkar
+                            }
+                        }
+                    }
+                },
+                scales: { x: { stacked: true }, y: { stacked: true } }
+            }
+        });
+
+        $('#stageUserTable').DataTable();
+    </script>
+}

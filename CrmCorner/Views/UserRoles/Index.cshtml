@@ -1,0 +1,25 @@
+﻿@model List<CrmCorner.Models.AppUser>
+
+<h2>Kullanıcı Listesi</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Kullanıcı Adı</th>
+            <th>Email</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    <a asp-action="AssignRole" asp-route-userId="@user.Id" class="btn btn-primary">Rol Ata</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

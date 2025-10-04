@@ -1,0 +1,37 @@
+﻿@model List<CrmCorner.Models.UserRoleAssignViewModel>
+
+@{
+    ViewData["Title"] = "Rol Atama";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<h2>@ViewBag.UserName kullanıcısına rol atama</h2>
+
+<form asp-action="AssignRole" asp-controller="UserRoles" method="post">
+    <input type="hidden" name="userId" value="@ViewBag.UserId" />
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Rol Adı</th>
+                <th>Seçili mi?</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>@Model[i].RoleName</td>
+                    <td>
+                        <input type="hidden" name="[@i].RoleId" value="@Model[i].RoleId" />
+                        <input type="hidden" name="[@i].RoleName" value="@Model[i].RoleName" />
+                        <input type="checkbox" name="[@i].IsAssigned" value="true" @(Model[i].IsAssigned ? "checked" : "") />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Kaydet</button>
+    <a asp-action="Index" class="btn btn-secondary">Geri</a>
+</form>

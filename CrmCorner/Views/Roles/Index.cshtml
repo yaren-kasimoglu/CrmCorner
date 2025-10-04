@@ -1,0 +1,26 @@
+﻿@model IEnumerable<CrmCorner.Models.AppRole>
+
+@{
+    ViewData["Title"] = "Roller";
+}
+
+<h2>Roller</h2>
+<a class="btn btn-primary mb-3" asp-action="Create">Yeni Rol Ekle</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Rol Adı</th>
+            <th>Açıklama</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model)
+        {
+            <tr>
+                <td>@role.Name</td>
+                <td>@role.Description</td>
+            </tr>
+        }
+    </tbody>
+</table>

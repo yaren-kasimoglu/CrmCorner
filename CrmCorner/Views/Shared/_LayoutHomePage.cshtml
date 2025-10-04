@@ -298,14 +298,13 @@
                                             <i class="fa fa-globe"></i> <span>Sosyal Medya</span>
                                         </a>
                                     </li>
-                                    @if (userRole == "Admin")
-                                    {
+                                  
                                         <li class="nav-item">
                                             <a asp-area="" asp-controller="SocialMedia" asp-action="Create">
                                                 <i class="fa fa-pencil-square-o"></i><span>Sosyal Medya İçerik Oluştur</span>
                                             </a>
                                         </li>
-                                    }
+                                    
                                     <li class="nav-item">
                                         <a asp-area="" asp-controller="SocialMedia" asp-action="Calendar">
                                             <i class="fa fa-calendar"></i> <span>Sosyal Medya Takvim</span>
@@ -369,6 +368,33 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-users"></i>Çalışanlarımız</a>
                                     </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link d-flex align-items-center"
+                                           data-bs-toggle="collapse"
+                                           href="#reportSubmenu"
+                                           role="button"
+                                           aria-expanded="false"
+                                           aria-controls="reportSubmenu">
+                                            <i class="fa fa-chart-bar me-2"></i><span>Rapor</span>
+                                            <i class="fa fa-chevron-down ms-auto"></i>
+                                        </a>
+                                        <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-controller="Reports" asp-action="ResponsibleUserTasks">
+                                                    <i class="fa fa-tasks me-2"></i>Süreç Durumu
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-controller="Reports" asp-action="StageByUserReports">
+                                                    <i class="fa fa-layer-group me-2"></i>Görev Sayısı
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+
+
                                  @*    <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
                                     </li>
@@ -456,6 +482,9 @@
 
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
 
     @RenderSection("Scripts", required: false)
     <script>

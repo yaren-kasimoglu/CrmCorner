@@ -1,6 +1,5 @@
 ﻿using CrmCorner.Extensions;
 using CrmCorner.Models;
-using CrmCorner.Models.CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
