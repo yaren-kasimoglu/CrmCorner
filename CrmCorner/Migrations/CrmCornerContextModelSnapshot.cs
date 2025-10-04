@@ -102,19 +102,29 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.AppRole", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Description")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedName")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("roles", (string)null);
                 });
@@ -122,6 +132,7 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.AppUser", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
                     b.Property<int>("AccessFailedCount")
@@ -141,10 +152,12 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Email")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
@@ -169,10 +182,12 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
@@ -199,9 +214,17 @@ namespace CrmCorner.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("users", (string)null);
                 });
@@ -209,16 +232,18 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.AppUserRole", b =>
                 {
                     b.Property<string>("UserId")
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("RoleId")
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AppUserRoles");
+                    b.ToTable("appuserrole", (string)null);
                 });
 
             modelBuilder.Entity("CrmCorner.Models.BigecSayfaDeneme", b =>
@@ -339,40 +364,6 @@ namespace CrmCorner.Migrations
                     b.HasKey("CompanyId");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.CrmCorner.Models.PipelineTaskFileAttachment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("PipelineTaskId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UploadedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PipelineTaskId");
-
-                    b.ToTable("PipelineTaskFileAttachments");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
@@ -626,7 +617,6 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("ResponsibleUserId")
-                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Source")
@@ -654,6 +644,40 @@ namespace CrmCorner.Migrations
                     b.HasIndex("ResponsibleUserId");
 
                     b.ToTable("PipelineTasks");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTaskFileAttachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("PipelineTaskId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PipelineTaskId");
+
+                    b.ToTable("PipelineTaskFileAttachments");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.PipelineTaskHistory", b =>
@@ -1090,9 +1114,12 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("longtext");
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("roleclaims", (string)null);
                 });
@@ -1110,9 +1137,12 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("longtext");
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("userclaims", (string)null);
                 });
@@ -1120,48 +1150,40 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("ProviderKey")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("UserId")
-                        .HasColumnType("longtext");
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("userlogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.Property<string>("RoleId")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext");
-
-                    b.ToTable("userroles", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("LoginProvider")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Value")
                         .HasColumnType("longtext");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("usertokens", (string)null);
                 });
@@ -1192,17 +1214,6 @@ namespace CrmCorner.Migrations
                         .HasForeignKey("AppUserId");
 
                     b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.CrmCorner.Models.PipelineTaskFileAttachment", b =>
-                {
-                    b.HasOne("CrmCorner.Models.PipelineTask", "PipelineTask")
-                        .WithMany("FileAttachments")
-                        .HasForeignKey("PipelineTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PipelineTask");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
@@ -1267,14 +1278,24 @@ namespace CrmCorner.Migrations
                     b.HasOne("CrmCorner.Models.AppUser", "ResponsibleUser")
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("AppUser");
 
                     b.Navigation("Customer");
 
                     b.Navigation("ResponsibleUser");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PipelineTaskFileAttachment", b =>
+                {
+                    b.HasOne("CrmCorner.Models.PipelineTask", "PipelineTask")
+                        .WithMany("FileAttachments")
+                        .HasForeignKey("PipelineTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PipelineTask");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.PipelineTaskHistory", b =>
@@ -1404,6 +1425,42 @@ namespace CrmCorner.Migrations
                         .HasForeignKey("AppUserId");
 
                     b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrmCorner.Models.AppRole", b =>

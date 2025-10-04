@@ -136,4 +136,10 @@ app.MapControllerRoute(
 // SignalR hub'ını yapılandırın
 app.MapHub<ChatHub>("/chatHub");
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedData.InitializeAsync(services);
+}
+
 app.Run();

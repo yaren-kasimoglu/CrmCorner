@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 
 namespace CrmCorner.Models
 {
-    public class AppRole:IdentityRole
+    public class AppRole : IdentityRole
     {
-        public string Name { get; set; } // Örn: SuperAdmin, Admin, TeamLeader, TeamMember
-        public ICollection<AppUserRole> UserRoles { get; set; }
-
+        public string? Description { get; set; } // Ekstra alan (opsiyonel)
+        public virtual ICollection<AppUserRole> UserRoles { get; set; }
     }
 }

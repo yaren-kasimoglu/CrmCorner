@@ -1,7 +1,7 @@
 ﻿using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.ViewModels;
-using Microsoft.AspNetCore.Authorization;
+using Independentsoft.Graph.Contacts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    
     public class SocialMediaController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -23,33 +22,15 @@ namespace CrmCorner.Controllers
             _environment = environment;
         }
 
-        public async Task<IActionResult> Index(string search, ContentType? type, int page = 1, int? selectedCompanyId = null)
+        public async Task<IActionResult> Index(string search, ContentType? type, int page = 1)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
-            var roles = await _userManager.GetRolesAsync(currentUser);
             var query = _context.SocialMediaContents.AsQueryable();
 
-            // Adminse: Firma seçimini yapabilir
-            if (roles.Contains("Admin"))
-            {
-                // Dropdown için şirket listesini ViewBag’e ekle
-                var companies = await _context.Companies.ToListAsync();
-                ViewBag.CompanyList = new SelectList(companies, "CompanyId", "CompanyName");
-                ViewBag.SelectedCompanyId = selectedCompanyId;
-
-                // Eğer admin belirli bir firma seçtiyse, o firmaya göre filtrele
-                if (selectedCompanyId.HasValue)
-                {
-                    query = query.Where(x => x.CompanyId == selectedCompanyId.Value);
-                }
-            }
-            else
-            {
-                // Admin değilse sadece kendi şirketine ait içerikleri görebilsin
-                query = query.Where(x => x.CompanyId == currentUser.CompanyId);
-            }
+            // Şimdilik herkes sadece kendi şirketinin içeriklerini görecek
+            query = query.Where(x => x.CompanyId == currentUser.CompanyId);
 
             // Arama filtresi
             if (!string.IsNullOrEmpty(search))
@@ -78,39 +59,30 @@ namespace CrmCorner.Controllers
 
             ViewBag.Search = search;
             ViewBag.Type = type;
-            ViewBag.IsAdmin = roles.Contains("Admin");
-
 
             return View(items);
         }
 
-
-
         [HttpGet]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
-            // HATALARI ENGELLEMEK İÇİN NULL KONTROLÜ
             if (currentUser == null)
             {
                 TempData["ErrorMessage"] = "Kullanıcı bilgisi alınamadı.";
                 return RedirectToAction("Index");
             }
 
-            // Company listesi ViewBag'e atanıyor
+            // Company listesi (şimdilik gerekmez ama kalsın)
             var companies = await _context.Companies.ToListAsync();
             ViewBag.CompanyList = new SelectList(companies, "CompanyId", "CompanyName");
 
-            return View(new SocialMediaContent()); // boş model döndürüyoruz
+            return View(new SocialMediaContent());
         }
 
-
-
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(SocialMediaContent model, IFormFile mediaFile)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -127,12 +99,13 @@ namespace CrmCorner.Controllers
                         using (var memoryStream = new MemoryStream())
                         {
                             await mediaFile.CopyToAsync(memoryStream);
-                            model.MediaFile = memoryStream.ToArray(); // sadece veritabanına kaydediyoruz
+                            model.MediaFile = memoryStream.ToArray();
                         }
                     }
 
                     model.CreatedDate = DateTime.Now;
                     model.Status = ContentStatus.OnayBekliyor;
+                    model.CompanyId = currentUser.CompanyId;
 
                     _context.SocialMediaContents.Add(model);
                     await _context.SaveChangesAsync();
@@ -148,7 +121,6 @@ namespace CrmCorner.Controllers
             return View(model);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -158,12 +130,10 @@ namespace CrmCorner.Controllers
                 return NotFound();
             }
 
-            return View(content); // Düzenlenecek içeriği View'a gönder
+            return View(content);
         }
 
-
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(SocialMediaContent model, IFormFile mediaFile)
         {
             ModelState.Remove("MediaFile");
@@ -186,7 +156,6 @@ namespace CrmCorner.Controllers
                             content.MediaFile = memoryStream.ToArray();
                         }
                     }
-                    // Eğer dosya yüklenmediyse eski MediaFile aynen kalacak
                 }
                 catch (Exception ex)
                 {
@@ -194,7 +163,6 @@ namespace CrmCorner.Controllers
                     return View(model);
                 }
 
-                // Diğer alanları güncelle
                 content.Title = model.Title;
                 content.Description = model.Description;
                 content.ScheduledPublishDate = model.ScheduledPublishDate;
@@ -210,7 +178,6 @@ namespace CrmCorner.Controllers
             return View(model);
         }
 
-
         public async Task<IActionResult> GetMedia(int id)
         {
             var content = await _context.SocialMediaContents.FindAsync(id);
@@ -219,22 +186,18 @@ namespace CrmCorner.Controllers
                 return NotFound();
             }
 
-            // İçerik tipine göre content type set edelim (jpg, png, mp4 gibi)
             var fileExtension = GetFileExtension(content);
             var mimeType = GetMimeType(fileExtension);
 
             return File(content.MediaFile, mimeType);
         }
 
-        // Yardımcı methodlar:
         private string GetFileExtension(SocialMediaContent content)
         {
-            // Basit mantık: burada istersen ContentType'a göre de ayarlayabiliriz.
-            // Örneğin ContentType == Reels ise mp4 kabul ederiz gibi.
             if (content.ContentType == ContentType.Reels)
                 return "mp4";
             else
-                return "jpg"; // Default image
+                return "jpg";
         }
 
         private string GetMimeType(string extension)
@@ -249,71 +212,13 @@ namespace CrmCorner.Controllers
             };
         }
 
-
         public async Task<IActionResult> Details(int id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+
             var content = await _context.SocialMediaContents
-                .Include(c => c.Feedbacks)  // Geri bildirimleri dahil et
-                .FirstOrDefaultAsync(c => c.Id == id);  // İçeriği ID ile bul
-
-            if (content == null)
-            {
-                return NotFound();
-            }
-
-            // Geri bildirimleri oluşturulma tarihine göre azalan sırayla sıralıyoruz
-            content.Feedbacks = content.Feedbacks.OrderByDescending(f => f.CreatedDate).ToList();
-
-            return View(content);  // İçeriği ve geri bildirimlerini View'a gönder
-        }
-
-
-        // Onaylama
-        [HttpPost]
-        public async Task<IActionResult> Approve(int id)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-            var content = await _context.SocialMediaContents.FindAsync(id);
-            if (content == null)
-            {
-                return NotFound();
-            }
-
-            content.Status = ContentStatus.Onaylandi;  // Onaylandı olarak ayarlıyoruz.
-            _context.Update(content);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Details", new { id = content.Id });
-        }
-
-  
-        [HttpPost]
-        public async Task<IActionResult> CancelApproval(int id)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-            var content = await _context.SocialMediaContents.FindAsync(id);
-            if (content != null)
-            {
-                content.Status = ContentStatus.OnayBekliyor;  // Geri al
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction("Details", new { id = content.Id });
-        }
-
-
-
-        // Geri bildirim eklemek için metot
-        [HttpPost]
-        public async Task<IActionResult> SendFeedback(int id, string feedbackMessage)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-            var content = await _context.SocialMediaContents
-                .Include(c => c.Feedbacks)  // İlişkili geri bildirimleri dahil et
+                .Include(c => c.Feedbacks)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (content == null)
@@ -321,7 +226,51 @@ namespace CrmCorner.Controllers
                 return NotFound();
             }
 
-            // Yeni bir geri bildirim oluştur
+            content.Feedbacks = content.Feedbacks.OrderByDescending(f => f.CreatedDate).ToList();
+
+            return View(content);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var content = await _context.SocialMediaContents.FindAsync(id);
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            content.Status = ContentStatus.Onaylandi;
+            _context.Update(content);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = content.Id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelApproval(int id)
+        {
+            var content = await _context.SocialMediaContents.FindAsync(id);
+            if (content != null)
+            {
+                content.Status = ContentStatus.OnayBekliyor;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Details", new { id = content.Id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendFeedback(int id, string feedbackMessage)
+        {
+            var content = await _context.SocialMediaContents
+                .Include(c => c.Feedbacks)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (content == null)
+            {
+                return NotFound();
+            }
+
             var feedback = new Feedback
             {
                 SocialMediaContentId = content.Id,
@@ -329,17 +278,13 @@ namespace CrmCorner.Controllers
                 CreatedDate = DateTime.Now
             };
 
-            // Geri bildirimi veritabanına ekle
             _context.Feedbacks.Add(feedback);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Details", new { id = content.Id });
         }
 
-  
-        // Geri bildirimi silmek için metot
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteFeedback(int feedbackId, int contentId)
         {
             var feedback = await _context.Feedbacks.FindAsync(feedbackId);
@@ -355,7 +300,6 @@ namespace CrmCorner.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var content = await _context.SocialMediaContents.FindAsync(id);
@@ -371,7 +315,6 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Index", "SocialMedia");
         }
 
-
         public async Task<IActionResult> Calendar()
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -380,17 +323,11 @@ namespace CrmCorner.Controllers
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
 
-            var roles = await _userManager.GetRolesAsync(currentUser);
             var query = _context.SocialMediaContents
                 .Where(c => c.ScheduledPublishDate.HasValue &&
                             c.ScheduledPublishDate.Value.Month == currentMonth &&
-                            c.ScheduledPublishDate.Value.Year == currentYear);
-
-            // Admin değilse sadece kendi şirketine ait içerikleri getir
-            if (!roles.Contains("Admin"))
-            {
-                query = query.Where(c => c.CompanyId == currentUser.CompanyId);
-            }
+                            c.ScheduledPublishDate.Value.Year == currentYear &&
+                            c.CompanyId == currentUser.CompanyId);
 
             var contents = await query.ToListAsync();
 
@@ -403,9 +340,5 @@ namespace CrmCorner.Controllers
 
             return View(calendarViewModel);
         }
-
-
-
-
     }
 }

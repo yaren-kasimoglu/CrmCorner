@@ -2,12 +2,9 @@
 
 namespace CrmCorner.Models
 {
-    public class AppUserRole
+    public class AppUserRole : IdentityUserRole<string>
     {
-        public string UserId { get; set; }
-        public AppUser User { get; set; }
-
-        public string RoleId { get; set; }
-        public AppRole Role { get; set; }
+        public virtual AppUser User { get; set; }
+        public virtual AppRole Role { get; set; }
     }
 }
