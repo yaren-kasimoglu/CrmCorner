@@ -26,6 +26,11 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> Index(string search, ContentType? type, int page = 1)
         {
             var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
+                return RedirectToAction("SignIn", "Home");
+            }
             ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
             var roles = await _userManager.GetRolesAsync(currentUser);

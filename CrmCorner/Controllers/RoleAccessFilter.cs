@@ -30,7 +30,9 @@ namespace CrmCorner.Filters
                     ("SocialMedia", "GetMedia"),
                     ("SocialMedia", "GetFileExtension"),
                     ("SocialMedia", "GetMimeType"),
-                    ("SocialMedia", "CancelApproval")
+                    ("SocialMedia", "CancelApproval"),
+                    ("SocialMedia", "DeleteFeedback"),
+                    ("SocialMedia", "Approve")
                 };
 
                 bool isAllowed = allowed.Any(a =>
