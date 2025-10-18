@@ -1,78 +1,117 @@
 ﻿using CrmCorner.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Graph;
-using System.Threading.Tasks;
 
 namespace CrmCorner.Hubs
 {
-   public class Hubs
+    public class Hubs
     {
-       public class ChatHub : Hub
-
+        public class ChatHub : Hub
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly CrmCornerContext _context;
+
             public ChatHub(CrmCornerContext context, UserManager<AppUser> userManager)
             {
                 _context = context;
                 _userManager = userManager;
             }
 
-            private readonly static ConnectionMapping<string> _connections =
-           new ConnectionMapping<string>();
-            public override async Task OnConnectedAsync()
+            private readonly static ConnectionMapping<string> _connections = new ConnectionMapping<string>();
+
+            public override async Task OnDisconnectedAsync(Exception? exception)
             {
                 var claims = Context.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-                _connections.Add(claims.Value, Context.ConnectionId);
-            	
-                    await base.OnConnectedAsync();
-            }
-            public async Task SendMessage(string message, string receiverUserId,string dateTime)
-            {
-                if (_connections.GetConnections(receiverUserId).Count() <= 0)
+                if (claims != null)
                 {
-                    AddChatHistory(message, receiverUserId,false);
-
+                    _connections.Add(claims.Value, Context.ConnectionId);
                 }
-                else
-                {
-                    AddChatHistory(message, receiverUserId,true);
-
-                }
-                var targetUserConnectionId = _connections.GetConnections(receiverUserId).First();
-                await Clients.Client(targetUserConnectionId).SendAsync("ChatChannel", message, dateTime);
-
+                await base.OnDisconnectedAsync(exception);
             }
-            private async Task AddChatHistory(string message, string receiverUserId,bool state)
+
+            public async Task SendMessage(string message, string receiverUserId, string dateTime)
             {
-                var claims = Context.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-                var sernderUserId = claims.Value;
-                ChatHistory history = new ChatHistory();
-                history.SenderId = sernderUserId;
-                history.ReceiverId = receiverUserId;
-                history.Message = message;
-                history.IsRead = state;
-                history.MessageTime = DateTime.Now.Date.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).AddSeconds(DateTime.Now.Second);
+                var senderClaims = Context.User.Claims.FirstOrDefault(c =>
+                    c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+                if (senderClaims == null) return;
+
+                var senderUserId = senderClaims.Value;
+
+                var receiverConnections = _connections.GetConnections(receiverUserId).ToList();
+                bool isOnline = receiverConnections.Any();
+
+                await AddChatHistory(message, senderUserId, receiverUserId, isOnline);
+
+                // 🔹 Sadece alıcının bağlantılarına gönder (kendine değil!)
+                foreach (var connectionId in receiverConnections)
+                {
+                    // 💬 Mesaj içeriği gönder
+                    await Clients.Client(connectionId)
+                        .SendAsync("ChatChannel", message, dateTime, senderUserId);
+
+                    // 🔔 Bildirim (yalnızca alıcıya)
+                    await Clients.Client(connectionId)
+                        .SendAsync("ReceiveNotification", senderUserId);
+                }
+            }
+
+
+            public async Task MarkMessagesAsRead(string senderId)
+            {
+                var receiverId = Context.User.Claims.FirstOrDefault(c =>
+                    c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+                if (receiverId == null) return;
+
+                var unreadMessages = _context.ChatHistories
+                    .Where(x => x.SenderId == senderId && x.ReceiverId == receiverId && !x.IsRead)
+                    .ToList();
+
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true;
+                }
+
+                await _context.SaveChangesAsync();
+
+                // 💬 Karşı taraftaki kullanıcıya bildir
+                var senderConnections = _connections.GetConnections(senderId);
+                foreach (var conn in senderConnections)
+                {
+                    // 🔹 Burada receiverId değil senderId gönderiyoruz!
+                    await Clients.Client(conn).SendAsync("MessagesMarkedAsRead", senderId);
+                }
+            }
+
+
+
+
+            private async Task AddChatHistory(string message, string senderId, string receiverId, bool isRead)
+            {
+                var history = new ChatHistory
+                {
+                    SenderId = senderId,
+                    ReceiverId = receiverId,
+                    Message = message,
+                    IsRead = isRead,
+                    MessageTime = DateTime.Now
+                };
+
                 try
                 {
                     _context.ChatHistories.Add(history);
-                    _context.SaveChanges();
-
+                    await _context.SaveChangesAsync();
                 }
-                catch(Exception EX)
+                catch (Exception ex)
                 {
-                    Console.Write(EX.Message);
+                    Console.WriteLine(ex.Message);
                 }
             }
+
             public async Task SendFile(string user, string fileName, byte[] fileData)
             {
-                // Dosya işlemleri burada yapılabilir, örneğin dosyayı bir yere kaydetme
-                // await File.WriteAllBytesAsync(Path.Combine("uploads", fileName), fileData);
-
                 await Clients.All.SendAsync("ReceiveFile", user, fileName, fileData);
             }
-
         }
     }
 }

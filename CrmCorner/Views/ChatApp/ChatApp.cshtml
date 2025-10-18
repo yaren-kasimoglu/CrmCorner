@@ -120,7 +120,11 @@
                                         <div style="position: relative; display: flex; align-items: center;">
                                             @if (@userName.HasUnreadMessages)
                                             {
-                                                <div style="position: absolute; left: -15px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background-color: #2eacb3; border-radius: 50%;"></div>
+                                                @if (@userName.HasUnreadMessages)
+                                                {
+                                                    <div class="unread-dot" style="position: absolute; left: -15px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background-color: #2eacb3; border-radius: 50%;"></div>
+                                                }
+
                                             }
                                             <img class="avatar rounded" src="@userName.PictureUrl" alt="avatar" />
                                         </div>
@@ -280,20 +284,37 @@
             };
             return date.toLocaleString('tr-TR', options).replace(',', '');
         }
-     
+
 
         function selectUser(userName, userId) {
             document.getElementById("searchDiv").style.display = "block";
             document.getElementById("selectedUserId").value = userId;
+
             if (userName != "1") {
                 document.getElementById("selectedUser").innerHTML = userName;
             }
-            var test = document.getElementById("selectedUserId").value;
+
             var useronlyId = document.getElementById("useronlyId").value;
-            var useronlyId2 = $("#useronlyId").val();
-            //const messageElement = document.querySelector('.message.other-message');
-            //messageElement.textContent = '';
-            // Seçilen kullanıcının kimliğini controller action'a iletmek için form submit işlemi gerçekleştiriyoruz
+
+            // ✅ 1. Sohbet açıldığı anda o kişinin yanındaki mavi noktayı kaldır
+           var userItems = document.querySelectorAll("ul.chat-list li");
+
+            userItems.forEach(function (item) {
+                if (item.getAttribute("onclick")?.includes(userId)) {
+                    var dot = item.querySelector(".unread-dot");
+                    if (dot) {
+                        dot.remove();
+                        console.log("✅ Mavi nokta kendi ekranında kaldırıldı:", userId);
+                    }
+                }
+            });
+
+            // ✅ 2. Okundu bilgisini backend'e gönder
+            signalRConnection.invoke("MarkMessagesAsRead", userId)
+                .then(() => console.log("📨 MarkMessagesAsRead tetiklendi:", userId))
+                .catch(err => console.error("MarkMessagesAsRead hatası:", err.toString()));
+
+            // ✅ 3. Mesaj geçmişini yükle
             $.ajax({
                 type: "GET",
                 url: "/ChatApp/GetUserMessages",
@@ -301,40 +322,44 @@
                 success: function (response) {
                     var $MessageBox = $("#MessageBox");
                     $MessageBox.empty();
-                    // Başarılı bir şekilde veri alındığında yapılacak işlemler
+
                     response.message.forEach(function (item) {
                         const formattedMessageTime = formatDateTime(item.messageTime);
+
                         if (item.senderId != useronlyId) {
-                            $MessageBox.append(`<li class="clearfix">
-                                            <div class="message-data mb-3">
-                                                <span class="small text-muted me-3">${formattedMessageTime}</span>
-                                            </div>
-                                            <div class="message my-message d-inline-block" style="line-height: normal;">
-                                                ${item.message}
-                                            </div>
-                                        </li>`);
-                        }
-                        else {
-                            $MessageBox.append(`<li class="clearfix">
-                                            <div class="message-data text-end mb-3 me-3">
-                                                <span class="small text-muted me-2"> ${formattedMessageTime}</span>
-                                                </div>
-                                             <div class="message other-message d-inline-block float-end" style="line-height: normal;">
-                                            ${item.message}
-                                            </div>
-                                    </li>`);
+                            $MessageBox.append(`
+                                <li class="clearfix">
+                                    <div class="message-data mb-3">
+                                        <span class="small text-muted me-3">${formattedMessageTime}</span>
+                                    </div>
+                                    <div class="message my-message d-inline-block" style="line-height: normal;">
+                                        ${item.message}
+                                    </div>
+                                </li>`);
+                        } else {
+                            $MessageBox.append(`
+                                <li class="clearfix">
+                                    <div class="message-data text-end mb-3 me-3">
+                                        <span class="small text-muted me-2">${formattedMessageTime}</span>
+                                    </div>
+                                    <div class="message other-message d-inline-block float-end" style="line-height: normal;">
+                                        ${item.message}
+                                    </div>
+                                </li>`);
                         }
                     });
-                    scrollToBottom2();
 
+                    scrollToBottom2();
                 },
                 error: function (xhr, status, error) {
-                    // Hata durumunda yapılacak işlemler
                     console.error("Hata:", error);
                 }
             });
-
         }
+
+
+
+
         function scrollToBottom2() {
             var messageBox = document.getElementById("chat-history");
             var scrooltop = messageBox.scrollHeight;
@@ -404,188 +429,168 @@
 
 
     </script>
-    <script>
- 
-        $(function () {
 
+
+    <script>
+        var signalRConnection;
+               $(function () {
             var $SendMessageTextArea = $("#SendMessageTextArea");
-            var $UserListSelectBox = $("#UserList");
             var $SendMessageBtn = $("#SendMessageBtn");
             var $MessageBox = $("#MessageBox");
-            var isMyMessage = false;
 
-            var signalRConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
-            signalRConnection.on("ChatChannel", function (message, dateTime) {
-                var userId = document.getElementById("selectedUserId").value;
+            // ⚡ SignalR bağlantısı oluşturuluyor
+             signalRConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
-                if (userId !== null && userId !== undefined) {
+            // 🔔 Yeni mesaj bildirimi (mavi nokta)
+            signalRConnection.on("ReceiveNotification", function (senderId) {
+                console.log("📩 Yeni mesaj bildirimi geldi! Gönderen ID:", senderId);
 
-                    $MessageBox.append(`<li class="clearfix">
-                                <div class="message-data mb-3">
-                                    <span class="small text-muted me-3">${dateTime}</span>
-                                </div>
-                                <div class="message my-message d-inline-block">
-                                    ${message}
-                                </div>
-                            </li>`);
-                
-                
-                }
-                scrollToBottom();
-                showNotification( userId,message);
-
-            });
-   
-            function uploadFile() {
-                const fileInput = document.getElementById('fileInput');
-                const file = fileInput.files[0];
-
-                if (!file) {
-                    alert("Please select a file.");
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append("file", file);
-
-                $.ajax({
-                    url: '/api/fileupload',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (data) {
-                        console.log("File uploaded successfully:", data);
-                        // SignalR üzerinden dosya bilgilerini gönderme
-                        signalRConnection.invoke("SendFile", "User", data.fileName, new Uint8Array(file));
-                    },
-                    error: function (error) {
-                        console.error("Error uploading file:", error);
-                        console.log("formdataerror" + error);
-
+                var userItems = document.querySelectorAll(".chat-list li");
+                userItems.forEach(function (item) {
+                    if (item.getAttribute("onclick")?.includes(senderId)) {
+                        if (!item.querySelector(".unread-dot")) {
+                            var dot = document.createElement("div");
+                            dot.className = "unread-dot";
+                            dot.style.cssText =
+                                "position:absolute;left:-15px;top:50%;transform:translateY(-50%);width:10px;height:10px;background-color:#2eacb3;border-radius:50%;";
+                            item.querySelector("div").appendChild(dot);
+                        }
                     }
-                    });
-                 }
-            $SendMessageBtn.click(function () {
-                signalRConnection.start().then(function () {
-
-                }).catch(function (err) {
-                    return console.error(err.toString());
                 });
-                var userId = document.getElementById("selectedUserId").value;
-                var message = $SendMessageTextArea.val();
-                var now = new Date();
-                var day = ("0" + now.getDate()).slice(-2);
-                var month = ("0" + (now.getMonth() + 1)).slice(-2);
-                var year = now.getFullYear(); // Yılı al
-                var hour = ("0" + now.getHours()).slice(-2);
-                var minute = ("0" + now.getMinutes()).slice(-2);
-                var dateTime = day + "." + month + "." + year + " " + hour + ":" + minute;
-
-
-                $MessageBox.append(`<li class="clearfix">
-                                <div class="message-data text-end mb-3 me-3">
-                                    <span class="small text-muted me-2"> ${dateTime}</span>
-                                    </div>
-                                 <div class="message other-message d-inline-block float-end">
-                                ${message}
-                                </div>
-                        </li>`);
-                signalRConnection.invoke("SendMessage", message, userId, dateTime);
-                $SendMessageTextArea.val("");
-                scrollToBottom();
-
             });
+
+
+        // ✅ Karşı taraf mesajı okuduğunda mavi nokta kalksın
+                signalRConnection.on("MessagesMarkedAsRead", function (senderId) {
+            console.log("📩 MessagesMarkedAsRead sinyali geldi, gönderen:", senderId);
+
+            var userItems = document.querySelectorAll(".chat-list li");
+            userItems.forEach(function (item) {
+                if (item.getAttribute("onclick")?.includes(senderId)) {
+                    var dot = item.querySelector(".unread-dot");
+                    if (dot) {
+                        dot.remove();
+                        console.log("✅ Mavi nokta kaldırıldı:", senderId);
+                    }
+                }
+            });
+        });
+
+
+
+
+
+            // 💬 ChatChannel - gelen mesaj
+            signalRConnection.on("ChatChannel", function (message, dateTime, senderId) {
+                var currentUserId = document.getElementById("useronlyId").value;
+
+                if (senderId !== currentUserId) {
+                    $MessageBox.append(`
+                        <li class="clearfix">
+                            <div class="message-data mb-3">
+                                <span class="small text-muted me-3">${dateTime}</span>
+                            </div>
+                            <div class="message my-message d-inline-block">${message}</div>
+                        </li>
+                    `);
+                    scrollToBottom();
+                    showNotification(senderId, message);
+                }
+            });
+
+            // 🔹 SignalR bağlantısını sadece 1 kere başlat
+            async function startConnection() {
+                try {
+                    await signalRConnection.start();
+                    console.log("✅ SignalR bağlantısı kuruldu.");
+                } catch (err) {
+                    console.error("❌ SignalR bağlantısı başarısız:", err.toString());
+                    setTimeout(startConnection, 5000);
+                }
+            }
+
+            // ⬅️ ÖNCE 'on' tanımlamaları, sonra bağlantı!
+            startConnection();
+
+            // ✉️ Mesaj gönderme
+            $SendMessageBtn.click(function () {
+                sendMessage();
+            });
+
             document.getElementById('SendMessageTextArea').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault(); // Formun gönderilmesini engelle
+                    e.preventDefault();
                     sendMessage();
                 }
             });
-            function sendMessage() {
-                signalRConnection.start().then(function () {
 
-                }).catch(function (err) {
-                    return console.error(err.toString());
-                });
+            async function sendMessage() {
                 var userId = document.getElementById("selectedUserId").value;
                 var message = $SendMessageTextArea.val();
-                var now = new Date();
-                var day = ("0" + now.getDate()).slice(-2);
-                var month = ("0" + (now.getMonth() + 1)).slice(-2);
-                var year = now.getFullYear(); // Yılı al
-                var hour = ("0" + now.getHours()).slice(-2);
-                var minute = ("0" + now.getMinutes()).slice(-2);
-                var dateTime = day + "." + month + "." + year + " " + hour + ":" + minute;
+                if (!message || !message.trim()) return;
 
-                console.log(dateTime);
-                $MessageBox.append(`<li class="clearfix">
-                                <div class="message-data text-end mb-3 me-3">
-                                    <span class="small text-muted me-2"> ${dateTime}</span>
-                                    </div>
-                                 <div class="message other-message d-inline-block float-end">
-                                ${message}
-                                </div>
-                        </li>`);
-                signalRConnection.invoke("SendMessage", message, userId, dateTime);
+                var now = new Date();
+                var dateTime = now.toLocaleString('tr-TR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                $MessageBox.append(`
+                    <li class="clearfix">
+                        <div class="message-data text-end mb-3 me-3">
+                            <span class="small text-muted me-2">${dateTime}</span>
+                        </div>
+                        <div class="message other-message d-inline-block float-end">${message}</div>
+                    </li>
+                `);
+
+                try {
+                    await signalRConnection.invoke("SendMessage", message, userId, dateTime);
+                } catch (err) {
+                    console.error("Gönderim hatası:", err.toString());
+                }
+
                 $SendMessageTextArea.val("");
                 scrollToBottom();
+
+                        // 🧩 Bu kullanıcıyla olan tüm mesajları okundu olarak işaretle
+        signalRConnection.invoke("MarkMessagesAsRead", userId)
+            .then(() => console.log("✅ Mesajlar okundu olarak işaretlendi:", userId))
+            .catch(err => console.error("MarkMessagesAsRead hatası:", err.toString()));
+
             }
+
             function scrollToBottom() {
                 var messageBox = document.getElementById("chat-history");
-                var scrooltop = messageBox.scrollHeight;
                 messageBox.scrollTop = messageBox.scrollHeight;
             }
 
-            signalRConnection.start().then(function () {
-
-            }).catch(function (err) {
-                return console.error(err.toString());
-            });
-
             signalRConnection.onclose(async () => {
-                console.log("SignalR bağlantısı kapandı. Yeniden bağlanılıyor...");
-                await tryReconnect();
+                console.warn("⚠️ SignalR bağlantısı koptu, yeniden bağlanılıyor...");
+                await startConnection();
             });
+
             setInterval(async function () {
                 if (signalRConnection.state === signalR.HubConnectionState.Disconnected) {
-                    console.log("SignalR bağlantısı kapandıss. Yeniden bağlanılıyor...");
-                    await tryReconnect();
+                    console.warn("🔄 Bağlantı durumu: disconnected. Yeniden bağlanılıyor...");
+                    await startConnection();
                 }
-            }, 10000); 
-            async function tryReconnect() {
-                try {
-                    await signalRConnection.start();
-                    console.log("SignalR bağlantısı başarıyla yeniden kuruldu.");
-                } catch (err) {
-                    console.error("SignalR bağlantısı yeniden kurulamadı: " + err.toString());
-                    // Hata durumunda tekrar deneme mekanizmasını başlat
-                    setTimeout(tryReconnect, 5000); // 5 saniye sonra tekrar dene
-                }
-            }
-            //setInterval(function () {
-            //    console.log("SignalR bağlantısı yenileniyor...");
-            //        .then(function () {
-            //            return connection.start();
-            //        })
-            //        .then(function () {
-            //            console.log("SignalR bağlantısı başarıyla yenilendi.");
-            //        })
-            //        .catch(function (err) {
-            //            console.error("SignalR bağlantısı yenilenemedi: " + err);
-            //        });
-            //}, 120000);
-           
-        })
-     
+            }, 10000);
+        });
 
-      
-      
     </script>
+
+
+
+
     <!-- core js file -->
     <script src="assets/bundles/libscripts.bundle.js"></script>
 
     <!-- page js file -->
     <script src="assets/bundles/mainscripts.bundle.js"></script>
+
 </body>
 </html>

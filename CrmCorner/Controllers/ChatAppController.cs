@@ -1,10 +1,11 @@
-﻿using System;
-using CrmCorner.Models;
+﻿using CrmCorner.Models;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI;
+using System;
 
 namespace CrmCorner.Controllers
 {
@@ -173,6 +174,9 @@ namespace CrmCorner.Controllers
 
             return Json(new { Message = peopleName.NameSurname });
         }
+
+ 
+
 
     }
 }
