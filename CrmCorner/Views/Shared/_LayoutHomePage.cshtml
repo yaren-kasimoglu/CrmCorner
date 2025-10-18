@@ -60,7 +60,7 @@
             position: absolute;
             bottom: -5px;
             right: 0;
-            color: red;
+           color: #2eacb3;
             font-size: 12px;
             font-weight: bold;
         }
@@ -217,7 +217,9 @@
                         <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
                             @*                <li class="d-none d-sm-block"><a href="/Calendar/Calendar" class="icon-menu"><i class="fa fa-calendar"></i></a></li> *@
                             <li id="messageIcon" class="d-none d-sm-block" style="position: relative;">
-                                @*   <a href="javascript:void(0);" class="icon-menu" id="messageIconLink" onclick="toggleDropdown(event)"><i class="fa fa-comments"></i></a> *@
+                               <a href="/ChatApp/ChatApp" class="text-decoration-none position-relative me-3" title="Mesajlar">
+    <i class="fa fa-comments fa-lg text-primary"></i>
+</a>
                                 <span id="notificationCount" class="notification-count"></span>
                                 <ul id="messageDropdown" class="dropdown-menu"></ul>
                             </li>
@@ -349,6 +351,17 @@
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
                                                 <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
+                                            </a>
+                                        </li>
+
+                                           <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="Index">
+                                                <i class="fa fa-briefcase"></i> Rol Oluşturma
+                                            </a>
+                                        </li>
+                                             <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">
+                                                <i class="fa fa-briefcase"></i> Yetki Atama
                                             </a>
                                         </li>
                                     }
@@ -569,6 +582,9 @@
 
 
     <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
+
+
+
 
 </body>
 @*    <!-- core js file -->
