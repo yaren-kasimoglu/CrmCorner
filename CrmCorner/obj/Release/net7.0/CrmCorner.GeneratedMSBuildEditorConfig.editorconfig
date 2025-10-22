@@ -232,6 +232,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVtYmVyXFVzZXJFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/PersonalBranding/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyc29uYWxCcmFuZGluZ1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/PersonalBranding/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyc29uYWxCcmFuZGluZ1xEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/PersonalBranding/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyc29uYWxCcmFuZGluZ1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/PersonalBranding/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyc29uYWxCcmFuZGluZ1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Lenovo/source/repos/CrmCornerCo/CrmCorner/CrmCorner/Views/PipelineAnalysis/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGlwZWxpbmVBbmFseXNpc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
