@@ -41,6 +41,12 @@ namespace CrmCorner.Models
         public DbSet<ApolloSettings> ApolloSettings { get; set; }
         public DbSet<ApolloContactDbModel> ApolloContacts { get; set; }
 
+        public DbSet<PersonalBrandingContent> PersonalBrandingContents { get; set; }
+
+        public DbSet<PersonalBrandingFeedback> PersonalBrandingFeedbacks { get; set; }
+
+
+
         // 🔑 Sadece AppUserRole’i DbSet olarak bırakıyoruz
         public DbSet<AppUserRole> AppUserRoles { get; set; }
 

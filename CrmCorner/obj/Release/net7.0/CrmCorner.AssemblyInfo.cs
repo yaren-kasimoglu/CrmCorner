@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CrmCorner")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2bb125029448a148cc8d314c2ad34f8b8ab48b11")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+221f64666ab490fcc18e064eb55947cbe743810f")]
 [assembly: System.Reflection.AssemblyProductAttribute("CrmCorner")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CrmCorner")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

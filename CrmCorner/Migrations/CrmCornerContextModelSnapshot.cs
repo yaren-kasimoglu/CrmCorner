@@ -555,6 +555,72 @@ namespace CrmCorner.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.PersonalBrandingContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("EstimatedPublishDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<byte[]>("MediaFile")
+                        .HasColumnType("longblob");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("PersonalBrandingContents");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PersonalBrandingFeedback", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<int>("PersonalBrandingContentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("PersonalBrandingContentId");
+
+                    b.ToTable("PersonalBrandingFeedbacks");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.PipelineTask", b =>
                 {
                     b.Property<int>("Id")
@@ -1264,6 +1330,32 @@ namespace CrmCorner.Migrations
                     b.Navigation("TaskComp");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.PersonalBrandingContent", b =>
+                {
+                    b.HasOne("CrmCorner.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId");
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PersonalBrandingFeedback", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById");
+
+                    b.HasOne("CrmCorner.Models.PersonalBrandingContent", "PersonalBrandingContent")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("PersonalBrandingContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("PersonalBrandingContent");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.PipelineTask", b =>
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
@@ -1491,6 +1583,11 @@ namespace CrmCorner.Migrations
             modelBuilder.Entity("CrmCorner.Models.CustomerN", b =>
                 {
                     b.Navigation("Taskcomps");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.PersonalBrandingContent", b =>
+                {
+                    b.Navigation("Feedbacks");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.PipelineTask", b =>
