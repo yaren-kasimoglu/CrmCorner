@@ -1,140 +1,71 @@
-﻿@model List<DashboardEmpViewModel>
+﻿@model List<CrmCorner.Models.AppUser>
 @{
-    ViewData["Title"] = "EmployeeList";
+    ViewData["Title"] = "Çalışan Listesi";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+
 <style>
     .table-spacing {
         margin-bottom: 40px !important;
     }
+
+    .profile-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
 </style>
 
-@{
-    var statusOrder = new Dictionary<string, int>
-    {
-        {"İLK TEMAS", 1},
-        {"GÖRÜŞME AYARLANDI", 2},
-        {"GÖRÜŞME GERÇEKLEŞTİ", 3},
-        {"TEKLİF GÖNDERİLDİ", 4},
-        {"SÖZLEŞME AŞAMASINDA", 5},
-        {"SATIŞ TAMAMLANDI", 6},
-    
-    };
+<h4 class="mb-4">👥 Şirket Çalışanları</h4>
 
-    var orderedStatuses = Model
-        .SelectMany(m => m.TaskStatusCountsByUser.Keys)
-        .Distinct()
-        .OrderBy(status => statusOrder.ContainsKey(status) ? statusOrder[status] : int.MaxValue)
-        .ToList();
-}
-
-<table id="user_List" class="table center-aligned-table table-spacing">
-
-    <thead>
+<table id="employeeTable" class="table table-striped table-bordered table-spacing align-middle">
+    <thead class="table-primary">
         <tr>
-            <th>Adı Soyadı</th>
+            <th>Profil</th>
+            <th>Ad Soyad</th>
             <th>Email</th>
             <th>Telefon Numarası</th>
             <th>Pozisyon</th>
-            <th>Kurum Adı</th>
+            <th>Şirket Adı</th>
         </tr>
-
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var user in Model)
         {
             <tr>
-                <td>@item.User.NameSurname</td>
-                <td>@item.User.Email</td>
-                <td>@item.User.PhoneNumber</td>
-                <td>@item.User.PositionName</td>
                 <td>
-                    <span class="badge bg-info">@item.User.CompanyName</span>
+                    <img src="/userprofilepicture/@(user.Picture ?? "defaultpp.png")" class="profile-img" />
                 </td>
-
-
+                <td>@user.NameSurname</td>
+                <td>@user.Email</td>
+                <td>@(string.IsNullOrEmpty(user.PhoneNumber) ? "-" : user.PhoneNumber)</td>
+                <td>@(string.IsNullOrEmpty(user.PositionName) ? "-" : user.PositionName)</td>
+                <td><span class="badge bg-info">@user.CompanyName</span></td>
             </tr>
         }
-
     </tbody>
-
 </table>
-
-<div class="table-spacing"></div>
-@* <table id="user_List1" class="table table-striped table-bordered">
-    <thead>
-        <tr class="table-primary">
-            <th>Çalışan</th>
-            @foreach (var status in orderedStatuses)
-            {
-                <th class="text-center align-middle">@status</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var dashboardModel in Model)
-        {
-            <tr>
-                <td>@dashboardModel.User.NameSurname</td>
-                @foreach (var status in orderedStatuses)
-                {
-                    <td class="align-middle">@dashboardModel.TaskStatusCountsByUser.GetValueOrDefault(status, 0)</td>
-                }
-            </tr>
-        }
-    </tbody>
-</table> *@
-
-
-
-
 
 @section Scripts {
     <!-- core js file -->
     <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-    <!-- page js file -->
     <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-
     <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
+
     <script>
-        function confirmDelete(button) {
-            // Kullanıcıya silme işlemini onaylamasını sor
-            if (confirm('Are you sure you want to dele te this employee?')) {
-                var employeeid = button.getAttribute('data-employeeid');
-                var form = document.createElement('form');
-                form.action = '/Employee/EmployeeDelete/' + employeeid;
-                form.method = 'post';
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
         $(document).ready(function () {
-            $('#user_List')
-                .dataTable({
-                    responsive: true,
-                    columnDefs: [
-                        {
-                            orderable: false,
-                            targets: [0]
-                        }
-                    ]
-                });
-        });
-
-
-        $(document).ready(function () {
-            $('#user_List1')
-                .dataTable({
-                    responsive: true,
-                    columnDefs: [
-                        {
-                            orderable: false,
-                            targets: [0]
-                        }
-                    ]
-                });
+            $('#employeeTable').DataTable({
+                responsive: true,
+                order: [[1, "asc"]],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.1/i18n/tr.json"
+                },
+                columnDefs: [
+                    { orderable: false, targets: [0] }
+                ]
+            });
         });
     </script>
 }
-

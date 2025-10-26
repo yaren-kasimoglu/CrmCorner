@@ -9,7 +9,10 @@ using System;
 
 namespace CrmCorner.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    //  ChatAppController
+    // Şirket içi mesajlaşma (chat) işlemlerini yönetir.
+    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember (sosyal medya rollerine kapalı)
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class ChatAppController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

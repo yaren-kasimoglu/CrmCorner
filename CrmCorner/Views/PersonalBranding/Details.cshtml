@@ -20,6 +20,14 @@
                         Oluşturulma: @Model.CreatedDate.ToString("dd MMM yyyy")
                     </p>
 
+                    @if (Model.PersonalUser != null)
+                    {
+                        <p class="text-muted mb-1">
+                            <i class="fa fa-user me-1"></i> @Model.PersonalUser.NameSurname
+                        </p>
+                    }
+
+
                     @if (Model.EstimatedPublishDate.HasValue)
                     {
                         <p class="text-muted">Tahmini Paylaşım Tarihi: @Model.EstimatedPublishDate.Value.ToString("dd MMM yyyy")</p>

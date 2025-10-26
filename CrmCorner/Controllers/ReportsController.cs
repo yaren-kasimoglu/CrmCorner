@@ -1,12 +1,14 @@
 ﻿using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CrmCorner.Controllers
 {
+    [Authorize(Roles = "Admin,SuperAdmin,TeamLeader,TeamMember")]
     public class ReportsController : Controller
     {
         private readonly CrmCornerContext _context;

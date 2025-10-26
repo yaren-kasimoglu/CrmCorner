@@ -12,7 +12,7 @@ using PipelineStage = CrmCorner.Models.Enums.PipelineStage;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class PipelineTaskController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -23,22 +23,34 @@ namespace CrmCorner.Controllers
         }
 
         // 1. Görevleri Listeleme
-        public IActionResult PipelineIndex()
+        public async Task<IActionResult> PipelineIndex()
         {
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
+            var me = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == currentUserId);
             if (me == null) return Unauthorized();
 
+            // 🔹 Rolleri al
+            var userRoles = await _context.UserRoles
+                .Where(ur => ur.UserId == me.Id)
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
+                .ToListAsync();
+
+            bool isSuperAdmin = userRoles.Contains("SuperAdmin");
+            bool isAdmin = userRoles.Contains("Admin");
+            bool isTeamLeader = userRoles.Contains("TeamLeader");
+            bool isTeamMember = userRoles.Contains("TeamMember");
+
+            // 🔹 Status List
             ViewBag.StatusList = Enum.GetValues(typeof(PipelineStage))
                 .Cast<PipelineStage>()
                 .ToDictionary(e => e, e => e.GetDisplayName());
 
-            var companyUsers = _context.Users.AsNoTracking()
+            // 🔹 Şirket kullanıcıları
+            var companyUsers = await _context.Users.AsNoTracking()
                 .Where(u => u.EmailDomain == me.EmailDomain)
-                .Select(u => new { u.Id, u.UserName, u.NameSurname })
-                .ToList();
+                .Select(u => new { u.Id, u.UserName, u.NameSurname, u.CompanyId })
+                .ToListAsync();
 
-            // Id -> Görünen Ad (NameSurname varsa onu, yoksa UserName)
             ViewBag.UserMap = companyUsers.ToDictionary(
                 x => x.Id,
                 x => string.IsNullOrWhiteSpace(x.NameSurname) ? x.UserName : x.NameSurname
@@ -46,24 +58,49 @@ namespace CrmCorner.Controllers
 
             var companyUserIds = companyUsers.Select(u => u.Id).ToList();
 
-            var tasks = _context.PipelineTasks
-             .Include(t => t.AppUser)           
-             .Include(t => t.ResponsibleUser)   
-             .AsNoTracking()
-             .Where(t =>
-                 (t.AppUserId != null && companyUserIds.Contains(t.AppUserId)) ||
-                 (t.ResponsibleUserId != null && companyUserIds.Contains(t.ResponsibleUserId))
-             )
-             .OrderByDescending(t => t.CreatedDate)
-             .ToList();
+            // 🔹 Görevleri çek (rol bazlı filtreleme)
+            var tasksQuery = _context.PipelineTasks
+                .Include(t => t.AppUser)
+                .Include(t => t.ResponsibleUser)
+                .AsNoTracking();
 
+            if (isSuperAdmin)
+            {
+                // 🔸 SuperAdmin -> tüm görevleri görür
+            }
+            else if (isAdmin)
+            {
+                // 🔸 Admin -> kendi şirketindeki herkesin görevleri
+                var sameCompanyUserIds = companyUsers
+                    .Where(u => u.CompanyId == me.CompanyId)
+                    .Select(u => u.Id)
+                    .ToList();
 
+                tasksQuery = tasksQuery.Where(t =>
+                    (t.AppUserId != null && sameCompanyUserIds.Contains(t.AppUserId)) ||
+                    (t.ResponsibleUserId != null && sameCompanyUserIds.Contains(t.ResponsibleUserId))
+                );
+            }
+            else if (isTeamLeader || isTeamMember)
+            {
+                // 🔸 TeamLeader & TeamMember -> sadece kendi görevleri (AppUser veya ResponsibleUser)
+                tasksQuery = tasksQuery.Where(t =>
+                    t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId
+                );
+            }
 
-            ViewBag.PipelineTaskCount = _context.PipelineTasks.Count(t =>
-        t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId);
+            // 🔹 Görevleri listele
+            var tasks = await tasksQuery
+                .OrderByDescending(t => t.CreatedDate)
+                .ToListAsync();
+
+            // 🔹 Görev sayısı (kişisel bazda)
+            ViewBag.PipelineTaskCount = await _context.PipelineTasks.CountAsync(t =>
+                t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId);
 
             return View(tasks);
         }
+
 
         #region GÖREV EKLEME
         // 2. Yeni Görev Formu (GET)
@@ -212,15 +249,54 @@ namespace CrmCorner.Controllers
         [HttpGet]
         public IActionResult PipelineEdit(int id)
         {
-            var task = _context.PipelineTasks.FirstOrDefault(t => t.Id == id);
+            var task = _context.PipelineTasks
+                .Include(t => t.AppUser)
+                .Include(t => t.ResponsibleUser)
+                .Include(t => t.Customer)
+                .FirstOrDefault(t => t.Id == id);
+
             if (task == null)
                 return NotFound();
 
+            // Aktif kullanıcı bilgisi
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
             if (me == null) return Unauthorized();
 
-            // --- Kullanıcı listesi: yalnızca aynı domain ---
+            // --- Roller ---
+            var userRoles = _context.UserRoles
+                .Where(ur => ur.UserId == me.Id)
+                .Select(ur => ur.RoleId)
+                .ToList();
+
+            var roleNames = _context.Roles
+                .Where(r => userRoles.Contains(r.Id))
+                .Select(r => r.Name)
+                .ToList();
+
+            bool isSuperAdmin = roleNames.Contains("SuperAdmin");
+            bool isAdmin = roleNames.Contains("Admin");
+            bool isTeamLeader = roleNames.Contains("TeamLeader");
+            bool isTeamMember = roleNames.Contains("TeamMember");
+
+            // --- Erişim kontrolü ---
+            if (!isSuperAdmin)
+            {
+                if (isAdmin)
+                {
+                    // admin yalnızca kendi şirketindeki görevleri görebilir
+                    if (task.AppUser?.CompanyId != me.CompanyId && task.ResponsibleUser?.CompanyId != me.CompanyId)
+                        return Forbid(); // erişim yok
+                }
+                else
+                {
+                    // teamleader veya member yalnızca kendine ait görevleri görebilir
+                    if (task.AppUserId != currentUserId && task.ResponsibleUserId != currentUserId)
+                        return Forbid();
+                }
+            }
+
+            // --- ViewBag doldurma kısmı (aynı kalıyor) ---
             var companyUsers = _context.Users.AsNoTracking()
                 .Where(u => u.EmailDomain == me.EmailDomain)
                 .OrderBy(u => u.UserName)
@@ -233,7 +309,7 @@ namespace CrmCorner.Controllers
                 })
                 .ToList();
 
-            // Eğer seçili AppUser ya da ResponsibleUser domain dışındaysa listeye "gizli" olarak ekle
+            // gizli kullanıcıları listeye ekleme
             var extraUserIds = new[] { task.AppUserId, task.ResponsibleUserId }
                 .Where(x => !string.IsNullOrWhiteSpace(x) && !companyUsers.Any(c => c.Value == x))
                 .Distinct()
@@ -255,7 +331,7 @@ namespace CrmCorner.Controllers
 
             ViewBag.Users = companyUsers;
 
-            // --- Müşteri listesi: sadece aynı domain kullanıcılarının sahip oldukları müşteriler ---
+            // --- müşteri listesi ---
             var companyUserIds = _context.Users.AsNoTracking()
                 .Where(u => u.EmailDomain == me.EmailDomain)
                 .Select(u => u.Id)
@@ -270,7 +346,7 @@ namespace CrmCorner.Controllers
                 })
                 .ToList();
 
-            // Seçili müşteri listede yoksa görünür kıl (gizli)
+            // gizli müşteri ekleme
             if (task.CustomerId != null && !customerItems.Any(x => x.Value == task.CustomerId.ToString()))
             {
                 var missingCustomer = _context.CustomerNs.AsNoTracking().FirstOrDefault(c => c.Id == task.CustomerId);
@@ -283,9 +359,10 @@ namespace CrmCorner.Controllers
                     });
                 }
             }
+
             ViewBag.Customer = new SelectList(customerItems, "Value", "Text", task.CustomerId?.ToString());
 
-            // Kaynak kanalları
+            // Kaynak kanallar
             ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
                 .Cast<SourceChannelType>()
                 .Select(e => new SelectListItem
@@ -306,28 +383,83 @@ namespace CrmCorner.Controllers
             return View(task);
         }
 
-
-
         // EDIT (POST)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult PipelineEdit(PipelineTask model)
         {
-            var existing = _context.PipelineTasks.FirstOrDefault(t => t.Id == model.Id);
+            var existing = _context.PipelineTasks
+                .Include(t => t.AppUser)
+                .Include(t => t.ResponsibleUser)
+                .FirstOrDefault(t => t.Id == model.Id);
+
             if (existing == null)
             {
                 TempData["ErrorMessage"] = "Görev bulunamadı.";
                 return RedirectToAction("PipelineIndex");
             }
 
-            // Aktif kullanıcı + domain
+            // Aktif kullanıcı
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
             if (me == null) return Unauthorized();
 
-            // --- Domain güvenliği ---
+            // ====== ROL ÇEK ======
+            var roleIdsOfMe = _context.UserRoles
+                .Where(ur => ur.UserId == me.Id)
+                .Select(ur => ur.RoleId)
+                .ToList();
+
+            var myRoles = _context.Roles
+                .Where(r => roleIdsOfMe.Contains(r.Id))
+                .Select(r => r.Name)
+                .ToList();
+
+            bool isSuperAdmin = myRoles.Contains("SuperAdmin");
+            bool isAdmin = myRoles.Contains("Admin");
+            bool isTeamLeader = myRoles.Contains("TeamLeader");
+            bool isTeamMember = myRoles.Contains("TeamMember");
+
+            // ====== YETKİ KONTROLÜ ======
+            // SuperAdmin: sınırsız
+            if (!isSuperAdmin)
+            {
+                if (isAdmin)
+                {
+                    // Admin yalnızca kendi şirketindeki görevleri düzenleyebilir
+                    var taskCompanyId =
+                        existing.ResponsibleUser?.CompanyId
+                        ?? existing.AppUser?.CompanyId;
+
+                    if (taskCompanyId != me.CompanyId)
+                    {
+                        TempData["ErrorMessage"] = "Bu görevi düzenleme yetkiniz yok.";
+                        return RedirectToAction("PipelineIndex");
+                    }
+                }
+                else
+                {
+                    // TeamLeader / TeamMember sadece kendisi dahilse düzenleyebilir
+                    bool iAmInTask =
+                        existing.AppUserId == currentUserId ||
+                        existing.ResponsibleUserId == currentUserId;
+
+                    if (!iAmInTask)
+                    {
+                        TempData["ErrorMessage"] = "Bu görevi düzenleme yetkiniz yok.";
+                        return RedirectToAction("PipelineIndex");
+                    }
+                }
+            }
+            // === Buraya kadar: erişim OK ===
+
+
+            // --- Domain güvenliği (SuperAdmin hariç) ---
             bool IsCompanyUser(string? uid) =>
-                !string.IsNullOrWhiteSpace(uid) &&
-                _context.Users.Any(u => u.Id == uid && u.EmailDomain == me.EmailDomain);
+                isSuperAdmin || (
+                    !string.IsNullOrWhiteSpace(uid) &&
+                    _context.Users.Any(u => u.Id == uid && u.EmailDomain == me.EmailDomain)
+                );
 
             // Burada sadece "zorunlu alan seçilmemişse" hata koy
             if (string.IsNullOrWhiteSpace(model.AppUserId))
@@ -341,78 +473,75 @@ namespace CrmCorner.Controllers
                 ModelState.AddModelError(nameof(model.ResponsibleUserId), "Sadece kendi şirketinizdeki kullanıcıları seçebilirsiniz.");
 
 
-            // Müşteri domain kontrolü
+            // Müşteri domain kontrolü (SuperAdmin hariç)
             var companyUserIds = _context.Users.AsNoTracking()
-            .Where(u => u.EmailDomain == me.EmailDomain)
-            .Select(u => u.Id)
-            .ToList();
-
+                .Where(u => u.EmailDomain == me.EmailDomain)
+                .Select(u => u.Id)
+                .ToList();
 
             bool IsCompanyCustomer(int? cid) =>
-                cid != null &&
-                _context.CustomerNs.Any(c => c.Id == cid && c.AppUserId != null && companyUserIds.Contains(c.AppUserId));
+                isSuperAdmin || (
+                    cid != null &&
+                    _context.CustomerNs.Any(c =>
+                        c.Id == cid &&
+                        c.AppUserId != null &&
+                        companyUserIds.Contains(c.AppUserId))
+                );
 
             if (!IsCompanyCustomer(model.CustomerId))
                 ModelState.AddModelError(nameof(model.CustomerId), "Sadece kendi şirketinizdeki müşterileri seçebilirsiniz.");
+
 
             // Stage/Outcome validasyonları
             if (model.Stage == PipelineStage.Sonuc &&
                 model.OutcomeStatus != OutcomeTypeSales.Won &&
                 model.OutcomeStatus != OutcomeTypeSales.Lost)
             {
-                ModelState.AddModelError(nameof(model.OutcomeStatus), "Sonuç aşamasına geçmek için lütfen 'Kazanıldı' veya 'Kaybedildi' seçiniz.");
+                ModelState.AddModelError(nameof(model.OutcomeStatus),
+                    "Sonuç aşamasına geçmek için lütfen 'Kazanıldı' veya 'Kaybedildi' seçiniz.");
             }
 
             if (model.OutcomeStatus == OutcomeTypeSales.Lost &&
                 string.IsNullOrWhiteSpace(model.NegativeReason))
             {
-                ModelState.AddModelError(nameof(model.NegativeReason), "Olumsuz sebep girilmesi zorunludur.");
+                ModelState.AddModelError(nameof(model.NegativeReason),
+                    "Olumsuz sebep girilmesi zorunludur.");
             }
 
-
             // === Outcomes ↔ OutcomeStatus tutarlılık kuralları ===
-            bool invalid = false;
-
-            // 1) Süreçte iken sonuç Won/Lost olamaz (None olmalı)
             if (model.Outcomes == OutcomeType.Surecte &&
-               (model.OutcomeStatus == OutcomeTypeSales.Won || model.OutcomeStatus == OutcomeTypeSales.Lost))
+               (model.OutcomeStatus == OutcomeTypeSales.Won ||
+                model.OutcomeStatus == OutcomeTypeSales.Lost))
             {
                 ModelState.AddModelError(nameof(model.OutcomeStatus),
                     "Süreç durumu 'Süreçte' iken sonuç 'Kazanıldı/Kaybedildi' olamaz. Lütfen 'Hiçbiri' seçin.");
-                invalid = true;
             }
 
-            // 2) Olumlu iken Kaybedildi olamaz
-            if (model.Outcomes == OutcomeType.Olumlu && model.OutcomeStatus == OutcomeTypeSales.Lost)
+            if (model.Outcomes == OutcomeType.Olumlu &&
+                model.OutcomeStatus == OutcomeTypeSales.Lost)
             {
                 ModelState.AddModelError(nameof(model.OutcomeStatus),
                     "Süreç durumu 'Olumlu' iken sonuç 'Kaybedildi' olamaz.");
-                invalid = true;
             }
 
-            // 3) Olumsuz iken Kazanıldı olamaz
-            if (model.Outcomes == OutcomeType.Olumsuz && model.OutcomeStatus == OutcomeTypeSales.Won)
+            if (model.Outcomes == OutcomeType.Olumsuz &&
+                model.OutcomeStatus == OutcomeTypeSales.Won)
             {
                 ModelState.AddModelError(nameof(model.OutcomeStatus),
                     "Süreç durumu 'Olumsuz' iken sonuç 'Kazanıldı' olamaz.");
-                invalid = true;
             }
 
-            // 4) Negatif gerekçe zorunlu: Outcomes=Olumsuz veya OutcomeStatus=Lost
-            if ((model.Outcomes == OutcomeType.Olumsuz || model.OutcomeStatus == OutcomeTypeSales.Lost)
-                && string.IsNullOrWhiteSpace(model.NegativeReason))
+            if ((model.Outcomes == OutcomeType.Olumsuz ||
+                 model.OutcomeStatus == OutcomeTypeSales.Lost) &&
+                string.IsNullOrWhiteSpace(model.NegativeReason))
             {
                 ModelState.AddModelError(nameof(model.NegativeReason),
                     "Olumsuz durumda 'Olumsuz Sebep' alanı zorunludur.");
-                invalid = true;
             }
 
-
-
-            // Hatalıysa view'ı filtreli listelerle geri yükle
+            // Model hatalıysa aynı geri dönüş bloğun aynen kalıyor ↓
             if (!ModelState.IsValid)
             {
-                // Kullanıcı listesi (filtreli) + gizli kullanıcılar
                 var usersSelect = _context.Users.AsNoTracking()
                     .Where(u => u.EmailDomain == me.EmailDomain)
                     .OrderBy(u => u.UserName)
@@ -433,6 +562,7 @@ namespace CrmCorner.Controllers
                         Text = au != null ? $"{au.UserName} (gizli)" : $"{model.AppUserId} (gizli)"
                     });
                 }
+
                 if (!string.IsNullOrWhiteSpace(model.ResponsibleUserId) &&
                     !usersSelect.Any(x => x.Value == model.ResponsibleUserId))
                 {
@@ -445,7 +575,6 @@ namespace CrmCorner.Controllers
                 }
                 ViewBag.Users = usersSelect;
 
-                // Müşteri listesi (filtreli) + gizli müşteri
                 var customerItems = _context.CustomerNs.AsNoTracking()
                     .Where(c => c.AppUserId != null && companyUserIds.Contains(c.AppUserId))
                     .Select(c => new SelectListItem
@@ -455,9 +584,11 @@ namespace CrmCorner.Controllers
                     })
                     .ToList();
 
-                if (model.CustomerId != null && !customerItems.Any(x => x.Value == model.CustomerId.ToString()))
+                if (model.CustomerId != null &&
+                    !customerItems.Any(x => x.Value == model.CustomerId.ToString()))
                 {
-                    var missingCustomer = _context.CustomerNs.AsNoTracking().FirstOrDefault(c => c.Id == model.CustomerId);
+                    var missingCustomer = _context.CustomerNs.AsNoTracking()
+                        .FirstOrDefault(c => c.Id == model.CustomerId);
                     if (missingCustomer != null)
                     {
                         customerItems.Insert(0, new SelectListItem
@@ -468,28 +599,23 @@ namespace CrmCorner.Controllers
                     }
                 }
 
-                var errs = ModelState.Where(x => x.Value?.Errors.Any() == true)
-.Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
+                var errs = ModelState
+                    .Where(x => x.Value?.Errors.Any() == true)
+                    .Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
+
                 TempData["ErrorMessage"] = string.Join(" | ", errs);
 
-
-
                 var allErrors = ModelState
-        .Where(ms => ms.Value.Errors.Any())
-        .Select(ms => new {
-            Field = ms.Key,
-            Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToList()
-        });
-
-                foreach (var error in allErrors)
-                {
-                    Console.WriteLine($"Alan: {error.Field} -> Hata: {string.Join(", ", error.Errors)}");
-                }
-
-                // debug için ViewBag'e de basabilirsin
+                    .Where(ms => ms.Value.Errors.Any())
+                    .Select(ms => new
+                    {
+                        Field = ms.Key,
+                        Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToList()
+                    });
                 ViewBag.DebugErrors = allErrors;
 
-                ViewBag.Customer = new SelectList(customerItems, "Value", "Text", model.CustomerId?.ToString());
+                ViewBag.Customer = new SelectList(customerItems, "Value", "Text",
+                    model.CustomerId?.ToString());
 
                 ViewBag.SourceChannels = Enum.GetValues(typeof(SourceChannelType))
                     .Cast<SourceChannelType>()
@@ -507,20 +633,20 @@ namespace CrmCorner.Controllers
                         Text = e.GetDisplayName()
                     }).ToList();
 
-
                 return View(model);
             }
 
-            // --- LOG setup ---
+            // --- LOG setup (senin kodun) ---
             var now = DateTime.Now;
-            var updaterUserId = currentUserId; // güncelleyen kişi (AppUserId'yi değiştirmiyoruz; o "görüşmeyi alan")
+            var updaterUserId = currentUserId;
 
             void LogIfChanged(string fieldName, object? oldVal, object? newVal)
             {
                 var oldStr = oldVal?.ToString();
                 var newStr = newVal?.ToString();
 
-                if (oldStr == newStr || (string.IsNullOrWhiteSpace(oldStr) && string.IsNullOrWhiteSpace(newStr)))
+                if (oldStr == newStr ||
+                    (string.IsNullOrWhiteSpace(oldStr) && string.IsNullOrWhiteSpace(newStr)))
                     return;
 
                 _context.PipelineTaskLogs.Add(new PipelineTaskLog
@@ -534,7 +660,6 @@ namespace CrmCorner.Controllers
                 });
             }
 
-            // --- Log'lanacak alanlar (AppUserId dahil!) ---
             LogIfChanged(nameof(model.AppUserId), existing.AppUserId, model.AppUserId);
             LogIfChanged(nameof(model.ResponsibleUserId), existing.ResponsibleUserId, model.ResponsibleUserId);
             LogIfChanged(nameof(model.Title), existing.Title, model.Title);
@@ -558,9 +683,9 @@ namespace CrmCorner.Controllers
             LogIfChanged(nameof(model.ContactedViaColdCall), existing.ContactedViaColdCall?.ToString(), model.ContactedViaColdCall?.ToString());
             LogIfChanged(nameof(model.CustomerId), existing.CustomerId?.ToString(), model.CustomerId?.ToString());
 
-            // --- Güncelleme ---
-            existing.AppUserId = model.AppUserId;              // Görüşmeyi Alan
-            existing.ResponsibleUserId = model.ResponsibleUserId;  // Sorumlu Kişi
+            // Güncelle
+            existing.AppUserId = model.AppUserId;
+            existing.ResponsibleUserId = model.ResponsibleUserId;
             existing.Title = model.Title;
             existing.Description = model.Description;
             existing.Value = model.Value;
@@ -582,10 +707,11 @@ namespace CrmCorner.Controllers
             existing.ContactedViaColdCall = model.ContactedViaColdCall;
             existing.CustomerId = model.CustomerId;
 
-            // Outcome kazanıldıysa PostSaleInfo kaydı oluştur
+            // Satış kazanıldıysa AfterSales kaydı aç
             if (existing.OutcomeStatus == OutcomeTypeSales.Won)
             {
-                var existingPostSale = _context.PostSaleInfos.FirstOrDefault(p => p.PipelineTaskId == existing.Id);
+                var existingPostSale = _context.PostSaleInfos
+                    .FirstOrDefault(p => p.PipelineTaskId == existing.Id);
                 if (existingPostSale == null)
                 {
                     var newPostSale = new PostSaleInfo
@@ -600,8 +726,6 @@ namespace CrmCorner.Controllers
 
             return RedirectToAction("PipelineIndex");
         }
-
-
 
         #endregion
 
@@ -632,24 +756,68 @@ namespace CrmCorner.Controllers
             return Ok();
         }
 
-
-
         public IActionResult PipelineDetails(int id)
         {
             var task = _context.PipelineTasks
-     .Include(t => t.Notes)
-     .Include(t => t.AppUser)
-     //.Include(t => t.ResponsibleUser)
-     .Include(t => t.Customer)
-     .Include(t => t.FileAttachments)
-     .FirstOrDefault(t => t.Id == id);
-
+                .Include(t => t.Notes)
+                .Include(t => t.AppUser)
+                .Include(t => t.ResponsibleUser)
+                .Include(t => t.Customer)
+                .Include(t => t.FileAttachments)
+                .FirstOrDefault(t => t.Id == id);
 
             if (task == null)
                 return NotFound();
 
+            // --- Aktif kullanıcı ve rol bilgisi ---
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
+            if (me == null) return Unauthorized();
+
+            var roleIdsOfMe = _context.UserRoles
+                .Where(ur => ur.UserId == me.Id)
+                .Select(ur => ur.RoleId)
+                .ToList();
+
+            var myRoles = _context.Roles
+                .Where(r => roleIdsOfMe.Contains(r.Id))
+                .Select(r => r.Name)
+                .ToList();
+
+            bool isSuperAdmin = myRoles.Contains("SuperAdmin");
+            bool isAdmin = myRoles.Contains("Admin");
+
+            // --- Erişim kontrolü ---
+            if (!isSuperAdmin)
+            {
+                if (isAdmin)
+                {
+                    // Admin sadece kendi şirketindeki görevleri görebilir
+                    var taskCompanyId = task.ResponsibleUser?.CompanyId ?? task.AppUser?.CompanyId;
+                    if (taskCompanyId != me.CompanyId)
+                    {
+                        TempData["ErrorMessage"] = "Bu görevin detayını görüntüleme yetkiniz yok.";
+                        return RedirectToAction("PipelineIndex");
+                    }
+                }
+                else
+                {
+                    // TeamLeader / TeamMember sadece kendiyle ilgili görevleri görebilir
+                    bool iAmInTask =
+                        task.AppUserId == currentUserId ||
+                        task.ResponsibleUserId == currentUserId;
+
+                    if (!iAmInTask)
+                    {
+                        TempData["ErrorMessage"] = "Bu görevin detayını görüntüleme yetkiniz yok.";
+                        return RedirectToAction("PipelineIndex");
+                    }
+                }
+            }
+
+            // --- Loglar ---
             var logs = _context.PipelineTaskLogs
-                .Include(l => l.UpdatedBy) // Düzenleyen kullanıcıyı görmek için gerekli
+                .Include(l => l.UpdatedBy)
                 .Where(l => l.PipelineTaskId == id)
                 .OrderByDescending(l => l.UpdatedAt)
                 .ToList();
@@ -658,7 +826,6 @@ namespace CrmCorner.Controllers
 
             return View(task);
         }
-
 
 
         [HttpPost]
@@ -680,10 +847,6 @@ namespace CrmCorner.Controllers
 
             return RedirectToAction("PipelineDetails", new { id = taskId });
         }
-
-
-
-
 
         [HttpPost]
         public IActionResult CheckProposalConditions(int id)
@@ -820,8 +983,6 @@ namespace CrmCorner.Controllers
 
             return Json(new { success = true });
         }
-
-
 
 
 

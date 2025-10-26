@@ -53,6 +53,15 @@
                                 <option value="">Şirket Seçiniz</option>
                             </select>
                         </div>
+
+
+<div class="col-md-6">
+    <label asp-for="PersonalUserId" class="form-label fw-semibold">Kişi (opsiyonel)</label>
+    <select asp-for="PersonalUserId" class="form-select" asp-items="ViewBag.UserList">
+        <option value="">Kişi Seçiniz (isteğe bağlı)</option>
+    </select>
+</div>
+
                     }
                 </div>
 

@@ -18,6 +18,8 @@ using System.Security.Claims;
 
 namespace CrmCorner.Controllers
 {
+    // 🔹 CRM Dashboard, Chart ve Bildirim fonksiyonları
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class HomeController : BaseController
     {
         private readonly CrmCornerContext _context;
@@ -46,7 +48,7 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> Index()
         
         {
-            await SetLayout();//areadamı değilmi onu  nalayıp layout set ediyor
+            await SetLayout();//areadamı değilmi onu  anlayıp layout set ediyor
             try
             {
                 if (!User.Identity!.IsAuthenticated)
@@ -62,7 +64,7 @@ namespace CrmCorner.Controllers
                 }
 
                 var roles = await _userManager.GetRolesAsync(currentUser);
-                if (roles.Contains("Admin"))//areaya yönlendiriyorum
+                if (roles.Contains("Admin") || roles.Contains("SuperAdmin"))
                 {
                     return RedirectToAction("Index", "Home", new { area = "Admin" });
                 }
@@ -84,7 +86,7 @@ namespace CrmCorner.Controllers
 
                     List<CustomerN> customers;
 
-                    if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                    if (User.IsInRole("Admin") || User.IsInRole("Team Leader"))
                     {
                         // Admin veya Manager ise aynı email domainine sahip tüm kullanıcıların müşterilerini getir
                         customers = companyUsers
@@ -173,7 +175,6 @@ namespace CrmCorner.Controllers
         }
 
         #region CHARTS
-        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> SourceChannelChart()
         {
@@ -208,7 +209,6 @@ namespace CrmCorner.Controllers
             });
         }
 
-        //[Authorize]
         public async Task<IActionResult> ValueOfferChart()
         {
             try
@@ -267,6 +267,7 @@ namespace CrmCorner.Controllers
                 return StatusCode(500, "İşleminiz sırasında bir hata oluştu.");
             }
         }
+
         // Yardımcı fonksiyon: chart verilerini hazırlar
         private List<ChartData> PrepareChartData(List<TaskComp> taskComps, dynamic[] ranges)
         {
@@ -348,9 +349,6 @@ namespace CrmCorner.Controllers
         //       }
         //   }
 
-
-        //[Authorize]
-        // /Home/IndustryChart
         public async Task<IActionResult> IndustryChart()
         {
             try
@@ -391,9 +389,6 @@ namespace CrmCorner.Controllers
         }
 
 
-
-        //[Authorize]
-        // /Home/IsFinalDecisionMaker  -> İletişim yöntemi grafiği
         public async Task<IActionResult> IsFinalDecisionMaker()
         {
             var userId = _userManager.GetUserId(User);
@@ -434,9 +429,6 @@ namespace CrmCorner.Controllers
         }
 
 
-
-        //[Authorize]
-        // /Home/OutcomeStatusChart
         public async Task<IActionResult> OutcomeStatusChart()
         {
             var userId = _userManager.GetUserId(User);
@@ -487,8 +479,6 @@ namespace CrmCorner.Controllers
         }
 
 
-        //[Authorize]
-        // /Home/UserTaskStatusChart
         public async Task<IActionResult> UserTaskStatusChart()
         {
             var userId = _userManager.GetUserId(User);
@@ -523,11 +513,13 @@ namespace CrmCorner.Controllers
         }
 
         #region Giriş
+        [AllowAnonymous]
         public IActionResult SignIn()
         {
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
         {
@@ -565,11 +557,13 @@ namespace CrmCorner.Controllers
         #endregion
 
         #region Kayıt
+        [AllowAnonymous]
         public IActionResult SignUp()
         {
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> SignUp(SignUpViewModel request)
         {
@@ -644,11 +638,13 @@ namespace CrmCorner.Controllers
             }
         }
         #endregion
+        [AllowAnonymous]
         public IActionResult ForgetPassword()
         {
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
         {
@@ -677,6 +673,7 @@ namespace CrmCorner.Controllers
             return RedirectToAction(nameof(ForgetPassword));
         }
 
+        [AllowAnonymous]
         public IActionResult ResetPassword(string userId, string token)
         {
             try
@@ -691,6 +688,7 @@ namespace CrmCorner.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
         {
@@ -759,92 +757,6 @@ namespace CrmCorner.Controllers
             return Json(new { Message = jsonData });
         }
 
-
-
-
-        //#region ŞİFRE İŞLEMLERİ
-        //public IActionResult ForgetPassword()
-        //{
-        //    return View();
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
-        //{
-        //    try
-        //    {
-        //        var hasUser = await _userManager.FindByEmailAsync(request.Email);
-        //        if (hasUser == null)
-        //        {
-        //            ModelState.AddModelError(String.Empty, "Bu email adresine sahip kullanıcı bulunamamıştır.");
-        //            return View();
-        //        }
-
-        //        string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
-        //        var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
-
-        //        await _emailServices.SendResetPasswordEmail(passwordResetLink!, hasUser.Email!);
-        //        TempData["SuccessMessage"] = "Şifre yenileme linki, e-posta adresinize gönderilmiştir.";
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return RedirectToAction("NotFound", "Error");
-        //    }
-
-        //    return RedirectToAction(nameof(ForgetPassword));
-        //}
-
-        //public IActionResult ResetPassword(string userId, string token)
-        //{
-        //    try
-        //    {
-        //        TempData["userId"] = userId;
-        //        TempData["token"] = token;
-        //        return View();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return RedirectToAction("NotFound", "Error");
-        //    }
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
-        //{
-        //    try
-        //    {
-        //        var userId = TempData["userId"];
-        //        var token = TempData["token"];
-        //        if (userId == null || token == null)
-        //        {
-        //            throw new Exception("Bir hata meydana geldi.");
-        //        }
-
-        //        var hasUser = await _userManager.FindByIdAsync(userId.ToString()!);
-        //        if (hasUser == null)
-        //        {
-        //            ModelState.AddModelError(String.Empty, "Kullanıcı bulunamamıştır.");
-        //            return View();
-        //        }
-
-        //        IdentityResult result = await _userManager.ResetPasswordAsync(hasUser, token.ToString()!, request.Password);
-        //        if (result.Succeeded)
-        //        {
-        //            TempData["SuccessMessage"] = "Şifreniz başarıyla yenilenmiştir.";
-        //            return RedirectToAction("SignIn", "Home");
-        //        }
-        //        else
-        //        {
-        //            ModelState.AddModelErrorList(result.Errors.Select(x => x.Description).ToList());
-        //            return View();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return RedirectToAction("NotFound", "Error");
-        //    }
-        //}
-        //#endregion
 
         public IActionResult Privacy()
         {

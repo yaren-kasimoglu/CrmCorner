@@ -17,7 +17,11 @@ using System.Text;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+
+    //  ApolloPullController
+    // Bu controller, Apollo API'den kişi çekme ve pipeline aktarma işlemleri içindir.
+    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember (Sosyal medya rollerine kapalı)
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class ApolloPullController : Controller
     {
         private readonly CrmCornerContext _context;

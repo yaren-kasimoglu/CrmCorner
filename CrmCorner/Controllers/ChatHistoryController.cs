@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Models
 {
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class ChatHistoryController
     {
         private readonly CrmCornerContext _context;

@@ -32,6 +32,14 @@
                 </div>
 
             }
+            @if (TempData["ErrorMessage"] != null)
+            {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fa fa-exclamation-triangle me-2"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            }
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
             </div>
 
@@ -129,3 +137,19 @@
             "placeholder": "5__-___-____"
         });
     });</script>
+<script>
+    setTimeout(function() {
+        var alert = document.querySelector('.alert');
+        if (alert) {
+            alert.classList.remove('show');
+        }
+    }, 4000);
+</script>
+<script>
+    setTimeout(function() {
+        var alert = document.querySelector('.alert-success');
+        if (alert) {
+            alert.classList.remove('show');
+        }
+    }, 3000);
+</script>

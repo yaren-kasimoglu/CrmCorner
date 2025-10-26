@@ -24,13 +24,24 @@
 {
     <div class="alert alert-warning">
         <ul>
-            @foreach (var err in ViewBag.DebugErrors)
+            @foreach (var err in (IEnumerable<dynamic>)ViewBag.DebugErrors)
             {
-                <li>@err.Field : @string.Join(", ", err.Errors)</li>
+                var fieldProp = err.GetType().GetProperty("Field");
+                var errorsProp = err.GetType().GetProperty("Errors");
+
+                if (fieldProp != null && errorsProp != null)
+                {
+                    <li>@fieldProp.GetValue(err): @string.Join(", ", (IEnumerable<string>)errorsProp.GetValue(err))</li>
+                }
+                else
+                {
+                    <li>@err.ToString()</li>
+                }
             }
         </ul>
     </div>
 }
+
 
 
 

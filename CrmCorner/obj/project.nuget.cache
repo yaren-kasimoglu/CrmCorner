@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "PkWLFSkPKF8=",
+  "dgSpecHash": "Ekceu34o1UY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+  "projectFilePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Lenovo\\.nuget\\packages\\ae.net.mail\\1.7.10\\ae.net.mail.1.7.10.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\azure.core\\1.37.0\\azure.core.1.37.0.nupkg.sha512",
@@ -262,156 +262,156 @@
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'Microsoft.Identity.Client' 4.59.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m5vv-6r4h-3vj9",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.Identity.Client",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1901",
       "level": "Warning",
       "message": "Package 'Microsoft.Identity.Client' 4.59.0 has a known low severity vulnerability, https://github.com/advisories/GHSA-x674-v45j-fwxw",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.Identity.Client",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'RestSharp' 110.2.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-4rr6-2v9v-wcpc",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "RestSharp",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'AE.Net.Mail 1.7.10' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'AE.Net.Mail 1.7.10' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "AE.Net.Mail",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Independentsoft.Graph 1.1.970' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Independentsoft.Graph 1.1.970' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Independentsoft.Graph",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Microsoft.AspNet.SignalR.Core 2.4.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Microsoft.AspNet.SignalR.Core 2.4.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.AspNet.SignalR.Core",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Microsoft.AspNet.SignalR.Owin 1.2.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Microsoft.AspNet.SignalR.Owin 1.2.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.AspNet.SignalR.Owin",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Microsoft.AspNet.SignalR.SystemWeb 2.4.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Microsoft.AspNet.SignalR.SystemWeb 2.4.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.AspNet.SignalR.SystemWeb",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Microsoft.Exchange.WebServices 2.2.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Microsoft.Exchange.WebServices 2.2.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.Exchange.WebServices",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Microsoft.Owin 4.2.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Microsoft.Owin 4.2.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.Owin",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Microsoft.Owin.Host.SystemWeb 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Microsoft.Owin.Host.SystemWeb 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.Owin.Host.SystemWeb",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Microsoft.Owin.Security 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Microsoft.Owin.Security 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Microsoft.Owin.Security",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     },
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Package 'Owin 1.0.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0'. This package may not be fully compatible with your project.",
-      "projectPath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "message": "Package 'Owin 1.0.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Lenovo\\source\\repos\\CrmCornerCo\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
+      "filePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
       "libraryId": "Owin",
       "targetGraphs": [
-        "net7.0"
+        "net8.0"
       ]
     }
   ]

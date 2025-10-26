@@ -17,13 +17,16 @@ namespace CrmCorner.Models
                 await roleManager.CreateAsync(new AppRole { Name = "User" });
 
             // Kullanıcı
-            var user = await userManager.FindByNameAsync("yarenkasSaaskontrol");
+            var user = await userManager.FindByNameAsync("YarenKasimoglu");
             if (user == null)
             {
-                user = new AppUser
+                new AppUser
                 {
                     UserName = "yarenkasSaaskontrol",
-                    Email = "yaren@saascorner.co"
+                    Email = "yaren@saascorner.co",
+                    CompanyName = "SAAS Corner",   // 🔥 eklendi
+                    CompanyId = 9,                 // varsa (opsiyonel)
+                    EmailDomain = "saascorner.co"  // senin sisteminde genelde kullanılıyor
                 };
 
                 // şifre: Test123!

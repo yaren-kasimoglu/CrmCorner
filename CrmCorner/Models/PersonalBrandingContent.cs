@@ -30,5 +30,11 @@ namespace CrmCorner.Models
 
         public ICollection<PersonalBrandingFeedback>? Feedbacks { get; set; }
 
+
+        public string? PersonalUserId { get; set; }
+
+        [ForeignKey("PersonalUserId")]
+        public AppUser? PersonalUser { get; set; }
+
     }
 }
