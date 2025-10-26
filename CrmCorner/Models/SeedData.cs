@@ -22,9 +22,9 @@ namespace CrmCorner.Models
             {
                 new AppUser
                 {
-                    UserName = "yarenkasSaaskontrol",
+                    UserName = "YarenKasimoglu",
                     Email = "yaren@saascorner.co",
-                    CompanyName = "SAAS Corner",   // 🔥 eklendi
+                    CompanyName = "SaasCorner",   //  eklendi
                     CompanyId = 9,                 // varsa (opsiyonel)
                     EmailDomain = "saascorner.co"  // senin sisteminde genelde kullanılıyor
                 };
