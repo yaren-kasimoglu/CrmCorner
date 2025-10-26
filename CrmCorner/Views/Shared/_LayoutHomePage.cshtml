@@ -351,22 +351,11 @@
 
 
 
-                                    @if (userRole == "Admin")
+                                    @if (userRole == "SuperAdmin")
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
                                                 <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
-                                            </a>
-                                        </li>
-
-                                           <li class="nav-item">
-                                            <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="Index">
-                                                <i class="fa fa-briefcase"></i> Rol Oluşturma
-                                            </a>
-                                        </li>
-                                             <li class="nav-item">
-                                            <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">
-                                                <i class="fa fa-briefcase"></i> Yetki Atama
                                             </a>
                                         </li>
                                     }
@@ -415,6 +404,36 @@
                                     </li>
 
 
+                                      @if (userRole == "SuperAdmin")
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link d-flex align-items-center"
+                                            data-bs-toggle="collapse"
+                                            href="#reportSubmenu"
+                                            role="button"
+                                            aria-expanded="false"
+                                            aria-controls="reportSubmenu">
+                                                <i class="fa fa-chart-bar me-2"></i><span>Rol Yetki</span>
+                                                <i class="fa fa-chevron-down ms-auto"></i>
+                                            </a>
+                                            <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
+                                                <li class="nav-item">
+                                                    <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="Index">
+                                                        <i class="fa fa-briefcase"></i> Rol Oluşturma
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">
+                                                        <i class="fa fa-briefcase"></i> Yetki Atama
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    }
+
+
+
+
 
                                     @*    <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
@@ -422,6 +441,8 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="EmailList" asp-action="EmailList"><i class="fa fa-envelope-o"></i>Gelen Kutusu</a>
                                     </li> *@
+
+
                                     <li class="nav-item">
                                         <a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a>
                                     </li>
