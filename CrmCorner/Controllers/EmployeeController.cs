@@ -10,7 +10,10 @@ using System.Threading.Tasks;
 
 namespace CrmCorner.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    // 🔹 EmployeeController
+    // Şirket içindeki çalışanları listeler. (SuperAdmin tüm şirketleri görebilir.)
+    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class EmployeeController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -25,71 +28,42 @@ namespace CrmCorner.Controllers
         {
             try
             {
-                // Giriş yapmış kullanıcının UserName'ini al
-                var currentUserName = User.Identity.Name;
-
-                // Giriş yapmış kullanıcının bilgilerini al
-                var currentUser = await _userManager.FindByNameAsync(currentUserName);
-                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-
+                var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
                     return RedirectToAction("NotFound", "Error");
                 }
 
-                // Giriş yapmış kullanıcının CompanyName bilgisini al
-                var currentUserCompanyName = currentUser.CompanyName;
-                var currentUserEmailDomain = currentUser.EmailDomain;
+                ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
 
-                // Aynı EmailDomain'e sahip olan kullanıcıları getir
-                var userList = await _userManager.Users
-                    .Where(u => u.EmailDomain == currentUserEmailDomain)
-                    .ToListAsync();
+                var roles = await _userManager.GetRolesAsync(currentUser);
 
-                var dashboardEmpViewModelList = new List<DashboardEmpViewModel>();
+                List<AppUser> employees;
 
-                foreach (var user in userList)
+                if (roles.Contains("SuperAdmin"))
                 {
-                    var taskComps = _context.TaskComps
-                        .AsNoTracking()
-                        .Include(tc => tc.Status) // Status nesnesini dahil et.
-                        .Where(tc => (tc.AppUser.UserName == user.UserName || tc.AssignedUser.UserName == user.UserName) && tc.Status != null)
-                        .ToList();
-
-                    var uniqueTaskComps = taskComps
-                        .GroupBy(tc => tc.TaskId)
-                        .Select(g => g.First())
-                        .ToList();
-
-                    var taskStatusCounts = uniqueTaskComps
-                        .GroupBy(tc => tc.Status.StatusName)
-                        .Select(group => new { Status = group.Key, Count = group.Count() })
-                        .ToDictionary(t => t.Status, t => t.Count);
-
-                    var dashboardEmpViewModel = new DashboardEmpViewModel
-                    {
-                        User = new UserViewModel
-                        {
-                            UserName = user.UserName,
-                            Email = user.Email,
-                            PhoneNumber = user.PhoneNumber,
-                            CompanyName = user.CompanyName,
-                            PositionName = user.PositionName,
-                            NameSurname = user.NameSurname
-                        },
-                        TaskStatusCountsByUser = taskStatusCounts
-                    };
-
-                    dashboardEmpViewModelList.Add(dashboardEmpViewModel);
+                    // SuperAdmin tüm kullanıcıları görebilir
+                    employees = await _userManager.Users
+                        .OrderBy(u => u.CompanyName)
+                        .ToListAsync();
+                }
+                else
+                {
+                    // Diğer roller sadece kendi şirketindeki kullanıcıları görebilir
+                    employees = await _userManager.Users
+                        .Where(u => u.CompanyId == currentUser.CompanyId)
+                        .OrderBy(u => u.NameSurname)
+                        .ToListAsync();
                 }
 
-                return View(dashboardEmpViewModelList);
+                return View(employees);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-             return RedirectToAction("NotFound", "Error");
+                return RedirectToAction("NotFound", "Error");
             }
         }
+
 
         #endregion
 

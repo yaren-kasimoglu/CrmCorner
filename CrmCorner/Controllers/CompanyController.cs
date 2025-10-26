@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize] // sadece giriş yapmış kullanıcılar erişebilir
+
+    //  CompanyController
+    // Şirket kayıtlarını listeleme, onaylama ve silme işlemlerini yönetir.
+    // Erişim: SuperAdmin, Admin
+    [Authorize(Roles = "SuperAdmin,Admin")]
     public class CompanyController : Controller
     {
         private readonly CrmCornerContext _context;

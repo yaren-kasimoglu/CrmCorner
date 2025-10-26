@@ -25,6 +25,7 @@ namespace CrmCorner.Controllers
             var roles = await _userManager.GetRolesAsync(currentUser);
             var query = _context.PersonalBrandingContents
                                 .Include(x => x.Company)
+                                .Include(x => x.PersonalUser)
                                 .OrderByDescending(x => x.CreatedDate)
                                 .AsQueryable();
 
@@ -43,10 +44,24 @@ namespace CrmCorner.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var companies = await _context.Companies.ToListAsync();
+            // Şirket listesi
+            var companies = await _context.Companies
+                .OrderBy(c => c.CompanyName)
+                .ToListAsync();
             ViewBag.CompanyList = new SelectList(companies, "CompanyId", "CompanyName");
+
+            // Kullanıcı listesi (kişisel hesap için)
+            // Burada UserManager üzerinden gidiyoruz ki kesin dolsun
+            var users = await _userManager.Users
+                .OrderBy(u => u.NameSurname) // AppUser içinde FullName yoksa -> u.UserName / u.NameSurname / u.Email kullan
+                .Select(u => new { u.Id, u.NameSurname })
+                .ToListAsync();
+
+            ViewBag.UserList = new SelectList(users, "Id", "NameSurname");
+
             return View();
         }
+
 
         [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin")]
         [HttpPost]
@@ -121,6 +136,7 @@ namespace CrmCorner.Controllers
 
             var content = await _context.PersonalBrandingContents
                 .Include(c => c.Company)
+                .Include(x => x.PersonalUser)
                 .Include(c => c.Feedbacks) // Feedback navigation varsa çeker
                 .FirstOrDefaultAsync(c => c.Id == id);
 
@@ -144,7 +160,7 @@ namespace CrmCorner.Controllers
         }
 
 
-        [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin")]
+        [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin,SocialMediaUser")]
         [HttpPost]
         public async Task<IActionResult> Approve(int id)
         {
@@ -156,7 +172,7 @@ namespace CrmCorner.Controllers
             return RedirectToAction("Details", new { id });
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin")]
+        [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin,SocialMediaUser")]
         [HttpPost]
         public async Task<IActionResult> CancelApproval(int id)
         {

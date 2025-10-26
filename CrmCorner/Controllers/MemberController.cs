@@ -2,6 +2,7 @@
 using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using CrmCorner.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.FileProviders;
 namespace CrmCorner.Controllers
 {
 
+    [Authorize]
     public class MemberController : Controller //Sadece kullanıcı olanların görebileceği bir sayfadır
     {
         private readonly CrmCornerContext _context;
@@ -85,24 +87,24 @@ namespace CrmCorner.Controllers
                 if (!checkOldPass)
                 {
                     ModelState.AddModelError(string.Empty, "Eski şifreniz yanlış.");
-                    return View();
+                    return RedirectToAction("PasswordChange");
                 }
 
                 var resultChangePassword = await _userManager.ChangePasswordAsync(currentUser, request.PasswordOld, request.PasswordNew);
 
                 if (!resultChangePassword.Succeeded)
                 {
-                    ModelState.AddModelErrorList(resultChangePassword.Errors);
-                    return View();
+                    TempData["ErrorMessage"] = "Şifre değiştirme işlemi başarısız oldu.";
+                    return RedirectToAction("PasswordChange");
                 }
 
                 await _userManager.UpdateSecurityStampAsync(currentUser);
                 await _signInManager.SignOutAsync();
                 await _signInManager.PasswordSignInAsync(currentUser, request.PasswordNew, true, false);
 
-                TempData["SucceesMessage"] = "Şifre değiştirme işlemi başarıyla tamamlandı.";
+                TempData["SuccessMessage"] = "Şifre başarıyla değiştirildi.";
+                return RedirectToAction("PasswordChange");
 
-                return RedirectToAction("MyProfile", "Member");
             }
             catch (Exception ex)
             {
@@ -182,6 +184,16 @@ namespace CrmCorner.Controllers
                             Directory.CreateDirectory(userprofilepicturePath);
                         }
 
+                        // Sadece belirli uzantılara izin ver
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                        var fileExt = Path.GetExtension(request.Picture.FileName).ToLower();
+
+                        if (!allowedExtensions.Contains(fileExt))
+                        {
+                            TempData["ErrorMessage"] = "Yalnızca .jpg, .jpeg, .png veya .gif formatındaki dosyaları yükleyebilirsiniz.";
+                            return RedirectToAction("UserEdit");
+                        }
+
                         var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(request.Picture.FileName)}";
                         var newPicturePath = Path.Combine(userprofilepicturePath, randomFileName);
 
@@ -219,7 +231,7 @@ namespace CrmCorner.Controllers
                 await _signInManager.SignInAsync(currentUser, isPersistent: true);
 
                 // Başarı mesajını TempData'ya ekle
-                TempData["SuccessMessage"] = "Bilgiler başarıyla değiştirildi.";
+                TempData["SuccessMessage"] = "Bilgiler başarıyla güncellendi.";
 
                 // Güncellenmiş kullanıcı bilgileri ile ViewModel'i doldur
                 var userEditViewModel = new UserEditViewModel
@@ -234,7 +246,7 @@ namespace CrmCorner.Controllers
                     EmployeeCount = request.EmployeeCount,
                 };
 
-                return View(userEditViewModel);
+                return RedirectToAction("UserEdit");
             }
             catch (Exception ex)
             {

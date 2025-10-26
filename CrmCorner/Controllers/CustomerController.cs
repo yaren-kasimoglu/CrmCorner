@@ -10,7 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    // 🔹 CustomerController
+    // CRM modülündeki müşteri yönetimi işlemlerini (listeleme, ekleme, düzenleme, silme) yönetir.
+    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember (sosyal medya rollerine kapalı)
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class CustomerController : Controller
     {
         private readonly CrmCornerContext _context;

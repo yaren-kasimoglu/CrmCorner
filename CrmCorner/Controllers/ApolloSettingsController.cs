@@ -7,8 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
-    //api kaydetme ve kontrol etme controllerı
-    //[Authorize(Roles = "Admin")]
+    // ApolloSettingsController
+    // Kullanıcı bazlı Apollo API anahtarı kaydetme ve test etme işlemlerini yapar.
+    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember (Sosyal medya rollerine kapalı)
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class ApolloSettingsController : Controller
     {
         private readonly CrmCornerContext _context;

@@ -16,7 +16,7 @@ using PipelineStageEnum = CrmCorner.Models.Enums.PipelineStage;
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class PipelineAnalysisController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -33,7 +33,7 @@ namespace CrmCorner.Controllers
             _roleManager = roleManager;
         }
 
-        // GET: /PipelineAnalysis
+        [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -42,18 +42,41 @@ namespace CrmCorner.Controllers
             if (currentUser is null) return Unauthorized();
 
             var roles = await _userManager.GetRolesAsync(currentUser);
-            bool isAdminOrManager = roles.Contains("Admin") || roles.Contains("Manager");
+            bool isSuperAdmin = roles.Contains("SuperAdmin");
+            bool isAdmin = roles.Contains("Admin");
+            bool isTeamLeader = roles.Contains("TeamLeader");
+            bool isTeamMember = roles.Contains("TeamMember");
 
             // 2) Kapsama girecek kullanıcılar
             IQueryable<AppUser> usersQ = _context.Users.AsNoTracking();
-            if (isAdminOrManager)
+
+            if (isSuperAdmin)
             {
-                // Aynı e-posta domainindeki tüm kullanıcılar
-                usersQ = usersQ.Where(u => u.EmailDomain == currentUser.EmailDomain);
+                // SuperAdmin -> tüm kullanıcılar
+                // Herhangi bir filtre uygulanmaz
+            }
+            else if (isAdmin)
+            {
+                // Admin -> kendi şirketindeki herkes
+                usersQ = usersQ.Where(u => u.CompanyId == currentUser.CompanyId);
+            }
+            else if (isTeamLeader)
+            {
+                // TeamLeader -> kendi şirketindeki TeamMember'lar ve kendisi
+                var teamMembers = await _userManager.GetUsersInRoleAsync("TeamMember");
+                var teamMemberIds = teamMembers
+                    .Where(u => u.CompanyId == currentUser.CompanyId)
+                    .Select(u => u.Id)
+                    .ToList();
+
+                // kendi ID'sini de ekle
+                teamMemberIds.Add(currentUser.Id);
+
+                usersQ = usersQ.Where(u => teamMemberIds.Contains(u.Id));
             }
             else
             {
-                // Sadece kendisi
+                // TeamMember -> sadece kendi verileri
                 usersQ = usersQ.Where(u => u.Id == currentUser.Id);
             }
 
@@ -118,7 +141,6 @@ namespace CrmCorner.Controllers
                     .ToList(),
                 AllStages = allStages,
                 AllOutcomes = allOutcomes,
-                IsAdminOrManager = isAdminOrManager
             };
 
             return View(vm); // Views/PipelineAnalysis/Index.cshtml
