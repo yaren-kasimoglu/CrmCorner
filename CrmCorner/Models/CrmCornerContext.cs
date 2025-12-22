@@ -27,8 +27,9 @@ namespace CrmCorner.Models
         public DbSet<Status> Statuses { get; set; }
         public DbSet<TaskComp> TaskComps { get; set; }
         public DbSet<FileAttachment> FileAttachments { get; set; }
-        public DbSet<ToDo> ToDos { get; set; }
-        public DbSet<ToDoList> ToDoList { get; set; }
+        public DbSet<TodoBoard> TodoBoards { get; set; }
+        public DbSet<TodoEntry> TodoEntries { get; set; }
+
         public DbSet<TaskCompLog> TaskCompLogs { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<BigecSayfaDeneme> BigeçSayfaDenemes { get; set; }
@@ -55,6 +56,9 @@ namespace CrmCorner.Models
         public DbSet<PipelineTaskLog> PipelineTaskLogs { get; set; }
         public DbSet<PipelineTaskHistory> PipelineTaskHistories { get; set; }
         public DbSet<PipelineTaskFileAttachment> PipelineTaskFileAttachments { get; set; }
+
+        public DbSet<ApolloLabelSync> ApolloLabelSyncs { get; set; }
+
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -175,6 +179,19 @@ namespace CrmCorner.Models
                 .HasOne(f => f.SocialMediaContent)
                 .WithMany(s => s.Feedbacks)
                 .HasForeignKey(f => f.SocialMediaContentId);
+
+            modelBuilder.Entity<TodoEntry>()
+    .HasOne(e => e.TodoBoard)
+    .WithMany(b => b.Entries)
+    .HasForeignKey(e => e.TodoBoardId);
+
+
+            modelBuilder.Entity<TodoEntry>()
+    .HasOne<AppUser>(t => t.Assignee)
+    .WithMany()
+    .HasForeignKey(t => t.AssigneeId)
+    .OnDelete(DeleteBehavior.SetNull);
+
 
             OnModelCreatingPartial(modelBuilder);
         }
