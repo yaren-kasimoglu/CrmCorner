@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20251122190451_Add_Assigneedd_To_TodoEntry")]
+    partial class Add_Assigneedd_To_TodoEntry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,28 +83,6 @@ namespace CrmCorner.Migrations
                     b.ToTable("ApolloContacts");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.ApolloLabelSync", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("LabelId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("LastSyncUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ApolloLabelSyncs");
-                });
-
             modelBuilder.Entity("CrmCorner.Models.ApolloSettings", b =>
                 {
                     b.Property<int>("Id")
@@ -111,9 +92,6 @@ namespace CrmCorner.Migrations
                     b.Property<string>("ApolloApiToken")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("LastContactsSyncUtc")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1156,9 +1134,6 @@ namespace CrmCorner.Migrations
                     b.Property<string>("AssignedById")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("AssignedByUserId")
-                        .HasColumnType("varchar(255)");
-
                     b.Property<string>("AssigneeId")
                         .HasColumnType("varchar(255)");
 
@@ -1183,8 +1158,6 @@ namespace CrmCorner.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignedByUserId");
 
                     b.HasIndex("AssigneeId");
 
@@ -1544,10 +1517,6 @@ namespace CrmCorner.Migrations
 
             modelBuilder.Entity("CrmCorner.Models.TodoEntry", b =>
                 {
-                    b.HasOne("CrmCorner.Models.AppUser", "AssignedByUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedByUserId");
-
                     b.HasOne("CrmCorner.Models.AppUser", "Assignee")
                         .WithMany()
                         .HasForeignKey("AssigneeId")
@@ -1558,8 +1527,6 @@ namespace CrmCorner.Migrations
                         .HasForeignKey("TodoBoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AssignedByUser");
 
                     b.Navigation("Assignee");
 

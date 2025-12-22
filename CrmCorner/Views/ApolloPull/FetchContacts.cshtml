@@ -6,7 +6,7 @@
 
 <h2>Apollo Kişi Verisi Çek</h2>
 
-<form asp-action="FetchContacts" method="post">
+@* <form asp-action="FetchContacts" method="post">
     <div class="form-group">
         <label>API Anahtarınız</label>
         <input type="text" name="ApiKey" value="@Model.ApiKey" class="form-control" required />
@@ -21,22 +21,38 @@
                 <option value="@item.Value">@item.Text</option>
             }
         </select>
-@*         <div class="form-group mt-2">
-            <label>Güncelleme Başlangıç Tarihi</label>
-            <input type="date" name="StartDate" class="form-control"
-                   value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
-        </div>
-
-        <div class="form-group mt-2">
-            <label>Güncelleme Bitiş Tarihi</label>
-            <input type="date" name="EndDate" class="form-control"
-                   value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
-        </div> *@
 
     </div>
 
     <button type="submit" class="btn btn-primary mt-3">Kişileri Getir</button>
+</form> *@
+
+<form asp-action="FetchLabels" method="post">
+    <div class="mb-2">
+        <label class="form-label">API Anahtarınız</label>
+        <input asp-for="ApiKey" class="form-control" />
+        <span asp-validation-for="ApiKey" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-secondary">Label’ları Getir</button>
+
 </form>
+<form asp-action="FetchContactsByLabel" method="post" class="mt-3">
+    <input asp-for="ApiKey" type="hidden" />
+
+    <div class="mb-2">
+        <label class="form-label">Liste Seçin</label>
+        <select asp-for="SelectedLabelId" asp-items="Model.Labels" class="form-control">
+            <option value="">-- Liste seçin --</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Seçili Listenin Kişilerini Çek
+    </button>
+</form>
+
+
 
 @if (ViewBag.Error != null)
 {

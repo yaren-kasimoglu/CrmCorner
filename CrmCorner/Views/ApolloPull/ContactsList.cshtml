@@ -1,5 +1,4 @@
-﻿@model IEnumerable<CrmCorner.Models.ApolloContactDbModel>
-@{
+﻿@{
     ViewData["Title"] = "Apollo Kişi Listesi";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
@@ -27,7 +26,7 @@
         <table id="contactsTable" class="display nowrap table table-bordered" style="width:100%">
             <thead>
                 <tr>
-                    <th><input type="checkbox" id="selectAll" /></th> <!-- Toplu seçim -->
+                    <th><input type="checkbox" id="selectAll" /></th>
                     <th>Ad</th>
                     <th>Soyad</th>
                     <th>Unvan</th>
@@ -37,18 +36,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var contact in Model)
-                {
-                    <tr>
-                        <td><input type="checkbox" name="selectedIds" value="@contact.Id" class="selectCheckbox" /></td>
-                        <td>@contact.FirstName</td>
-                        <td>@contact.LastName</td>
-                        <td>@contact.Title</td>
-                        <td>@contact.CompanyName</td>
-                        <td>@contact.Email</td>
-                        <td>@(((DateTime?)contact.UpdatedAt)?.ToString("yyyy-MM-dd") ?? "")</td>
-                    </tr>
-                }
+                @* Server-side: tbody boş kalacak, DataTables dolduracak *@
             </tbody>
         </table>
     </div>
@@ -56,9 +44,9 @@
     <button type="submit" class="btn btn-primary mt-3">Görevlerime Taşı</button>
 </form>
 
-<!-- ✅ GÜNCELLENMEMİŞ KALAN TÜM SCRIPTLER AYNEN DURUYOR -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
@@ -68,39 +56,86 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"></script>
 
 <script>
     $(document).ready(function () {
+
         var table = $('#contactsTable').DataTable({
             dom: 'Bfrtip',
             pageLength: 20,
             responsive: true,
+
+            processing: true,
+            serverSide: true,
+
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"
             },
+
+            ajax: {
+                url: '@Url.Action("ContactsListData", "ApolloPull")',
+                type: 'POST'
+            },
+
             buttons: [
                 'copyHtml5',
                 'excelHtml5',
                 'csvHtml5',
                 'pdfHtml5',
                 'colvis'
+            ],
+
+            columns: [
+                {
+                    data: 'id',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row, meta) {
+                        return '<input type="checkbox" name="selectedIds" value="' + data + '" class="selectCheckbox" />';
+                    }
+                },
+                { data: 'firstName' },
+                { data: 'lastName' },
+                { data: 'title' },
+                { data: 'companyName' },
+                { data: 'email' },
+                {
+                    data: 'updatedAt',
+                    render: function (data) {
+                        if (!data) return '';
+                        // ISO date geldiyse (2025-12-22T...) sadece tarihi al
+                        return data.toString().substring(0, 10);
+                    }
+                }
             ]
         });
 
-        // ✅ "Hepsini Seç" checkbox davranışı
+        // ✅ "Hepsini Seç" (mevcut sayfadaki satırlar için)
         $('#selectAll').on('click', function () {
-            var rows = table.rows({ 'search': 'applied' }).nodes();
-            $('input[type="checkbox"].selectCheckbox', rows).prop('checked', this.checked);
+            var checked = this.checked;
+            $('#contactsTable tbody input.selectCheckbox').prop('checked', checked);
         });
 
-        // ✅ Tek tek kutu seçildiğinde "Hepsini Seç" kutusunu kontrol et
-        $('#contactsTable tbody').on('change', 'input[type="checkbox"].selectCheckbox', function () {
-            var el = $('#selectAll').get(0);
-            if (el && el.checked && ('indeterminate' in el)) {
-                el.indeterminate = true;
+        // ✅ Sayfa değişince / arama yapınca selectAll sıfırlansın (server-side mantık)
+        table.on('draw', function () {
+            $('#selectAll').prop('checked', false).prop('indeterminate', false);
+        });
+
+        // ✅ Tek tek seçilince indeterminate
+        $('#contactsTable tbody').on('change', 'input.selectCheckbox', function () {
+            var all = $('#contactsTable tbody input.selectCheckbox').length;
+            var checkedCount = $('#contactsTable tbody input.selectCheckbox:checked').length;
+
+            if (checkedCount === 0) {
+                $('#selectAll').prop('checked', false).prop('indeterminate', false);
+            } else if (checkedCount === all) {
+                $('#selectAll').prop('checked', true).prop('indeterminate', false);
+            } else {
+                $('#selectAll').prop('checked', false).prop('indeterminate', true);
             }
         });
+
+        // ✅ Form submit öncesi: sadece seçilen checkbox'lar zaten name="selectedIds" ile gidecek
+        // ekstra bir şeye gerek yok.
     });
 </script>
-

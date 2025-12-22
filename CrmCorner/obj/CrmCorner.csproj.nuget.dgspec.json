@@ -161,7 +161,7 @@
             },
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
-              "version": "[7.0.12, )"
+              "version": "[8.0.7, )"
             },
             "Microsoft.Web.LibraryManager.Build": {
               "target": "Package",
