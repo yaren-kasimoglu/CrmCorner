@@ -100,6 +100,12 @@ namespace CrmCorner.Controllers
 
             string currentUserId = _userManager.GetUserId(User);
 
+            var me = await _context.Users.AsNoTracking()
+    .FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+            var myCompanyId = me?.CompanyId;
+
+
             var allContacts = new List<ApolloContactViewModel>();
             int page = 1;
             int perPage = 100;
@@ -156,7 +162,7 @@ namespace CrmCorner.Controllers
                 page++;
             }
 
-            await SaveOrUpdateApolloContacts(allContacts, model, currentUserId);
+            await SaveOrUpdateApolloContacts(allContacts, model, currentUserId, myCompanyId);
 
             ViewBag.SuccessMessage = $"{allContacts.Count} kişi çekildi ve işlendi.";
             ViewBag.TotalCount = allContacts.Count;
@@ -191,6 +197,12 @@ namespace CrmCorner.Controllers
             }
 
             string currentUserId = _userManager.GetUserId(User);
+
+            var me = await _context.Users
+    .AsNoTracking()
+    .FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+            var myCompanyId = me?.CompanyId;
 
             var allContacts = new List<ApolloContactViewModel>();
             var labelList = new List<SelectListItem>();
@@ -359,15 +371,16 @@ namespace CrmCorner.Controllers
                 .Select(c => c.Email.ToLower())
                 .ToList();
 
-            var existingContacts = await _context.ApolloContacts
-                .Where(x =>
-                    x.UserId == currentUserId &&
-                    (
-                        (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
-                        (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
-                    )
-                )
-                .ToListAsync();
+       var existingContacts = await _context.ApolloContacts
+    .Where(x =>
+        x.CompanyId == myCompanyId &&   // ✅ değişti
+        (
+            (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
+            (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
+        )
+    )
+    .ToListAsync();
+
 
             var existingByPersonId = existingContacts
                 .Where(x => !string.IsNullOrWhiteSpace(x.PersonId))
@@ -400,6 +413,7 @@ namespace CrmCorner.Controllers
                     {
                         Email = contact.Email,
                         PersonId = contact.PersonId,
+                        CompanyId = myCompanyId,
                         FirstName = contact.FirstName,
                         LastName = contact.LastName,
                         Title = contact.Title,
@@ -427,6 +441,7 @@ namespace CrmCorner.Controllers
                         existing.SourceLabelName = labelList.FirstOrDefault(l => l.Value == model.SelectedLabelId)?.Text;
                         existing.LinkedinUrl = contact.LinkedinUrl;
                         existing.Headline = contact.Headline;
+                        existing.CompanyId = myCompanyId;
                         existing.Location = contact.Location;
                     }
                 }
@@ -463,13 +478,19 @@ namespace CrmCorner.Controllers
         {
             var currentUserId = _userManager.GetUserId(User);
 
+            var me = await _context.Users.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+            var myCompanyId = me?.CompanyId;
+
             var contacts = await _context.ApolloContacts
-                .Where(x => x.UserId == currentUserId)
+                .Where(x => x.CompanyId == myCompanyId)   // ✅ artık şirket bazlı
                 .OrderByDescending(x => x.UpdatedAt)
                 .ToListAsync();
 
             return View(contacts);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> ContactsListData()
@@ -485,9 +506,15 @@ namespace CrmCorner.Controllers
             var orderColumnIndex = Request.Form["order[0][column]"].FirstOrDefault();
             var orderDir = Request.Form["order[0][dir]"].FirstOrDefault(); // asc/desc
 
+            var me = await _context.Users.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            var myCompanyId = me?.CompanyId;
+
             var query = _context.ApolloContacts
                 .AsNoTracking()
-                .Where(x => x.UserId == userId);
+                .Where(x => x.CompanyId == myCompanyId);
+
 
             var recordsTotal = await query.CountAsync();
 
@@ -671,7 +698,11 @@ namespace CrmCorner.Controllers
             }).ToList();
         }
 
-        private async Task SaveOrUpdateApolloContacts(List<ApolloContactViewModel> allContacts, ApolloApiViewModel model, string currentUserId)
+        private async Task SaveOrUpdateApolloContacts(
+            List<ApolloContactViewModel> allContacts,
+            ApolloApiViewModel model,
+            string currentUserId,
+            int? companyId)
         {
             var labelList = model.Labels ?? new List<SelectListItem>();
 
@@ -685,9 +716,10 @@ namespace CrmCorner.Controllers
                 .Select(c => c.Email.ToLower())
                 .ToList();
 
+            // ✅ Duplicate kontrolü artık CompanyId bazlı
             var existingContacts = await _context.ApolloContacts
                 .Where(x =>
-                    x.UserId == currentUserId &&
+                    x.CompanyId == companyId &&
                     (
                         (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
                         (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
@@ -733,7 +765,8 @@ namespace CrmCorner.Controllers
                         UpdatedAt = contact.UpdatedAt,
                         SourceLabelId = model.SelectedLabelId,
                         SourceLabelName = labelList.FirstOrDefault(l => l.Value == model.SelectedLabelId)?.Text,
-                        UserId = currentUserId,
+                        UserId = currentUserId,      // kim çekti
+                        CompanyId = companyId,       // ✅ ortak havuz
                         CreatedAt = DateTime.UtcNow,
                         LinkedinUrl = contact.LinkedinUrl,
                         Headline = contact.Headline,
@@ -752,6 +785,10 @@ namespace CrmCorner.Controllers
                     existing.LinkedinUrl = contact.LinkedinUrl;
                     existing.Headline = contact.Headline;
                     existing.Location = contact.Location;
+
+                    // ✅ eski kayıtlarda CompanyId boş kalmış olabilir
+                    if (existing.CompanyId == null)
+                        existing.CompanyId = companyId;
                 }
             }
 

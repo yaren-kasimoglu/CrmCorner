@@ -1,0 +1,380 @@
+﻿@model List<CrmCorner.Models.FinanceInvoice>
+
+@{
+    ViewData["Title"] = "Faturalar";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Faturalar</h4>
+
+    <!-- ✅ Seçili Ay/Yıl için yeni satır ekle -->
+    <form method="post" action="/Finance/CreateRow" class="mb-0">
+        <input type="hidden" name="year" value="@ViewBag.SelectedYear" />
+        <input type="hidden" name="month" value="@ViewBag.SelectedMonth" />
+        <button type="submit" class="btn btn-sm btn-primary">+ Yeni Satır</button>
+    </form>
+</div>
+
+<!-- ✅ Ay/Yıl filtreleri -->
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-2">
+        <label class="form-label">Ay</label>
+        <select name="month" class="form-select" onchange="this.form.submit()">
+            @for (int m = 1; m <= 12; m++)
+            {
+                <option value="@m" selected="@(ViewBag.SelectedMonth == m)">
+                    @System.Globalization.CultureInfo.GetCultureInfo("tr-TR").DateTimeFormat.GetMonthName(m)
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label">Yıl</label>
+        <select name="year" class="form-select" onchange="this.form.submit()">
+            @for (int y = DateTime.Now.Year - 3; y <= DateTime.Now.Year + 2; y++)
+            {
+                <option value="@y" selected="@(ViewBag.SelectedYear == y)">@y</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-8 text-end">
+        <a class="btn btn-sm btn-outline-secondary"
+           href="/Finance/Invoices?year=@ViewBag.SelectedYear&month=@ViewBag.SelectedMonth">Yenile</a>
+    </div>
+</form>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">
+        Bu ay için kayıt yok. <b>+ Yeni Satır</b> ile ilk kaydı ekleyebilirsin.
+    </div>
+}
+
+<table class="table table-sm table-bordered align-middle" id="invoiceTable">
+    <thead class="table-light">
+        <tr>
+            <th style="width:220px;">Firma</th>
+            <th style="width:140px;">Beklenen Net</th>
+            <th style="width:110px;">KDV Oranı</th>
+            <th style="width:120px;">KDV</th>
+            <th style="width:140px;">Brüt</th>
+            <th style="width:140px;">Ödenen</th>
+            <th style="width:140px;">Kalan</th>
+            <th style="width:140px;">Durum</th>
+            <th style="width:220px;">Problem Nedeni</th>
+            <th style="width:220px;">Not</th>
+            <th style="width:160px;">Kim Sattı</th>
+            <th style="width:160px;">SDR</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var i in Model)
+        {
+            <tr data-id="@i.Id">
+
+                <!-- ✅ Firma adı da inline edit -->
+                <td class="d-flex align-items-center gap-2">
+                    <input class="form-control form-control-sm inline-edit"
+                           data-field="CompanyName"
+                           value="@i.CompanyName" />
+
+                    <a href="@Url.Action("InvoiceDetail", "Finance", new { id = i.Id })"
+                       title="Detay"
+                       class="text-muted"
+                       style="text-decoration:none;">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                </td>
+
+
+                <td>
+                    <input class="form-control form-control-sm inline-edit"
+                           data-field="ExpectedNet"
+                           value="@i.ExpectedNet.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))" />
+                </td>
+
+                <td>
+                    <select class="form-select form-select-sm inline-edit" data-field="VatRate">
+                        <option value="0" selected="@(i.VatRate == 0)">0</option>
+                        <option value="0.01" selected="@(i.VatRate == 0.01m)">0,01</option>
+                        <option value="0.08" selected="@(i.VatRate == 0.08m)">0,08</option>
+                        <option value="0.1" selected="@(i.VatRate == 0.1m)">0,1</option>
+                        <option value="0.2" selected="@(i.VatRate == 0.2m)">0,2</option>
+                    </select>
+                </td>
+
+                <td class="vat-amount">@i.VatAmount.ToString("N2")</td>
+                <td class="gross-amount">@i.GrossAmount.ToString("N2")</td>
+
+
+                <td>
+                    <input class="form-control form-control-sm inline-edit"
+                           data-field="PaidAmount"
+                         value="@i.PaidAmount.ToString("N2")"
+ />
+                </td>
+                <td class="remaining-amount">
+                    @((i.GrossAmount - i.PaidAmount).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")))
+                </td>
+
+
+                <td>
+                    <select class="form-select form-select-sm inline-edit" data-field="Status">
+                        <option value="Taslak" selected="@(i.Status == "Taslak")">Taslak</option>
+                        <option value="Orijinal" selected="@(i.Status == "Kesildi")">Orijinal</option>
+                        <option value="Tahsil Edildi" selected="@(i.Status == "Beklemede")">Tahsil Edildi</option>
+                        <option value="Beklemede" selected="@(i.Status == "Problem")">Beklemede</option>
+                        <option value="Problemli" selected="@(i.Status == "Tahsil Edildi")">Problemli</option>
+                        <option value="Problemli" selected="@(i.Status == "İade/İptal")">Problemli</option>
+                        <option value="Problemli" selected="@(i.Status == "Orjinal")">Problemli</option>
+                    </select>
+                </td>
+
+                <td>
+                    <input class="form-control form-control-sm inline-edit"
+                           data-field="ProblemReason"
+                           value="@i.ProblemReason" />
+                </td>
+
+                <td>
+                    <input class="form-control form-control-sm inline-edit"
+                           data-field="Note"
+                           value="@i.Note" />
+                </td>
+                <td>
+                    <select class="form-select form-select-sm inline-edit"
+                            data-field="KimSattiUserId">
+                        @foreach (var u in ViewBag.TeamUsers as List<SelectListItem>)
+                        {
+                            <option value="@u.Value"
+                                    selected="@(u.Value == i.KimSattiUserId)">
+                                @u.Text
+                            </option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <select class="form-select form-select-sm inline-edit"
+                            data-field="SdrUserId">
+                        @foreach (var u in ViewBag.TeamUsers as List<SelectListItem>)
+                        {
+                            <option value="@u.Value"
+                                    selected="@(u.Value == i.SdrUserId)">
+                                @u.Text
+                            </option>
+                        }
+                    </select>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="table-light fw-bold">
+            <td class="text-end">TOPLAM:</td>
+
+            <td id="sumExpected">@Model.Sum(x => x.ExpectedNet).ToString("N2")</td>
+
+            <td></td>
+
+            <td id="sumVat">@Model.Sum(x => x.VatAmount).ToString("N2")</td>
+
+            <td id="sumGross">@Model.Sum(x => x.GrossAmount).ToString("N2")</td>
+
+            <td id="sumPaid">@Model.Sum(x => x.PaidAmount).ToString("N2")</td>
+            <td id="sumRemaining">@Model.Sum(x => (x.ExpectedNet - x.PaidAmount)).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
+            <td></td>
+            <td></td>
+            <td>Toplam Tahsil Oranı<span class="badge rounded-pill" id="collectionRateBadge">%</span></td>
+        </tr>
+    </tfoot>
+
+</table>
+
+@section Scripts {
+    <script>
+        // --------- helpers ---------
+        function parseSmartNumber(val) {
+            if (val === null || val === undefined) return 0;
+
+            let s = val.toString().trim();
+            if (s === '') return 0;
+
+            s = s.replace(/\s/g, '');
+
+            const hasComma = s.includes(',');
+            const hasDot = s.includes('.');
+
+            // "50,000.00" or "50.000,00"
+            if (hasComma && hasDot) {
+                const lastComma = s.lastIndexOf(',');
+                const lastDot = s.lastIndexOf('.');
+                const decimalSep = lastComma > lastDot ? ',' : '.';
+                const thousandSep = decimalSep === ',' ? '.' : ',';
+
+                s = s.split(thousandSep).join('');
+                s = s.replace(decimalSep, '.');
+            }
+            // "50.000,00" (TR)
+            else if (hasComma && !hasDot) {
+                s = s.replace(/\./g, '');
+                s = s.replace(',', '.');
+            }
+            // "50000.00" (EN) or "50000"
+            else {
+                s = s.replace(/,/g, '');
+            }
+
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function formatTrNumber(num) {
+            return (num || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatInputAsTr(el) {
+            const n = parseSmartNumber(el.value);
+            el.value = formatTrNumber(n);
+        }
+
+        function recalcTotals() {
+            let sumExpected = 0;
+            let sumPaid = 0;
+            let sumVat = 0;
+            let sumGross = 0;
+            let sumRemaining = 0;
+
+            document.querySelectorAll('#invoiceTable tbody tr').forEach(tr => {
+                const expectedInput = tr.querySelector('[data-field="ExpectedNet"]');
+                const paidInput = tr.querySelector('[data-field="PaidAmount"]');
+
+                const expected = parseSmartNumber(expectedInput ? expectedInput.value : 0);
+                const paid = parseSmartNumber(paidInput ? paidInput.value : 0);
+
+                const vatText = tr.querySelector('.vat-amount') ? tr.querySelector('.vat-amount').innerText : "0";
+                const grossText = tr.querySelector('.gross-amount') ? tr.querySelector('.gross-amount').innerText : "0";
+
+                const vat = parseSmartNumber(vatText);
+                const gross = parseSmartNumber(grossText);
+
+                // ✅ NET KALAN = Beklenen Net - Ödenen
+                const remaining = expected - paid;
+
+                sumExpected += expected;
+                sumPaid += paid;
+                sumVat += vat;
+                sumGross += gross;
+                sumRemaining += remaining;
+
+                // satır kalanını yaz
+                const remCell = tr.querySelector('.remaining-amount');
+                if (remCell) {
+                    remCell.innerText = formatTrNumber(remaining);
+                    remCell.classList.toggle('text-danger', remaining < 0);
+                }
+            });
+
+            const sumExpectedEl = document.getElementById('sumExpected');
+            const sumPaidEl = document.getElementById('sumPaid');
+            const sumVatEl = document.getElementById('sumVat');
+            const sumGrossEl = document.getElementById('sumGross');
+            const sumRemainingEl = document.getElementById('sumRemaining');
+
+            if (sumExpectedEl) sumExpectedEl.innerText = formatTrNumber(sumExpected);
+            if (sumPaidEl) sumPaidEl.innerText = formatTrNumber(sumPaid);
+            if (sumVatEl) sumVatEl.innerText = formatTrNumber(sumVat);
+            if (sumGrossEl) sumGrossEl.innerText = formatTrNumber(sumGross);
+            if (sumRemainingEl) sumRemainingEl.innerText = formatTrNumber(sumRemaining);
+
+            // ✅✅ TOPLAM TAHSİL ORANI (NET) = sumPaid / sumExpected
+            const rate = sumExpected > 0 ? (sumPaid / sumExpected) * 100 : 0;
+
+            const badge = document.getElementById('collectionRateBadge');
+            if (badge) {
+                badge.innerText = "%" + rate.toFixed(2).replace('.', ',');
+
+                // önce temizle
+                badge.classList.remove('bg-danger', 'bg-warning', 'bg-success', 'text-dark');
+
+                // renklendir
+                if (rate < 30) {
+                    badge.classList.add('bg-danger');
+                } else if (rate < 70) {
+                    badge.classList.add('bg-warning', 'text-dark');
+                } else {
+                    badge.classList.add('bg-success');
+                }
+            }
+        }
+
+
+        // --------- save inline edit ---------
+        function saveField() {
+            const el = this;
+            const tr = el.closest('tr');
+            const id = tr.getAttribute('data-id');
+            const field = el.getAttribute('data-field');
+            const value = el.value;
+
+            fetch('/Finance/UpdateField', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                body: new URLSearchParams({ id, field, value })
+            })
+                .then(r => {
+                    if (!r.ok) throw new Error('Save failed');
+                    return r.json();
+                })
+                .then(data => {
+                    // KDV & Brüt güncelle
+                    if (data && data.vatAmount !== undefined) {
+                        const vatCell = tr.querySelector('.vat-amount');
+                        const grossCell = tr.querySelector('.gross-amount');
+                        if (vatCell) vatCell.innerText = data.vatAmount;
+                        if (grossCell) grossCell.innerText = data.grossAmount;
+                    }
+
+                    // input formatını TR'ye çevir
+                    if (field === "ExpectedNet" || field === "PaidAmount") {
+                        formatInputAsTr(el);
+                    }
+
+                    // toplamları ve kalanları güncelle
+                    recalcTotals();
+
+                    tr.classList.add('table-success');
+                    setTimeout(() => tr.classList.remove('table-success'), 350);
+                })
+                .catch(() => {
+                    tr.classList.add('table-danger');
+                    setTimeout(() => tr.classList.remove('table-danger'), 700);
+                });
+        }
+
+        // --------- init ---------
+        document.addEventListener('DOMContentLoaded', function () {
+            // inline edit event'lerini bağla
+            document.querySelectorAll('.inline-edit').forEach(el => {
+                if (el.tagName.toLowerCase() === 'select') {
+                    el.addEventListener('change', saveField);
+                } else {
+                    el.addEventListener('blur', saveField);
+                    el.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') { e.preventDefault(); saveField.call(this); }
+                    });
+                }
+            });
+
+            // sayfa açılınca toplamları bas
+            recalcTotals();
+        });
+    </script>
+}

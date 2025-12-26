@@ -7,6 +7,41 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
+@{
+    var fieldTr = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Description", "Açıklama" },
+        { "Source", "Kaynak" },
+        { "Outcomes", "Sonuç" },
+        { "OutcomeStatus", "Sonuç Durumu" },
+        { "NegativeReason", "Olumsuzluk Nedeni" },
+        { "Stage", "Aşama" },
+        { "Currency", "Değer Teklifi" },
+        { "ExpectedCloseDate", "Satış Kapatma Tarihi" },
+        { "ResponsibleUserId", "Sorumlu" },
+        { "ContactedViaLinkedIn", "LinkedIn ile iletişim kuruldu" },
+        { "ContactedViaColdCall", "Soğuk arama yapıldı" },
+        { "AppUserId", "Görüşmeyi Alan" }
+    };
+
+    string TrField(string key)
+        => string.IsNullOrWhiteSpace(key) ? "-" : (fieldTr.TryGetValue(key, out var v) ? v : key);
+}
+
+@{
+    string Pretty(string v)
+    {
+        if (string.IsNullOrWhiteSpace(v) || v.Equals("None", StringComparison.OrdinalIgnoreCase))
+            return "Boş";
+        if (v.Equals("Lost", StringComparison.OrdinalIgnoreCase))
+            return "Kaybedildi";
+        if (v.Equals("Won", StringComparison.OrdinalIgnoreCase))
+            return "Kazanıldı";
+        return v;
+    }
+}
+
+
 @section Styles {
     <style>
         .highlight {
@@ -64,6 +99,13 @@
             text-overflow: ellipsis;
             display: block;
         }
+
+        .outcome-badge {
+            font-size: 20px;
+            padding: 8px 12px;
+            border: 1px solid transparent;
+        }
+
     </style>
 }
 
@@ -75,41 +117,55 @@
                 <div class="card-body">
                     <h6 class="card-title mb-4">Detaylar/Notlar</h6>
                     <p>@Model.Description</p>
-                    <span class="buyukYazi badge badge-light text-danger border border-danger">
-                        @EnumExtensions.GetDisplayName(Model.Outcomes)
+                    @{
+                        string outcomeText = EnumExtensions.GetDisplayName(Model.Outcomes);
+
+                        string outcomeClass =
+                        outcomeText == "Olumlu" ? "bg-success text-white" :
+                        outcomeText == "Olumsuz" ? "bg-danger text-white" :
+                        outcomeText == "Süreçte" ? "bg-warning text-dark" :
+                        "bg-light text-dark border";
+                    }
+
+                    <span class="badge outcome-badge @outcomeClass">
+                        @outcomeText
                     </span>
+
                 </div>
             </div>
             <div class="card mb-2">
                 <div class="card-body">
                     <ul class="list-unstyled basic-list mb-0">
-                        <li class="d-flex justify-content-between mb-3">
-                            <div>Sorumlu:</div>
-                            <span class="badge bg-primary">
-                       @*          @Model.ResponsibleUser?.NameSurname ?? "Seçilmemiş" *@
+                        <li class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="me-2">Sorumlu:</div>
+                            <span class="badge bg-primary text-truncate" style="max-width:180px;">
+                                @(Model.ResponsibleUser?.NameSurname ?? "Seçilmemiş")
                             </span>
                         </li>
+
 
                         <!-- İstersen ayrıca gösterebilirsin -->
-                        <li class="d-flex justify-content-between mb-3">
-                            <div>Görüşmeyi Alan:</div>
-                            <span class="badge bg-info">
-                                @Model.AppUser?.NameSurname ?? "Seçilmemiş"
+                        <li class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="me-2">Görüşmeyi Alan:</div>
+                            <span class="badge bg-info text-truncate" style="max-width:180px;">
+                                @(Model.AppUser?.NameSurname ?? "Seçilmemiş")
                             </span>
                         </li>
-                        <li class="d-flex justify-content-between mb-3">
-                            Görev Oluşturma Tarihi:
+
+                        <li class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="me-2">Görev Oluşturma Tarihi:</div>
                             <span class="badge bg-success">
                                 @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")
+                            </span>
+                        </li>
 
+                        <li class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="me-2">Güncel Durum:</div>
+                            <span class="badge bg-info text-truncate" style="max-width:220px;">
+                                @(Model.Stage != null ? Model.Stage.GetDisplayName() : "Seçilmemiş")
                             </span>
                         </li>
-                        <li class="d-flex justify-content-between mb-3">
-                            Güncel Durum:
-                            <span class="badge bg-info">
-                                @Model.Stage?.GetDisplayName()
-                            </span>
-                        </li>
+
                         <li class="d-flex justify-content-between mb-3">
                             Satış Kapatma Tarihi:
                             <span class="badge bg-danger">
@@ -125,16 +181,6 @@
                         <li class="d-flex justify-content-between mb-3">
                             Kayıt Nereden Geldi?
                             <span class="badge bg-primary">@Model.Source</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="card mb-2">
-                <div class="card-body">
-                    <ul class="list-unstyled basic-list mb-0">
-                        <li class="d-flex justify-content-between mb-3">
-                            Sorumlu:
-                            <span class="badge bg-primary">@Model.AppUser?.NameSurname</span>
                         </li>
                     </ul>
                 </div>
@@ -292,6 +338,20 @@
 
                     <h5 class="mb-3">Geçmiş Değişiklikler</h5>
 
+                    <div class="timeline-item green">
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h6 class="timeline-title">Kayıt Oluşturuldu</h6>
+                                <small class="text-muted">@Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</small>
+                            </div>
+                            <div class="timeline-body">
+                                <p>
+                                    Kayıt <strong>@(Model.AppUser?.NameSurname ?? "Bilinmiyor")</strong> tarafından oluşturuldu.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     @if (ViewBag.Logs != null && (ViewBag.Logs as List<CrmCorner.Models.PipelineTaskLog>)?.Any() == true)
                     {
                         foreach (var log in ViewBag.Logs as List<CrmCorner.Models.PipelineTaskLog>)
@@ -300,11 +360,11 @@
                             <div class="@timelineClass">
                                 <div class="timeline-panel">
                                     <div class="timeline-heading">
-                                        <h6 class="timeline-title">@log.UpdatedField</h6>
+                                        <h6 class="timeline-title">@TrField(log.UpdatedField)</h6>
                                         <small class="text-muted">@log.UpdatedAt?.ToString("dd.MM.yyyy HH:mm")</small>
                                     </div>
                                     <div class="timeline-body">
-                                        <p><strong>@log.OldValue</strong> <i class="fa fa-arrow-right mx-2"></i> <strong>@log.NewValue</strong></p>
+                                        <p><strong>@Pretty(log.OldValue)</strong> <i class="fa fa-arrow-right mx-2"></i> <strong>@Pretty(log.NewValue)</strong></p>
                                         @if (!string.IsNullOrWhiteSpace(log.UpdatedBy?.NameSurname))
                                         {
                                             <p>Düzenleyen: @log.UpdatedBy.NameSurname</p>

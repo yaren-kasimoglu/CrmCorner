@@ -5,6 +5,8 @@
         public int Id { get; set; }
         public string PersonId { get; set; }
 
+        public int? CompanyId { get; set; } 
+
         public string? Email { get; set; } // UNIQUE
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

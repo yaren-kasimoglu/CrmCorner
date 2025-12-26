@@ -1,0 +1,196 @@
+﻿@model CrmCorner.Models.FinanceInvoice
+
+@{
+    ViewData["Title"] = "Fatura Detayı";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>@Model.CompanyName – Detay</h4>
+
+    <a href="@Url.Action("Invoices", "Finance", new { 
+            year = Model.PeriodYear, 
+            month = Model.PeriodMonth 
+        })"
+       class="btn btn-sm btn-outline-secondary">
+        ← Faturalara Dön
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row g-3">
+
+    <div class="col-md-4">
+        <label class="form-label">Satış Bedeli ($)</label>
+        <input class="form-control inline-edit"
+               data-field="SaleAmountUsd"
+               value="@Model.SaleAmountUsd" />
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Hak Ediş ($)</label>
+        <input class="form-control inline-edit"
+               data-field="CommissionUsd"
+               value="@Model.CommissionUsd" />
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Satış Kur (USD)</label>
+        <input class="form-control inline-edit"
+               data-field="UsdRateAtSale"
+               value="@Model.UsdRateAtSale" />
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Sözleşme Süresi (Ay)</label>
+        <input class="form-control inline-edit"
+               data-field="ContractMonths"
+               value="@Model.ContractMonths" />
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Sözleşme Başlangıç</label>
+        <input type="date"
+               class="form-control inline-edit"
+               data-field="ContractStartDate"
+               value="@(Model.ContractStartDate?.ToString("yyyy-MM-dd"))" />
+    </div>
+
+<div class="col-md-4">
+    <label class="form-label">Sözleşme Bitiş</label>
+
+    <input type="date"
+           class="form-control"
+           data-field="ContractEndDate"
+           readonly
+           value="@(Model.ContractEndDate?.ToString("yyyy-MM-dd"))" />
+
+    @if (Model.ContractEndDate.HasValue)
+    {
+        <small class="text-muted">
+            @Model.ContractEndDate.Value.ToString("dd.MM.yyyy")
+        </small>
+    }
+</div>
+
+
+    <hr />
+
+<h6>Belgeler</h6>
+
+<form method="post"
+      enctype="multipart/form-data"
+      action="@Url.Action("UploadInvoiceDocument", "Finance")"
+      class="mb-3">
+    <input type="hidden" name="invoiceId" value="@Model.Id" />
+
+    <div class="d-flex gap-2">
+        <input type="file" name="file" class="form-control" />
+        <button class="btn btn-sm btn-primary">Yükle</button>
+    </div>
+</form>
+@if (ViewBag.Documents != null && ((List<CrmCorner.Models.FinanceInvoiceDocument>)ViewBag.Documents).Any())
+{
+    <ul class="list-group">
+        @foreach (var doc in (List<CrmCorner.Models.FinanceInvoiceDocument>)ViewBag.Documents)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-paperclip"></i>
+                    @doc.FileName
+                    <small class="text-muted ms-2">
+                        (@doc.UploadedAt.ToString("dd.MM.yyyy HH:mm"))
+                    </small>
+                </span>
+
+              <div class="d-flex gap-2">
+    <a href="@doc.FilePath"
+       target="_blank"
+       class="btn btn-sm btn-outline-secondary">
+        İndir
+    </a>
+
+    <form method="post"
+          action="@Url.Action("DeleteInvoiceDocument", "Finance")"
+          onsubmit="return confirm('Bu belge silinecek. Emin misiniz?');">
+        <input type="hidden" name="id" value="@doc.Id" />
+        <button class="btn btn-sm btn-outline-danger">
+            Sil
+        </button>
+    </form>
+</div>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p class="text-muted">Henüz belge eklenmedi.</p>
+}
+
+
+</div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+<script>
+    document.querySelectorAll('.inline-edit').forEach(el => {
+
+        if (el.type === 'date' || el.tagName.toLowerCase() === 'select') {
+            el.addEventListener('change', saveField);
+        } else {
+            el.addEventListener('blur', saveField);
+            el.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveField.call(this);
+                }
+            });
+        }
+    });
+
+    function saveField() {
+        const el = this;
+        const field = el.dataset.field;
+        const value = el.value;
+
+        fetch('/Finance/UpdateField', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                id: '@Model.Id',
+                field: field,
+                value: value
+            })
+        })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            el.classList.add('border-success');
+            setTimeout(() => el.classList.remove('border-success'), 400);
+
+            // ✅ SÖZLEŞME BİTİŞ TARİHİNİ ANINDA GÜNCELLE
+           if (data && data.contractEndDate) {
+        const endInput = document.querySelector('[data-field="ContractEndDate"]');
+        if (endInput) {
+            endInput.value = data.contractEndDate;
+        }
+
+        const endText = endInput?.nextElementSibling;
+        if (endText) {
+            endText.innerText = data.contractEndDateText;
+        }
+    }
+        })
+        .catch(() => {
+            el.classList.add('border-danger');
+            setTimeout(() => el.classList.remove('border-danger'), 700);
+        });
+    }
+</script>
+}
+
+

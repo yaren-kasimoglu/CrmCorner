@@ -60,6 +60,13 @@ namespace CrmCorner.Models
         public DbSet<ApolloLabelSync> ApolloLabelSyncs { get; set; }
 
 
+        public DbSet<FinanceInvoice> FinanceInvoices { get; set; }
+        public DbSet<FinanceInvoiceDocument> FinanceInvoiceDocuments { get; set; }
+
+
+
+
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
