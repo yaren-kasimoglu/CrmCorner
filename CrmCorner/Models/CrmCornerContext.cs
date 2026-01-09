@@ -63,6 +63,12 @@ namespace CrmCorner.Models
         public DbSet<FinanceInvoice> FinanceInvoices { get; set; }
         public DbSet<FinanceInvoiceDocument> FinanceInvoiceDocuments { get; set; }
 
+        public DbSet<FinanceContract> FinanceContracts { get; set; }
+
+        public DbSet<FinanceContractDocument> FinanceContractDocuments { get; set; }
+
+
+
 
 
 
@@ -198,6 +204,10 @@ namespace CrmCorner.Models
     .WithMany()
     .HasForeignKey(t => t.AssigneeId)
     .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<FinanceInvoice>()
+      .HasIndex(x => new { x.CompanyId, x.ContractId, x.PeriodYear, x.PeriodMonth })
+      .IsUnique();
 
 
             OnModelCreatingPartial(modelBuilder);

@@ -546,7 +546,7 @@ namespace CrmCorner.Migrations
                     b.ToTable("FileAttachments");
                 });
 
-            modelBuilder.Entity("CrmCorner.Models.FinanceInvoice", b =>
+            modelBuilder.Entity("CrmCorner.Models.FinanceContract", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -554,6 +554,9 @@ namespace CrmCorner.Migrations
 
                     b.Property<decimal?>("CommissionUsd")
                         .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
@@ -571,6 +574,69 @@ namespace CrmCorner.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("KimSattiUserId")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal?>("SaleAmountUsd")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("SdrUserId")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal?>("UsdRateAtSale")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FinanceContracts");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.FinanceContractDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("FinanceContractId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FinanceContractId");
+
+                    b.ToTable("FinanceContractDocuments");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.FinanceInvoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContractId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<decimal>("ExpectedNet")
                         .HasColumnType("decimal(65,30)");
 
@@ -582,10 +648,6 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("InvoiceNo")
                         .HasColumnType("longtext");
-
-                    b.Property<string>("KimSattiUserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime?>("LastReminderAt")
                         .HasColumnType("datetime(6)");
@@ -610,22 +672,12 @@ namespace CrmCorner.Migrations
                     b.Property<decimal?>("ProfitLoss")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<decimal?>("SaleAmountUsd")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<string>("SdrUserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<decimal?>("UsdRateAtSale")
-                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal>("VatAmount")
                         .HasColumnType("decimal(65,30)");
@@ -635,9 +687,10 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("KimSattiUserId");
+                    b.HasIndex("ContractId");
 
-                    b.HasIndex("SdrUserId");
+                    b.HasIndex("CompanyId", "ContractId", "PeriodYear", "PeriodMonth")
+                        .IsUnique();
 
                     b.ToTable("FinanceInvoices");
                 });
@@ -1463,23 +1516,26 @@ namespace CrmCorner.Migrations
                     b.Navigation("Task");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.FinanceContractDocument", b =>
+                {
+                    b.HasOne("CrmCorner.Models.FinanceContract", "Contract")
+                        .WithMany()
+                        .HasForeignKey("FinanceContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contract");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.FinanceInvoice", b =>
                 {
-                    b.HasOne("CrmCorner.Models.AppUser", "KimSattiUser")
+                    b.HasOne("CrmCorner.Models.FinanceContract", "Contract")
                         .WithMany()
-                        .HasForeignKey("KimSattiUserId")
+                        .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CrmCorner.Models.AppUser", "SdrUser")
-                        .WithMany()
-                        .HasForeignKey("SdrUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("KimSattiUser");
-
-                    b.Navigation("SdrUser");
+                    b.Navigation("Contract");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Notification", b =>
