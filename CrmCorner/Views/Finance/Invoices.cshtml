@@ -1,4 +1,13 @@
 ﻿@model List<CrmCorner.Models.FinanceInvoice>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Globalization
+@using CrmCorner.Helpers
+
+@{
+    var tr = CultureInfo.GetCultureInfo("tr-TR");
+    var originals = (ViewBag.OriginalInvoicesAllMonths as List<CrmCorner.Models.FinanceInvoice>)
+                    ?? new List<CrmCorner.Models.FinanceInvoice>();
+}
 
 @{
     ViewData["Title"] = "Faturalar";
@@ -35,16 +44,245 @@
             border-color: rgba(13, 110, 253, 0.35);
         }
 
-    /* seçilen toplam satırı */
-    #invoiceTable tfoot tr.selected-summary {
-        background: rgba(255, 193, 7, 0.18) !important;
+    /* Seçili satırda status rengini ezmeyelim; overlay + net outline */
+    #invoiceTable tbody tr.is-selected {
+        position: relative;
+        outline: 2px solid rgba(13,110,253,.55);
+        outline-offset: -2px;
     }
+
+    /* =========================
+       Seçili satır (layout bozmaz)
+       ========================= */
+    #invoiceTable tbody tr.is-selected {
+        /* background vermiyoruz, status rengi sabit kalsın */
+        outline: 2px solid rgba(13,110,253,.65);
+        outline-offset: -2px;
+        /* ekstra netlik: içten hafif çizgi */
+        box-shadow: inset 0 0 0 1px rgba(13,110,253,.35);
+    }
+
+        /* Seçili satır input/select borderları */
+        #invoiceTable tbody tr.is-selected input,
+        #invoiceTable tbody tr.is-selected select {
+            border-color: rgba(13,110,253,.75) !important;
+        }
+
+
+    /* =========================
+       Seçilen toplam satırı (biraz daha belirgin)
+       ========================= */
+    #invoiceTable tfoot tr.selected-summary {
+        background: rgba(255, 193, 7, 0.30) !important;
+    }
+
+    /* =========================
+       Status'a göre satır renklendirme (daha net + layout bozmaz)
+       Sol şerit: border-left yerine inset box-shadow
+       ========================= */
+    #invoiceTable tbody tr.status-taslak {
+        background: rgba(13,110,253,.28) !important;
+        box-shadow: inset 6px 0 0 rgba(13,110,253,.85);
+    }
+
+    #invoiceTable tbody tr.status-orijinal {
+        background: rgba(13,202,240,.30) !important;
+        box-shadow: inset 6px 0 0 rgba(13,202,240,.90);
+    }
+
+    #invoiceTable tbody tr.status-kesildi {
+        background: rgba(108,117,125,.28) !important;
+        box-shadow: inset 6px 0 0 rgba(108,117,125,.85);
+    }
+
+    #invoiceTable tbody tr.status-beklemede {
+        background: rgba(255,193,7,.34) !important;
+        box-shadow: inset 6px 0 0 rgba(255,193,7,.95);
+    }
+
+    #invoiceTable tbody tr.status-tahsil {
+        background: rgba(25,135,84,.30) !important;
+        box-shadow: inset 6px 0 0 rgba(25,135,84,.90);
+    }
+
+    #invoiceTable tbody tr.status-problemli {
+        background: rgba(220,53,69,.30) !important;
+        box-shadow: inset 6px 0 0 rgba(220,53,69,.90);
+    }
+
+    #invoiceTable tbody tr.status-iade {
+        background: rgba(33,37,41,.20) !important;
+        box-shadow: inset 6px 0 0 rgba(33,37,41,.80);
+    }
+
+    /* =========================
+       Status select (net)
+       ========================= */
+    #invoiceTable select.status-select {
+        font-weight: 600;
+    }
+
+        #invoiceTable select.status-select.status-taslak {
+            border-color: rgba(13,110,253,.85) !important;
+            background: rgba(13,110,253,.10);
+        }
+
+        #invoiceTable select.status-select.status-orijinal {
+            border-color: rgba(13,202,240,.90) !important;
+            background: rgba(13,202,240,.10);
+        }
+
+        #invoiceTable select.status-select.status-kesildi {
+            border-color: rgba(108,117,125,.90) !important;
+            background: rgba(108,117,125,.10);
+        }
+
+        #invoiceTable select.status-select.status-beklemede {
+            border-color: rgba(255,193,7,.95) !important;
+            background: rgba(255,193,7,.12);
+        }
+
+        #invoiceTable select.status-select.status-tahsil {
+            border-color: rgba(25,135,84,.90) !important;
+            background: rgba(25,135,84,.10);
+        }
+
+        #invoiceTable select.status-select.status-problemli {
+            border-color: rgba(220,53,69,.90) !important;
+            background: rgba(220,53,69,.10);
+        }
+
+        #invoiceTable select.status-select.status-iade {
+            border-color: rgba(33,37,41,.85) !important;
+            background: rgba(33,37,41,.08);
+        }
+
+    #invoiceTable.invoice-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    #invoiceTable th, #invoiceTable td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Şık başlık barı */
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(111, 66, 193, .18);
+        background: linear-gradient(90deg, rgba(111,66,193,.16), rgba(13,110,253,.08));
+        box-shadow: 0 6px 18px rgba(16, 24, 40, .06);
+        margin: 6px 0 14px 0;
+    }
+
+        .section-header .title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: .2px;
+            color: #2b2b2b;
+            font-size: 22px;
+        }
+
+            .section-header .title i {
+                font-size: 20px;
+                color: #6f42c1; /* CRM Corner mor tonu */
+            }
+
+        .section-header .sub {
+            margin: 0;
+            font-size: 12px;
+            color: rgba(33,37,41,.65);
+        }
+
+        .section-header .right-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(111,66,193,.22);
+            background: rgba(255,255,255,.7);
+            color: #6f42c1;
+            font-weight: 700;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        /* ✅ Mac/Windows: yatay scroll kesin çalışsın */
+.invoice-table-wrap{
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* iOS/Mac smooth scroll */
+}
+
+/* tablo genişliği daralmaya çalışmasın, scroll oluşsun */
+#invoiceTable{
+    min-width: 1400px; /* ihtiyacına göre 1200-1800 arası ayarla */
+}
+
+/* Opsiyonel: Mac'te scrollbar görünürlüğü */
+.invoice-table-wrap::-webkit-scrollbar{
+    height: 10px;
+}
+
+
+/* ddl uyarı css i*/
+    .deadline-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        margin-top: 6px;
+        white-space: nowrap;
+    }
+
+    .deadline-warn {
+        background: rgba(255, 193, 7, .28);
+        border: 1px solid rgba(255, 193, 7, .55);
+        color: #7a5a00;
+    }
+
+    .deadline-danger {
+        background: rgba(220, 53, 69, .22);
+        border: 1px solid rgba(220, 53, 69, .45);
+        color: #8a1f2b;
+    }
+
+    .deadline-muted {
+        display: none;
+    }
+
+    .deadline-text {
+        white-space: pre-line;
+    }
+
+
 </style>
 
-
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Faturalar</h4>
-
+    <div class="section-header">
+        <div>
+            <h4 class="title">
+                <i class="bi bi-receipt-cutoff"></i>
+                Faturalar
+            </h4>
+            <p class="sub">Ay/Yıl bazlı fatura yönetimi, inline düzenleme ve durum filtreleme.</p>
+        </div>
+    </div>
     <!-- ✅ Seçili Ay/Yıl için yeni satır ekle -->
     <form method="post" action="/Finance/CreateRow" class="mb-0">
         <input type="hidden" name="year" value="@ViewBag.SelectedYear" />
@@ -54,6 +292,7 @@
 </div>
 
 <!-- ✅ Ay/Yıl filtreleri -->
+<!-- ✅ Ay/Yıl + Durum filtre + Yenile -->
 <form method="get" class="row g-2 align-items-end mb-3">
     <div class="col-md-2">
         <label class="form-label">Ay</label>
@@ -77,11 +316,25 @@
         </select>
     </div>
 
-    <div class="col-md-8 text-end">
+    <div class="col-md-3">
+        <label class="form-label">Durum Filtrele</label>
+        <select id="statusFilter" class="form-select form-select-sm">
+            <option value="">Tümü</option>
+            <option value="Taslak">Taslak</option>
+            <option value="Orijinal">Orijinal</option>
+            <option value="Beklemede">Beklemede</option>
+            <option value="Tahsil Edildi">Tahsil Edildi</option>
+            <option value="Problemli">Problemli</option>
+            <option value="İade/İptal">İade/İptal</option>
+        </select>
+    </div>
+
+    <div class="col-md-5 text-end">
         <a class="btn btn-sm btn-outline-secondary"
            href="/Finance/Invoices?year=@ViewBag.SelectedYear&month=@ViewBag.SelectedMonth">Yenile</a>
     </div>
 </form>
+
 
 @if (Model == null || !Model.Any())
 {
@@ -89,21 +342,39 @@
         Bu ay için kayıt yok. <b>+ Yeni Satır</b> ile ilk kaydı ekleyebilirsin.
     </div>
 }
+<div class="invoice-table-wrap">
+<table class="table table-sm table-bordered align-middle invoice-table" id="invoiceTable">
+    <colgroup>
+        <col style="width:20px;">   <!-- checkbox -->
+        <col style="width:140px;">  <!-- Firma -->
+        <col style="width:130px;">  <!-- Fatura Tarihi -->
+        <col style="width:100px;">  <!-- Beklenen Net -->
+        <col style="width:95px;">  <!-- KDV Oranı -->
+        <col style="width:85px;">  <!-- KDV -->
+        <col style="width:95px">  <!-- Brüt -->
+        <col style="width:90px">  <!-- Ödenen -->
+        <col style="width:85px">  <!-- Kalan -->
+        <col style="width:120px">  <!-- Durum -->
+        <col style="width:90px">  <!-- Problem Nedeni -->
+        <col style="width:150px;">  <!-- Not -->
+        <col style="width:90px;">  <!-- Kim Sattı -->
+        <col style="width:90px;">  <!-- SDR -->
+    </colgroup>
 
-<table class="table table-sm table-bordered align-middle" id="invoiceTable">
     <thead class="table-light">
         <tr>
             <th class="select-col">
                 <input type="checkbox" id="selectAllRows" title="Tümünü seç" />
             </th>
             <th style="width:220px;">Firma</th>
-            <th style="width:140px;">Beklenen Net</th>
+            <th style="width:130px;">Fatura Tarihi</th>
+            <th style="width:130px;">Beklenen Net</th>
             <th style="width:110px;">KDV Oranı</th>
             <th style="width:120px;">KDV</th>
-            <th style="width:140px;">Brüt</th>
-            <th style="width:140px;">Ödenen</th>
-            <th style="width:140px;">Kalan</th>
-            <th style="width:140px;">Durum</th>
+            <th style="width:130px;">Brüt</th>
+            <th style="width:130px;">Ödenen</th>
+            <th style="width:130px;">Kalan</th>
+            <th style="width:130px;">Durum</th>
             <th style="width:220px;">Problem Nedeni</th>
             <th style="width:220px;">Not</th>
             <th style="width:160px;">Kim Sattı</th>
@@ -115,12 +386,12 @@
         @foreach (var i in Model)
         {
             <tr data-id="@i.Id">
-                <!-- ✅ Checkbox (TR içinde olmalı) -->
+                <!-- ✅ Checkbox -->
                 <td class="select-col">
                     <input type="checkbox" class="row-select" />
                 </td>
 
-                <!-- ✅ Firma adı Contract üzerinden inline edit -->
+                <!-- ✅ Firma adı (Contract üzerinden inline edit) -->
                 <td class="d-flex align-items-center gap-2">
                     <input class="form-control form-control-sm inline-edit"
                            data-field="ContractCompanyName"
@@ -133,6 +404,46 @@
                         <i class="bi bi-pencil-square"></i>
                     </a>
                 </td>
+                    <td>
+                        <input type="date"
+                               class="form-control form-control-sm inline-edit invoice-date"
+                               data-field="InvoiceDate"
+                               value="@(i.InvoiceDate.HasValue? i.InvoiceDate.Value.ToString("yyyy-MM-dd") : "")" />
+
+                        @{
+                            // sadece ilk render için: taslak + tarih dolu + <=3 gün veya geçmişse
+                            var daysLeft = InvoiceDeadlineHelper.GetDaysLeft(i.InvoiceDate, DateTime.Today);
+                            var deadline = InvoiceDeadlineHelper.GetOriginalDeadline(i.InvoiceDate);
+
+                            string badgeClass = "deadline-muted";
+                            string text = "";
+
+                            if (i.Status == "Taslak" && i.InvoiceDate.HasValue && daysLeft.HasValue && daysLeft.Value <= 3)
+                            {
+                                if (daysLeft.Value > 0)
+                                {
+                                    badgeClass = "deadline-badge deadline-warn";
+                                    text = $"{daysLeft.Value} gün kaldı \\n (Son: {deadline:dd.MM.yyyy})";
+                                }
+                                else if (daysLeft.Value == 0)
+                                {
+                                    badgeClass = "deadline-badge deadline-danger";
+                                    text = $"Bugün son gün! (Son: {deadline:dd.MM.yyyy})";
+                                }
+                                else
+                                {
+                                    badgeClass = "deadline-badge deadline-danger";
+                                    text = $"{Math.Abs(daysLeft.Value)} gün gecikti! (Son: {deadline:dd.MM.yyyy})";
+                                }
+                            }
+                        }
+
+                        <div class="@badgeClass deadline-ui" data-deadline="@((deadline.HasValue) ? deadline.Value.ToString("yyyy-MM-dd") : "")">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span class="deadline-text">@text</span>
+                        </div>
+                    </td>
+
 
                 <td>
                     <input class="form-control form-control-sm inline-edit"
@@ -164,10 +475,9 @@
                 </td>
 
                 <td>
-                    <select class="form-select form-select-sm inline-edit" data-field="Status">
+                    <select class="form-select form-select-sm inline-edit status-select" data-field="Status">
                         <option value="Taslak" selected="@(i.Status == "Taslak")">Taslak</option>
                         <option value="Orijinal" selected="@(i.Status == "Orijinal")">Orijinal</option>
-                        <option value="Kesildi" selected="@(i.Status == "Kesildi")">Kesildi</option>
                         <option value="Beklemede" selected="@(i.Status == "Beklemede")">Beklemede</option>
                         <option value="Tahsil Edildi" selected="@(i.Status == "Tahsil Edildi")">Tahsil Edildi</option>
                         <option value="Problemli" selected="@(i.Status == "Problemli")">Problemli</option>
@@ -176,16 +486,36 @@
                 </td>
 
                 <td>
-                    <input class="form-control form-control-sm inline-edit"
-                           data-field="ProblemReason"
-                           value="@i.ProblemReason" />
+                    <div class="d-flex align-items-center gap-2">
+                        <input class="form-control form-control-sm inline-edit longtext"
+                               data-field="ProblemReason"
+                               value="@i.ProblemReason"
+                               title="@i.ProblemReason" />
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary open-longtext"
+                                data-field="ProblemReason"
+                                title="Büyüt">
+                            <i class="bi bi-arrows-angle-expand"></i>
+                        </button>
+                    </div>
                 </td>
 
+
                 <td>
-                    <input class="form-control form-control-sm inline-edit"
-                           data-field="Note"
-                           value="@i.Note" />
+                    <div class="d-flex align-items-center gap-2">
+                        <input class="form-control form-control-sm inline-edit longtext"
+                               data-field="Note"
+                               value="@i.Note"
+                               title="@i.Note" />
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary open-longtext"
+                                data-field="Note"
+                                title="Büyüt">
+                            <i class="bi bi-arrows-angle-expand"></i>
+                        </button>
+                    </div>
                 </td>
+
 
                 <!-- ✅ Kim Sattı (Contract üzerinden) -->
                 <td>
@@ -222,6 +552,7 @@
         <!-- ✅ TOPLAM -->
         <tr class="table-light fw-bold">
             <td></td>
+            <td></td>
             <td class="text-end">TOPLAM:</td>
 
             <td id="sumExpected">@Model.Sum(x => x.ExpectedNet).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
@@ -234,7 +565,8 @@
 
             <td id="sumPaid">@Model.Sum(x => x.PaidAmount).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
 
-            <td id="sumRemaining">@Model.Sum(x => (x.GrossAmount - x.PaidAmount)).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
+            <!-- ✅ KALAN: ExpectedNet - PaidAmount -->
+            <td id="sumRemaining">@Model.Sum(x => (x.ExpectedNet - x.PaidAmount)).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
 
             <td></td>
             <td></td>
@@ -248,16 +580,17 @@
         <!-- ✅ SEÇİLEN TOPLAM -->
         <tr class="selected-summary fw-bold">
             <td></td>
+            <td></td>
             <td class="text-end">SEÇİLEN TOPLAM:</td>
 
-            <td id="selectedExpected">0,00</td>
+            <td id="selectedExpected">0,00</td>      <!-- Beklenen Net -->
+            <td></td>                               <!-- KDV Oranı -->
 
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td id="selectedVat">0,00</td>           <!-- KDV -->
+            <td id="selectedGross">0,00</td>         <!-- Brüt -->
 
-            <td id="selectedRemaining">0,00</td>
+            <td id="selectedPaid">0,00</td>                                <!-- Ödenen -->
+            <td id="selectedRemaining">0,00</td>     <!-- Kalan -->
 
             <td colspan="5" class="text-muted fw-normal">
                 (Checkbox ile istediğin firmaları seç)
@@ -265,6 +598,131 @@
         </tr>
     </tfoot>
 </table>
+</div>
+<hr class="my-4" />
+
+<div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="section-header">
+            <div>
+                <h5 class="title" style="font-size:18px;">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Orijinal Durumdaki Faturalar (Ay/Yıl bağımsız)
+                </h5>
+                <p class="sub">Durumu Orijinal olan ve henüz tahsil edilmemiş faturalar.</p>
+            </div>
+
+            <span class="right-badge">
+                <i class="bi bi-list-check"></i>
+            @originals.Count adet
+            </span>
+        </div>
+        <div class="text-muted" style="font-size:12px;">
+            Bu tabloda sadece <b>Durum = Orijinal</b> olan faturalar listelenir.
+        </div>
+</div>
+
+@if (!originals.Any())
+{
+    <div class="alert alert-success mb-0">
+        Orijinal durumda fatura yok 🎉
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle" id="originalInvoiceTable">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:140px;">Fatura No</th>
+                    <th style="width:220px;">Firma</th>
+                    <th style="width:150px;">Fatura Tarihi</th>
+                    <th style="width:140px;">Beklenen Net</th>
+                    <th style="width:140px;">Beklenen Brüt</th>
+                    <th style="width:140px;">Yapılan Ödeme</th>
+                    <th style="width:140px;">Durum</th>
+                    <th style="width:220px;">Problem</th>
+                    <th style="width:220px;">Not</th>
+                    <th style="width:90px;">Detay</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in originals)
+                {
+                    var fallbackDate = new DateTime(i.PeriodYear, i.PeriodMonth, 1);
+
+                    <tr>
+                        <td>@(string.IsNullOrWhiteSpace(i.InvoiceNo) ? "-" : i.InvoiceNo)</td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold">
+                                    @(i.Contract?.CompanyName ?? "-")
+                                </span>
+                                <small class="text-muted">
+                                    Dönem: @fallbackDate.ToString("MMMM yyyy", tr)
+                                </small>
+                            </div>
+                        </td>
+
+                        <td>
+                            @(
+                                                i.InvoiceDate.HasValue
+                                                ? i.InvoiceDate.Value.ToString("dd.MM.yyyy", tr)
+                                                : "-"
+                                                )
+                    </td>
+
+                        <td>@i.ExpectedNet.ToString("N2", tr)</td>
+                        <td>@i.GrossAmount.ToString("N2", tr)</td>
+                        <td>@i.PaidAmount.ToString("N2", tr)</td>
+
+                        <td>
+                            <span class="badge bg-info text-dark">@i.Status</span>
+                        </td>
+
+                        <td>
+                            @(string.IsNullOrWhiteSpace(i.ProblemReason) ? "-" : i.ProblemReason)
+                        </td>
+
+                        <td>
+                            @(string.IsNullOrWhiteSpace(i.Note) ? "-" : i.Note)
+                        </td>
+                        <td class="text-center">
+                            <a class="btn btn-sm btn-outline-primary"
+                               href="@Url.Action("InvoiceDetail", "Finance", new { id = i.Id })"
+                               title="Detay">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+
+                    </tr>
+                        }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div class="modal fade" id="longTextModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="longTextTitle">Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="longTextArea" class="form-control" rows="8"></textarea>
+                <small class="text-muted d-block mt-2">Kaydet’e basınca satır otomatik güncellenir.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary" id="btnSaveLongText">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 @section Scripts {
     <script>
@@ -310,6 +768,109 @@
             el.value = formatTrNumber(n);
         }
 
+        // --------- status styling ---------
+        const STATUS_CLASSES = [
+            'status-taslak', 'status-orijinal', 'status-beklemede',
+            'status-tahsil', 'status-problemli', 'status-iade'
+        ];
+
+        function getStatusClass(status) {
+            const s = (status || '').trim();
+            switch (s) {
+                case 'Taslak': return 'status-taslak';
+                case 'Orijinal': return 'status-orijinal';
+                case 'Beklemede': return 'status-beklemede';
+                case 'Tahsil Edildi': return 'status-tahsil';
+                case 'Problemli': return 'status-problemli';
+                case 'İade/İptal': return 'status-iade';
+                default: return null;
+            }
+        }
+
+        function applyStatusStyles(tr) {
+            if (!tr) return;
+
+            const sel = tr.querySelector('[data-field="Status"]');
+            const status = sel ? sel.value : '';
+            const cls = getStatusClass(status);
+
+            STATUS_CLASSES.forEach(c => tr.classList.remove(c));
+            if (cls) tr.classList.add(cls);
+
+            if (sel) {
+                STATUS_CLASSES.forEach(c => sel.classList.remove(c));
+                sel.classList.add('status-select');
+                if (cls) sel.classList.add(cls);
+            }
+        }
+
+        // --------- deadline UI (Taslak -> Orijinal uyarısı) ---------
+        function updateDeadlineUI(tr) {
+            if (!tr) return;
+
+            const statusSel = tr.querySelector('[data-field="Status"]');
+            const dateInput = tr.querySelector('[data-field="InvoiceDate"]');
+            const ui = tr.querySelector('.deadline-ui');
+            const textEl = tr.querySelector('.deadline-text');
+
+            if (!ui || !textEl) return;
+
+            const status = statusSel ? (statusSel.value || '').trim() : '';
+            const rawDate = dateInput ? (dateInput.value || '').trim() : '';
+
+            // sadece taslakta göster
+            if (status !== 'Taslak' || !rawDate) {
+                ui.className = 'deadline-muted deadline-ui';
+                textEl.textContent = '';
+                return;
+            }
+
+            const invoiceDate = new Date(rawDate + 'T00:00:00');
+            if (isNaN(invoiceDate.getTime())) {
+                ui.className = 'deadline-muted deadline-ui';
+                textEl.textContent = '';
+                return;
+            }
+
+            // deadline = invoiceDate + 7, ama ay sonunu geçemez
+            const plus7 = new Date(invoiceDate);
+            plus7.setDate(plus7.getDate() + 7);
+
+            const monthEnd = new Date(invoiceDate.getFullYear(), invoiceDate.getMonth() + 1, 0); // ayın son günü
+            const deadline = (plus7 <= monthEnd) ? plus7 : monthEnd;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            deadline.setHours(0, 0, 0, 0);
+
+            const diffMs = deadline.getTime() - today.getTime();
+            const daysLeft = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+            // sadece <=3 gün ise göster (3,2,1,0,-1...)
+            if (daysLeft > 3) {
+                ui.className = 'deadline-muted deadline-ui';
+                textEl.textContent = '';
+                return;
+            }
+
+            const dd = String(deadline.getDate()).padStart(2, '0');
+            const mm = String(deadline.getMonth() + 1).padStart(2, '0');
+            const yyyy = deadline.getFullYear();
+            const deadlineText = `${dd}.${mm}.${yyyy}`;
+
+            if (daysLeft > 0) {
+                ui.className = 'deadline-badge deadline-warn deadline-ui';
+               textEl.textContent = `${daysLeft} gün kaldı\n ${deadlineText}`;
+
+            } else if (daysLeft === 0) {
+                ui.className = 'deadline-badge deadline-danger deadline-ui';
+                textEl.textContent = `Bugün son gün!\n ${deadlineText}`;
+            } else {
+                ui.className = 'deadline-badge deadline-danger deadline-ui';
+                textEl.textContent = `${Math.abs(daysLeft)} gün gecikti!\n${deadlineText}`;
+            }
+        }
+
         // --------- totals ---------
         function recalcTotals() {
             let sumExpected = 0;
@@ -319,6 +880,10 @@
             let sumRemaining = 0;
 
             document.querySelectorAll('#invoiceTable tbody tr').forEach(tr => {
+
+                // ✅ filtre ile gizlenen satırları toplama dahil etme
+                if (tr.style.display === 'none') return;
+
                 const expectedInput = tr.querySelector('[data-field="ExpectedNet"]');
                 const paidInput = tr.querySelector('[data-field="PaidAmount"]');
 
@@ -331,7 +896,7 @@
                 const vat = parseSmartNumber(vatText);
                 const gross = parseSmartNumber(grossText);
 
-                const remaining = expected  - paid;
+                const remaining = expected - paid;
 
                 sumExpected += expected;
                 sumPaid += paid;
@@ -363,12 +928,19 @@
             }
         }
 
-        // ✅ seçilen satırların toplamı
+        // ✅ seçilen satırların toplamı (Beklenen + KDV + Brüt + Ödenen + Kalan)
         function recalcSelectedTotals() {
             let selectedExpected = 0;
+            let selectedVat = 0;
+            let selectedGross = 0;
             let selectedRemaining = 0;
+            let selectedPaid = 0;
 
             document.querySelectorAll('#invoiceTable tbody tr').forEach(tr => {
+
+                // ✅ filtre ile gizlenen satırları seçilen toplama dahil etme
+                if (tr.style.display === 'none') return;
+
                 const cb = tr.querySelector('.row-select');
                 if (!cb || !cb.checked) return;
 
@@ -378,19 +950,26 @@
                 const expected = parseSmartNumber(expectedInput ? expectedInput.value : 0);
                 const paid = parseSmartNumber(paidInput ? paidInput.value : 0);
 
+                const vatText = tr.querySelector('.vat-amount')?.innerText ?? "0";
                 const grossText = tr.querySelector('.gross-amount')?.innerText ?? "0";
+
+                const vat = parseSmartNumber(vatText);
                 const gross = parseSmartNumber(grossText);
 
-                const remaining = expected  - paid;
+                const remaining = expected - paid;
 
                 selectedExpected += expected;
+                selectedVat += vat;
+                selectedGross += gross;
                 selectedRemaining += remaining;
+                selectedPaid += paid;
             });
 
-            const selExpEl = document.getElementById('selectedExpected');
-            const selRemEl = document.getElementById('selectedRemaining');
-            if (selExpEl) selExpEl.innerText = formatTrNumber(selectedExpected);
-            if (selRemEl) selRemEl.innerText = formatTrNumber(selectedRemaining);
+            document.getElementById('selectedExpected') && (document.getElementById('selectedExpected').innerText = formatTrNumber(selectedExpected));
+            document.getElementById('selectedVat') && (document.getElementById('selectedVat').innerText = formatTrNumber(selectedVat));
+            document.getElementById('selectedGross') && (document.getElementById('selectedGross').innerText = formatTrNumber(selectedGross));
+            document.getElementById('selectedRemaining') && (document.getElementById('selectedRemaining').innerText = formatTrNumber(selectedRemaining));
+            document.getElementById('selectedPaid') && (document.getElementById('selectedPaid').innerText = formatTrNumber(selectedPaid));
         }
 
         function paintSelectedRow(tr, checked) {
@@ -425,6 +1004,15 @@
 
                 if (field === "ExpectedNet" || field === "PaidAmount") {
                     formatInputAsTr(el);
+                }
+
+                if (field === "Status") {
+                    applyStatusStyles(tr);
+                    updateDeadlineUI(tr);
+                }
+
+                if (field === "InvoiceDate") {
+                    updateDeadlineUI(tr);
                 }
 
                 recalcTotals();
@@ -470,6 +1058,13 @@
                 paintSelectedRow(rows[idx], cb.checked);
 
                 cb.addEventListener('change', function (e) {
+                    // ✅ eğer satır filtre ile gizliyse seçim yapma
+                    if (rows[idx].style.display === 'none') {
+                        cb.checked = false;
+                        paintSelectedRow(rows[idx], false);
+                        return;
+                    }
+
                     if (e.shiftKey && lastCheckedIndex !== null) {
                         const start = Math.min(lastCheckedIndex, idx);
                         const end = Math.max(lastCheckedIndex, idx);
@@ -477,6 +1072,10 @@
 
                         for (let i = start; i <= end; i++) {
                             if (!checkboxes[i]) continue;
+
+                            // ✅ gizli satırları shift-select ile seçme
+                            if (rows[i].style.display === 'none') continue;
+
                             checkboxes[i].checked = targetState;
                             paintSelectedRow(rows[i], targetState);
                         }
@@ -486,7 +1085,13 @@
 
                     lastCheckedIndex = idx;
 
-                    syncSelectAll(checkboxes);
+                    // sadece görünenleri sync et
+                    const visibleCbs = rows
+                        .filter(r => r.style.display !== 'none')
+                        .map(r => r.querySelector('.row-select'))
+                        .filter(x => x);
+
+                    syncSelectAll(visibleCbs);
                     recalcSelectedTotals();
                 });
             });
@@ -495,24 +1100,105 @@
             if (selectAll) {
                 selectAll.addEventListener('change', function () {
                     const checked = this.checked;
-                    checkboxes.forEach((cb, i) => {
+
+                    rows.forEach((row, i) => {
+                        // ✅ sadece görünen satırları seç
+                        if (row.style.display === 'none') return;
+
+                        const cb = checkboxes[i];
                         if (!cb) return;
                         cb.checked = checked;
                         paintSelectedRow(rows[i], checked);
                     });
+
                     this.indeterminate = false;
                     recalcSelectedTotals();
                 });
 
-                syncSelectAll(checkboxes);
+                const visibleCbs = rows
+                    .filter(r => r.style.display !== 'none')
+                    .map(r => r.querySelector('.row-select'))
+                    .filter(x => x);
+
+                syncSelectAll(visibleCbs);
             }
         }
 
+        // --------- Status Filter ---------
+        function applyStatusFilter() {
+            const selected = (document.getElementById('statusFilter')?.value || "").trim();
+
+            const rows = Array.from(document.querySelectorAll('#invoiceTable tbody tr'));
+            rows.forEach(tr => {
+                const statusSelect = tr.querySelector('select[data-field="Status"]');
+                const status = (statusSelect?.value || "").trim();
+
+                const match = !selected || status === selected;
+
+                tr.style.display = match ? '' : 'none';
+
+                // ✅ satır gizleniyorsa checkbox'ı kaldır
+                if (!match) {
+                    const cb = tr.querySelector('.row-select');
+                    if (cb) cb.checked = false;
+                    tr.classList.remove('is-selected');
+                }
+            });
+
+            // SelectAll sync sadece görünenler
+            const visibleCbs = rows
+                .filter(r => r.style.display !== 'none')
+                .map(r => r.querySelector('.row-select'))
+                .filter(x => x);
+
+            syncSelectAll(visibleCbs);
+
+            recalcTotals();
+            recalcSelectedTotals();
+        }
+
+        // --------- Long text modal (problem/not) ---------
+        let currentLongInput = null;
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.open-longtext');
+            if (!btn) return;
+
+            const tr = btn.closest('tr');
+            const field = btn.getAttribute('data-field');
+            const input = tr.querySelector(`input[data-field="${field}"]`);
+            if (!input) return;
+
+            currentLongInput = input;
+
+            document.getElementById('longTextTitle').innerText = (field === "ProblemReason") ? "Problem Nedeni" : "Not";
+            document.getElementById('longTextArea').value = input.value || "";
+
+            const modal = new bootstrap.Modal(document.getElementById('longTextModal'));
+            modal.show();
+        });
+
+        document.getElementById('btnSaveLongText')?.addEventListener('click', function () {
+            if (!currentLongInput) return;
+
+            currentLongInput.value = document.getElementById('longTextArea').value || "";
+            currentLongInput.setAttribute('title', currentLongInput.value);
+
+            saveField.call(currentLongInput);
+
+            const modalEl = document.getElementById('longTextModal');
+            bootstrap.Modal.getInstance(modalEl).hide();
+        });
+
         // --------- init ---------
         document.addEventListener('DOMContentLoaded', function () {
-            // inline edit event
+
+            // inline edit event (select + date => change, diğerleri => blur)
             document.querySelectorAll('.inline-edit').forEach(el => {
-                if (el.tagName.toLowerCase() === 'select') {
+                const tag = el.tagName.toLowerCase();
+                const type = (el.getAttribute('type') || '').toLowerCase();
+
+                if (tag === 'select' || type === 'date') {
                     el.addEventListener('change', saveField);
                 } else {
                     el.addEventListener('blur', saveField);
@@ -525,9 +1211,24 @@
             // checkbox selection
             bindRowSelection();
 
+            // status + deadline init
+            document.querySelectorAll('#invoiceTable tbody tr').forEach(tr => {
+                applyStatusStyles(tr);
+                updateDeadlineUI(tr);
+            });
+
+            // status filter bind
+            const statusFilterEl = document.getElementById('statusFilter');
+            if (statusFilterEl) {
+                statusFilterEl.addEventListener('change', applyStatusFilter);
+            }
+
             // initial totals
             recalcTotals();
             recalcSelectedTotals();
         });
+
     </script>
 }
+
+

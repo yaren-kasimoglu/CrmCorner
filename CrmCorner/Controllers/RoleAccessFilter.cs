@@ -18,6 +18,16 @@ namespace CrmCorner.Filters
             if (controller == "Member")
                 return;
 
+            // ✅ Finans rolü SocialMedia sayfalarını görmesin
+            if (user.IsInRole("Finance"))
+            {
+                if (string.Equals(controller, "SocialMedia", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Result = new RedirectToActionResult("AccessDenied", "Member", null);
+                    return;
+                }
+            }
+
             // Sadece SocialMediaUser için kontrol yap
             if (user.IsInRole("SocialMediaUser"))
             {
