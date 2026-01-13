@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,11 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using CrmCorner.Helpers;
 
 
 namespace CrmCorner.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Admin,Finance")]
     public class FinanceController : Controller
     {
         private readonly CrmCornerContext _context;
@@ -28,6 +30,141 @@ namespace CrmCorner.Controllers
 
 
         // LIST
+        public async Task<IActionResult> Dashboard(int? year, int? month)
+        {
+            int selectedYear = year ?? DateTime.Now.Year;
+            int selectedMonth = month ?? DateTime.Now.Month;
+
+            var query = _context.FinanceInvoices.AsQueryable();
+
+            // Eğer CompanyId filtresi varsa burada uygula
+            // query = query.Where(x => x.CompanyId == companyId);
+
+            // ✅ Yıl dropdown
+            var availableYears = await query
+                .Select(x => x.PeriodYear)
+                .Distinct()
+                .OrderByDescending(x => x)
+                .ToListAsync();
+
+            // ✅ Seçili yıl datası
+            var yearList = await query
+                .Where(x => x.PeriodYear == selectedYear)
+                .ToListAsync();
+
+            // ✅ Ay dropdown (o yıl içinde hangi aylar varsa)
+            var availableMonths = yearList
+                .Select(x => (int)x.PeriodMonth)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+
+            // Eğer seçili ay o yıl içinde yoksa ilk available ayı seç
+            if (availableMonths.Any() && !availableMonths.Contains(selectedMonth))
+                selectedMonth = availableMonths.First();
+
+            // ✅ Seçili ay datası
+            var monthList = yearList
+                .Where(x => (int)x.PeriodMonth == selectedMonth)
+                .ToList();
+
+            // ✅ Yıllık toplamlar
+            decimal totalExpected = yearList.Sum(x => x.ExpectedNet);
+            decimal totalPaid = yearList.Sum(x => x.PaidAmount);
+            decimal totalRemaining = yearList.Sum(x => (x.ExpectedNet - x.PaidAmount));
+
+            // ✅ Aylık toplamlar (seçili ay)
+            decimal monthExpected = monthList.Sum(x => x.ExpectedNet);
+            decimal monthPaid = monthList.Sum(x => x.PaidAmount);
+            decimal monthRemaining = monthList.Sum(x => (x.ExpectedNet - x.PaidAmount));
+
+            // ✅ Aylık grafik (yılın 12 ayı)
+            var monthly = yearList
+                .GroupBy(x => (int)x.PeriodMonth)
+                .Select(g => new
+                {
+                    Month = g.Key,
+                    Expected = g.Sum(i => i.ExpectedNet),
+                    Paid = g.Sum(i => i.PaidAmount)
+                })
+                .ToList();
+
+            // ✅ Durum sırası sabit kalsın
+            var preferredOrder = new List<string>
+    {
+        "Taslak", "Orijinal", "Beklemede",
+        "Tahsil Edildi", "Problemli", "İade/İptal", "Bilinmiyor"
+    };
+
+            // ✅ AY donut (seçili ay)
+            var monthStatusGroups = monthList
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.Status) ? "Bilinmiyor" : x.Status.Trim())
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToList();
+
+            var orderedMonthStatuses = monthStatusGroups
+                .OrderBy(g =>
+                {
+                    int idx = preferredOrder.IndexOf(g.Status);
+                    return idx == -1 ? 999 : idx;
+                })
+                .ThenBy(g => g.Status)
+                .ToList();
+
+            // ✅ YIL donut (seçili yıl - tüm aylar)
+            var yearStatusGroups = yearList
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.Status) ? "Bilinmiyor" : x.Status.Trim())
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToList();
+
+            var orderedYearStatuses = yearStatusGroups
+                .OrderBy(g =>
+                {
+                    int idx = preferredOrder.IndexOf(g.Status);
+                    return idx == -1 ? 999 : idx;
+                })
+                .ThenBy(g => g.Status)
+                .ToList();
+
+            var vm = new FinanceDashboardVm
+            {
+                Year = selectedYear,
+                SelectedMonth = selectedMonth,
+                AvailableYears = availableYears,
+                AvailableMonths = availableMonths,
+
+                TotalExpectedNet = totalExpected,
+                TotalPaid = totalPaid,
+                TotalRemaining = totalRemaining,
+
+                MonthExpectedNet = monthExpected,
+                MonthPaid = monthPaid,
+                MonthRemaining = monthRemaining,
+
+                // ✅ Ay donut datası
+                StatusLabels = orderedMonthStatuses.Select(x => x.Status).ToList(),
+                StatusCounts = orderedMonthStatuses.Select(x => x.Count).ToList(),
+
+                // ✅ Yıl donut datası (YENİ)
+                YearStatusLabels = orderedYearStatuses.Select(x => x.Status).ToList(),
+                YearStatusCounts = orderedYearStatuses.Select(x => x.Count).ToList()
+            };
+
+            var tr = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+
+            // ✅ 12 ayı doldur (boş aylar 0)
+            for (int m = 1; m <= 12; m++)
+            {
+                vm.MonthLabels.Add(new DateTime(selectedYear, m, 1).ToString("MMM", tr));
+                var row = monthly.FirstOrDefault(x => x.Month == m);
+                vm.MonthlyExpectedNet.Add(row?.Expected ?? 0);
+                vm.MonthlyPaid.Add(row?.Paid ?? 0);
+            }
+
+            return View(vm);
+        }
+
+
 
         public async Task<IActionResult> Invoices(int? year, int? month)
         {
@@ -45,6 +182,10 @@ namespace CrmCorner.Controllers
                 ViewBag.TeamUsers = new List<SelectListItem>();
                 ViewBag.SelectedYear = selectedYear;
                 ViewBag.SelectedMonth = selectedMonth;
+
+                // ✅ Alt tablo için de boş liste
+                ViewBag.OriginalInvoicesAllMonths = new List<FinanceInvoice>();
+
                 return View(new List<FinanceInvoice>());
             }
 
@@ -65,7 +206,7 @@ namespace CrmCorner.Controllers
             var monthStart = new DateTime(selectedYear, selectedMonth, 1);
             var monthEnd = monthStart.AddMonths(1).AddDays(-1);
 
-            // ✅ Bu ay ile kesişen sözleşmeler (Aralık'ta başlayıp Şubat'ta biten => Aralık/Ocak/Şubat dahil)
+            // ✅ Bu ay ile kesişen sözleşmeler
             var activeContracts = await _context.FinanceContracts
                 .Where(c =>
                     c.CompanyId == companyId &&
@@ -76,7 +217,7 @@ namespace CrmCorner.Controllers
                 )
                 .ToListAsync();
 
-            // ✅ Bu ayın mevcut invoice'ları (company filtreli)
+            // ✅ Bu ayın mevcut invoice'ları
             var existingInvoices = await _context.FinanceInvoices
                 .Where(i =>
                     i.CompanyId == companyId &&
@@ -102,7 +243,6 @@ namespace CrmCorner.Controllers
                         PeriodYear = selectedYear,
                         PeriodMonth = (byte)selectedMonth,
 
-                        // Finans defaultlar
                         ExpectedNet = 0,
                         VatRate = 0,
                         VatAmount = 0,
@@ -126,7 +266,7 @@ namespace CrmCorner.Controllers
             if (addedAny)
                 await _context.SaveChangesAsync();
 
-            // ✅ Ekrana basılacak liste (Contract include)
+            // ✅ Üst tablo: seçili ay/yıl listesi
             var invoices = await _context.FinanceInvoices
                 .Include(x => x.Contract)
                 .Where(i =>
@@ -134,15 +274,29 @@ namespace CrmCorner.Controllers
                     i.PeriodYear == selectedYear &&
                     i.PeriodMonth == (byte)selectedMonth
                 )
-                // ✅ Sıralama Contract şirket adına göre
                 .OrderBy(i => i.Contract != null ? i.Contract.CompanyName : "")
                 .ToListAsync();
+
+            // ✅ Alt tablo: Ay/Yıl bağımsız SADECE "Orijinal"
+            var originalsRaw = await _context.FinanceInvoices
+                .Include(x => x.Contract)
+                .Where(i => i.CompanyId == companyId && i.Status == "Orijinal")
+                .ToListAsync();
+
+            // ✅ SQL değil C# tarafında sıralama (EF çevirme derdi yok)
+            var originalInvoicesAllMonths = originalsRaw
+                .OrderBy(i => i.InvoiceDate ?? new DateTime(i.PeriodYear, i.PeriodMonth, 1))
+                .ThenBy(i => i.Contract != null ? i.Contract.CompanyName : "")
+                .ToList();
+
+            ViewBag.OriginalInvoicesAllMonths = originalInvoicesAllMonths;
 
             ViewBag.SelectedYear = selectedYear;
             ViewBag.SelectedMonth = selectedMonth;
 
             return View(invoices);
         }
+
 
 
         public async Task<IActionResult> InvoiceDetail(int id)
@@ -321,6 +475,29 @@ namespace CrmCorner.Controllers
 
                 case "Note":
                     inv.Note = value ?? "";
+                    break;
+
+                case "InvoiceDate":
+                    if (string.IsNullOrWhiteSpace(value))
+                    {
+                        inv.InvoiceDate = null;
+                    }
+                    else
+                    {
+                        if (DateTime.TryParseExact(
+                            value,
+                            "yyyy-MM-dd",
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None,
+                            out var dt))
+                        {
+                            inv.InvoiceDate = dt;
+                        }
+                        else
+                        {
+                            return BadRequest(new { message = "Geçersiz tarih formatı." });
+                        }
+                    }
                     break;
 
                 // ===== CONTRACT ALANLARI =====
@@ -571,6 +748,13 @@ namespace CrmCorner.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest();
 
+            // ✅ Invoice kaydı var mı?
+            var invoice = await _context.FinanceInvoices
+                .FirstOrDefaultAsync(x => x.Id == invoiceId);
+
+            if (invoice == null)
+                return NotFound();
+
             var uploadPath = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
@@ -589,6 +773,7 @@ namespace CrmCorner.Controllers
                 await file.CopyToAsync(stream);
             }
 
+            // ✅ Doküman kaydı
             var doc = new FinanceInvoiceDocument
             {
                 FinanceInvoiceId = invoiceId,
@@ -598,6 +783,24 @@ namespace CrmCorner.Controllers
             };
 
             _context.FinanceInvoiceDocuments.Add(doc);
+
+            // ✅ PDF ise fatura no/tarih çek
+            var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+            if (ext == ".pdf")
+            {
+                var result = PdfInvoiceExtractor.Extract(fullPath);
+
+                // Fatura No bulunduysa otomatik yaz
+                if (!string.IsNullOrWhiteSpace(result.InvoiceNo))
+                    invoice.InvoiceNo = result.InvoiceNo;
+
+                // Fatura tarihi bulunduysa otomatik yaz (istersen kapatabilirsin)
+                if (result.InvoiceDate.HasValue)
+                    invoice.InvoiceDate = result.InvoiceDate.Value;
+
+                invoice.UpdatedAt = DateTime.Now;
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction("InvoiceDetail", new { id = invoiceId });
@@ -673,7 +876,6 @@ namespace CrmCorner.Controllers
             return RedirectToAction("InvoiceDetail", new { id = invoiceId });
         }
 
-
         [HttpPost]
         public IActionResult DeleteContractDocument(int id, int invoiceId)
         {
@@ -688,7 +890,6 @@ namespace CrmCorner.Controllers
 
             return RedirectToAction("InvoiceDetail", new { id = invoiceId });
         }
-
 
         [HttpPost]
         public async Task<IActionResult> DeleteContract(int? contractId, int returnYear, int returnMonth)

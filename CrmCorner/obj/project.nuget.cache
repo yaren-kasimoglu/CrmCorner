@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "RRACkf3sKvs=",
+  "dgSpecHash": "f0kYBW4noX0=",
   "success": true,
   "projectFilePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
   "expectedPackageFiles": [
@@ -199,6 +199,7 @@
     "C:\\Users\\Lenovo\\.nuget\\packages\\nuget.protocol\\6.11.0\\nuget.protocol.6.11.0.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\nuget.versioning\\6.11.0\\nuget.versioning.6.11.0.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\owin\\1.0.0\\owin.1.0.0.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\pdfpig\\0.1.13\\pdfpig.0.1.13.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\pomelo.entityframeworkcore.mysql\\7.0.0\\pomelo.entityframeworkcore.mysql.7.0.0.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\restsharp\\110.2.0\\restsharp.110.2.0.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\std.uritemplate\\0.0.50\\std.uritemplate.0.0.50.nupkg.sha512",
