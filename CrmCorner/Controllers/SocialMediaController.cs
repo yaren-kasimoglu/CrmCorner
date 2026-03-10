@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+    [ModuleAuthorize(ModuleType.SocialMedia)]
     public class SocialMediaController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -74,7 +75,78 @@ namespace CrmCorner.Controllers
             return View(items);
         }
 
+        public async Task<IActionResult> Dashboard()
+        {
+            var user = await _userManager.GetUserAsync(User);
 
+            if (user == null)
+                return RedirectToAction("SignIn", "Account");
+
+            var companyId = user.CompanyId;
+
+            var isAdmin =
+                User.IsInRole("Admin") ||
+                User.IsInRole("SuperAdmin") ||
+                User.IsInRole("SocialMediaAdmin");
+
+            IQueryable<SocialMediaContent> companyContents = _context.SocialMediaContents;
+            IQueryable<PersonalBrandingContent> personalBrandingContents = _context.PersonalBrandingContents;
+
+            if (!isAdmin)
+            {
+                if (companyId == null)
+                    return View(new SocialMediaDashboardViewModel());
+
+                companyContents = companyContents.Where(x => x.CompanyId == companyId);
+                personalBrandingContents = personalBrandingContents.Where(x => x.CompanyId == companyId);
+            }
+
+            var weekStart = DateTime.Today;
+            var weekEnd = weekStart.AddDays(7);
+            var today = DateTime.Today;
+
+            var model = new SocialMediaDashboardViewModel
+            {
+                PendingCount = await companyContents.CountAsync(x => x.Status == ContentStatus.OnayBekliyor),
+
+                ApprovedCount = await companyContents.CountAsync(x => x.Status == ContentStatus.Onaylandi),
+
+                WeeklyCount = await companyContents.CountAsync(x =>
+                    x.ScheduledPublishDate.HasValue &&
+                    x.ScheduledPublishDate.Value >= weekStart &&
+                    x.ScheduledPublishDate.Value <= weekEnd),
+
+                RevisionCount = await companyContents.CountAsync(x => x.Status == ContentStatus.FeedbackVerildi),
+
+                TodayCount = await companyContents.CountAsync(x =>
+                    x.ScheduledPublishDate.HasValue &&
+                    x.ScheduledPublishDate.Value.Date == today),
+
+                UpcomingContents = await companyContents
+                    .Where(x => x.ScheduledPublishDate.HasValue &&
+                                x.ScheduledPublishDate.Value >= DateTime.Now)
+                    .OrderBy(x => x.ScheduledPublishDate)
+                    .Take(3)
+                    .ToListAsync(),
+
+                PersonalBrandingTotalCount = await personalBrandingContents.CountAsync(),
+
+                PersonalBrandingWeeklyCount = await personalBrandingContents.CountAsync(x =>
+                    x.EstimatedPublishDate.HasValue &&
+                    x.EstimatedPublishDate.Value >= weekStart &&
+                    x.EstimatedPublishDate.Value <= weekEnd),
+
+                PersonalBrandingPendingCount = await personalBrandingContents.CountAsync(x =>
+                    x.Status == ContentStatus.OnayBekliyor),
+
+                PersonalBrandingPublishedCount = await personalBrandingContents.CountAsync(x =>
+                    x.Status == ContentStatus.Onaylandi),
+
+                IsAdminView = isAdmin
+            };
+
+            return View(model);
+        }
 
         [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin")]
         [HttpGet]
@@ -233,7 +305,6 @@ namespace CrmCorner.Controllers
 
             return new FileStreamResult(new MemoryStream(content.MediaFile), mimeType);
         }
-
 
 
         [AllowAnonymous]

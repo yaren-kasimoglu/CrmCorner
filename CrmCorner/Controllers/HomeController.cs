@@ -509,8 +509,6 @@ namespace CrmCorner.Controllers
                 if (!ModelState.IsValid)
                     return View();
 
-                returnUrl ??= Url.Action("Index", "SocialMedia");
-
                 var hasUser = await _userManager.FindByEmailAsync(model.Email);
                 if (hasUser == null)
                 {
@@ -522,7 +520,27 @@ namespace CrmCorner.Controllers
 
                 if (result.Succeeded)
                 {
-                    return Redirect(returnUrl);
+                    var userModules = await _context.UserModules
+                        .Where(x => x.UserId == hasUser.Id)
+                        .Select(x => x.Module)
+                        .ToListAsync();
+
+                    if (userModules.Contains(ModuleType.CRM) && !userModules.Contains(ModuleType.SocialMedia))
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    if (userModules.Contains(ModuleType.SocialMedia) && !userModules.Contains(ModuleType.CRM))
+                    {
+                        return RedirectToAction("Dashboard", "SocialMedia");
+                    }
+
+                    if (userModules.Contains(ModuleType.CRM) && userModules.Contains(ModuleType.SocialMedia))
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    return RedirectToAction("Index", "Home");
                 }
 
                 ModelState.AddModelError(string.Empty, "Giriş başarısız.");

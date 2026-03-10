@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CrmCorner.Controllers
 {
+    [ModuleAuthorize(ModuleType.SocialMedia)]
     public class PersonalBrandingController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -19,6 +20,7 @@ namespace CrmCorner.Controllers
             _context = context;
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,SocialMediaAdmin,SocialMediaUser")]
         public async Task<IActionResult> Index()
         {
             var currentUser = await _userManager.GetUserAsync(User);

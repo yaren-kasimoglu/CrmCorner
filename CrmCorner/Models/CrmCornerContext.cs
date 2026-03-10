@@ -67,7 +67,7 @@ namespace CrmCorner.Models
 
         public DbSet<FinanceContractDocument> FinanceContractDocuments { get; set; }
 
-
+        public DbSet<UserModule> UserModules { get; set; }
 
 
 

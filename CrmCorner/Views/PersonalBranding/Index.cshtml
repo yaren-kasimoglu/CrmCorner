@@ -28,7 +28,7 @@
                     <tr>
                         <th style="width:5%">#</th>
                         <th style="width:15%">Başlık</th>
-                        <th style="width:30%">Yazı</th>
+@*                         <th style="width:30%">Yazı</th> *@
                         <th style="width:10%">Kişi</th>
                         <th style="width:15%">Tahmini Paylaşım Tarihi</th>
                         <th style="width:10%">Durum</th>
@@ -58,14 +58,14 @@
                                 </td>
 
                                 <!-- Description (ilk 12 kelime) -->
-                                <td>
+                       @*          <td>
                                     @{
                                         var desc = item.Description?.Length > 80
                                         ? item.Description.Substring(0, 80) + "..."
                                         : item.Description;
                                     }
                                     <span>@desc</span>
-                                </td>
+                                </td> *@
                                 <td>
                                     @if (item.PersonalUser != null)
                                     {

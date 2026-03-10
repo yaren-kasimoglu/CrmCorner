@@ -32,6 +32,32 @@
         </tbody>
     </table>
 
+    <hr />
+    <h4>Modules</h4>
+    @{
+        var assignedModules = ViewBag.UserModules as List<CrmCorner.Models.Enums.ModuleType>;
+    }
+
+    <div class="form-check">
+        <input class="form-check-input"
+               type="checkbox"
+               name="SelectedModules"
+               value="1"
+               @(assignedModules != null && assignedModules.Contains(CrmCorner.Models.Enums.ModuleType.CRM) ? "checked" : "") />
+        <label class="form-check-label">CRM</label>
+    </div>
+
+    <div class="form-check">
+        <input class="form-check-input"
+               type="checkbox"
+               name="SelectedModules"
+               value="2"
+               @(assignedModules != null && assignedModules.Contains(CrmCorner.Models.Enums.ModuleType.SocialMedia) ? "checked" : "") />
+        <label class="form-check-label">Social Media</label>
+    </div>
+
+    <br />
+
     <button type="submit" class="btn btn-success">Kaydet</button>
     <a asp-action="Index" class="btn btn-secondary">Geri</a>
 </form>

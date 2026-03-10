@@ -1,4 +1,5 @@
 ﻿using CrmCorner.Models;
+using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,13 @@ namespace CrmCorner.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<AppRole> _roleManager;
+        private readonly CrmCornerContext _context;
 
-        public UserRolesController(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+        public UserRolesController(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, CrmCornerContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
         }
 
         // Kullanıcı listesi
@@ -34,6 +37,12 @@ namespace CrmCorner.Controllers
             var roles = await _roleManager.Roles.ToListAsync();
             var userRoles = await _userManager.GetRolesAsync(user);
 
+            // Kullanıcının modüllerini getir
+            var userModules = await _context.UserModules
+                .Where(x => x.UserId == userId)
+                .Select(x => x.Module)
+                .ToListAsync();
+
             var model = roles.Select(r => new UserRoleAssignViewModel
             {
                 RoleId = r.Id,
@@ -43,12 +52,13 @@ namespace CrmCorner.Controllers
 
             ViewBag.UserId = userId;
             ViewBag.UserName = user.UserName;
+            ViewBag.UserModules = userModules;
 
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AssignRole(string userId, List<UserRoleAssignViewModel> model)
+        public async Task<IActionResult> AssignRole(string userId, List<UserRoleAssignViewModel> model, List<int> SelectedModules)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -90,7 +100,22 @@ namespace CrmCorner.Controllers
                 }
             }
 
+            var existingModules = _context.UserModules.Where(x => x.UserId == userId);
+            _context.UserModules.RemoveRange(existingModules);
 
+            if (SelectedModules != null && SelectedModules.Any())
+            {
+                foreach (var moduleId in SelectedModules)
+                {
+                    _context.UserModules.Add(new UserModule
+                    {
+                        UserId = userId,
+                        Module = (ModuleType)moduleId
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Index");
         }
