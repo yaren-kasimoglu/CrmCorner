@@ -1,5 +1,9 @@
 @using Microsoft.AspNetCore.Identity
 @using CrmCorner.Models
+@using CrmCorner.Models.Enums
+@using Microsoft.EntityFrameworkCore
+@inject CrmCornerContext  _context
+@inject Microsoft.AspNetCore.Identity.UserManager<CrmCorner.Models.AppUser> UserManager
 @inject UserManager<AppUser> UserManager
 
 @{
@@ -10,10 +14,34 @@
     if (currentUser != null)
     {
         var roles = UserManager.GetRolesAsync(currentUser).Result;
-        userRole = roles.Contains("Admin") ? "Admin" : "User";
+        if (roles.Contains("SuperAdmin")) userRole = "SuperAdmin";
+        else if (roles.Contains("Admin")) userRole = "Admin";
+        else if (roles.Contains("SocialMediaAdmin")) userRole = "SocialMediaAdmin";
+        else if (roles.Contains("TeamMember")) userRole = "TeamMember";
+        else if (roles.Contains("TeamLeader")) userRole = "TeamLeader";
+        else userRole = "User";
         userEmail = currentUser.Email;
+
+
     }
-    string layoutTheme = userRole == "Admin" ? "theme-purple" : "theme-cyan";
+
+    var user = await UserManager.GetUserAsync(User);
+
+    List<ModuleType> userModules = new List<ModuleType>();
+
+    if (user != null)
+    {
+        userModules = await _context.UserModules
+            .Where(x => x.UserId == user.Id)
+            .Select(x => x.Module)
+            .ToListAsync();
+    }
+
+    string layoutTheme =
+     (userRole == "SuperAdmin" || userRole == "Admin")
+         ? "theme-purple"
+         : "theme-cyan";
+
 
 }
 <!DOCTYPE html>
@@ -290,47 +318,38 @@
         </li>
                                     *@
 
-
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="SocialMedia" asp-action="Index">
-                                            <i class="fa fa-globe"></i> <span>Sosyal Medya</span>
-                                        </a>
-                                    </li>
-                                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("SocialMediaAdmin"))
+                                    @if (userModules.Contains(ModuleType.SocialMedia))
                                     {
                                         <li class="nav-item">
-                                            <a asp-area="" asp-controller="SocialMedia" asp-action="Create">
-                                                <i class="fa fa-pencil-square-o"></i><span>Sosyal Medya İçerik Oluştur</span>
+                                            <a asp-area="" asp-controller="SocialMedia" asp-action="Index">
+                                                <i class="fa fa-globe"></i> <span>Sosyal Medya</span>
+                                            </a>
+                                        </li>
+
+
+                                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("SocialMediaAdmin"))
+                                        {
+                                            <li class="nav-item">
+                                                <a asp-area="" asp-controller="SocialMedia" asp-action="Create">
+                                                    <i class="fa fa-pencil-square-o"></i><span>Sosyal Medya İçerik Oluştur</span>
+                                                </a>
+                                            </li>
+                                        }
+                                        <li class="nav-item">
+                                            <a asp-area="" asp-controller="SocialMedia" asp-action="Calendar">
+                                                <i class="fa fa-calendar"></i><span>Sosyal Medya Takvim</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a asp-area="" asp-controller="PersonalBranding" asp-action="Index">
+                                                <i class="fa fa-calendar"></i><span>Kişisel Markalaşma</span>
                                             </a>
                                         </li>
                                     }
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="SocialMedia" asp-action="Calendar">
-                                            <i class="fa fa-calendar"></i><span>Sosyal Medya Takvim</span>
-                                        </a>
-                                    </li>
-                                        <li class="nav-item">
-                                        <a asp-area="" asp-controller="PersonalBranding" asp-action="Index">
-                                            <i class="fa fa-calendar"></i><span>Kişisel Markalaşma</span>
-                                        </a>
-                                    </li>
 
 
-                                    @*              <li class="always-open">
-                                        <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
-                                        <ul class="list-unstyled">
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Tümü</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="TaskStatus" asp-action="PositiveTasks"><i class="fa fa-tag"></i>Kazanılan</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="TaskStatus" asp-action="NegativeTasks"><i class="fa fa-tag"></i>Kaybedilen</a>
-                                            </li>
-
-                                        </ul>
-                                    </li> *@
+                                        @if (userModules.Contains(ModuleType.CRM))
+                                    {
 
                                     <li class="always-open">
                                         <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
@@ -350,7 +369,7 @@
 
 
 
-                                    @if (userRole == "SuperAdmin")
+                                    @if (userRole == "SuperAdmin" || userRole == "Admin")
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
@@ -373,35 +392,39 @@
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-users"></i>Çalışanlarımız</a>
                                     </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link d-flex align-items-center"
-                                           data-bs-toggle="collapse"
-                                           href="#reportSubmenu"
-                                           role="button"
-                                           aria-expanded="false"
-                                           aria-controls="reportSubmenu">
-                                            <i class="fa fa-chart-bar me-2"></i><span>Rapor</span>
-                                            <i class="fa fa-chevron-down ms-auto"></i>
-                                        </a>
-                                        <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-controller="Reports" asp-action="ResponsibleUserTasks">
-                                                    <i class="fa fa-tasks me-2"></i>Süreç Durumu
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-controller="Reports" asp-action="StageByUserReports">
-                                                    <i class="fa fa-layer-group me-2"></i>Görev Sayısı
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-controller="PipelineAnalysis" asp-action="Index">
-                                                    <i class="fa fa-layer-group me-2"></i>Kişi / Görev Analiz
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </li>
 
+
+                                    @if (userRole == "SuperAdmin" || userRole == "Admin" || userRole == "TeamLeader")
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link d-flex align-items-center"
+                                            data-bs-toggle="collapse"
+                                            href="#reportSubmenu"
+                                            role="button"
+                                            aria-expanded="false"
+                                            aria-controls="reportSubmenu">
+                                                <i class="fa fa-chart-bar me-2"></i><span>Rapor</span>
+                                                <i class="fa fa-chevron-down ms-auto"></i>
+                                            </a>
+                                            <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
+                                                <li class="nav-item">
+                                                    <a class="nav-link text-dark" asp-controller="Reports" asp-action="ResponsibleUserTasks">
+                                                        <i class="fa fa-tasks me-2"></i>Süreç Durumu
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link text-dark" asp-controller="Reports" asp-action="StageByUserReports">
+                                                        <i class="fa fa-layer-group me-2"></i>Görev Sayısı
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link text-dark" asp-controller="PipelineAnalysis" asp-action="Index">
+                                                        <i class="fa fa-layer-group me-2"></i>Kişi / Görev Analiz
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    }
 
                                       @if (userRole == "SuperAdmin")
                                     {
@@ -458,9 +481,9 @@
                                         <a asp-area="" asp-controller="Finance" asp-action="Invoices"><i class="fa fa-file-invoice-dollar"></i><span>Finans</span></a>
                                     </li>
                                     <li class="nav-item">
-                                        <a asp-area="" asp-controller="Finance" asp-action="Invoices"><i class="fa fa-file-invoice-dollar"></i><span>Finans Analiz</span></a>
+                                        <a asp-area="" asp-controller="Finance" asp-action="Dashboard"><i class="fa fa-file-invoice-dollar"></i><span>Finans Analiz</span></a>
                                     </li>
-
+                                      }
                                 </ul>
                             </nav>
 

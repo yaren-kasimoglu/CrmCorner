@@ -699,31 +699,70 @@ namespace CrmCorner.Controllers
         }
 
         private async Task SaveOrUpdateApolloContacts(
-            List<ApolloContactViewModel> allContacts,
-            ApolloApiViewModel model,
-            string currentUserId,
-            int? companyId)
+      List<ApolloContactViewModel> allContacts,
+      ApolloApiViewModel model,
+      string currentUserId,
+      int? companyId)
         {
+            // CompanyId senin multi-tenant ayrımınsa null gelmesini istemeyebilirsin
+            // İstersen aç:
+            // if (companyId == null)
+            //     throw new InvalidOperationException("CompanyId bulunamadı. Kullanıcının CompanyId alanını kontrol edin.");
+
             var labelList = model.Labels ?? new List<SelectListItem>();
 
-            var personIdList = allContacts
+            // ✅ 1) Aynı batch içinde duplicate gelenleri temizle (PersonId öncelikli)
+            // PersonId yoksa email ile de dedupe yapalım
+            var normalized = allContacts
+                .Where(c => c != null)
+                .Select(c => new ApolloContactViewModel
+                {
+                    PersonId = c.PersonId?.Trim(),
+                    Email = c.Email?.Trim(),
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Title = c.Title,
+                    CompanyName = c.CompanyName,
+                    UpdatedAt = c.UpdatedAt,
+                    LinkedinUrl = c.LinkedinUrl,
+                    Headline = c.Headline,
+                    Location = c.Location
+                })
+                .ToList();
+
+            // PersonId'li olanları PersonId'e göre tekilleştir (en güncel UpdatedAt kalsın)
+            var withPersonId = normalized
+                .Where(c => !string.IsNullOrWhiteSpace(c.PersonId))
+                .GroupBy(c => c.PersonId)
+                .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
+                .ToList();
+
+            // PersonId'siz olanları email'e göre tekilleştir
+            var withoutPersonId = normalized
+                .Where(c => string.IsNullOrWhiteSpace(c.PersonId) && !string.IsNullOrWhiteSpace(c.Email))
+                .GroupBy(c => c.Email.ToLowerInvariant())
+                .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
+                .ToList();
+
+            var dedupedContacts = withPersonId.Concat(withoutPersonId).ToList();
+
+            // ✅ 2) DB'de var mı kontrolü (GLOBAL) — CompanyId filtresi YOK!
+            var personIdList = dedupedContacts
                 .Where(c => !string.IsNullOrWhiteSpace(c.PersonId))
                 .Select(c => c.PersonId)
+                .Distinct()
                 .ToList();
 
-            var emailList = allContacts
+            var emailList = dedupedContacts
                 .Where(c => !string.IsNullOrWhiteSpace(c.Email))
-                .Select(c => c.Email.ToLower())
+                .Select(c => c.Email.ToLowerInvariant())
+                .Distinct()
                 .ToList();
 
-            // ✅ Duplicate kontrolü artık CompanyId bazlı
             var existingContacts = await _context.ApolloContacts
                 .Where(x =>
-                    x.CompanyId == companyId &&
-                    (
-                        (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
-                        (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
-                    )
+                    (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
+                    (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
                 )
                 .ToListAsync();
 
@@ -734,67 +773,89 @@ namespace CrmCorner.Controllers
 
             var existingByEmail = existingContacts
                 .Where(x => !string.IsNullOrWhiteSpace(x.Email))
-                .GroupBy(x => x.Email.ToLower())
+                .GroupBy(x => x.Email.ToLowerInvariant())
                 .ToDictionary(g => g.Key, g => g.First());
 
-            foreach (var contact in allContacts)
+            // Label adı tek sefer hesapla
+            var selectedLabelName = labelList.FirstOrDefault(l => l.Value == model.SelectedLabelId)?.Text;
+
+            foreach (var contact in dedupedContacts)
             {
                 ApolloContactDbModel existing = null;
 
-                if (!string.IsNullOrWhiteSpace(contact.PersonId) &&
-                    existingByPersonId.TryGetValue(contact.PersonId, out var pidMatch))
+                var pid = contact.PersonId?.Trim();
+                var emailLower = contact.Email?.Trim()?.ToLowerInvariant();
+
+                if (!string.IsNullOrWhiteSpace(pid) && existingByPersonId.TryGetValue(pid, out var pidMatch))
                 {
                     existing = pidMatch;
                 }
-                else if (!string.IsNullOrWhiteSpace(contact.Email) &&
-                         existingByEmail.TryGetValue(contact.Email.ToLower(), out var emailMatch))
+                else if (!string.IsNullOrWhiteSpace(emailLower) && existingByEmail.TryGetValue(emailLower, out var emailMatch))
                 {
                     existing = emailMatch;
                 }
+
+                // UpdatedAt null güvenliği
+                var incomingUpdatedAt = contact.UpdatedAt;
 
                 if (existing == null)
                 {
                     _context.ApolloContacts.Add(new ApolloContactDbModel
                     {
-                        Email = contact.Email,
-                        PersonId = contact.PersonId,
+                        Email = contact.Email?.Trim(),
+                        PersonId = pid,
                         FirstName = contact.FirstName,
                         LastName = contact.LastName,
                         Title = contact.Title,
                         CompanyName = contact.CompanyName,
-                        UpdatedAt = contact.UpdatedAt,
+                        UpdatedAt = contact.UpdatedAt, // null olabilir, sorun değil
                         SourceLabelId = model.SelectedLabelId,
-                        SourceLabelName = labelList.FirstOrDefault(l => l.Value == model.SelectedLabelId)?.Text,
-                        UserId = currentUserId,      // kim çekti
-                        CompanyId = companyId,       // ✅ ortak havuz
+                        SourceLabelName = selectedLabelName,
+                        UserId = currentUserId,
+                        CompanyId = companyId,
                         CreatedAt = DateTime.UtcNow,
                         LinkedinUrl = contact.LinkedinUrl,
                         Headline = contact.Headline,
                         Location = contact.Location
                     });
                 }
-                else if (existing.UpdatedAt < contact.UpdatedAt)
+                else
                 {
-                    existing.FirstName = contact.FirstName;
-                    existing.LastName = contact.LastName;
-                    existing.Title = contact.Title;
-                    existing.CompanyName = contact.CompanyName;
-                    existing.UpdatedAt = contact.UpdatedAt;
-                    existing.SourceLabelId = model.SelectedLabelId;
-                    existing.SourceLabelName = labelList.FirstOrDefault(l => l.Value == model.SelectedLabelId)?.Text;
-                    existing.LinkedinUrl = contact.LinkedinUrl;
-                    existing.Headline = contact.Headline;
-                    existing.Location = contact.Location;
+                    var existingUpdatedAt = existing.UpdatedAt;
+
+                    // ✅ daha güncelse update et
+                    if (existingUpdatedAt < incomingUpdatedAt)
+                    {
+                        existing.FirstName = contact.FirstName;
+                        existing.LastName = contact.LastName;
+                        existing.Title = contact.Title;
+                        existing.CompanyName = contact.CompanyName;
+                        existing.UpdatedAt = contact.UpdatedAt;
+
+                        existing.SourceLabelId = model.SelectedLabelId;
+                        existing.SourceLabelName = selectedLabelName;
+
+                        existing.LinkedinUrl = contact.LinkedinUrl;
+                        existing.Headline = contact.Headline;
+                        existing.Location = contact.Location;
+
+                        // Email boş değilse güncelle (bazı kayıtlarda sonradan doluyor)
+                        if (!string.IsNullOrWhiteSpace(contact.Email))
+                            existing.Email = contact.Email.Trim();
+                    }
 
                     // ✅ eski kayıtlarda CompanyId boş kalmış olabilir
                     if (existing.CompanyId == null)
                         existing.CompanyId = companyId;
+
+                    // ✅ eski kayıtlarda UserId boşsa doldur (opsiyonel)
+                    if (string.IsNullOrWhiteSpace(existing.UserId))
+                        existing.UserId = currentUserId;
                 }
             }
 
             await _context.SaveChangesAsync();
         }
-
 
 
 

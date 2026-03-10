@@ -1,0 +1,184 @@
+﻿@model SocialMediaDashboardViewModel
+@{
+    ViewData["Title"] = "Social Media Dashboard";
+}
+
+<div class="card border-0 shadow-sm mb-4" style="background:#f8f6ff; border-radius:18px;">
+    <div class="card-body p-4">
+        <h2 class="mb-2" style="color:#3f2b6b; font-weight:700;">
+            Hoş geldin, @User.Identity.Name 👋
+        </h2>
+        <p class="mb-0" style="color:#6b7280; font-size:15px;">
+            Sosyal medya içeriklerini planla, onay süreçlerini yönet ve takvimini kolayca takip et.
+        </p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    @if (User.IsInRole("Admin") || User.IsInRole("SocialMediaAdmin") || User.IsInRole("SuperAdmin"))
+    {
+        <div class="col-md-4">
+            <a class="btn w-100 shadow-sm"
+               href="/SocialMedia/Create"
+               style="background:#4b2e83; color:white; border-radius:12px; padding:12px 18px; font-weight:600;">
+                Yeni İçerik Oluştur
+            </a>
+        </div>
+    }
+
+    <div class="col-md-4">
+        <a class="btn w-100"
+           href="/SocialMedia/Calendar"
+           style="background:white; color:#4b2e83; border:1px solid #d9cdf7; border-radius:12px; padding:12px 18px; font-weight:600;">
+            Takvimi Aç
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a class="btn w-100"
+           href="/SocialMedia"
+           style="background:white; color:#a16207; border:1px solid #f4d58d; border-radius:12px; padding:12px 18px; font-weight:600;">
+            Onay Bekleyenleri Gör
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+            <div class="card-body">
+                <h6 class="mb-2" style="color:#a16207;">Onay Bekleyen</h6>
+                <h2 class="fw-bold mb-0" style="color:#374151;">@Model.PendingCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+            <div class="card-body">
+                <h6 class="mb-2" style="color:#15803d;">Onaylanan</h6>
+                <h2 class="fw-bold mb-0" style="color:#374151;">@Model.ApprovedCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+            <div class="card-body">
+                <h6 class="mb-2" style="color:#2563eb;">Bu Hafta İçerik</h6>
+                <h2 class="fw-bold mb-0" style="color:#374151;">@Model.WeeklyCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+            <div class="card-body">
+                <h6 class="mb-2" style="color:#dc2626;">Revize</h6>
+                <h2 class="fw-bold mb-0" style="color:#374151;">@Model.RevisionCount</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:16px;">
+            <div class="card-body">
+                <h5 class="mb-3" style="color:#3f2b6b; font-weight:700;">Hızlı Bakış</h5>
+
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2" style="border-bottom:1px solid #f1f1f1;">
+                    <span style="color:#6b7280;">Bugün yayınlanacak içerik</span>
+                    <strong style="color:#111827;">@Model.TodayCount</strong>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2" style="border-bottom:1px solid #f1f1f1;">
+                    <span style="color:#6b7280;">Onay bekleyen toplam içerik</span>
+                    <strong style="color:#111827;">@Model.PendingCount</strong>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color:#6b7280;">Revize isteyen içerik</span>
+                    <strong style="color:#111827;">@Model.RevisionCount</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100" style="border-radius:16px;">
+            <div class="card-body">
+                <h5 class="mb-3" style="color:#3f2b6b; font-weight:700;">Yaklaşan İçerikler</h5>
+
+                @if (Model.UpcomingContents != null && Model.UpcomingContents.Any())
+                {
+                    @for (int i = 0; i < Model.UpcomingContents.Count; i++)
+                    {
+                        var item = Model.UpcomingContents[i];
+                        var hasBorder = i < Model.UpcomingContents.Count - 1;
+
+                        <div class="mb-3 pb-2" style="@(hasBorder ? "border-bottom:1px solid #f1f1f1;" : "")">
+                            <div style="font-weight:600; color:#374151;">
+                                @item.ContentType - @item.Title
+                            </div>
+                            <small style="color:#6b7280;">
+                                @item.ScheduledPublishDate?.ToString("dd.MM.yyyy HH:mm")
+                            </small>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div style="color:#6b7280;">Yaklaşan içerik bulunmuyor.</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+
+        <div class="col-12">
+            <h4 style="color:#3f2b6b;font-weight:700;">Kişisel Markalaşma</h4>
+            <p style="color:#6b7280;font-size:14px;">
+                Kişisel içerik planlarını ve paylaşım durumlarını takip et.
+            </p>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+                <div class="card-body">
+                    <h6 class="mb-2" style="color:#7c3aed;">Kişisel İçerik</h6>
+                    <h2 class="fw-bold mb-0" style="color:#374151;">@Model.PersonalBrandingTotalCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+                <div class="card-body">
+                    <h6 class="mb-2" style="color:#2563eb;">Bu Hafta Planlanan</h6>
+                    <h2 class="fw-bold mb-0" style="color:#374151;">@Model.PersonalBrandingWeeklyCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+                <div class="card-body">
+                    <h6 class="mb-2" style="color:#f59e0b;">Onay Bekleyen</h6>
+                    <h2 class="fw-bold mb-0" style="color:#374151;">@Model.PersonalBrandingPendingCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-radius:14px;">
+                <div class="card-body">
+                    <h6 class="mb-2" style="color:#22c55e;">Yayınlanan</h6>
+                    <h2 class="fw-bold mb-0" style="color:#374151;">@Model.PersonalBrandingPublishedCount</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

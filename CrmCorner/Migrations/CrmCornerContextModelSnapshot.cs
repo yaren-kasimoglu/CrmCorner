@@ -1370,6 +1370,26 @@ namespace CrmCorner.Migrations
                     b.ToTable("TodoEntries");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.UserModule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Module")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserModules");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -1763,6 +1783,17 @@ namespace CrmCorner.Migrations
                     b.Navigation("Assignee");
 
                     b.Navigation("TodoBoard");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.UserModule", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

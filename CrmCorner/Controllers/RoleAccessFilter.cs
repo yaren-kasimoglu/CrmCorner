@@ -14,7 +14,7 @@ namespace CrmCorner.Filters
             var controller = context.RouteData.Values["controller"]?.ToString();
             var action = context.RouteData.Values["action"]?.ToString();
 
-         
+
             if (controller == "Member")
                 return;
 
@@ -41,8 +41,15 @@ namespace CrmCorner.Filters
                     ("SocialMedia", "GetFileExtension"),
                     ("SocialMedia", "GetMimeType"),
                     ("SocialMedia", "CancelApproval"),
+                    ("SocialMedia", "Dashboard"),
                     ("SocialMedia", "DeleteFeedback"),
-                    ("SocialMedia", "Approve")
+                    ("SocialMedia", "Approve"),
+                    ("PersonalBranding", "Index"),
+                    ("PersonalBranding", "Details"),
+                    ("PersonalBranding", "GetMedia"),
+                    ("PersonalBranding", "SendFeedback"),
+                    ("PersonalBranding", "Approve"),
+                    ("PersonalBranding", "CancelApproval")
                 };
 
                 bool isAllowed = allowed.Any(a =>
