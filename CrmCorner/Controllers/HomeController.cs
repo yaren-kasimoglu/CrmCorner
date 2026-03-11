@@ -652,11 +652,18 @@ namespace CrmCorner.Controllers
                             "ConfirmEmail",
                             "Home",
                             new { userId = user.Id, token = encodedToken },
-                            protocol: Request.Scheme
+                            protocol: Request.Scheme,
+                            host: Request.Host.Value
                         );
+
                         await _emailService.SendEmailConfirmationAsync(user.Email, confirmationLink);
 
-                        //TempData["SuccessMessage"] = "Kayıt işlemi başarıyla tamamlandı. Lütfen email adresinize gelen doğrulama linkine tıklayın.";
+                        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                        {
+                            TempData["DebugConfirmationLink"] = confirmationLink;
+                        }
+
+                       // TempData["SuccessMessage"] = "Kayıt işlemi başarıyla tamamlandı. Lütfen email adresinize gelen doğrulama linkine tıklayın.";
                         return RedirectToAction("SignIn", "Home");
                     }
 
@@ -692,18 +699,25 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("SignIn", "Home");
             }
 
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+            try
+            {
+                var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
-            if (result.Succeeded)
-            {
-                TempData["SuccessMessage"] = "Email adresiniz başarıyla doğrulandı. Giriş yapabilirsiniz.";
-            }
-            else
-            {
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "Email adresiniz başarıyla doğrulandı. Giriş yapabilirsiniz.";
+                    return RedirectToAction("SignIn", "Home");
+                }
+
                 TempData["ErrorMessage"] = string.Join(" | ", result.Errors.Select(x => x.Description));
+                return RedirectToAction("SignIn", "Home");
             }
-
-            return RedirectToAction("SignIn", "Home");
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Token çözülürken hata oluştu: " + ex.Message;
+                return RedirectToAction("SignIn", "Home");
+            }
         }
         #endregion
 
