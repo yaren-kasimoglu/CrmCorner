@@ -4,13 +4,14 @@ using CrmCorner.Extensions;
 using CrmCorner.Filters;
 using CrmCorner.Hubs;
 using CrmCorner.Models;
-using CrmCorner.OptionsModels;
+using CrmCorner.OptionModels;
 using CrmCorner.Services;
-using CrmCorner.ViewModels;
+using Google.Apis.Gmail.v1;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using System;
 using static CrmCorner.Hubs.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,26 +24,28 @@ builder.Logging.AddDebug();
 // Google Calendar servisini ekleyin
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
-// MVC ve SignalR servislerini ekleyin
-builder.Services.AddControllersWithViews();
+// HttpClient servisleri
 builder.Services.AddHttpClient<ApolloService>();
 builder.Services.AddHttpClient<ApolloHealthService>();
 
+// SignalR
 builder.Services.AddSignalR();
 
-// Razor runtime derlemesini ekleyin
-builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+// MVC + Razor Runtime Compilation + Global Filters
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<AdminLayoutFilter>();
-});
+    options.Filters.Add<SetUserPictureFilter>();
+    options.Filters.Add<RoleAccessFilter>();
+})
+.AddRazorRuntimeCompilation();
 
-// Fiziksel dosya sağlayıcısını ekleyin
+// Fiziksel dosya sağlayıcısı
 builder.Services.AddSingleton<IFileProvider>(
     new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
 );
 
-// Form seçeneklerini yapılandırın
+// Form seçenekleri
 builder.Services.Configure<FormOptions>(x =>
 {
     x.ValueLengthLimit = int.MaxValue;
@@ -50,57 +53,46 @@ builder.Services.Configure<FormOptions>(x =>
     x.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
-// MySQL veritabanı bağlantısını ekleyin
+// MySQL veritabanı bağlantısı
 var connectionString = builder.Configuration.GetConnectionString("CrmConnection");
 
 builder.Services.AddDbContext<CrmCornerContext>(options =>
 {
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 6, 18)))
-           .EnableSensitiveDataLogging() // Detaylı loglama için
-           .EnableDetailedErrors(); // Daha detaylı hata mesajları için
+           .EnableSensitiveDataLogging()
+           .EnableDetailedErrors();
 });
 
-// E-posta ayarlarını yapılandırın
+// SMTP ayarları
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+// Email servisleri
 builder.Services.AddSingleton<EmailService>();
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
-//Identity servislerini ve cookie yapılandırmasını ekleyin
-builder.Services.AddIdentity<AppUser, AppRole>()
-    .AddEntityFrameworkStores<CrmCornerContext>()
-    .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<SetUserPictureFilter>();
-
-builder.Services.AddControllersWithViews(options =>
+// Identity
+builder.Services.AddIdentity<AppUser, AppRole>(options =>
 {
-    options.Filters.Add<SetUserPictureFilter>();
-});
+    options.SignIn.RequireConfirmedEmail = true;
 
-builder.Services.AddScoped<RoleAccessFilter>();
-
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add<SetUserPictureFilter>();
-    options.Filters.Add<RoleAccessFilter>(); // 🔹 filtre global çalışır
-});
-
-builder.Services.AddScoped<IEmailServices, EmailServices>();
-
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    // Kullanıcı kilitlenme ayarları
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
-});
+})
+.AddEntityFrameworkStores<CrmCornerContext>()
+.AddDefaultTokenProviders();
+
+// Filtreler
+builder.Services.AddScoped<SetUserPictureFilter>();
+builder.Services.AddScoped<RoleAccessFilter>();
+
+// Cookie ayarları
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     var cookieBuilder = new CookieBuilder
     {
         Name = "CrmAppCookie",
-
-         HttpOnly = true,
+        HttpOnly = true,
         IsEssential = true,
     };
 
@@ -108,19 +100,13 @@ builder.Services.ConfigureApplicationCookie(opt =>
     opt.LogoutPath = new PathString("/Member/Logout");
     opt.AccessDeniedPath = new PathString("/Member/AccessDenied");
     opt.Cookie = cookieBuilder;
-    opt.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie ömrü
-    opt.SlidingExpiration = true; // Cookie'nin süresini uzat
+    opt.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    opt.SlidingExpiration = true;
 });
-
-// Dosya yükleme seçeneklerini yapılandırın
-//builder.Services.Configure<FileUploadOptions>(builder.Configuration.GetSection("FileUploadOptions"));
-
-
-
 
 var app = builder.Build();
 
-// HTTP istek hattını yapılandırın
+// HTTP istek hattı
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -128,20 +114,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // wwwroot klasörünün kullanımını aktifleştirir
-
+app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication(); // Kimlik doğrulama
-app.UseAuthorization(); // Yetkilendirme
-
-
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Landing}/{id?}");
 
-// SignalR hub'ını yapılandırın
 app.MapHub<ChatHub>("/chatHub");
 
 using (var scope = app.Services.CreateScope())

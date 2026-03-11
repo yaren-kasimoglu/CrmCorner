@@ -45,5 +45,17 @@ namespace CrmCorner.Services
             await client.SendMailAsync(mailMessage);
         }
 
+        public async Task SendEmailConfirmationAsync(string to, string confirmationLink)
+        {
+            var subject = "Email Doğrulama";
+
+            var body = $@"
+        <h3>Email adresinizi doğrulayın</h3>
+        <p>Hesabınızı doğrulamak için aşağıdaki linke tıklayın:</p>
+        <p><a href='{confirmationLink}'>Email adresimi doğrula</a></p>";
+
+            await SendEmailAsync(to, subject, body);
+        }
+
     }
 }

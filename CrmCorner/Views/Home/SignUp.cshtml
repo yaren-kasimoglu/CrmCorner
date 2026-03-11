@@ -1,124 +1,368 @@
 ﻿@model SignUpViewModel
 @{
     ViewData["Title"] = "SignUp";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
 }
+
 @section Scripts
-    {
+{
     @await Html.PartialAsync("_ValidationScriptsPartial")
-
-
 }
-<!DOCTYPE html>
-<html lang="en">
 
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-    <meta charset="utf-8">
-    <title>Sign Up</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
-    <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
+    <meta charset="utf-8" />
+    <title>Kayıt Ol - CRM Corner</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <link rel="icon" href="/CRMTema/bootstrap5/favicon.ico" type="image/x-icon">
-    <!-- VENDOR CSS -->
-    <!-- MAIN CSS -->
     <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/css/main.css">
+
+    <style>
+        :root {
+            --primary: #5b3cc4;
+            --primary-dark: #44289f;
+            --secondary: #8b5cf6;
+            --soft-bg: #f8f6ff;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top left, rgba(139,92,246,.16), transparent 30%), radial-gradient(circle at bottom right, rgba(59,130,246,.10), transparent 30%), #ffffff;
+            min-height: 100vh;
+        }
+
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+        }
+
+        .auth-shell {
+            width: 100%;
+            max-width: 1280px;
+            background: rgba(255,255,255,.94);
+            border: 1px solid rgba(229,231,235,.9);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(15,23,42,.08);
+            overflow: hidden;
+        }
+
+        .auth-left {
+            background: linear-gradient(135deg, #ffb71b, #ffcf5c);
+            color: white;
+            padding: 56px 46px;
+            height: 100%;
+            position: relative;
+
+
+            //ffb71b
+        }
+
+            .auth-left::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(circle at top right, rgba(255,255,255,.16), transparent 28%), radial-gradient(circle at bottom left, rgba(255,255,255,.10), transparent 24%);
+                pointer-events: none;
+            }
+
+        .auth-left-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .auth-left h1 {
+            font-size: 40px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 18px;
+        }
+
+        .auth-left p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: rgba(255,255,255,.88);
+            max-width: 470px;
+        }
+
+        .auth-mini-card {
+            margin-top: 34px;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+            .auth-mini-card h6 {
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                opacity: .85;
+                margin-bottom: 10px;
+            }
+
+            .auth-mini-card p {
+                margin: 0;
+                font-size: 14px;
+                line-height: 1.7;
+            }
+
+        .auth-right {
+            padding: 52px 42px;
+            background: #fff;
+        }
+
+        .top-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+            .top-link:hover {
+                color: var(--primary);
+            }
+
+        .auth-title {
+            font-size: 34px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.7;
+        }
+
+        .auth-card {
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(15,23,42,.04);
+            background: #fff;
+        }
+
+        .form-floating > .form-control {
+            border-radius: 14px;
+            border: 1px solid #dfe3ea;
+            min-height: 58px;
+            box-shadow: none;
+        }
+
+            .form-floating > .form-control:focus {
+                border-color: #8b5cf6;
+                box-shadow: 0 0 0 4px rgba(139,92,246,.12);
+            }
+
+        .btn-auth-primary {
+            background: linear-gradient(135deg, #ffb71b, #ffc94a);
+            border: none;
+            color: white;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-weight: 700;
+            box-shadow: 0 12px 25px rgba(91,60,196,.20);
+        }
+
+            .btn-auth-primary:hover {
+                color: white;
+                background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+            }
+
+        .helper-links {
+            border-top: 1px solid #eef1f5;
+            margin-top: 22px;
+            padding-top: 18px;
+            color: var(--text-muted);
+        }
+
+            .helper-links a {
+                color: var(--primary);
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+                .helper-links a:hover {
+                    text-decoration: underline;
+                }
+
+        @@media (max-width: 991px) {
+            .auth-left {
+                display: none;
+            }
+
+            .auth-right {
+                padding: 36px 22px;
+            }
+
+            .auth-title {
+                font-size: 28px;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <div class="auth-wrapper">
+        <div class="auth-shell">
+            <div class="row g-0">
+                <div class="col-lg-5">
+                    <div class="auth-left">
+                        <div class="auth-left-content">
+                            <div class="brand-box">C</div>
+                            <h1>CRM Corner ile çalışma alanını oluştur.</h1>
+                            <p>
+                                Şirketini, kullanıcılarını ve modüllerini tek bir platformda yönetmek için
+                                hesabını oluştur ve profesyonel iş akışına adım at.
+                            </p>
 
-    <div id="layout" class="theme-cyan">
-        <!-- WRAPPER -->
-        <div id="wrapper">
-            <div class="d-flex h100vh align-items-center auth-main w-100">
-                <div class="auth-box">
-                    <div class="card shadow p-lg-4">
-                        @if (TempData["SuccessMessage"] != null)
-                        {
-                            <div class="alert alert-info" role="alert">
-                                @TempData["SuccessMessage"]
+                            <div class="auth-mini-card">
+                                <h6>Platform Avantajı</h6>
+                                <p>
+                                    CRM yönetimi, sosyal medya operasyonları ve kişisel markalaşma süreçlerini
+                                    tek yapı altında daha kontrollü şekilde kullan.
+                                </p>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                        }
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
+                <div class="col-lg-7">
+                    <div class="auth-right">
+                        <a href="/Home/Landing" class="top-link">
+                            <span>←</span> Landing sayfasına dön
+                        </a>
+
+                        <div class="auth-title">Hesap Oluştur</div>
+                        <div class="auth-subtitle">
+                            Bilgilerini doldur, hesabını oluştur ve CRM Corner dünyasına katıl.
                         </div>
 
-                        <div class="card-header">
-                            <p class="fs-5 mb-0">Hesap Oluştur</p>
-                        </div>
-                    
-                        <div class="card-body">
+                        <div class="auth-card">
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <div class="alert alert-info" role="alert">
+                                    @TempData["SuccessMessage"]
+                                </div>
+                            }
+
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
                             <form asp-controller="Home" asp-action="SignUp" method="post">
-                                <div class="form-floating mb-1">
-                                  
-                                    <input asp-for="UserName" class="form-control">
-                                    <label asp-for="UserName"></label>
-                                    <span class="text-danger" asp-validation-for="UserName"></span>
-                                </div>
-                                <div class="form-floating mb-1">
-                                  
-                                    <input asp-for="Email" class="form-control">
-                                    <label asp-for="Email"></label>
-                                    <span class="text-danger" asp-validation-for="Email"></span>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="UserName" class="form-control" placeholder="Kullanıcı Adı" />
+                                            <label asp-for="UserName"></label>
+                                            <span class="text-danger" asp-validation-for="UserName"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="Email" class="form-control" placeholder="E-posta" />
+                                            <label asp-for="Email"></label>
+                                            <span class="text-danger" asp-validation-for="Email"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="form-floating mb-1">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="NameSurname" class="form-control" placeholder="Ad Soyad" />
+                                            <label asp-for="NameSurname"></label>
+                                            <span class="text-danger" asp-validation-for="NameSurname"></span>
+                                        </div>
+                                    </div>
 
-                                    <input asp-for="NameSurname" class="form-control">
-                                    <label asp-for="NameSurname"></label>
-                                    <span class="text-danger" asp-validation-for="NameSurname"></span>
-                                </div>
-
-                                <div class="form-floating mb-1">
-
-                                    <input asp-for="PositionName" class="form-control">
-                                    <label asp-for="PositionName"></label>
-                                    <span class="text-danger" asp-validation-for="PositionName"></span>
-                                </div>
-
-                                   <div class="form-floating mb-1">
-                                  
-                                    <input asp-for="CompanyName" class="form-control">
-                                    <label asp-for="CompanyName"></label>
-                                    <span class="text-danger" asp-validation-for="CompanyName"></span>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="PositionName" class="form-control" placeholder="Pozisyon" />
+                                            <label asp-for="PositionName"></label>
+                                            <span class="text-danger" asp-validation-for="PositionName"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
- 
-                                <div class="form-floating mb-1">
-                                 
-                                    <input asp-for="Phone" class="form-control">
-                                    <label asp-for="Phone"></label>
-                                    <span class="text-danger" asp-validation-for="Phone"></span>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="CompanyName" class="form-control" placeholder="Firma Adı" />
+                                            <label asp-for="CompanyName"></label>
+                                            <span class="text-danger" asp-validation-for="CompanyName"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="Phone" class="form-control" placeholder="Telefon" />
+                                            <label asp-for="Phone"></label>
+                                            <span class="text-danger" asp-validation-for="Phone"></span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-floating mb-1">
-                               
-                                    <input type="password" asp-for="Password" class="form-control">
-                                    <label asp-for="Password"></label>
-                                    <span class="text-danger" asp-validation-for="Password"></span>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="password" asp-for="Password" class="form-control" placeholder="Şifre" />
+                                            <label asp-for="Password"></label>
+                                            <span class="text-danger" asp-validation-for="Password"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="password" asp-for="PasswordConfirm" class="form-control" placeholder="Şifre Tekrar" />
+                                            <label asp-for="PasswordConfirm"></label>
+                                            <span class="text-danger" asp-validation-for="PasswordConfirm"></span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-floating mb-1">
-                                   
-                                    <input type="password"  asp-for="PasswordConfirm" class="form-control">
-                                    <label asp-for="PasswordConfirm"></label>
-                                    <span class="text-danger" asp-validation-for="PasswordConfirm"></span>
-                                </div>
-                                <div class="my-3">
-                                    <button type="submit" class="btn btn-primary w-100 px-3 py-2 mb-2">KAYIT OL</button>
-                                    <span>Zaten hesabın var mı? <a asp-action="SignIn" asp-controller="Home">Giriş</a></span>
-                                </div>
+
+                                <button type="submit" class="btn btn-auth-primary w-100 mt-2">
+                                    Kayıt Ol
+                                </button>
                             </form>
-                            @*     <div class="d-grid gap-2 mt-3 pt-3">
-                            <div class="text-center"><span>VEYA</span></div>
-                            <button class="btn btn-light"><i class="fa fa-facebook-official"></i> Facebook ile Kayıt Ol</button>
-                            </div>*@
+
+                            <div class="helper-links">
+                                Zaten hesabın var mı?
+                                <a asp-action="SignIn" asp-controller="Home">Giriş Yap</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- END WRAPPER -->
     </div>
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 </body>
 </html>
-

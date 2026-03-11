@@ -1,4 +1,4 @@
-﻿namespace CrmCorner.OptionsModels
+﻿namespace CrmCorner.OptionModels
 {
     public class EmailSettings
     {

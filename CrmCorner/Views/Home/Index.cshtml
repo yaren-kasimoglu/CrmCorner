@@ -5,402 +5,580 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
+
 <style>
+    :root {
+        --crm-bg: #f6f8fc;
+        --crm-card: #ffffff;
+        --crm-border: #e8edf5;
+        --crm-text: #1f2937;
+        --crm-muted: #6b7280;
+        --crm-primary: #ffb71b;
+        --crm-primary-dark: #e3a20f;
+        --crm-primary-soft: #fff5db;
+        --crm-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        --crm-radius-lg: 22px;
+        --crm-radius-md: 16px;
+        --crm-radius-sm: 12px;
+    }
+
+    body {
+        background: var(--crm-bg);
+    }
+
+    .dashboard-page {
+        padding: 18px 8px 30px 8px;
+    }
+
+    .dashboard-hero {
+        background: linear-gradient(135deg, #ffffff 0%, #fffaf0 100%);
+        border: 1px solid var(--crm-border);
+        border-radius: 24px;
+        box-shadow: var(--crm-shadow);
+        padding: 24px 26px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .dashboard-hero::after {
+            content: "";
+            position: absolute;
+            right: -40px;
+            top: -50px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(255,183,27,.18) 0%, rgba(255,183,27,0) 70%);
+            pointer-events: none;
+        }
+
+    .dashboard-title-main {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--crm-text);
+        margin-bottom: 6px;
+        line-height: 1.2;
+    }
+
+    .dashboard-subtitle-main {
+        color: var(--crm-muted);
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+
+    .dashboard-welcome-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--crm-primary-soft);
+        border: 1px solid #ffe3a2;
+        color: #8a5a00;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .dashboard-card {
+        background: var(--crm-card);
+        border: 1px solid var(--crm-border);
+        border-radius: var(--crm-radius-lg);
+        box-shadow: var(--crm-shadow);
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .dashboard-card-header {
+        padding: 20px 22px 0 22px;
+    }
+
+    .dashboard-card-body {
+        padding: 18px 22px 22px 22px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--crm-text);
+        margin-bottom: 4px;
+    }
+
+    .section-subtitle {
+        font-size: 13px;
+        color: var(--crm-muted);
+        margin-bottom: 0;
+    }
+
+    .stats-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .stat-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        border: 1px solid #eef2f7;
+        border-radius: var(--crm-radius-md);
+        background: #fbfcfe;
+        transition: all .2s ease;
+    }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+            background: #ffffff;
+        }
+
+    .stat-icon-box {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 14px;
+        background: var(--crm-primary-soft);
+        color: #cf8c00;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+        .stat-icon-box a {
+            color: inherit !important;
+        }
+
+    .stat-meta {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: var(--crm-muted);
+        margin-bottom: 2px;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--crm-text);
+        line-height: 1.1;
+    }
+
+    .todo-panel {
+        min-height: 330px;
+    }
+
+    .todo-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .todo-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 16px;
+        border: 1px solid #eef2f7;
+        border-radius: var(--crm-radius-md);
+        background: #fbfcfe;
+        text-decoration: none;
+        transition: all .2s ease;
+    }
+
+        .todo-item:hover {
+            transform: translateY(-2px);
+            background: #ffffff;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+        }
+
+    .todo-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .todo-icon {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 12px;
+        background: #fff3d6;
+        color: #cf8c00;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .todo-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--crm-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 360px;
+    }
+
+    .todo-date {
+        font-size: 12px;
+        color: var(--crm-muted);
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
     .custom-card {
-        background-color: #fff; /* Beyaz arka plan */
-        border-radius: 10px; /* Köşe yuvarlama */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge */
-        padding: 20px; /* İç boşluk */
-        margin: 10px; /* Dış boşluk */
-        border: 1px solid #ddd; /* İnce border */
+        background: var(--crm-card);
+        border: 1px solid var(--crm-border);
+        border-radius: var(--crm-radius-lg);
+        box-shadow: var(--crm-shadow);
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .chart-card-header {
+        padding: 20px 20px 0 20px;
     }
 
     .chart-title {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 15px; /* Başlık altı boşluk */
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--crm-text);
+        margin-bottom: 4px;
+    }
+
+    .chart-subtitle {
+        color: var(--crm-muted);
+        font-size: 12px;
+        margin-bottom: 0;
     }
 
     .card-body {
-        padding: 10px; /* İç boşluk */
+        padding: 18px 20px 20px 20px;
     }
 
-
-    /* Responsive grid ayarları */
-    .row {
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .col-xl-4, .col-lg-6, .col-md-6, .col-xl-8, .col-lg-12, .col-md-12 {
-        padding: 15px; /* İç boşluk */
-    }
-
-    /* Küçük cihazlar için sütun boyutları */
-    @@media (max-width: 768px) {
-        .col-xl-4, .col-lg-6, .col-md-6, .col-xl-8, .col-lg-12, .col-md-12 {
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
-
-        .custom-card, .card-body {
-            width: 100% !important; /* !important kullanımı genelde kaçınılması gereken bir yöntemdir ama burada özel bir durum için kullanılmıştır. */
-        }
-    }
-
-    .task-item:hover {
-        background: #f9fafb;
-        transform: translateX(3px);
+    .chart-body {
+        min-height: 320px;
+        position: relative;
     }
 
     .fixed-todo-height {
-        min-height: 260px; /* Kartın minimum yüksekliği */
+        min-height: 260px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
     }
 
-    .card.top_counter {
-        border-radius: 16px !important; /* Köşeleri yuvarlat */
-        border: 1px solid #e5e7eb; /* Hafif çerçeve */
-        box-shadow: 0 4px 10px rgba(0,0,0,0.07); /* Hafif gölge */
-        overflow: hidden; /* Köşe taşmalarını önle */
+    .row.dashboard-row {
+        row-gap: 24px;
     }
-
-        .card.top_counter .list-group-item {
-            border: none !important; /* İç çizgileri kaldır */
-            padding: 18px 20px !important;
-        }
-
-        .card.top_counter .icon {
-            width: 45px;
-            height: 45px;
-            background: #f1f5f9;
-            border-radius: 10px; /* İkon kutusunu da yumuşat */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .card.top_counter .content div {
-            color: #6b7280; /* Başlık alt ton */
-            font-size: 14px;
-        }
 
     .equal-card {
-        min-height: 330px; /* Her iki kutu aynı boy */
+        min-height: 100%;
         border-radius: 16px !important;
-        background: #fff;
-        padding: 10px;
+        background: transparent;
+        padding: 0;
+        border: none;
+        box-shadow: none;
     }
 
+    .empty-state {
+        padding: 16px;
+        border: 1px dashed #d8e0ea;
+        border-radius: 16px;
+        background: #fafbfd;
+        color: var(--crm-muted);
+        font-size: 14px;
+    }
 
+    @@media (max-width: 991px) {
+        .dashboard-title-main {
+            font-size: 24px;
+        }
 
+        .todo-text {
+            max-width: 220px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-page {
+            padding: 10px 0 24px 0;
+        }
+
+        .dashboard-hero {
+            padding: 18px;
+        }
+
+        .dashboard-card-header,
+        .dashboard-card-body,
+        .chart-card-header,
+        .card-body {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .todo-text {
+            max-width: 140px;
+        }
+
+        .chart-body {
+            min-height: 280px;
+        }
+    }
 </style>
 
-@*@if (!User.Identity!.IsAuthenticated)
-    {
-        <div class="d-flex h100vh justify-content-center align-items-center">
-            <div class="text-center">
-                <article>
-                    <h1>Yakında yüklenecektir...</h1>
-                    <div>
-                        <p>
-                            Platformumuz henüz kullanıma hazır değildir. Eğer kullanıcı iseniz;
-                        </p>
-                        <p>&mdash; Crm Corner</p>
-                    </div>
-                </article>
-                <div class="margin-top-30">
+<div class="container-fluid px-3 dashboard-page">
 
-                    <a asp-action="SignIn" asp-controller="Home" class="btn btn-info"><i class="fa fa-home"></i> <span>Giriş Yapınız</span></a>
-                </div>
-            </div>
+    <div class="dashboard-hero d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+            <div class="dashboard-title-main">CRM Corner Dashboard</div>
+            <p class="dashboard-subtitle-main">
+                Görevler, müşteri verileri ve temel performans metriklerini tek ekranda takip edebilirsiniz.
+            </p>
         </div>
-    }
-    else
-    {*@
 
-@* <a asp-action="Notifications" asp-controller="Home">Bildirimlerim</a>*@
-
-
-
-<div class="row">
-    @if (Model.CurrentUser != null)
-    {
-        <div class="col-xl-4 col-lg-6 col-md-6 d-flex align-items-start">
-             <div class="card equal-card shadow-sm" style="border-radius:16px;">
-            <div class="card top_counter">
-                <div class="list-group list-group-custom list-group-flush">
-                    <div class="list-group-item d-flex align-items-center py-3">
-                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-user"></i> </a></div>
-                        <div class="content">
-                            <div>Çalışan Sayımız</div>
-                            <h5 class="mb-0">@Model.CompanyUsers.Count</h5>
-                        </div>
-                    </div>
-                    <div class="list-group-item d-flex align-items-center py-3">
-                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i></a> </div>
-                        <div class="content">
-                            <div>Müşterilerim</div>
-                            <h5 class="mb-0">@Model.CurrentUser.Customers.Count</h5>
-                        </div>
-                    </div>
-                    <div class="list-group-item d-flex align-items-center py-3">
-                        <div class="icon text-center me-3"><a class="nav-link text-dark" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex"><i class="fa fa-users"></i></a> </div>
-                        <div class="content">
-                            <div>Sahip Olduğum Görev Sayısı</div>
-                            <h5 class="mb-0">@Model.PipelineTaskCount</h5>
-                        </div>
-                    </div>
-                    <div class="list-group-item d-flex align-items-center py-3">
-                        <div class="icon text-center me-3"><i class="fa fa-briefcase"></i></div>
-                        <div class="content">
-                            <div>Sektör</div>
-                            <h5 class="mb-0">@Model.SectorCount</h5>
-                        </div>
-                    </div>
-                </div>
+        @if (Model.CurrentUser != null)
+        {
+            <div class="dashboard-welcome-badge mt-3 mt-md-0">
+                <i class="fa fa-user-circle"></i>
+                Hoş geldin, @Model.CurrentUser.NameSurname
             </div>
-            </div>
-        </div>
-    }
+        }
+    </div>
 
-    <div class="col-xl-8 col-lg-6 col-md-6 d-flex align-items-start">
-        <div class="card equal-card shadow-sm" style="border-radius:16px;">
+    <div class="row dashboard-row">
+        @if (Model.CurrentUser != null)
+        {
+            <div class="col-xl-4 col-lg-6 col-md-12 d-flex align-items-stretch">
+                <div class="dashboard-card w-100">
+                    <div class="dashboard-card-header">
+                        <h5 class="section-title">Genel Durum</h5>
+                        <p class="section-subtitle">Kullanıcı ve şirket bazlı özet bilgiler</p>
+                    </div>
 
-            <div class="card-header"
-                 style="background: transparent; border: none; padding-bottom: 0;">
-                <h6 class="card-title" style="font-size: 18px; font-weight: 600; color: #111827;">
-                    Yapılacaklar
-                </h6>
-                <small style="color: #6b7280;">Son Eklenen 5 Görev</small>
-            </div>
-
-            <div class="card-body todo_list fixed-todo-height" style="padding-top: 10px;">
-                @if (ViewBag.LatestTasks != null)
-                {
-                    var tasks = ViewBag.LatestTasks as List<LatestTaskDto>;
-
-                    @foreach (var item in tasks)
-                    {
-                        <a href="/ToDoList/ToDoList/@item.BoardId"
-                           style="text-decoration:none;">
-
-                            <div class="d-flex align-items-center justify-content-between task-item"
-                                 style="padding: 10px 0;
-                                            border-bottom: 1px solid #f3f4f6;
-                                            transition: .2s;">
-
-                                <div class="d-flex align-items-center gap-2">
-                                    <div style="background:#eef2ff; padding:8px;
-                                                    border-radius:8px;
-                                                    display:flex; align-items:center;">
-                                        <i class="fa fa-calendar"
-                                           style="color:#4f46e5;"></i>
-                                    </div>
-
-                                    <span style="font-size:15px;
-                                                     font-weight:500;
-                                                     color:#1f2937;">
-                                        @item.Text
-                                    </span>
+                    <div class="dashboard-card-body">
+                        <div class="stats-stack">
+                            <div class="stat-box">
+                                <div class="stat-icon-box">
+                                    <a class="nav-link p-0" asp-area="" asp-controller="Employee" asp-action="EmployeeList">
+                                        <i class="fa fa-user"></i>
+                                    </a>
                                 </div>
-
-                                <span style="font-size:13px; color:#6b7280;">
-                                    @item.CreatedDate.ToString("dd.MM.yyyy")
-                                </span>
+                                <div class="stat-meta">
+                                    <div class="stat-label">Çalışan Sayımız</div>
+                                    <div class="stat-value">@Model.CompanyUsers.Count</div>
+                                </div>
                             </div>
-                        </a>
-                    }
-                }
+
+                            <div class="stat-box">
+                                <div class="stat-icon-box">
+                                    <a class="nav-link p-0" asp-area="" asp-controller="Customer" asp-action="CustomerList">
+                                        <i class="fa fa-users"></i>
+                                    </a>
+                                </div>
+                                <div class="stat-meta">
+                                    <div class="stat-label">Müşterilerim</div>
+                                    <div class="stat-value">@Model.CurrentUser.Customers.Count</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-box">
+                                <div class="stat-icon-box">
+                                    <a class="nav-link p-0" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex">
+                                        <i class="fa fa-tasks"></i>
+                                    </a>
+                                </div>
+                                <div class="stat-meta">
+                                    <div class="stat-label">Sahip Olduğum Görev Sayısı</div>
+                                    <div class="stat-value">@Model.PipelineTaskCount</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-box">
+                                <div class="stat-icon-box">
+                                    <i class="fa fa-briefcase"></i>
+                                </div>
+                                <div class="stat-meta">
+                                    <div class="stat-label">Sektör</div>
+                                    <div class="stat-value">@Model.SectorCount</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-xl-8 col-lg-6 col-md-12 d-flex align-items-stretch">
+            <div class="dashboard-card w-100 todo-panel">
+                <div class="dashboard-card-header">
+                    <h5 class="section-title">Yapılacaklar</h5>
+                    <p class="section-subtitle">Son eklenen 5 görev</p>
+                </div>
+
+                <div class="dashboard-card-body fixed-todo-height">
+                    <div class="todo-list">
+                        @if (ViewBag.LatestTasks != null)
+                        {
+                            var tasks = ViewBag.LatestTasks as List<LatestTaskDto>;
+
+                            if (tasks != null && tasks.Any())
+                            {
+                                foreach (var item in tasks)
+                                {
+                                    <a href="/ToDoList/ToDoList/@item.BoardId" class="todo-item">
+                                        <div class="todo-left">
+                                            <div class="todo-icon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+
+                                            <div class="todo-text">@item.Text</div>
+                                        </div>
+
+                                        <div class="todo-date">
+                                            @item.CreatedDate.ToString("dd.MM.yyyy")
+                                        </div>
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <div class="empty-state">Henüz eklenmiş görev bulunmuyor.</div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">Henüz eklenmiş görev bulunmuyor.</div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-
-
-
-</div>
-
-
-
-
-
-@* <div class="row"> *@
-    @*    <div class="col-xl-4 col-lg-4 col-md-12">
-    <div class="custom-card" style="width: 100%;">
-    <div class="chart-title" style="margin-bottom: -15%;">Görevlerim</div>
-    <div class="card-body">
-    <canvas id="userTaskStatusChart"></canvas>
-    </div>
-    </div>
-    </div>*@
-    @* <div class="col-xl-4 col-lg-4 col-md-12">
-        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
-            <canvas id="valueOfferChartTL"></canvas>
-        </div>
-    </div>
-    <div class="col-xl-4 col-lg-4 col-md-12">
-        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
-            <canvas id="valueOfferChartEU"></canvas>
-        </div>
-    </div>
-    <div class="col-xl-4 col-lg-4 col-md-12">
-        <div class="chart-container" style="position: relative; height:40vh; width:100%;">
-            <canvas id="valueOfferChart$"></canvas>
-        </div>
-    </div>
-</div> *@
-
-
-<div class="container">
-    <div class="row no-gutters">
-        <div class="col-xl-4 col-lg-4 col-md-12">
-            <div class="custom-card">
-                <div class="chart-title">Kazanıldı/Kaybedildi</div>
-                <div class="card-body">
+    <div class="row dashboard-row mt-1">
+        <div class="col-xl-4 col-lg-4 col-md-12 d-flex">
+            <div class="custom-card w-100">
+                <div class="chart-card-header">
+                    <div class="chart-title">Kazanıldı / Kaybedildi</div>
+                    <p class="chart-subtitle">Pipeline sonuç dağılımı</p>
+                </div>
+                <div class="card-body chart-body">
                     <canvas id="outcomeStatusChart"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-lg-4 col-md-12">
-            <div class="custom-card">
-                <div class="chart-title">Müşteriye Ulaşılan Kanal</div>
-                <div class="card-body">
+
+        <div class="col-xl-4 col-lg-4 col-md-12 d-flex">
+            <div class="custom-card w-100">
+                <div class="chart-card-header">
+                    <div class="chart-title">Karar Verici Dağılımı</div>
+                    <p class="chart-subtitle">Final decision maker bilgisi</p>
+                </div>
+                <div class="card-body chart-body">
                     <canvas id="isFinalDecisionMaker"></canvas>
                 </div>
             </div>
         </div>
-    
-        <div class="col-xl-4 col-lg-4 col-md-12">
-            <div class="custom-card">
-                <div class="chart-title">Müşteriye Ulaşılan Kanal</div>
-                <div class="card-body">
+
+        <div class="col-xl-4 col-lg-4 col-md-12 d-flex">
+            <div class="custom-card w-100">
+                <div class="chart-card-header">
+                    <div class="chart-title">Kaynak Kanalı</div>
+                    <p class="chart-subtitle">Lead’lerin geldiği kanal dağılımı</p>
+                </div>
+                <div class="card-body chart-body">
                     <canvas id="sourceChannelChart"></canvas>
                 </div>
             </div>
         </div>
-
-
     </div>
 </div>
 
-@* 
-<div class="col-xl-4 col-lg-4 col-md-12">
-    <div class="custom-card">
-        <div class="chart-title">Müşteri Bilgisine Nereden Ulaşıldı?</div>
-        <div class="card-body">
-            <canvas id="heardFromChart"></canvas>
-        </div>
-    </div>
-</div> *@
-
-
-<!-- core js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-<!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-
 <script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        $.ajax({
-            type: "GET",
-            url: "/Home/UserTaskStatusChart",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-            //    console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
-                var ctx = document.getElementById('userTaskStatusChart').getContext('2d');
-                //var colors = ['#2eacb3', '#FED049', '#2D6187', '#89BEB3', '#FF9A76', '#8bc3fe'];
-                var colors = [
-                    '#d0e9f5', // En açık mavi
-                    '#a0c4e3', // Açık mavi
-                    '#6baed6', // Orta mavi
-                    '#3182bd'  // Koyu mavi
-                ];
+    Chart.register(ChartDataLabels);
 
-
-                // Gelen veri yapısına göre haritalama yapalım
-                var labels = data.map(item => item.statusName);
-                var dataValues = data.map(item => item.count);
-                var taskNames = data.map(item => item.taskNames);
-
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: dataValues,
-                            backgroundColor: colors,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        layout: {
-                            padding: {
-                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
-                                bottom: 0
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                align: 'center',
-                                labels: {
-                                    boxWidth: 20,
-                                    padding: 8,
-                                    font: {
-                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
-                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-                                        style: 'normal'
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        var index = context.dataIndex;
-                                        var count = dataValues[index];
-                                        var tasks = taskNames[index];
-                                        var label = labels[index] + ': ' + count;
-                                        var lines = [label].concat(tasks); // Görev isimlerini ekle
-                                        return lines;
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                color: 'rgba(0, 0, 0, 0.6)',
-                                formatter: function (value, context) {
-                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                                    var percentage = ((value / total) * 100).toFixed(2);
-                                    return percentage > 0 ? percentage + '%' : '';
-                                },
-                                font: {
-                                    weight: 'bold',
-                                    size: 8// Yazı boyutunu küçük tut
-                                },
-                                anchor: 'center', // Konumu merkezde gösterir
-                                align: 'center',  // Yazıları merkezde hizalar
-                                offset: 10 // Sağ tarafa doğru kaydırma
-                            }
-
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-
+    function getCommonDoughnutOptions(tooltipCallback) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 0
+                }
             },
-            error: function (error) {
-                console.error('Error fetching data:', error);
+            plugins: {
+                legend: {
+                    position: 'right',
+                    align: 'center',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        boxWidth: 10,
+                        padding: 14,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: tooltipCallback
+                    }
+                },
+                datalabels: {
+                    color: 'rgba(0, 0, 0, 0.6)',
+                    formatter: function (value, context) {
+                        var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                        var percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return percentage > 0 ? percentage + '%' : '';
+                    },
+                    font: {
+                        weight: 'bold',
+                        size: 9
+                    }
+                }
             }
-        });
-    });
+        };
+    }
+
+    function generateColors(count) {
+        var predefinedColors = [
+            '#A3D9A5',
+            '#FFDAC1',
+            '#BAFFB3',
+            '#C2C2F0',
+            '#B3F3D0',
+            '#BAE1FF',
+            '#FFB3BA',
+            '#FFDFBA',
+            '#FFFFBA',
+            '#D5AAFF',
+            '#FFB3E6'
+        ];
+
+        if (count <= predefinedColors.length) {
+            return predefinedColors.slice(0, count);
+        }
+
+        return predefinedColors;
+    }
 
     $(document).ready(function () {
         $.ajax({
@@ -409,18 +587,13 @@
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
-                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('outcomeStatusChart').getContext('2d');
-                var colors = [
-                    '#f3e6f6', // En açık mor
-                    '#e1a7e8', // Açık mor
-                    '#b76cd0', // Orta mor
-                    '#8a2c77'  // Koyu mor
-                ];
+                var colors = ['#f3e6f6', '#e1a7e8', '#b76cd0', '#8a2c77'];
 
                 var labels = data.labels;
                 var dataValues = data.data;
                 var taskNames = data.taskNames;
+
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
@@ -431,57 +604,13 @@
                             borderWidth: 1
                         }]
                     },
-                    options: {
-                        layout: {
-                            padding: {
-                                top: 10,
-                                bottom: 0
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                align: 'center',
-                                labels: {
-                                    boxWidth: 20,
-                                    padding: 8,
-                                    font: {
-                                        size: 11,
-                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-                                        style: 'normal'
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        var index = context.dataIndex;
-                                        var count = dataValues[index];
-                                        var tasks = taskNames[index];
-                                        var label = labels[index] + ': ' + count;
-                                        var lines = [label].concat(tasks);
-                                        return lines;
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                color: 'rgba(0, 0, 0, 0.6)',
-                                formatter: function (value, context) {
-                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                                    var percentage = ((value / total) * 100).toFixed(2);
-                                    return percentage > 0 ? percentage + '%' : '';
-                                },
-                                font: {
-                                    weight: 'bold',
-                                    size: 8 // Yazı boyutunu küçük tut
-                                },
-                                anchor: 'center', // Konumu merkezde gösterir
-                                align: 'center',  // Yazıları merkezde hizalar
-                                offset: 10 // Sağ tarafa doğru kaydırma
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
+                    options: getCommonDoughnutOptions(function (context) {
+                        var index = context.dataIndex;
+                        var count = dataValues[index];
+                        var tasks = taskNames[index];
+                        var label = labels[index] + ': ' + count;
+                        return [label].concat(tasks);
+                    })
                 });
 
             },
@@ -490,7 +619,6 @@
             }
         });
     });
-
 
     $(document).ready(function () {
         $.ajax({
@@ -499,12 +627,8 @@
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
-                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
                 var ctx = document.getElementById('isFinalDecisionMaker').getContext('2d');
-                var colors = [
-                    '#FFE0B2', // En açık turuncu
-                    '#FF6F00'  // Koyu turuncu
-                ];
+                var colors = ['#FFE0B2', '#FF6F00', '#FFD180', '#FFB74D'];
 
                 var labels = data.labels;
                 var dataValues = data.data;
@@ -520,351 +644,34 @@
                             borderWidth: 1
                         }]
                     },
-                    options: {
-                        layout: {
-                            padding: {
-                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
-                                bottom: 0
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                align: 'center',
-                                labels: {
-                                    boxWidth: 20,
-                                    padding: 8,
-                                    font: {
-                                        size: 11, // Yazı boyutunu 12px olarak ayarladım
-                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-                                        style: 'normal'
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        var index = context.dataIndex;
-                                        var count = dataValues[index];
-                                        var tasks = taskNames[index];
-                                        var label = labels[index] + ': ' + count;
-                                        var lines = [label].concat(tasks);
-                                        return lines;
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                color: 'rgba(0, 0, 0, 0.6)',
-                                formatter: function (value, context) {
-                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                                    var percentage = ((value / total) * 100).toFixed(2);
-                                    return percentage > 0 ? percentage + '%' : '';
-                                },
-                                font: {
-                                    weight: 'bold',
-                                    size: 8// Yazı boyutunu küçük tut
-                                },
-                                anchor: 'center', // Konumu merkezde gösterir
-                                align: 'center',  // Yazıları merkezde hizalar
-                                offset: 10 // Sağ tarafa doğru kaydırma
-                            }
-
-                        }
-                    },
-                    plugins: [ChartDataLabels]
+                    options: getCommonDoughnutOptions(function (context) {
+                        var index = context.dataIndex;
+                        var count = dataValues[index];
+                        var tasks = taskNames[index];
+                        var label = labels[index] + ': ' + count;
+                        return [label].concat(tasks);
+                    })
                 });
             },
             error: function (error) {
                 console.error('Error fetching data:', error);
             }
         });
-    });</script>
-<script>$(document).ready(function () {
+    });
+
+    $(document).ready(function () {
         $.ajax({
             type: "GET",
-            url: "/Home/IndustryChart",
+            url: "/Home/SourceChannelChart",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (data) {
-                console.log(data); // Gelen veriyi kontrol etmek için bu satırı ekleyin
-                var ctx = document.getElementById('industuryChart').getContext('2d');
-                // Dinamik olarak renk seçimi
+                var ctx = document.getElementById('sourceChannelChart').getContext('2d');
                 var colors = generateColors(data.labels.length);
-
-                var labels = data.labels;
-                var dataValues = data.data;
-                var customerNames = data.customerNames;
 
                 new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels: labels,
-                        datasets: [{
-                            data: dataValues,
-                            backgroundColor: colors,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        layout: {
-                            padding: {
-                                top: 10, // Grafiğin üstündeki boşluğu ayarlayın
-                                bottom: 0
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                align: 'center',
-                                labels: {
-                                    boxWidth: 10,
-                                    padding: 5,
-                                    font: {
-                                        size: 10, // Yazı boyutunu 12px olarak ayarladım
-                                        family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-                                        style: 'normal'
-                                    }
-                                }
-                            },
-                              tooltip: {
-      callbacks: {
-        label: function (context) {
-          const i = context.dataIndex;
-          return `${labels[i]}: ${dataValues[i]}`;
-        }
-      }
-                            },
-                            datalabels: {
-                                color: 'rgba(0, 0, 0, 0.6)',
-                                formatter: function (value, context) {
-                                    var total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                                    var percentage = ((value / total) * 100).toFixed(2);
-                                    return percentage > 0 ? percentage + '%' : '';
-                                },
-                                font: {
-                                    weight: 'bold',
-                                    size: 8// Yazı boyutunu küçük tut
-                                },
-                                anchor: 'center', // Konumu merkezde gösterir
-                                align: 'center',  // Yazıları merkezde hizalar
-                                offset: 10 // Sağ tarafa doğru kaydırma
-                            }
-
-                        }
-                    },
-                    plugins: [ChartDataLabels] // ChartDataLabels plugin'ini kullanın
-                });
-
-            },
-            error: function (xhr, status, error) {
-                // Hata durumunda kullanıcıya bildirim
-                var errorMessage = xhr.status + ': ' + xhr.statusText;
-                console.error('Error - ' + errorMessage);
-                // alert('Failed to fetch data. Error: ' + errorMessage);
-            }
-        });
-
-        // Dinamik renk üretimi
-        function generateColors(count) {
-            var predefinedColors = [
-                '#A3D9A5',
-                '#FFDAC1',
-                '#BAFFB3',
-                '#C2C2F0', // Pastel lavanta
-                '#B3F3D0',
-                '#BAE1FF',
-                '#FFB3BA', // Pastel pembe
-                '#FFDFBA', // Pastel şeftali
-                '#FFFFBA', // Pastel sarı
-                '#D5AAFF', // Pastel mor
-                '#FFB3E6', // Pastel fuşya
-
-            ];
-
-            // Renklerin sayısına göre döndür
-            return predefinedColors.slice(0, count);
-        }
-    });</script>
-
-
-
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            type: "GET",
-            url: "/Admin/Home/ValueOfferChart",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                createChart('valueOfferChartTL', data.tlChart, '₺');
-                createChart('valueOfferChartEU', data.euChart, '€');
-                createChart('valueOfferChart$', data.dollarChart, '$');
-            },
-            error: function (xhr, status, error) {
-                console.error('Veri getirilirken hata oluştu:', error);
-            }
-        });
-
-        // Grafik oluşturma fonksiyonu
-        function createChart(canvasId, chartData, currency) {
-            var ctx = document.getElementById(canvasId).getContext('2d');
-            var colors = generateColors(chartData.labels.length);
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.labels,
-                    datasets: [{
-                        label: 'Değer Teklifi (' + currency + ')',
-                        data: chartData.data,
-                        backgroundColor: colors,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    var label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-
-                                    var value = context.dataset.data[context.dataIndex]; // Toplam Değer
-                                    var index = context.dataIndex;
-                                    var taskNames = chartData.taskNames[index];
-
-                                    var lines = [
-                                        label + value + ' ' + currency, // Toplam Değer ve Para Birimi
-                                        'Görev: ' + taskNames.join(', ') // Görev isimleri
-                                    ];
-
-                                    return lines;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Dinamik renk üretimi
-        function generateColors(count) {
-            var predefinedColors = [
-                '#A3D9A5', '#FFDAC1', '#BAFFB3', '#C2C2F0', '#B3F3D0', '#BAE1FF',
-                '#FFB3BA', '#FFDFBA', '#FFFFBA', '#D5AAFF', '#FFB3E6'
-            ];
-            return predefinedColors.slice(0, count);
-        }
-    });
-
-</script>
-
-@*<script type="text/javascript">
-    $(document).ready(function () {
-        $.ajax({
-            type: "GET",
-            url: "/Home/ValueOfferChart",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                console.log(data); // Gelen veriyi kontrol etmek için konsola yazdır
-                var ctx = document.getElementById('valueOfferChart').getContext('2d');
-                var colors = generateColors(data.labels.length);
-
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Değer Teklifi',
-                            data: data.data,
-                            backgroundColor: colors,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        var label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        label += context.raw;
-
-                                        var index = context.dataIndex;
-                                        var taskNames = data.taskNames[index];
-                                        var lines = [label].concat(taskNames);
-                                        //label += '\n' + taskNames.join('\n');
-
-                                        return lines;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error('Veri getirilirken hata oluştu:', error);
-            }
-        });
-
-        // Dinamik renk üretimi
-        function generateColors(count) {
-            var predefinedColors = [
-                '#A3D9A5',
-                '#FFDAC1',
-                '#BAFFB3',
-                '#C2C2F0', // Pastel lavanta
-                '#B3F3D0',
-                '#BAE1FF',
-                '#FFB3BA', // Pastel pembe
-                '#FFDFBA', // Pastel şeftali
-                '#FFFFBA', // Pastel sarı
-                '#D5AAFF', // Pastel mor
-                '#FFB3E6', // Pastel fuşya
-
-            ];
-
-            // Renklerin sayısına göre döndür
-            return predefinedColors.slice(0, count);
-        }
-    });
-</script>*@
-
-<script type="text/javascript">
-    $(document).ready(function () {
-        $.ajax({
-            type: "GET",
-            url: "/Home/SourceChannelChart", // Controller metoduna yapılan istek
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                console.log(data); // Gelen veriyi kontrol etmek için
-                var ctx = document.getElementById('sourceChannelChart').getContext('2d');
-
-                // Renkleri dinamik olarak belirleyelim
-                var colors = generateColors(data.labels.length);
-
-                new Chart(ctx, {
-                    type: 'pie', // sektörel dağılım grafiğiyle aynı tip
-                    data: {
                         labels: data.labels,
                         datasets: [{
                             data: data.data,
@@ -873,6 +680,8 @@
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
                         layout: {
                             padding: { top: 10, bottom: 0 }
                         },
@@ -881,40 +690,37 @@
                                 position: 'right',
                                 align: 'center',
                                 labels: {
-                                    boxWidth: 12,
-                                    padding: 5,
-                                    font: { size: 10 }
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    boxWidth: 10,
+                                    padding: 12,
+                                    font: { size: 11 }
                                 }
                             },
-                      tooltip: {
-        callbacks: {
-          label: function (context) {
-            const i = context.dataIndex;
-            const label = `${data.labels[i]}: ${data.data[i]}`;
-            const tasks = (data.taskNames && data.taskNames[i]) ? data.taskNames[i] : [];
-            const max = 8; // tooltip'te en fazla kaç görev adı gösterilsin
-            const shown = tasks.slice(0, max).map(t => `• ${t}`);
-            if (tasks.length > max) shown.push(`+${tasks.length - max} daha…`);
-            // Çok satır için dizi döndür
-            return [label, ...shown];
-          }
-        }
-      },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const i = context.dataIndex;
+                                        const label = `${data.labels[i]}: ${data.data[i]}`;
+                                        const tasks = (data.taskNames && data.taskNames[i]) ? data.taskNames[i] : [];
+                                        const max = 8;
+                                        const shown = tasks.slice(0, max).map(t => `• ${t}`);
+                                        if (tasks.length > max) shown.push(`+${tasks.length - max} daha...`);
+                                        return [label, ...shown];
+                                    }
+                                }
+                            },
                             datalabels: {
                                 color: 'rgba(0,0,0,0.6)',
                                 formatter: function (value, context) {
                                     var total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    var percentage = ((value / total) * 100).toFixed(2);
+                                    var percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
                                     return percentage > 0 ? percentage + '%' : '';
                                 },
-                                font: { weight: 'bold', size: 8 },
-                                anchor: 'center',
-                                align: 'center',
-                                offset: 10
+                                font: { weight: 'bold', size: 9 }
                             }
                         }
-                    },
-                    plugins: [ChartDataLabels]
+                    }
                 });
 
             },
@@ -922,20 +728,5 @@
                 console.error('SourceChannel chart verisi getirilirken hata oluştu:', error);
             }
         });
-
-        // Dinamik renk üretimi
-        function generateColors(count) {
-            var predefinedColors = [
-                '#A3D9A5', '#FFDAC1', '#BAFFB3', '#C2C2F0',
-                '#B3F3D0', '#BAE1FF', '#FFB3BA', '#FFDFBA',
-                '#FFFFBA', '#D5AAFF', '#FFB3E6'
-            ];
-            return predefinedColors.slice(0, count);
-        }
     });
 </script>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
-
