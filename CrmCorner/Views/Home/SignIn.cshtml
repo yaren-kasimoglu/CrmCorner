@@ -1,93 +1,406 @@
 ﻿@{
     ViewData["Title"] = "SignIn";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
 }
 
 @model SignInViewModel
-@section Scripts
-    {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
 
-
-}
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="tr">
 <head>
-    <meta charset="utf-8">
-    <title>Sign In</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Lucid HR & Project Admin Dashboard Template with Bootstrap 5x">
-    <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
+    <meta charset="utf-8" />
+    <title>Giriş Yap - CRM Corner</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <link rel="icon" href="/CRMTema/bootstrap5/favicon.ico" type="image/x-icon">
-    <!-- VENDOR CSS -->
-    <!-- MAIN CSS -->
     <link rel="stylesheet" href="/CRMTema/bootstrap5/dist/assets/css/main.css">
+
+    <style>
+        :root {
+            --primary: #ffb71b;
+            --primary-dark: #e2a10a;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg-soft: #fffaf0;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, rgba(255,183,27,.18), transparent 28%), radial-gradient(circle at bottom right, rgba(255,183,27,.10), transparent 25%), #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 18px;
+        }
+
+        .auth-shell {
+            width: 100%;
+            max-width: 1220px;
+            background: rgba(255,255,255,.92);
+            border: 1px solid rgba(229,231,235,.9);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 25px 70px rgba(15,23,42,.08);
+        }
+
+        .left-panel {
+            background: linear-gradient(135deg, #ffb71b, #ffd76a);
+            min-height: 720px;
+            padding: 56px 48px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            .left-panel:before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(circle at top right, rgba(255,255,255,.22), transparent 30%), radial-gradient(circle at bottom left, rgba(255,255,255,.14), transparent 28%);
+                pointer-events: none;
+            }
+
+        .left-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-box {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.24);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 24px rgba(0,0,0,.08);
+        }
+
+        .left-title {
+            font-size: 46px;
+            line-height: 1.08;
+            font-weight: 800;
+            letter-spacing: -.8px;
+            color: white;
+            margin-bottom: 18px;
+            max-width: 440px;
+        }
+
+        .left-text {
+            max-width: 470px;
+            color: rgba(255,255,255,.92);
+            font-size: 17px;
+            line-height: 1.9;
+        }
+
+        .feature-card {
+            position: relative;
+            z-index: 2;
+            margin-top: 34px;
+            max-width: 480px;
+            background: rgba(255,255,255,.18);
+            border: 1px solid rgba(255,255,255,.22);
+            border-radius: 22px;
+            padding: 22px;
+            backdrop-filter: blur(6px);
+        }
+
+            .feature-card small {
+                display: block;
+                color: rgba(255,255,255,.88);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .feature-card p {
+                margin: 0;
+                color: white;
+                line-height: 1.8;
+                font-size: 14px;
+            }
+
+        .left-footer-note {
+            position: relative;
+            z-index: 2;
+            color: rgba(255,255,255,.85);
+            font-size: 14px;
+            line-height: 1.8;
+            max-width: 470px;
+        }
+
+        .right-panel {
+            background: #fff;
+            padding: 54px 46px;
+            display: flex;
+            align-items: center;
+            min-height: 720px;
+        }
+
+        .form-wrap {
+            width: 100%;
+            max-width: 470px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 28px;
+        }
+
+            .back-link:hover {
+                color: var(--text-dark);
+            }
+
+        .form-title {
+            font-size: 42px;
+            line-height: 1.1;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            letter-spacing: -.8px;
+        }
+
+        .form-subtitle {
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 28px;
+        }
+
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 14px 35px rgba(15,23,42,.05);
+        }
+
+        .form-floating > .form-control {
+            border-radius: 16px;
+            border: 1px solid #dbe1ea;
+            min-height: 60px;
+            box-shadow: none;
+            background: #f8fafc;
+        }
+
+            .form-floating > .form-control:focus {
+                border-color: var(--primary);
+                background: white;
+                box-shadow: 0 0 0 4px rgba(255,183,27,.18);
+            }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .forgot-btn {
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+        }
+
+        .main-btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 15px 18px;
+            font-weight: 700;
+            font-size: 15px;
+            color: white;
+            background: linear-gradient(135deg, #ffb71b, #ffcd52);
+            box-shadow: 0 12px 24px rgba(255,183,27,.24);
+            transition: all .2s ease;
+        }
+
+            .main-btn:hover {
+                transform: translateY(-1px);
+                background: linear-gradient(135deg, #e2a10a, #ffbf2a);
+                color: white;
+            }
+
+        .bottom-text {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #eef2f7;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+            .bottom-text a {
+                color: var(--primary-dark);
+                text-decoration: none;
+                font-weight: 700;
+            }
+
+                .bottom-text a:hover {
+                    text-decoration: underline;
+                }
+
+        .alert {
+            border-radius: 14px;
+        }
+
+        @@media (max-width: 991px) {
+            .left-panel {
+                display: none;
+            }
+
+            .right-panel {
+                min-height: auto;
+                padding: 34px 20px;
+            }
+
+            .form-title {
+                font-size: 32px;
+            }
+
+            .auth-shell {
+                border-radius: 24px;
+            }
+
+            .form-card {
+                padding: 22px;
+                border-radius: 22px;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <div class="auth-page">
+        <div class="auth-shell">
+            <div class="row g-0">
+                <div class="col-lg-6">
+                    <div class="left-panel">
+                        <div class="left-content">
+                            <div class="logo-box">C</div>
 
-    <div id="layout" class="theme-cyan">
-        <!-- WRAPPER -->
-        <div id="wrapper">
-            <div class="d-flex h100vh align-items-center auth-main w-100">
-                <div class="auth-box">
-                    <div class="card shadow p-lg-4">
-                        @if (TempData["ErrorMessage"] != null)
-                        {
-                            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-                        }
-
-                        <div class="card-header">
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
+                            <div class="left-title">
+                                CRM Corner’a tekrar hoş geldin.
                             </div>
-                            <p class="fs-5 mb-0">Giriş yap</p>
+
+                            <div class="left-text">
+                                Satış süreçlerini, sosyal medya operasyonlarını ve şirket bazlı yönetimi
+                                tek panelden takip etmek için hesabına giriş yap.
+                            </div>
+
+                            <div class="feature-card">
+                                <small>Tek Platform</small>
+                                <p>
+                                    CRM, Social Media ve kişisel markalaşma süreçlerini daha düzenli,
+                                    daha güvenli ve daha profesyonel şekilde yönet.
+                                </p>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <form asp-action="SignIn" asp-controller="Home" asp-route-returnUrl="@Context.Request.Query["returnUrl"]" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                                <div asp-validation-summary="All" class="text-danger"></div>
-                                <div class="form-floating">
-                                    <input asp-for="Email" class="form-control">
-                                    <label asp-for="Email"></label>
-                                    <span class="text-danger" asp-validation-for="Email"></span>
-                                </div>
-                                <div class="form-floating">
-                                    <input type="password" asp-for="Password" class="form-control">
-                                    <label for="Password" asp-for="Password"></label>
-                                    <span class="text-danger" asp-validation-for="Password"></span>
-                                </div>
-                                </br>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3 form-check">
-                                            <input class="form-check-input" asp-for="RememberMe">
-                                            <label class="form-check-label" asp-for="RememberMe" for="RememberMe">Beni Hatırla</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <a class="btn btn-outline-secondary btn-sm float-end" asp-action="ForgetPassword" asp-controller="Home">Şifremi unuttum</a>
-                                    </div>
-                                </div>
 
-                                <button type="submit" class="btn btn-primary w-100 px-3 py-2">GİRİŞ</button>
-
-
-                            </form>
-                            <div class="mt-2 pt-2 border-top">
-                                @*  <p class="mb-1"><a href="page-forgot-password.html"><i class="fa fa-lock me-2"></i>Forgot password?</a></p>*@
-                                <span>Hesabınız yok mu? <a asp-action="SignUp" asp-controller="Home">Kayıt Ol</a></span>
-                            </div>
+                        <div class="left-footer-note">
+                            Modüllerini tek panelde görüntüle, yetkine göre doğru ekranları aç
+                            ve şirketine özel verilerle daha kontrollü çalış.
                         </div>
                     </div>
                 </div>
 
+                <div class="col-lg-6">
+                    <div class="right-panel">
+                        <div class="form-wrap">
+                            <a href="/Home/Landing" class="back-link">
+                                <span>←</span> Landing sayfasına dön
+                            </a>
+
+                            <div class="form-title">Giriş Yap</div>
+                            <div class="form-subtitle">
+                                Hesabına giriş yaparak modüllerine ve çalışma alanına eriş.
+                            </div>
+
+                            <div class="form-card">
+                                @if (TempData["ErrorMessage"] != null)
+                                {
+                                    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                                }
+
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                                <form asp-action="SignIn"
+                                      asp-controller="Home"
+                                      asp-route-returnUrl="@Context.Request.Query["returnUrl"]"
+                                      method="post"
+                                      enctype="multipart/form-data">
+
+                                    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+                                    <div class="form-floating mb-3">
+                                        <input asp-for="Email" class="form-control" placeholder="E-posta" />
+                                        <label asp-for="Email"></label>
+                                        <span class="text-danger" asp-validation-for="Email"></span>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="password" asp-for="Password" class="form-control" placeholder="Şifre" />
+                                        <label asp-for="Password"></label>
+                                        <span class="text-danger" asp-validation-for="Password"></span>
+                                    </div>
+
+                                    <div class="row align-items-center mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" asp-for="RememberMe" />
+                                                <label class="form-check-label" asp-for="RememberMe">Beni Hatırla</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                                            <a class="btn btn-outline-secondary forgot-btn"
+                                               asp-action="ForgetPassword"
+                                               asp-controller="Home">
+                                                Şifremi unuttum
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="main-btn">
+                                        Giriş Yap
+                                    </button>
+                                </form>
+
+                                <div class="bottom-text">
+                                    Hesabınız yok mu?
+                                    <a asp-action="SignUp" asp-controller="Home">Kayıt Ol</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- END WRAPPER -->
     </div>
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 </body>
 </html>
-
-

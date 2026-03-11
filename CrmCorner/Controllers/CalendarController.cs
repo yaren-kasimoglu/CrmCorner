@@ -20,7 +20,6 @@ using Attendee = Independentsoft.Graph.Calendars.Attendee;
 using System.Net.Http.Headers;
 using System.Net.Mail;
 using System.Net;
-using CrmCorner.OptionsModels;
 using Microsoft.Extensions.Options;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;

@@ -9,16 +9,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NuGet.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 
 namespace CrmCorner.Controllers
 {
-    // 🔹 CRM Dashboard, Chart ve Bildirim fonksiyonları
+    //  CRM Dashboard, Chart ve Bildirim fonksiyonları
     [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class HomeController : BaseController
     {
@@ -26,23 +28,28 @@ namespace CrmCorner.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<AppRole> _roleManager;
-        private readonly IEmailServices _emailServices;
         private readonly EmailService _emailService;
         private Timer _timer;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-            IEmailServices emailServices, CrmCornerContext context, RoleManager<AppRole> roleManager, EmailService emailService
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, CrmCornerContext context, RoleManager<AppRole> roleManager, EmailService emailService
            ) : base(userManager)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
-            _emailServices = emailServices;
             _context = context;
             _roleManager = roleManager;
             _emailService = emailService;
 
+        }
+
+
+
+        [AllowAnonymous]
+        public IActionResult Landing()
+        {
+            return View();
         }
 
         public async Task<IActionResult> Index()
@@ -516,6 +523,12 @@ namespace CrmCorner.Controllers
                     return View();
                 }
 
+                if (!hasUser.EmailConfirmed)
+                {
+                    ModelState.AddModelError(string.Empty, "Lütfen önce email adresinizi doğrulayın.");
+                    return View(model);
+                }
+
                 var result = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
                 if (result.Succeeded)
@@ -570,30 +583,44 @@ namespace CrmCorner.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return View();
+                    return View(request);
                 }
 
-                // Kullanıcının e-posta adresinden domain'i çıkarma
+                if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains("@"))
+                {
+                    ModelState.AddModelError("Email", "Geçerli bir email adresi giriniz.");
+                    return View(request);
+                }
+
+                request.Email = request.Email.Trim().ToLower();
                 var emailDomain = request.Email.Split('@')[1].ToLower();
 
-                // Domain'e göre bir firma var mı kontrol et
+                // Aynı email ile kullanıcı var mı kontrol et
+                var existingUser = await _userManager.FindByEmailAsync(request.Email);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("Email", "Bu email adresi ile zaten kayıt mevcut.");
+                    return View(request);
+                }
+
+                // Domain'e göre firma var mı kontrol et
                 var company = _context.Companies.FirstOrDefault(c => c.EmailDomain.ToLower() == emailDomain);
 
                 if (company == null)
                 {
                     try
                     {
-                        // Yeni firma oluştur ve ekle
                         company = new Company
                         {
                             CompanyName = request.CompanyName,
                             EmailDomain = emailDomain,
                             IsApproved = false
                         };
+
                         _context.Companies.Add(company);
                         await _context.SaveChangesAsync();
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         return RedirectToAction("NotFound", "Error");
                     }
@@ -601,7 +628,6 @@ namespace CrmCorner.Controllers
 
                 try
                 {
-                    // Kullanıcıyı kaydetme
                     var user = new AppUser
                     {
                         UserName = request.UserName,
@@ -609,34 +635,78 @@ namespace CrmCorner.Controllers
                         PhoneNumber = request.Phone,
                         NameSurname = request.NameSurname,
                         PositionName = request.PositionName,
-                        CompanyName = company.CompanyName,  // Firma adını Company'den al
+                        CompanyName = company.CompanyName,
                         EmailDomain = emailDomain,
-                        CompanyId = company.CompanyId
+                        CompanyId = company.CompanyId,
+                        EmailConfirmed = false
                     };
 
                     var identityResult = await _userManager.CreateAsync(user, request.Password);
 
                     if (identityResult.Succeeded)
                     {
+                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-                        TempData["SuccessMessage"] = "Kayıt işlemi başarıyla tamamlandı.";
+                        var confirmationLink = Url.Action(
+                            "ConfirmEmail",
+                            "Home",
+                            new { userId = user.Id, token = encodedToken },
+                            protocol: Request.Scheme
+                        );
+                        await _emailService.SendEmailConfirmationAsync(user.Email, confirmationLink);
+
+                        //TempData["SuccessMessage"] = "Kayıt işlemi başarıyla tamamlandı. Lütfen email adresinize gelen doğrulama linkine tıklayın.";
                         return RedirectToAction("SignIn", "Home");
                     }
 
                     ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
-                    return View();
+                    return View(request);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return RedirectToAction("NotFound", "Error");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Geçersiz doğrulama linki.";
+                return RedirectToAction("SignIn", "Home");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Kullanıcı bulunamadı.";
+                return RedirectToAction("SignIn", "Home");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Email adresiniz başarıyla doğrulandı. Giriş yapabilirsiniz.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = string.Join(" | ", result.Errors.Select(x => x.Description));
+            }
+
+            return RedirectToAction("SignIn", "Home");
+        }
         #endregion
+
         [AllowAnonymous]
         public IActionResult ForgetPassword()
         {
