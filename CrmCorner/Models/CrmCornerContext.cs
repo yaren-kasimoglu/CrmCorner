@@ -23,6 +23,7 @@ namespace CrmCorner.Models
         public DbSet<Calendar> Calendars { get; set; }
 
         public DbSet<ChatHistory> ChatHistories { get; set; }
+
         public DbSet<CustomerN> CustomerNs { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Status> Statuses { get; set; }
