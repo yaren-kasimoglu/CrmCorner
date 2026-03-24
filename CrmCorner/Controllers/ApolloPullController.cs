@@ -2,7 +2,6 @@
 using CrmCorner.Models.Enums;
 using CrmCorner.Services;
 using CrmCorner.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,14 +12,11 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 
-
-
 namespace CrmCorner.Controllers
 {
-
-    //  ApolloPullController
-    // Bu controller, Apollo API'den kişi çekme ve pipeline aktarma işlemleri içindir.
-    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember (Sosyal medya rollerine kapalı)
+    // ApolloPullController
+    // Apollo API'den kişi çekme ve pipeline aktarma işlemleri
+    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember
     //[Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class ApolloPullController : Controller
     {
@@ -29,7 +25,11 @@ namespace CrmCorner.Controllers
         private readonly ApolloService _apolloService;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public ApolloPullController(CrmCornerContext context, UserManager<AppUser> userManager, ApolloService apolloService, IHttpClientFactory httpClientFactory)
+        public ApolloPullController(
+            CrmCornerContext context,
+            UserManager<AppUser> userManager,
+            ApolloService apolloService,
+            IHttpClientFactory httpClientFactory)
         {
             _context = context;
             _userManager = userManager;
@@ -37,7 +37,12 @@ namespace CrmCorner.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-
+        [HttpGet]
+        public IActionResult FetchContacts()
+        {
+            ViewBag.Labels = new List<SelectListItem>();
+            return View(new ApolloApiViewModel());
+        }
 
         [HttpPost]
         public async Task<IActionResult> FetchLabels(ApolloApiViewModel model)
@@ -49,11 +54,7 @@ namespace CrmCorner.Controllers
                 return View("FetchContacts", model);
             }
 
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.apollo.io/");
-            client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("x-api-key", model.ApiKey);
+            using var client = CreateApolloClient(model.ApiKey);
 
             var labelRequest = new StringContent("{}", Encoding.UTF8, "application/json");
             var labelResponse = await client.PostAsync("api/v1/labels/search", labelRequest);
@@ -89,7 +90,6 @@ namespace CrmCorner.Controllers
                 return View("FetchContacts", model);
             }
 
-            // dropdown boş kalmasın
             model.Labels = await GetLabels(model.ApiKey);
 
             if (string.IsNullOrWhiteSpace(model.SelectedLabelId))
@@ -98,35 +98,35 @@ namespace CrmCorner.Controllers
                 return View("FetchContacts", model);
             }
 
-            string currentUserId = _userManager.GetUserId(User);
+            var currentUserId = _userManager.GetUserId(User);
 
-            var me = await _context.Users.AsNoTracking()
-    .FirstOrDefaultAsync(u => u.Id == currentUserId);
+            var me = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == currentUserId);
 
             var myCompanyId = me?.CompanyId;
-
 
             var allContacts = new List<ApolloContactViewModel>();
             int page = 1;
             int perPage = 100;
             int retryDelay = 1000;
 
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.apollo.io/");
-            client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("x-api-key", model.ApiKey);
+            using var client = CreateApolloClient(model.ApiKey);
 
             while (true)
             {
                 var requestBody = new
                 {
-                    page = page,
+                    page,
                     per_page = perPage,
                     label_ids = new[] { model.SelectedLabelId }
                 };
 
-                var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(requestBody),
+                    Encoding.UTF8,
+                    "application/json");
+
                 var response = await client.PostAsync("api/v1/contacts/search", content);
 
                 if (!response.IsSuccessStatusCode)
@@ -149,7 +149,7 @@ namespace CrmCorner.Controllers
                 var parsed = JObject.Parse(resultString);
 
                 var contactsJson = parsed["contacts"]?.ToString();
-                var contactList = JsonConvert.DeserializeObject<List<ApolloContactViewModel>>(contactsJson);
+                var contactList = JsonConvert.DeserializeObject<List<ApolloContactViewModel>>(contactsJson ?? "[]");
 
                 if (contactList == null || contactList.Count == 0)
                     break;
@@ -164,28 +164,19 @@ namespace CrmCorner.Controllers
 
             await SaveOrUpdateApolloContacts(allContacts, model, currentUserId, myCompanyId);
 
-            ViewBag.SuccessMessage = $"{allContacts.Count} kişi çekildi ve işlendi.";
-            ViewBag.TotalCount = allContacts.Count;
+            var missingEmailCount = allContacts.Count(c => !HasRealEmail(c.Email));
 
-            ViewBag.ContactList = allContacts.Take(200).ToList();
+            ViewBag.SuccessMessage = missingEmailCount > 0
+                ? $"{allContacts.Count} kişi çekildi ve işlendi. {missingEmailCount} kişide e-posta bulunamadığı için sistem fallback e-posta oluşturdu."
+                : $"{allContacts.Count} kişi çekildi ve işlendi.";
+
             ViewBag.TotalCount = allContacts.Count;
+            ViewBag.MissingEmailCount = missingEmailCount;
+            ViewBag.ContactList = allContacts.Take(200).ToList();
 
             return View("FetchContacts", model);
         }
 
-
-
-
-        //[Authorize(Roles = "Admin")]
-        [HttpGet]
-        public IActionResult FetchContacts()
-        {
-            // İlk açılışta boş model ve boş liste
-            ViewBag.Labels = new List<SelectListItem>();
-            return View(new ApolloApiViewModel());
-        }
-
-        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> FetchContacts(ApolloApiViewModel model)
         {
@@ -196,11 +187,11 @@ namespace CrmCorner.Controllers
                 return View(model);
             }
 
-            string currentUserId = _userManager.GetUserId(User);
+            var currentUserId = _userManager.GetUserId(User);
 
             var me = await _context.Users
-    .AsNoTracking()
-    .FirstOrDefaultAsync(u => u.Id == currentUserId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == currentUserId);
 
             var myCompanyId = me?.CompanyId;
 
@@ -211,7 +202,6 @@ namespace CrmCorner.Controllers
             int perPage = 100;
             int retryDelay = 1000;
 
-            // ✅ ApolloSettings çek (yoksa oluştur)
             var setting = await _context.ApolloSettings
                 .FirstOrDefaultAsync(x => x.UserId == currentUserId);
 
@@ -221,32 +211,25 @@ namespace CrmCorner.Controllers
                 {
                     UserId = currentUserId
                 };
+
                 _context.ApolloSettings.Add(setting);
                 await _context.SaveChangesAsync();
             }
 
-            // ✅ İlk çekiş için kullanıcı 15/30 seçmişse onu kullan (default 30)
             int lastDays = model.LastDays.HasValue && (model.LastDays.Value == 15 || model.LastDays.Value == 30)
                 ? model.LastDays.Value
                 : 30;
 
-            // ✅ fromDate: daha önce sync yapıldıysa oradan itibaren çek
-            // ✅ hiç sync yoksa: lastDays kadar geriye git
             DateTime fromDate = setting.LastContactsSyncUtc ?? DateTime.UtcNow.Date.AddDays(-lastDays);
-            DateTime toDate = DateTime.UtcNow.Date.AddDays(1); // bugünü kapsasın
+            DateTime toDate = DateTime.UtcNow.Date.AddDays(1);
 
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.apollo.io/");
-            client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("X-Api-Key", model.ApiKey);
+            using var client = CreateApolloClient(model.ApiKey, useUpperCaseApiHeader: true);
 
             var jsonSettings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             };
 
-            // 🔹 Etiketleri çek
             var labelRequest = new StringContent("{}", Encoding.UTF8, "application/json");
             var labelResponse = await client.PostAsync("api/v1/labels/search", labelRequest);
 
@@ -273,11 +256,9 @@ namespace CrmCorner.Controllers
 
             ViewBag.Labels = labelList;
 
-            // 🔄 Saved Contacts: sayfa sayfa çek (fromDate -> toDate)
             while (true)
             {
                 object requestBody;
-
                 var updatedAtFilter = new
                 {
                     from = fromDate.ToString("yyyy-MM-dd"),
@@ -288,7 +269,7 @@ namespace CrmCorner.Controllers
                 {
                     requestBody = new
                     {
-                        page = page,
+                        page,
                         per_page = perPage,
                         updated_at = updatedAtFilter
                     };
@@ -297,7 +278,7 @@ namespace CrmCorner.Controllers
                 {
                     requestBody = new
                     {
-                        page = page,
+                        page,
                         per_page = perPage,
                         label_ids = new[] { model.SelectedLabelId },
                         updated_at = updatedAtFilter
@@ -311,7 +292,7 @@ namespace CrmCorner.Controllers
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
                     {
                         await Task.Delay(retryDelay);
                         retryDelay *= 2;
@@ -320,7 +301,9 @@ namespace CrmCorner.Controllers
 
                     var errorBody = await response.Content.ReadAsStringAsync();
 
-                    if ((int)response.StatusCode == 422 && errorBody != null && errorBody.Contains("over threshold"))
+                    if ((int)response.StatusCode == 422 &&
+                        errorBody != null &&
+                        errorBody.Contains("over threshold"))
                     {
                         ViewBag.Info = $"Apollo limiti nedeniyle en fazla {allContacts.Count} kayıt çekilebildi. Daha fazlası için label seçin veya tarih aralığını daraltın.";
                         break;
@@ -356,11 +339,6 @@ namespace CrmCorner.Controllers
                 page++;
             }
 
-            // ✅ Eğer API’den hiç kişi gelmediyse bile sync tarihini güncellemek istersen:
-            // (Ben yine de güncelliyorum çünkü "check edildi" anlamına gelir)
-            // Eğer istemezsen, allContacts.Count > 0 şartı koyarız.
-
-            // ✅ TOPLU KONTROL İÇİN PERSON ID VE EMAIL LİSTESİ
             var personIdList = allContacts
                 .Where(c => !string.IsNullOrWhiteSpace(c.PersonId))
                 .Select(c => c.PersonId)
@@ -368,33 +346,31 @@ namespace CrmCorner.Controllers
 
             var emailList = allContacts
                 .Where(c => !string.IsNullOrWhiteSpace(c.Email))
-                .Select(c => c.Email.ToLower())
+                .Select(c => c.Email!.ToLower())
                 .ToList();
 
-       var existingContacts = await _context.ApolloContacts
-    .Where(x =>
-        x.CompanyId == myCompanyId &&   // ✅ değişti
-        (
-            (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
-            (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
-        )
-    )
-    .ToListAsync();
-
+            var existingContacts = await _context.ApolloContacts
+                .Where(x =>
+                    x.CompanyId == myCompanyId &&
+                    (
+                        (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
+                        (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
+                    ))
+                .ToListAsync();
 
             var existingByPersonId = existingContacts
                 .Where(x => !string.IsNullOrWhiteSpace(x.PersonId))
-                .GroupBy(x => x.PersonId)
+                .GroupBy(x => x.PersonId!)
                 .ToDictionary(g => g.Key, g => g.First());
 
             var existingByEmail = existingContacts
                 .Where(x => !string.IsNullOrWhiteSpace(x.Email))
-                .GroupBy(x => x.Email.ToLower())
+                .GroupBy(x => x.Email!.ToLower())
                 .ToDictionary(g => g.Key, g => g.First());
 
             foreach (var contact in allContacts)
             {
-                ApolloContactDbModel existing = null;
+                ApolloContactDbModel? existing = null;
 
                 if (!string.IsNullOrWhiteSpace(contact.PersonId) &&
                     existingByPersonId.TryGetValue(contact.PersonId, out var pidMatch))
@@ -407,11 +383,15 @@ namespace CrmCorner.Controllers
                     existing = emailMatch;
                 }
 
+                var safeEmail = HasRealEmail(contact.Email)
+                    ? contact.Email!.Trim()
+                    : BuildFallbackEmail(contact);
+
                 if (existing == null)
                 {
                     _context.ApolloContacts.Add(new ApolloContactDbModel
                     {
-                        Email = contact.Email,
+                        Email = safeEmail,
                         PersonId = contact.PersonId,
                         CompanyId = myCompanyId,
                         FirstName = contact.FirstName,
@@ -443,6 +423,9 @@ namespace CrmCorner.Controllers
                         existing.Headline = contact.Headline;
                         existing.CompanyId = myCompanyId;
                         existing.Location = contact.Location;
+
+                        if (HasRealEmail(contact.Email))
+                            existing.Email = contact.Email!.Trim();
                     }
                 }
             }
@@ -451,7 +434,6 @@ namespace CrmCorner.Controllers
             {
                 await _context.SaveChangesAsync();
 
-                // ✅ Başarıyla kaydedildiyse sync tarihini güncelle
                 setting.LastContactsSyncUtc = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
@@ -460,37 +442,40 @@ namespace CrmCorner.Controllers
                 ModelState.AddModelError("", "Bazı kişiler zaten sistemde mevcut olabilir.");
             }
 
+            var missingEmailCount = allContacts.Count(c => !HasRealEmail(c.Email));
+
             ViewBag.ContactList = allContacts;
             ViewBag.TotalCount = allContacts.Count;
             ViewBag.LastDaysUsed = lastDays;
-
-            // ekstra bilgi: artık hangi aralığı kullandığını UI'da görmek istersen
             ViewBag.FromDateUsed = fromDate.ToString("yyyy-MM-dd");
             ViewBag.ToDateUsed = toDate.ToString("yyyy-MM-dd");
+            ViewBag.MissingEmailCount = missingEmailCount;
+
+            if (missingEmailCount > 0)
+            {
+                ViewBag.Info = $"{missingEmailCount} kişide e-posta bulunamadı. Bu kayıtlar fallback e-posta ile işlendi.";
+            }
 
             return View(model);
         }
 
-
-
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> ContactsList()
         {
             var currentUserId = _userManager.GetUserId(User);
 
-            var me = await _context.Users.AsNoTracking()
+            var me = await _context.Users
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == currentUserId);
 
             var myCompanyId = me?.CompanyId;
 
             var contacts = await _context.ApolloContacts
-                .Where(x => x.CompanyId == myCompanyId)   // ✅ artık şirket bazlı
+                .Where(x => x.CompanyId == myCompanyId)
                 .OrderByDescending(x => x.UpdatedAt)
                 .ToListAsync();
 
             return View(contacts);
         }
-
 
         [HttpPost]
         public async Task<IActionResult> ContactsListData()
@@ -502,11 +487,11 @@ namespace CrmCorner.Controllers
             var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "25");
             var searchValue = Request.Form["search[value]"].FirstOrDefault();
 
-            // order parametreleri
             var orderColumnIndex = Request.Form["order[0][column]"].FirstOrDefault();
-            var orderDir = Request.Form["order[0][dir]"].FirstOrDefault(); // asc/desc
+            var orderDir = Request.Form["order[0][dir]"].FirstOrDefault();
 
-            var me = await _context.Users.AsNoTracking()
+            var me = await _context.Users
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             var myCompanyId = me?.CompanyId;
@@ -514,7 +499,6 @@ namespace CrmCorner.Controllers
             var query = _context.ApolloContacts
                 .AsNoTracking()
                 .Where(x => x.CompanyId == myCompanyId);
-
 
             var recordsTotal = await query.CountAsync();
 
@@ -526,15 +510,11 @@ namespace CrmCorner.Controllers
                     (x.LastName != null && x.LastName.ToLower().Contains(s)) ||
                     (x.Email != null && x.Email.ToLower().Contains(s)) ||
                     (x.CompanyName != null && x.CompanyName.ToLower().Contains(s)) ||
-                    (x.Title != null && x.Title.ToLower().Contains(s))
-                );
+                    (x.Title != null && x.Title.ToLower().Contains(s)));
             }
 
             var recordsFiltered = await query.CountAsync();
 
-            // ✅ Hangi kolona göre sıralanacağını seç
-            // DataTables columns sırası:
-            // 0 checkbox(id), 1 firstName, 2 lastName, 3 title, 4 companyName, 5 email, 6 updatedAt
             bool desc = (orderDir ?? "desc").ToLower() == "desc";
             switch (orderColumnIndex)
             {
@@ -556,9 +536,8 @@ namespace CrmCorner.Controllers
                 case "6":
                 default:
                     query = desc
-                     ? query.OrderByDescending(x => x.UpdatedAt)
-                     : query.OrderBy(x => x.UpdatedAt);
-
+                        ? query.OrderByDescending(x => x.UpdatedAt)
+                        : query.OrderBy(x => x.UpdatedAt);
                     break;
             }
 
@@ -588,11 +567,10 @@ namespace CrmCorner.Controllers
             });
         }
 
-
-
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
+
             var token = await _context.ApolloSettings
                 .Where(x => x.UserId == userId)
                 .Select(x => x.ApolloApiToken)
@@ -607,7 +585,7 @@ namespace CrmCorner.Controllers
             try
             {
                 var users = await _apolloService.GetContactsAsync(token);
-                return View("Index", users); // View name 'GetUsers.cshtml' olacak
+                return View("Index", users);
             }
             catch (Exception ex)
             {
@@ -615,25 +593,32 @@ namespace CrmCorner.Controllers
             }
         }
 
-
         [HttpPost]
         public async Task<IActionResult> TransferToTasks(List<int> selectedIds)
         {
-            var contacts = _context.ApolloContacts
+            var contacts = await _context.ApolloContacts
                 .Where(c => selectedIds.Contains(c.Id))
-                .ToList();
+                .ToListAsync();
 
             var currentUserId = _userManager.GetUserId(User);
+            int missingEmailCount = 0;
 
             foreach (var contact in contacts)
             {
+                var safeEmail = HasRealEmail(contact.Email)
+                    ? contact.Email!.Trim()
+                    : BuildFallbackEmail(contact);
+
+                if (!HasRealEmail(contact.Email))
+                    missingEmailCount++;
+
                 var customer = new CustomerN
                 {
                     Name = contact.FirstName,
                     Surname = contact.LastName,
                     CompanyName = contact.CompanyName,
                     PhoneNumber = contact.Phone,
-                    CustomerEmail = contact.Email,
+                    CustomerEmail = safeEmail,
                     LinkedinUrl = contact.LinkedinUrl,
                     AppUserId = currentUserId,
                     CreatedDate = DateTime.UtcNow,
@@ -641,22 +626,24 @@ namespace CrmCorner.Controllers
                 };
 
                 _context.CustomerNs.Add(customer);
-                await _context.SaveChangesAsync(); // Müşteri kaydedildi, Id oluştu
+                await _context.SaveChangesAsync();
 
                 var pipelineTask = new PipelineTask
                 {
                     Title = $"{contact.FirstName} {contact.LastName} - {contact.CompanyName}",
-                    Description = "Apollo'dan aktarıldı.",
+                    Description = HasRealEmail(contact.Email)
+                        ? "Apollo'dan aktarıldı."
+                        : "Apollo'dan aktarıldı. Orijinal e-posta bilgisi bulunamadığı için sistem fallback e-posta oluşturdu.",
                     CreatedDate = DateTime.UtcNow,
                     CustomerName = contact.FirstName,
                     CustomerSurname = contact.LastName,
                     CompanyName = contact.CompanyName,
                     Phone = contact.Phone,
-                    Email = contact.Email,
+                    Email = safeEmail,
                     LinkedinUrl = contact.LinkedinUrl,
                     AppUserId = currentUserId,
                     CustomerId = customer.Id,
-                    Stage = PipelineStage.Degerlendirilen, // varsayılan ilk aşama
+                    Stage = PipelineStage.Degerlendirilen,
                     Source = "Apollo",
                     SourceChannel = SourceChannelType.Apollo
                 };
@@ -665,20 +652,16 @@ namespace CrmCorner.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            TempData["Success"] = "Seçilen kişiler başarıyla görev olarak aktarıldı.";
+            TempData["Success"] = missingEmailCount > 0
+                ? $"Seçilen kişiler başarıyla aktarıldı. {missingEmailCount} kişide e-posta olmadığı için sistem fallback e-posta oluşturdu."
+                : "Seçilen kişiler başarıyla görev olarak aktarıldı.";
+
             return RedirectToAction("ContactsList");
         }
 
-
-
-
         private async Task<List<SelectListItem>> GetLabels(string apiKey)
         {
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.apollo.io/");
-            client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+            using var client = CreateApolloClient(apiKey);
 
             var labelRequest = new StringContent("{}", Encoding.UTF8, "application/json");
             var labelResponse = await client.PostAsync("api/v1/labels/search", labelRequest);
@@ -699,20 +682,13 @@ namespace CrmCorner.Controllers
         }
 
         private async Task SaveOrUpdateApolloContacts(
-      List<ApolloContactViewModel> allContacts,
-      ApolloApiViewModel model,
-      string currentUserId,
-      int? companyId)
+            List<ApolloContactViewModel> allContacts,
+            ApolloApiViewModel model,
+            string currentUserId,
+            int? companyId)
         {
-            // CompanyId senin multi-tenant ayrımınsa null gelmesini istemeyebilirsin
-            // İstersen aç:
-            // if (companyId == null)
-            //     throw new InvalidOperationException("CompanyId bulunamadı. Kullanıcının CompanyId alanını kontrol edin.");
-
             var labelList = model.Labels ?? new List<SelectListItem>();
 
-            // ✅ 1) Aynı batch içinde duplicate gelenleri temizle (PersonId öncelikli)
-            // PersonId yoksa email ile de dedupe yapalım
             var normalized = allContacts
                 .Where(c => c != null)
                 .Select(c => new ApolloContactViewModel
@@ -730,61 +706,66 @@ namespace CrmCorner.Controllers
                 })
                 .ToList();
 
-            // PersonId'li olanları PersonId'e göre tekilleştir (en güncel UpdatedAt kalsın)
             var withPersonId = normalized
                 .Where(c => !string.IsNullOrWhiteSpace(c.PersonId))
-                .GroupBy(c => c.PersonId)
+                .GroupBy(c => c.PersonId!)
                 .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
                 .ToList();
 
-            // PersonId'siz olanları email'e göre tekilleştir
             var withoutPersonId = normalized
                 .Where(c => string.IsNullOrWhiteSpace(c.PersonId) && !string.IsNullOrWhiteSpace(c.Email))
-                .GroupBy(c => c.Email.ToLowerInvariant())
+                .GroupBy(c => c.Email!.ToLowerInvariant())
                 .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
                 .ToList();
 
-            var dedupedContacts = withPersonId.Concat(withoutPersonId).ToList();
+            var noPersonIdNoEmail = normalized
+                .Where(c => string.IsNullOrWhiteSpace(c.PersonId) && string.IsNullOrWhiteSpace(c.Email))
+                .ToList();
 
-            // ✅ 2) DB'de var mı kontrolü (GLOBAL) — CompanyId filtresi YOK!
+            var dedupedContacts = withPersonId
+                .Concat(withoutPersonId)
+                .Concat(noPersonIdNoEmail)
+                .ToList();
+
             var personIdList = dedupedContacts
                 .Where(c => !string.IsNullOrWhiteSpace(c.PersonId))
-                .Select(c => c.PersonId)
+                .Select(c => c.PersonId!)
                 .Distinct()
                 .ToList();
 
             var emailList = dedupedContacts
                 .Where(c => !string.IsNullOrWhiteSpace(c.Email))
-                .Select(c => c.Email.ToLowerInvariant())
+                .Select(c => c.Email!.ToLowerInvariant())
                 .Distinct()
                 .ToList();
 
             var existingContacts = await _context.ApolloContacts
                 .Where(x =>
                     (!string.IsNullOrEmpty(x.PersonId) && personIdList.Contains(x.PersonId)) ||
-                    (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower()))
-                )
+                    (!string.IsNullOrEmpty(x.Email) && emailList.Contains(x.Email.ToLower())))
                 .ToListAsync();
 
             var existingByPersonId = existingContacts
                 .Where(x => !string.IsNullOrWhiteSpace(x.PersonId))
-                .GroupBy(x => x.PersonId)
+                .GroupBy(x => x.PersonId!)
                 .ToDictionary(g => g.Key, g => g.First());
 
             var existingByEmail = existingContacts
                 .Where(x => !string.IsNullOrWhiteSpace(x.Email))
-                .GroupBy(x => x.Email.ToLowerInvariant())
+                .GroupBy(x => x.Email!.ToLowerInvariant())
                 .ToDictionary(g => g.Key, g => g.First());
 
-            // Label adı tek sefer hesapla
             var selectedLabelName = labelList.FirstOrDefault(l => l.Value == model.SelectedLabelId)?.Text;
 
             foreach (var contact in dedupedContacts)
             {
-                ApolloContactDbModel existing = null;
+                ApolloContactDbModel? existing = null;
 
                 var pid = contact.PersonId?.Trim();
                 var emailLower = contact.Email?.Trim()?.ToLowerInvariant();
+                var safeEmail = HasRealEmail(contact.Email)
+                    ? contact.Email!.Trim()
+                    : BuildFallbackEmail(contact);
 
                 if (!string.IsNullOrWhiteSpace(pid) && existingByPersonId.TryGetValue(pid, out var pidMatch))
                 {
@@ -795,20 +776,19 @@ namespace CrmCorner.Controllers
                     existing = emailMatch;
                 }
 
-                // UpdatedAt null güvenliği
                 var incomingUpdatedAt = contact.UpdatedAt;
 
                 if (existing == null)
                 {
                     _context.ApolloContacts.Add(new ApolloContactDbModel
                     {
-                        Email = contact.Email?.Trim(),
+                        Email = safeEmail,
                         PersonId = pid,
                         FirstName = contact.FirstName,
                         LastName = contact.LastName,
                         Title = contact.Title,
                         CompanyName = contact.CompanyName,
-                        UpdatedAt = contact.UpdatedAt, // null olabilir, sorun değil
+                        UpdatedAt = incomingUpdatedAt,
                         SourceLabelId = model.SelectedLabelId,
                         SourceLabelName = selectedLabelName,
                         UserId = currentUserId,
@@ -823,32 +803,26 @@ namespace CrmCorner.Controllers
                 {
                     var existingUpdatedAt = existing.UpdatedAt;
 
-                    // ✅ daha güncelse update et
                     if (existingUpdatedAt < incomingUpdatedAt)
                     {
                         existing.FirstName = contact.FirstName;
                         existing.LastName = contact.LastName;
                         existing.Title = contact.Title;
                         existing.CompanyName = contact.CompanyName;
-                        existing.UpdatedAt = contact.UpdatedAt;
-
+                        existing.UpdatedAt = incomingUpdatedAt;
                         existing.SourceLabelId = model.SelectedLabelId;
                         existing.SourceLabelName = selectedLabelName;
-
                         existing.LinkedinUrl = contact.LinkedinUrl;
                         existing.Headline = contact.Headline;
                         existing.Location = contact.Location;
 
-                        // Email boş değilse güncelle (bazı kayıtlarda sonradan doluyor)
-                        if (!string.IsNullOrWhiteSpace(contact.Email))
-                            existing.Email = contact.Email.Trim();
+                        if (HasRealEmail(contact.Email))
+                            existing.Email = contact.Email!.Trim();
                     }
 
-                    // ✅ eski kayıtlarda CompanyId boş kalmış olabilir
                     if (existing.CompanyId == null)
                         existing.CompanyId = companyId;
 
-                    // ✅ eski kayıtlarda UserId boşsa doldur (opsiyonel)
                     if (string.IsNullOrWhiteSpace(existing.UserId))
                         existing.UserId = currentUserId;
                 }
@@ -857,7 +831,42 @@ namespace CrmCorner.Controllers
             await _context.SaveChangesAsync();
         }
 
+        private HttpClient CreateApolloClient(string apiKey, bool useUpperCaseApiHeader = false)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri("https://api.apollo.io/");
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+            if (useUpperCaseApiHeader)
+                client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+            else
+                client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
+            return client;
+        }
+
+        private static bool HasRealEmail(string? email)
+        {
+            return !string.IsNullOrWhiteSpace(email);
+        }
+
+        private static string BuildFallbackEmail(ApolloContactDbModel contact)
+        {
+            var key = !string.IsNullOrWhiteSpace(contact.PersonId)
+                ? contact.PersonId.Trim()
+                : contact.Id.ToString();
+
+            return $"apollo-noemail-{key}@crmcorner.local";
+        }
+
+        private static string BuildFallbackEmail(ApolloContactViewModel contact)
+        {
+            var key = !string.IsNullOrWhiteSpace(contact.PersonId)
+                ? contact.PersonId.Trim()
+                : Guid.NewGuid().ToString("N");
+
+            return $"apollo-noemail-{key}@crmcorner.local";
+        }
     }
 }

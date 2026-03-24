@@ -13,6 +13,7 @@ using PipelineStage = CrmCorner.Models.Enums.PipelineStage;
 namespace CrmCorner.Controllers
 {
     [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
+    [ModuleAuthorize(ModuleType.CRM)]
     public class PipelineTaskController : Controller
     {
         private readonly CrmCornerContext _context;
