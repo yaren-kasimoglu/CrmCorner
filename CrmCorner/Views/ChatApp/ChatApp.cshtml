@@ -3,67 +3,43 @@
     ViewData["Title"] = "ChatApp";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
     string useronlyId = ViewBag.GetUserId;
-
 }
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.3/signalr.min.js"></script>
-@*<script src="~/js/Chat.js"></script>*@
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-<!-- page js file -->
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
 
-<div class="row">
+<div class="row"></div>
 
-    @*<div class="col-md-3 form-group">
-            <select class="form-control" id="UserList">
-                @foreach (var user in Model.Users)
-                {
-                    <option value="@user.Id">@user.UserName</option>
-                }
-            </select>
-        </div>*@
-
-    @*<div class="col-md-3 form-group">
-            <textarea id="SendMessageTextArea" class="form-control"></textarea>
-        </div>*@
-
-    @*<div class="col-md-6 form-group">
-            <div id="MessageBox" style=" border:1px solid gray;  width:600px; height:600px; ">
-            </div>
-        </div>*@
-
-</div>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <title>:: Lucid HR BS5 :: Chat App</title>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
     <style>
         .container {
             display: flex;
-            justify-content: center; /* Yatayda ortala */
-            align-items: flex-start; /* Dikeyde yukarıda hizala */
-            height: 100vh; /* Sayfa yüksekliği kadar genişlet */
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
         }
 
-        /* Mesaj divi */
-        .message.other-message {
-            font-size: 16px; /* Örnek bir font boyutu */
-            /* Diğer stiller buraya eklenebilir */
+        .message.other-message,
+        .message.my-message {
+            font-size: 16px;
         }
 
         ul.chat-list {
-            overflow-y: auto; /* Yükseklik aşıldığında dikey kaydırma çubuğunu göster */
-            max-height: 400px; /* Maksimum yükseklik belirleyin */
+            overflow-y: auto;
+            max-height: 400px;
         }
 
         #MessageBox li::marker {
             content: none;
         }
+
         .notification {
             position: fixed;
             bottom: 20px;
@@ -76,12 +52,14 @@
             display: none;
             z-index: 1000;
         }
+
         #notification {
-            cursor: pointer; /* Kullanıcıya tıklamaya hazır olduğunu göstermek için fare işaretçisini değiştirir */
+            cursor: pointer;
         }
+
         .file-upload-label {
             cursor: pointer;
-            padding: 0.5rem 0.75rem; /* Yatay ve dikey padding değerlerini artırdım */
+            padding: 0.5rem 0.75rem;
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
             background-color: #f8f9fa;
@@ -91,13 +69,38 @@
         }
 
             .file-upload-label i {
-                font-size: 1.5rem; /* Simge boyutunu artırdım */
+                font-size: 1.5rem;
             }
 
             .file-upload-label:hover {
                 background-color: #e2e6ea;
             }
-      
+
+        .ai-suggestion-btn {
+            border: 1px solid #6f42c1;
+            background-color: #f8f5ff;
+            color: #6f42c1;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .ai-suggestion-btn:hover {
+                background-color: #6f42c1;
+                color: white;
+            }
+
+        #aiSuggestionsContainer {
+            display: none;
+        }
+
+        .ai-loading {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 
@@ -109,88 +112,83 @@
                     <div class="people_list">
                         <div class="input-group p-3">
                             <span id="searchIcon" class="input-group-text"><i class="fa fa-search"></i></span>
-                            <input id="searchInput" type="text" class="form-control" placeholder="Search..." aria-label="Search...">
+                            <input id="searchInput" type="text" class="form-control" placeholder="Search..." aria-label="Search..." />
                         </div>
+
                         <ul class="list-unstyled chat-list mb-0">
                             @if (ViewBag.UserNames != null)
                             {
                                 @foreach (var userName in ViewBag.UserNames)
                                 {
-                                    <li class="d-flex align-items-center py-2 px-3" onclick="selectUser('@userName.NameSurname','@userName.UserId')">
+                                    <li class="d-flex align-items-center py-2 px-3"
+                                        onclick="selectUser('@userName.NameSurname','@userName.UserId')">
                                         <div style="position: relative; display: flex; align-items: center;">
-                                            @if (@userName.HasUnreadMessages)
+                                            @if (userName.HasUnreadMessages)
                                             {
-                                                @if (@userName.HasUnreadMessages)
-                                                {
-                                                    <div class="unread-dot" style="position: absolute; left: -15px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background-color: #2eacb3; border-radius: 50%;"></div>
-                                                }
-
+                                                <div class="unread-dot"
+                                                     style="position: absolute; left: -15px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background-color: #2eacb3; border-radius: 50%;"></div>
                                             }
-                                            <img class="avatar rounded" src="@userName.PictureUrl" alt="avatar" />
+                                            <img class="avatar rounded user-avatar"
+                                                 src="@userName.PictureUrl"
+                                                 alt="avatar"
+                                                 onerror="this.onerror=null; this.src='@Url.Content("~/userprofilepicture/defaultpp.png")';" />
                                         </div>
                                         <div class="about ps-3">
                                             <div class="fs-6">@userName.NameSurname</div>
                                         </div>
                                     </li>
                                 }
-
                             }
                         </ul>
                     </div>
-                    <div id="notification" class="notification"  onclick="hideNotification()"></div>
+
+                    <div id="notification" class="notification" onclick="hideNotification()"></div>
+
                     <div class="chat">
                         <div class="chat-header d-flex justify-content-between align-items-center p-3 border-bottom">
                             <div class="left d-flex" id="selectedUser">
                                 <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                    @*<img class="avatar rounded" src="../dist/assets/images/xs/avatar2.jpg" alt="avatar" />*@
                                 </button>
                                 <div class="chat-about ps-2">
-                                    <h6 class="mb-0"></h6>
-                                    @*<small class="text-muted">Last seen: 2 hours ago</small>*@
+                                    <h6 class="mb-0" id="selectedUserName">Yeni bir sohbet başlatın..</h6>
                                 </div>
                             </div>
-                            <div id="selectedUserId" class="hidden"></div>
 
-                            @*<div class="right d-md-block d-none text-end">
-                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-camera"></i></a>
-                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-video-camera"></i></a>
-                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-cog"></i></a>
-                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-secondary"><i class="fa fa-question"></i></a>
-                </div>*@
+                            <input type="hidden" id="selectedUserId" />
                         </div>
+
                         <div class="chat-history p-3" id="chat-history">
                             <div id="MessageBox">
-                                <ul class="list-unstyled mb-0">
-                                </ul>
+                                <ul class="list-unstyled mb-0"></ul>
                             </div>
                         </div>
+
                         <div class="chat-message p-3 border-top" id="searchDiv" style="display: none;">
+                            <div id="aiSuggestionsContainer" class="mb-2">
+                                <div id="aiLoadingText" class="ai-loading" style="display:none;">AI önerileri hazırlanıyor...</div>
+                                <div class="d-flex flex-wrap gap-2" id="aiSuggestions"></div>
+                            </div>
+
                             <div class="input-group">
-                                <button id="SendMessageBtn">
+                                <button id="SendMessageBtn" type="button">
                                     <span class="input-group-text"><i class="fa fa-paper-plane"></i></span>
                                 </button>
-                                <input type="text" id="SendMessageTextArea" class="form-control" placeholder="Enter text here..." aria-label="Enter text here...">
-                                <input type="hidden" id="userIdHiddenInput">
-                                @*< <form id="uploadForm" class="d-inline">
-                                    <label for="fileInput" class="file-upload-label">
-                                        <i class="fa fa-paperclip"></i>
-                                    </label>
-                                    input type="file" id="fileInput" style="display: none;" />
-        <button type="button" onclick="uploadFile()" style="display: none;">Upload</button>
-                                </form>
-                                *@
+
+                                <input type="text"
+                                       id="SendMessageTextArea"
+                                       class="form-control"
+                                       placeholder="Enter text here..."
+                                       aria-label="Enter text here..." />
+
+                                <input type="hidden" id="userIdHiddenInput" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
-
-
-    <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -214,7 +212,7 @@
                     <small class="text-muted">Mobile: </small>
                     <p>+ 202-555-2828</p>
                     <small class="text-muted">Birth Date: </small>
-                    <p class="">October 22th, 1990</p>
+                    <p>October 22th, 1990</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -222,55 +220,42 @@
             </div>
         </div>
     </div>
+
     <input type="hidden" id="useronlyId" value="@useronlyId" />
 
     <script>
-
+        let aiTypingTimer = null;
 
         document.addEventListener("DOMContentLoaded", function () {
             var userIsd = localStorage.getItem('selectedUserId');
             var userNames = localStorage.getItem('selectedUserName');
-            console.log("userNames" + userNames);
-            if (userIsd) {
+
+            if (userIsd && userNames) {
                 selectUser(userNames, userIsd);
                 localStorage.removeItem('selectedUserId');
                 localStorage.removeItem('selectedUserName');
-            }
-            else {
+            } else {
                 var userId = document.getElementById("selectedUserId").value;
-                var userName = document.getElementById("selectedUser").innerHTML;
+                var userName = document.getElementById("selectedUserName").textContent;
 
-                if (userId && userName) {
+                if (userId && userName && userName.trim() !== "") {
                     document.getElementById("searchDiv").style.display = "block";
                 }
             }
-
         });
-
 
         document.getElementById("searchIcon").addEventListener("click", function () {
             var searchText = document.getElementById("searchInput").value;
-
-            // Controller'a git
-            window.location.href = "/ChatApp/ChatApp?search=" + searchText;
+            window.location.href = "/ChatApp/ChatApp?search=" + encodeURIComponent(searchText);
         });
 
         document.getElementById("searchInput").addEventListener("keypress", function (event) {
-            // Enter tuşuna basıldığında işlem yap
             if (event.key === "Enter") {
-                var searchText = document.getElementById("searchInput").value;
-                var searchText = this.value; // Input alanından arama metnini al
-
-                // Aynı URL yönlendirme işlemi
+                var searchText = this.value;
                 window.location.href = "/ChatApp/ChatApp?search=" + encodeURIComponent(searchText);
             }
         });
-        const selectedUserElement = document.getElementById("selectedUser");
-        // selectedUser elementi null ise "Hello" mesajını ekleyelim
-        if (selectedUserElement.value === undefined) {
-            const messageElement = document.querySelector('.message.other-message');
-            messageElement.textContent = 'Yeni bir sohbet başlatın..';
-        }
+
         function formatDateTime(dateTimeString) {
             const date = new Date(dateTimeString);
             const options = {
@@ -285,19 +270,53 @@
             return date.toLocaleString('tr-TR', options).replace(',', '');
         }
 
+        function renderAiSuggestions(response) {
+            if (response.success && response.suggestions && response.suggestions.length > 0) {
+                $("#aiSuggestions").html("");
+
+                response.suggestions.forEach(function (item) {
+                    const btn = $("<button>")
+                        .attr("type", "button")
+                        .addClass("ai-suggestion-btn")
+                        .text(item)
+                        .on("click", function () {
+                            useAiSuggestion(item);
+                        });
+
+                    $("#aiSuggestions").append(btn);
+                });
+
+                $("#aiSuggestionsContainer").show();
+            } else {
+                $("#aiSuggestions").html("");
+                $("#aiSuggestionsContainer").hide();
+            }
+        }
+
+        function setAiLoading(isLoading) {
+            if (isLoading) {
+                $("#aiSuggestionsContainer").show();
+                $("#aiLoadingText").show();
+            } else {
+                $("#aiLoadingText").hide();
+            }
+        }
+
+        function useAiSuggestion(text) {
+            $("#SendMessageTextArea").val(text);
+            $("#SendMessageTextArea").focus();
+        }
 
         function selectUser(userName, userId) {
             document.getElementById("searchDiv").style.display = "block";
             document.getElementById("selectedUserId").value = userId;
 
-            if (userName != "1") {
-                document.getElementById("selectedUser").innerHTML = userName;
+            if (userName !== "1") {
+                document.getElementById("selectedUserName").textContent = userName;
             }
 
             var useronlyId = document.getElementById("useronlyId").value;
-
-            // ✅ 1. Sohbet açıldığı anda o kişinin yanındaki mavi noktayı kaldır
-           var userItems = document.querySelectorAll("ul.chat-list li");
+            var userItems = document.querySelectorAll("ul.chat-list li");
 
             userItems.forEach(function (item) {
                 if (item.getAttribute("onclick")?.includes(userId)) {
@@ -309,12 +328,10 @@
                 }
             });
 
-            // ✅ 2. Okundu bilgisini backend'e gönder
             signalRConnection.invoke("MarkMessagesAsRead", userId)
                 .then(() => console.log("📨 MarkMessagesAsRead tetiklendi:", userId))
                 .catch(err => console.error("MarkMessagesAsRead hatası:", err.toString()));
 
-            // ✅ 3. Mesaj geçmişini yükle
             $.ajax({
                 type: "GET",
                 url: "/ChatApp/GetUserMessages",
@@ -335,7 +352,8 @@
                                     <div class="message my-message d-inline-block" style="line-height: normal;">
                                         ${item.message}
                                     </div>
-                                </li>`);
+                                </li>
+                            `);
                         } else {
                             $MessageBox.append(`
                                 <li class="clearfix">
@@ -345,11 +363,13 @@
                                     <div class="message other-message d-inline-block float-end" style="line-height: normal;">
                                         ${item.message}
                                     </div>
-                                </li>`);
+                                </li>
+                            `);
                         }
                     });
 
                     scrollToBottom2();
+                    loadAiSuggestions(userId);
                 },
                 error: function (xhr, status, error) {
                     console.error("Hata:", error);
@@ -357,35 +377,30 @@
             });
         }
 
-
-
-
         function scrollToBottom2() {
             var messageBox = document.getElementById("chat-history");
-            var scrooltop = messageBox.scrollHeight;
             messageBox.scrollTop = messageBox.scrollHeight;
         }
-        function showNotification(userId,message) {
+
+        function showNotification(userId, message) {
             document.getElementById("userIdHiddenInput").value = userId;
             var notificationElement = document.getElementById("notification");
+
             if (!notificationElement) {
                 console.error("Notification element not found!");
                 return;
             }
-            var name = "";
-            var id = userId;  // userId değişkeninin doğru atandığından emin olun
+
             $.ajax({
                 type: 'POST',
-                url: "/ChatApp/GetUserName/",  // URL'nin doğru olduğundan emin olun
-                data: { userId: id },  // userId'nin doğru gönderildiğinden emin olun
+                url: "/ChatApp/GetUserName/",
+                data: { userId: userId },
                 dataType: "json",
                 success: function (data) {
                     if (data.message) {
-                        name = data.message;
-                        notificationElement.textContent = name + " " + "Kişisinden Mesajınız var";
+                        notificationElement.textContent = data.message + " Kişisinden Mesajınız var";
                         document.body.appendChild(notificationElement);
                         notificationElement.style.display = 'block';
-
                     } else {
                         alert("Error: No message received.");
                     }
@@ -395,53 +410,85 @@
                     alert("Error occurred while fetching user name.");
                 }
             });
-            // Bildirimi belirli bir süre sonra gizle
-          
         }
 
-        // Notification elementine tıklandığında kaybolmasını sağlayan bir event listener ekleyin
         function hideNotification() {
             var notificationElement = document.getElementById("notification");
             notificationElement.style.display = "none";
+
             var userId = document.getElementById("userIdHiddenInput").value;
             selectUser("1", userId);
         }
-        
-        function getMessages() {
-            document.getElementById("selectedUserId").value = userId;
-            document.getElementById("selectedUser").innerHTML = userName;
-            var selectedUserId = document.getElementById("selectedUserId").value;
 
-            // Sunucuya istek gönder ve mesajları al
-            fetch("/getMessage?userId=" + selectedUserId)
-                .then(response => response.json())
-                .then(data => {
-                    // Mesajları ekrana ekle
-                    var messageContainer = document.getElementById("messageContainer");
-                    messageContainer.innerHTML = ""; // Önceki mesajları temizle
-                    data.forEach(message => {
-                        messageContainer.innerHTML += `<div>${message}</div>`;
-                    });
-                })
-                .catch(error => console.error("Error:", error));
+        function loadAiSuggestions(userId) {
+            if (!userId) {
+                $("#aiSuggestionsContainer").hide();
+                $("#aiSuggestions").html("");
+                return;
+            }
+
+            setAiLoading(true);
+
+            $.ajax({
+                url: '/ChatApp/GetAiReplySuggestions',
+                type: 'GET',
+                data: { userId: userId },
+                success: function (response) {
+                    setAiLoading(false);
+                    renderAiSuggestions(response);
+                },
+                error: function () {
+                    setAiLoading(false);
+                    $("#aiSuggestions").html("");
+                    $("#aiSuggestionsContainer").hide();
+                }
+            });
         }
-        
 
+        function loadAiSuggestionsLive(userId, draftMessage) {
+            if (!userId) {
+                $("#aiSuggestionsContainer").hide();
+                $("#aiSuggestions").html("");
+                return;
+            }
 
+            if (!draftMessage || !draftMessage.trim()) {
+                loadAiSuggestions(userId);
+                return;
+            }
+
+            setAiLoading(true);
+
+            $.ajax({
+                url: '/ChatApp/GetAiReplySuggestionsLive',
+                type: 'POST',
+                data: {
+                    userId: userId,
+                    draftMessage: draftMessage
+                },
+                success: function (response) {
+                    setAiLoading(false);
+                    renderAiSuggestions(response);
+                },
+                error: function () {
+                    setAiLoading(false);
+                    $("#aiSuggestions").html("");
+                    $("#aiSuggestionsContainer").hide();
+                }
+            });
+        }
     </script>
-
 
     <script>
         var signalRConnection;
-               $(function () {
+
+        $(function () {
             var $SendMessageTextArea = $("#SendMessageTextArea");
             var $SendMessageBtn = $("#SendMessageBtn");
             var $MessageBox = $("#MessageBox");
 
-            // ⚡ SignalR bağlantısı oluşturuluyor
-             signalRConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+            signalRConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
-            // 🔔 Yeni mesaj bildirimi (mavi nokta)
             signalRConnection.on("ReceiveNotification", function (senderId) {
                 console.log("📩 Yeni mesaj bildirimi geldi! Gönderen ID:", senderId);
 
@@ -459,32 +506,26 @@
                 });
             });
 
+            signalRConnection.on("MessagesMarkedAsRead", function (senderId) {
+                console.log("📩 MessagesMarkedAsRead sinyali geldi, gönderen:", senderId);
 
-        // ✅ Karşı taraf mesajı okuduğunda mavi nokta kalksın
-                signalRConnection.on("MessagesMarkedAsRead", function (senderId) {
-            console.log("📩 MessagesMarkedAsRead sinyali geldi, gönderen:", senderId);
-
-            var userItems = document.querySelectorAll(".chat-list li");
-            userItems.forEach(function (item) {
-                if (item.getAttribute("onclick")?.includes(senderId)) {
-                    var dot = item.querySelector(".unread-dot");
-                    if (dot) {
-                        dot.remove();
-                        console.log("✅ Mavi nokta kaldırıldı:", senderId);
+                var userItems = document.querySelectorAll(".chat-list li");
+                userItems.forEach(function (item) {
+                    if (item.getAttribute("onclick")?.includes(senderId)) {
+                        var dot = item.querySelector(".unread-dot");
+                        if (dot) {
+                            dot.remove();
+                            console.log("✅ Mavi nokta kaldırıldı:", senderId);
+                        }
                     }
-                }
+                });
             });
-        });
 
-
-
-
-
-            // 💬 ChatChannel - gelen mesaj
             signalRConnection.on("ChatChannel", function (message, dateTime, senderId) {
                 var currentUserId = document.getElementById("useronlyId").value;
+                var selectedUserId = document.getElementById("selectedUserId").value;
 
-                if (senderId !== currentUserId) {
+                if (senderId === selectedUserId) {
                     $MessageBox.append(`
                         <li class="clearfix">
                             <div class="message-data mb-3">
@@ -494,11 +535,12 @@
                         </li>
                     `);
                     scrollToBottom();
+                    loadAiSuggestions(selectedUserId);
+                } else if (senderId !== currentUserId) {
                     showNotification(senderId, message);
                 }
             });
 
-            // 🔹 SignalR bağlantısını sadece 1 kere başlat
             async function startConnection() {
                 try {
                     await signalRConnection.start();
@@ -509,16 +551,32 @@
                 }
             }
 
-            // ⬅️ ÖNCE 'on' tanımlamaları, sonra bağlantı!
             startConnection();
 
-            // ✉️ Mesaj gönderme
             $SendMessageBtn.click(function () {
                 sendMessage();
             });
 
-            document.getElementById('SendMessageTextArea').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
+            $SendMessageTextArea.on("input", function () {
+                var userId = document.getElementById("selectedUserId").value;
+                var draftMessage = $(this).val();
+
+                clearTimeout(aiTypingTimer);
+
+                if (!userId) return;
+
+                if (!draftMessage || !draftMessage.trim() || draftMessage.trim().length < 2) {
+                    loadAiSuggestions(userId);
+                    return;
+                }
+
+                aiTypingTimer = setTimeout(function () {
+                    loadAiSuggestionsLive(userId, draftMessage);
+                }, 700);
+            });
+
+            document.getElementById("SendMessageTextArea").addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
                     e.preventDefault();
                     sendMessage();
                 }
@@ -527,6 +585,14 @@
             async function sendMessage() {
                 var userId = document.getElementById("selectedUserId").value;
                 var message = $SendMessageTextArea.val();
+
+                clearTimeout(aiTypingTimer);
+
+                if (!userId) {
+                    alert("Lütfen önce bir kullanıcı seçin.");
+                    return;
+                }
+
                 if (!message || !message.trim()) return;
 
                 var now = new Date();
@@ -556,11 +622,13 @@
                 $SendMessageTextArea.val("");
                 scrollToBottom();
 
-                        // 🧩 Bu kullanıcıyla olan tüm mesajları okundu olarak işaretle
-        signalRConnection.invoke("MarkMessagesAsRead", userId)
-            .then(() => console.log("✅ Mesajlar okundu olarak işaretlendi:", userId))
-            .catch(err => console.error("MarkMessagesAsRead hatası:", err.toString()));
+                setTimeout(function () {
+                    loadAiSuggestions(userId);
+                }, 400);
 
+                signalRConnection.invoke("MarkMessagesAsRead", userId)
+                    .then(() => console.log("✅ Mesajlar okundu olarak işaretlendi:", userId))
+                    .catch(err => console.error("MarkMessagesAsRead hatası:", err.toString()));
             }
 
             function scrollToBottom() {
@@ -580,17 +648,7 @@
                 }
             }, 10000);
         });
-
     </script>
-
-
-
-
-    <!-- core js file -->
-    <script src="assets/bundles/libscripts.bundle.js"></script>
-
-    <!-- page js file -->
-    <script src="assets/bundles/mainscripts.bundle.js"></script>
 
 </body>
 </html>

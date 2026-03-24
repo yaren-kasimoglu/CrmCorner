@@ -315,8 +315,14 @@ namespace CrmCorner.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("GoogleEventId")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Guid")
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("IsSyncedWithGoogle")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("StartDate")
                         .HasMaxLength(50)
@@ -718,6 +724,37 @@ namespace CrmCorner.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FinanceInvoiceDocuments");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.GoogleCalendarToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("ExpiryUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("GoogleCalendarTokens");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Notification", b =>
@@ -1556,6 +1593,15 @@ namespace CrmCorner.Migrations
                         .IsRequired();
 
                     b.Navigation("Contract");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.GoogleCalendarToken", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId");
+
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.Notification", b =>

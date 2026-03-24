@@ -1,89 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Outlook = Microsoft.Office.Interop.Outlook;
 
-namespace CrmCorner.Models;
-
-public class Calendar
+namespace CrmCorner.Models
 {
-    public int Id { get; set; }
-
-
-    public string Title { get; set; } = null!;
-
-    public string Description { get; set; } = null!;
-
-    public string Date { get; set; } = null!;
-
-
-    public string? UserId { get; set; }
-    public virtual AppUser? AppUser { get; set; }
-    public string? Email { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public int? ToId { get; set; }
-    public String? Guid { get; set; }
-
-
-    [NotMapped]
-    public EmailProperty EmailProperty { get; set; }
-    [NotMapped]
-    public List<string> SelectedEmails { get; set; } = new List<string>();
-    [NotMapped]
-    public string? NotEmail { get; set; }
-
-
-
-}
-public class EmailProperty
-{
-    [NotMapped]
-    public string Email { get; set; }
-
-
-    [NotMapped]
-    public DateTime StartDate { get; set; }
-    [NotMapped]
-    public DateTime EndDate { get; set; }
-    // Diğer özellikler...
-
-}
-
-public class OutlookCalendarService
-{
-    private readonly string accessToken; // Outlook REST API'ye erişim için alınan erişim belirtecini içerir
-    private readonly string calendarId; // Randevunun ekleneceği takvimin kimliği
-
-    public OutlookCalendarService(string accessToken, string calendarId)
+    public class Calendar
     {
-        this.accessToken = accessToken;
-        this.calendarId = calendarId;
-    }
+        public int Id { get; set; }
 
-    public async Task AddAppointmentToOutlookAsync(string subject, DateTime startTime, DateTime endTime, string location)
-    {
-        string apiUrl = $"https://outlook.office.com/api/v2.0/me/calendars/{calendarId}/events";
+        public string Title { get; set; } = null!;
 
-        HttpClient client = new HttpClient();
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        public string? Description { get; set; }
 
-        var requestBody = new
-        {
-            Subject = subject,
-            Start = startTime.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-            End = endTime.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-            Location = location
-        };
+        public DateTime StartDate { get; set; }
 
-        var jsonBody = Newtonsoft.Json.JsonConvert.SerializeObject(requestBody);
-        var httpContent = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+        public DateTime EndDate { get; set; }
 
-        HttpResponseMessage response = await client.PostAsync(apiUrl, httpContent);
-        response.EnsureSuccessStatusCode();
+        public string? UserId { get; set; }
+
+        public virtual AppUser? AppUser { get; set; }
+
+        public string? GoogleEventId { get; set; }
+
+        public bool IsSyncedWithGoogle { get; set; } = false;
     }
 }
-
-

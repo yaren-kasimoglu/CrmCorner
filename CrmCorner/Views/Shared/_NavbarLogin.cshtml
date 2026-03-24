@@ -1,20 +1,44 @@
-﻿
-@if (User.Identity!.IsAuthenticated)
+﻿@if (User.Identity.IsAuthenticated)
 {
+    var pictureUrl = !string.IsNullOrWhiteSpace(ViewBag.PictureUrl as string)
+        ? Url.Content(ViewBag.PictureUrl)
+        : Url.Content("~/userprofilepicture/defaultpp.png");
+
     <div class="user-account p-3 mb-3">
         <div class="d-flex mb-3 pb-3 border-bottom align-items-center">
 
+            <img src="@pictureUrl"
+                 class="avatar lg rounded-circle me-3 user-avatar"
+                 alt="Profil Fotoğrafı"
+                 onerror="this.onerror=null; this.src='@Url.Content("~/userprofilepicture/defaultpp.png")';" />
 
-            <img src="@ViewBag.PictureUrl" class="avatar lg rounded me-3" />
             <div class="dropdown flex-grow-1">
                 <span>Hoşgeldin,</span>
-                <a href="#" class="dropdown-toggle user-name" data-bs-toggle="dropdown"><strong>@User.Identity.Name</strong></a>
+                <a href="#" class="dropdown-toggle user-name" data-bs-toggle="dropdown">
+                    <strong>@User.Identity.Name</strong>
+                </a>
+
                 <ul class="dropdown-menu p-2 shadow-sm">
-                    <li><a asp-action="MyProfile" asp-controller="Member" asp-area=""><i class="fa fa-user me-2"></i> Profilim</a></li>
-                    <li><a asp-action="UserEdit" asp-controller="Member" asp-area=""><i class="fa fa-bars"></i>  Profil Güncelle</a></li>
-                    <li><a asp-action="PasswordChange" asp-controller="Member" asp-area=""><i class="fa fa-lock"></i>  Şifre Değiştir</a></li>
-@*                    <li><a asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout" asp-area=""><i class="fa fa-power-off me-2"></i>Çıkış Yap</a></li>*@
-                    <li><a class="icon-menu" asp-controller="Member" asp-action="Logout" asp-area=""><i class="fa fa-power-off me-2"></i>Çıkış Yap</a></li>
+                    <li>
+                        <a asp-action="MyProfile" asp-controller="Member" asp-area="">
+                            <i class="fa fa-user me-2"></i> Profilim
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="UserEdit" asp-controller="Member" asp-area="">
+                            <i class="fa fa-bars me-2"></i> Profil Güncelle
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="PasswordChange" asp-controller="Member" asp-area="">
+                            <i class="fa fa-lock me-2"></i> Şifre Değiştir
+                        </a>
+                    </li>
+                    <li>
+                        <a class="icon-menu" asp-controller="Member" asp-action="Logout" asp-area="">
+                            <i class="fa fa-power-off me-2"></i> Çıkış Yap
+                        </a>
+                    </li>
                 </ul>
             </div>
 
@@ -23,9 +47,8 @@
 }
 else
 {
-    @*  <a class="btn btn-warning" asp-controller="Customer" asp-action="CustomerAdd">Firma Kayıt</a>
-        <a class="btn btn-outline-warning" asp-controller="Home" asp-action="SignUp">Kullanıcı Kayıt</a>*@
-    @*    <a class="btn btn-outline-success" @*asp-controller="Customer" asp-action="CustomerAdd">Firma Giriş</a>*@
-    @*    <a class="btn btn-success" asp-controller="Home" asp-action="SignIn">Kullanıcı Giriş</a>
-    *@
+    @* <a class="btn btn-warning" asp-controller="Customer" asp-action="CustomerAdd">Firma Kayıt</a> *@
+    <a class="btn btn-outline-warning" asp-controller="Home" asp-action="SignUp">Kullanıcı Kayıt</a>
+    @* <a class="btn btn-outline-success" asp-controller="Customer" asp-action="CustomerAdd">Firma Giriş</a> *@
+    <a class="btn btn-success" asp-controller="Home" asp-action="SignIn">Kullanıcı Giriş</a>
 }

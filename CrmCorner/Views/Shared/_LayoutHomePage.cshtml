@@ -194,6 +194,15 @@
                 margin-left: 0 !important;
                 width: 100%;
             }
+
+            .user-avatar {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    flex-shrink: 0;
+}
         }
     </style>
     <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon">
@@ -231,7 +240,7 @@
             <nav class="navbar navbar-fixed-top">
                 <div class="container-fluid">
                     <div class="logo-container">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index"><img src="/CRMTema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo"></a>
+                        <a class="nav-link" asp-controller="Home" asp-action="Index"><img src="/CRMTema/bootstrap5/dist/assets/images/CRMCornerLogo.png" alt="Logo"></a>
                         @* <img src="/CRMTema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo"> *@
 
                     </div>
@@ -310,7 +319,7 @@
                                 <ul class="metismenu list-unstyled">
 
                                     <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-home"></i>Anasayfam</a>
+            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-home"></i>Ana Sayfam</a>
         </li>
 
 
@@ -319,7 +328,7 @@
                                     {
                                         <li class="nav-item">
                                             <a asp-area="" asp-controller="SocialMedia" asp-action="Index">
-                                                <i class="fa fa-globe"></i> <span>Sosyal Medya</span>
+                                                <i class="fa fa-globe"></i><span>Sosyal Medya</span>
                                             </a>
                                         </li>
 
@@ -370,7 +379,7 @@
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
-                                                <i class="fa fa-briefcase"></i> Sistemde Kayıtlı Firmalar
+                                                <i class="fa fa-briefcase"></i>Sistemde Kayıtlı Firmalar
                                             </a>
                                         </li>
                                     }
@@ -438,12 +447,12 @@
                                             <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
                                                 <li class="nav-item">
                                                     <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="Index">
-                                                        <i class="fa fa-briefcase"></i> Rol Oluşturma
+                                                        <i class="fa fa-briefcase"></i>Rol Oluşturma
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">
-                                                        <i class="fa fa-briefcase"></i> Yetki Atama
+                                                        <i class="fa fa-briefcase"></i>Yetki Atama
                                                     </a>
                                                 </li>
                                             </ul>
@@ -640,7 +649,9 @@
 
     <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
 
-
+       <script src="~/crmtema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+    <script src="~/crmtema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+    <script src="~/CRMTema/bootstrap4/documentation/assets/vendor/jquery/jquery.min.js"></script>
 
 
 </body>

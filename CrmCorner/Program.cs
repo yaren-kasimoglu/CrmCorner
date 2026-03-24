@@ -30,6 +30,10 @@ builder.Services.AddHttpClient<ApolloHealthService>();
 
 // SignalR
 builder.Services.AddSignalR();
+//builder.Services.AddScoped<IAiChatService, AiChatService>();
+builder.Services.AddHttpClient<AiChatService>();
+
+
 
 // MVC + Razor Runtime Compilation + Global Filters
 builder.Services.AddControllersWithViews(options =>
