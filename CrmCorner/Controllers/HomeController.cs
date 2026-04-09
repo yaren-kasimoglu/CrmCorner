@@ -52,6 +52,19 @@ namespace CrmCorner.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Pricing()
+        {
+            return View();
+        }
+
+
         public async Task<IActionResult> Index()
         {
           //  await SetLayout(); // area mı değil mi onu anlayıp layout set ediyor
@@ -840,8 +853,20 @@ namespace CrmCorner.Controllers
             return Json(new { Message = jsonData });
         }
 
-
+        [AllowAnonymous]
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Contact()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Terms()
         {
             return View();
         }

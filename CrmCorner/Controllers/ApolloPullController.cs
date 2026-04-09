@@ -470,41 +470,33 @@ namespace CrmCorner.Controllers
             var myCompanyId = me?.CompanyId;
 
             var contacts = await _context.ApolloContacts
-                .Where(x => x.CompanyId == myCompanyId)
+                .AsNoTracking()
                 .OrderByDescending(x => x.UpdatedAt)
+                .Take(500)
                 .ToListAsync();
 
             return View(contacts);
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> ContactsListData()
         {
-            var userId = _userManager.GetUserId(User);
+            var draw = Request.Query["draw"].FirstOrDefault();
+            var start = Convert.ToInt32(Request.Query["start"].FirstOrDefault() ?? "0");
+            var length = Convert.ToInt32(Request.Query["length"].FirstOrDefault() ?? "25");
+            var searchValue = Request.Query["search[value]"].FirstOrDefault();
 
-            var draw = Request.Form["draw"].FirstOrDefault();
-            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
-            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "25");
-            var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            var orderColumnIndex = Request.Query["order[0][column]"].FirstOrDefault();
+            var orderDir = Request.Query["order[0][dir]"].FirstOrDefault();
 
-            var orderColumnIndex = Request.Form["order[0][column]"].FirstOrDefault();
-            var orderDir = Request.Form["order[0][dir]"].FirstOrDefault();
-
-            var me = await _context.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            var myCompanyId = me?.CompanyId;
-
-            var query = _context.ApolloContacts
-                .AsNoTracking()
-                .Where(x => x.CompanyId == myCompanyId);
+            IQueryable<ApolloContactDbModel> query = _context.ApolloContacts.AsNoTracking();
 
             var recordsTotal = await query.CountAsync();
 
             if (!string.IsNullOrWhiteSpace(searchValue))
             {
                 var s = searchValue.ToLower();
+
                 query = query.Where(x =>
                     (x.FirstName != null && x.FirstName.ToLower().Contains(s)) ||
                     (x.LastName != null && x.LastName.ToLower().Contains(s)) ||
@@ -516,6 +508,7 @@ namespace CrmCorner.Controllers
             var recordsFiltered = await query.CountAsync();
 
             bool desc = (orderDir ?? "desc").ToLower() == "desc";
+
             switch (orderColumnIndex)
             {
                 case "1":
@@ -547,25 +540,24 @@ namespace CrmCorner.Controllers
                 .Select(x => new
                 {
                     id = x.Id,
-                    firstName = x.FirstName,
-                    lastName = x.LastName,
-                    email = x.Email,
-                    companyName = x.CompanyName,
-                    title = x.Title,
-                    updatedAt = x.UpdatedAt,
-                    sourceLabelName = x.SourceLabelName,
-                    linkedinUrl = x.LinkedinUrl
+                    firstName = x.FirstName ?? "",
+                    lastName = x.LastName ?? "",
+                    title = x.Title ?? "",
+                    companyName = x.CompanyName ?? "",
+                    email = x.Email ?? "",
+                    updatedAt = x.UpdatedAt
                 })
                 .ToListAsync();
 
             return Json(new
             {
-                draw,
+                draw = draw ?? "1",
                 recordsTotal,
                 recordsFiltered,
                 data
             });
         }
+
 
         public async Task<IActionResult> Index()
         {

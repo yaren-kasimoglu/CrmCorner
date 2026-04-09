@@ -2,7 +2,7 @@
 @using CrmCorner.Models
 @using CrmCorner.Models.Enums
 @using Microsoft.EntityFrameworkCore
-@inject CrmCornerContext  _context
+@inject CrmCornerContext _context
 @inject Microsoft.AspNetCore.Identity.UserManager<CrmCorner.Models.AppUser> UserManager
 @inject UserManager<AppUser> UserManager
 
@@ -20,9 +20,8 @@
         else if (roles.Contains("TeamMember")) userRole = "TeamMember";
         else if (roles.Contains("TeamLeader")) userRole = "TeamLeader";
         else userRole = "User";
+
         userEmail = currentUser.Email;
-
-
     }
 
     var user = await UserManager.GetUserAsync(User);
@@ -38,56 +37,59 @@
     }
 
     string layoutTheme =
-     (userRole == "SuperAdmin" || userRole == "Admin")
-         ? "theme-purple"
-         : "theme-cyan";
-
-
+        (userRole == "SuperAdmin" || userRole == "Admin")
+            ? "theme-purple"
+            : "theme-cyan";
 }
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>CRM CORNER</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="CRMCorner HR & Project Admin Dashboard Template with Bootstrap 5x">
-    <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="CRMCorner HR & Project Admin Dashboard Template with Bootstrap 5x" />
+    <meta name="author" content="WrapTheme, design by: ThemeMakker.com" />
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon" />
+    <link href="~/CRMTema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    @RenderSection("Styles", required: false)
 
     <style>
         .logo-container {
-            max-width: 100px; /* Maksimum genişlik */
-            max-height: 50px; /* Maksimum yükseklik */
+            max-width: 100px;
+            max-height: 50px;
             display: flex;
-            justify-content: center; /* Merkeze hizalama */
-            align-items: center; /* Dikey hizalama */
+            justify-content: center;
+            align-items: center;
         }
 
-            .logo-container img {
-                width: 100%;
-                height: auto;
-                object-fit: contain; /* Oranı koruma */
-            }
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
 
         .green-light {
-            box-shadow: 0 0 5px 2px #2eacb3; /* Yeşil bir gölge ekler */
-            border: 1px solid #2eacb3; /* Yeşil bir kenarlık ekler */
+            box-shadow: 0 0 5px 2px #2eacb3;
+            border: 1px solid #2eacb3;
         }
 
         .pink-light {
-            box-shadow: 0 0 5px 2px white; /* Yeşil bir gölge ekler */
-            border: 1px solid white; /* Yeşil bir kenarlık ekler */
+            box-shadow: 0 0 5px 2px white;
+            border: 1px solid white;
         }
 
         .notification-count {
             position: absolute;
             bottom: -5px;
             right: 0;
-           color: #2eacb3;
+            color: #2eacb3;
             font-size: 12px;
             font-weight: bold;
         }
@@ -103,18 +105,17 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            width: 200px; /* Genişlik ayarlanabilir */
+            width: 200px;
         }
 
-            #messageDropdown li {
-                padding: 8px 16px;
-                border-bottom: 1px solid #ddd;
-            }
+        #messageDropdown li {
+            padding: 8px 16px;
+            border-bottom: 1px solid #ddd;
+        }
 
-                #messageDropdown li:hover {
-                    background-color: #f1f1f1;
-                }
-
+        #messageDropdown li:hover {
+            background-color: #f1f1f1;
+        }
 
         .always-open > ul {
             display: block !important;
@@ -122,23 +123,21 @@
 
         .always-open > a {
             cursor: default;
-            pointer-events: none; /* Tıklanabilirliği tamamen kaldırır */
+            pointer-events: none;
         }
 
-        /* Sidebar kapalıyken */
         .sidebar-closed {
             transform: translateX(-250px);
             transition: transform 0.3s ease;
         }
 
-        /* Main content alanı genişlesin istenirse */
         .expanded-content {
             margin-left: 0 !important;
             transition: margin-left 0.3s ease;
         }
 
         body {
-            padding-top: 60px; /* navbar yüksekliği kadar */
+            padding-top: 60px;
         }
 
         html, body {
@@ -155,14 +154,13 @@
             padding: 20px;
             transition: margin-left 0.3s ease;
             margin-left: 250px;
-            width: calc(100% - 250px); /* sidebar açıkken */
+            width: calc(100% - 250px);
         }
 
-            #main-content.expanded-content {
-                margin-left: 0 !important;
-                width: 100%;
-            }
-
+        #main-content.expanded-content {
+            margin-left: 0 !important;
+            width: 100%;
+        }
 
         #left-sidebar {
             position: fixed;
@@ -175,20 +173,18 @@
             transition: transform 0.3s ease;
         }
 
-
-            #left-sidebar.sidebar-closed {
-                transform: translateX(-250px);
-            }
-
+        #left-sidebar.sidebar-closed {
+            transform: translateX(-250px);
+        }
 
         @@media (max-width: 768px) {
             #left-sidebar {
-                transform: translateX(-250px); /* Başlangıçta gizli */
+                transform: translateX(-250px);
             }
 
-                #left-sidebar.sidebar-open {
-                    transform: translateX(0);
-                }
+            #left-sidebar.sidebar-open {
+                transform: translateX(0);
+            }
 
             #main-content {
                 margin-left: 0 !important;
@@ -196,53 +192,26 @@
             }
 
             .user-avatar {
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
-    flex-shrink: 0;
-}
+                width: 48px;
+                height: 48px;
+                object-fit: cover;
+                border-radius: 50%;
+                display: block;
+                flex-shrink: 0;
+            }
         }
     </style>
-    <link rel="icon" href="~/CRMTema/favicon.ico" type="image/x-icon">
-    <!-- MAIN CSS -->
-    <link href="~/CRMTema/bootstrap5/dist/assets/css/main.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-    @RenderSection("Styles", required: false)
-
-
 </head>
 
 <body>
     <div id="layout" class="@layoutTheme">
-
         <div id="wrapper">
-            <!-- Page Loader -->
-            @*<div class="page-loader-wrapper text-center">
-                <div class="loader">
-                <svg class="p-3 bg-light rounded" width="120px" viewBox="0 0 85 25">
-                <path d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
-                z M29,18.5v-14h1.6v12.6h6.2v1.5H29V18.5z M49.6,4.5v9.1c0,1.6-0.5,2.9-1.5,3.8s-2.3,1.4-4,1.4s-3-0.5-3.9-1.4s-1.4-2.2-1.4-3.8V4.5
-                h1.6v9.1c0,1.2,0.3,2.1,1,2.7c0.6,0.6,1.6,0.9,2.8,0.9s2.1-0.3,2.7-0.9c0.6-0.6,1-1.5,1-2.7V4.5H49.6z M59.4,5.7
-                c-1.5,0-2.8,0.5-3.7,1.5s-1.3,2.4-1.3,4.2s0.4,3.3,1.3,4.3c0.9,1,2.1,1.5,3.7,1.5c1,0,2.1-0.2,3.4-0.5v1.4c-1,0.4-2.2,0.5-3.6,0.5
-                c-2.1,0-3.7-0.6-4.8-1.9s-1.7-3-1.7-5.4c0-1.4,0.3-2.7,0.8-3.8c0.5-0.9,1.3-1.8,2.3-2.4s2.2-0.9,3.6-0.9c1.5,0,2.8,0.3,3.9,0.8
-                l-0.7,1.4C61.5,6,60.4,5.7,59.4,5.7z M65.8,18.5v-14h1.6v14.1h-1.6V18.5z M82.5,11.3c0,2.3-0.6,4.1-1.9,5.3s-3.1,1.8-5.4,1.8h-3.9
-                V4.5h4.3c2.2,0,3.9,0.6,5.1,1.8S82.5,9.2,82.5,11.3z M80.8,11.4c0-1.8-0.5-3.2-1.4-4.1s-2.3-1.4-4.1-1.4h-2.4v11.2h2
-                c1.9,0,3.4-0.5,4.4-1.4S80.8,13.3,80.8,11.4z" />
-                </svg>
-                <div class="h5 fw-light mt-3">Lütfen Bekleyin</div>
-                </div>
-                </div>*@
-
-            <!-- top navbar -->
             <nav class="navbar navbar-fixed-top">
                 <div class="container-fluid">
                     <div class="logo-container">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index"><img src="/CRMTema/bootstrap5/dist/assets/images/CRMCornerLogo.png" alt="Logo"></a>
-                        @* <img src="/CRMTema/bootstrap5/dist/assets/images/crmkosesi.png" alt="Logo"> *@
-
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            <img src="/CRMTema/bootstrap5/dist/assets/images/CRMCornerLogo.png" alt="Logo">
+                        </a>
                     </div>
 
                     <button type="button" class="btn-toggle-offcanvas btn btn-outline-secondary ms-2">
@@ -251,78 +220,45 @@
 
                     <div id="notificationDiv" class="flex-grow-1">
                         <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
-                            @*                <li class="d-none d-sm-block"><a href="/Calendar/Calendar" class="icon-menu"><i class="fa fa-calendar"></i></a></li> *@
                             <li id="messageIcon" class="d-none d-sm-block" style="position: relative;">
-                               <a href="/ChatApp/ChatApp" class="text-decoration-none position-relative me-3" title="Mesajlar">
-    <i class="fa fa-comments fa-lg text-primary"></i>
-</a>
+                                <a href="/ChatApp/ChatApp" class="text-decoration-none position-relative me-3" title="Mesajlar">
+                                    <i class="fa fa-comments fa-lg text-primary"></i>
+                                </a>
                                 <span id="notificationCount" class="notification-count"></span>
                                 <ul id="messageDropdown" class="dropdown-menu"></ul>
                             </li>
 
-
-                            <!-- Notification Dot için kullanılacak li -->
-                            @*<li id="notificationDot" class="d-none d-sm-block">
-            <a href="app-inbox.html" class="icon-menu"><i class="fa fa-envelope"></i><span class="notification-dot"></span></a>
-        </li>*@
-                            <!-- more link -->
-                            <li><a class="icon-menu" asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout"><i class="fa fa-sign-out"></i></a></li>
+                            <li>
+                                <a class="icon-menu" asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout">
+                                    <i class="fa fa-sign-out"></i>
+                                </a>
+                            </li>
                         </ul>
                     </div>
-
-
-                    @*<div class="navbar-brand ps-2">
-             <a href="index.html" class="d-flex">
-        <svg width="85px" viewBox="0 0 85 25">
-        <path class="fill-primary" d="M12.3,7.2l1.5-3.7l8.1,19.4H19l-2.4-5.7H8.2l1.1-2.5h6.1L12.3,7.2z M14.8,20.2l1,2.7H0L9.5,0h3.1L4.3,20.2H14.8
-        z M29,18.5v-14h1.6v12.6h6.2v1.5H29V18.5z M49.6,4.5v9.1c0,1.6-0.5,2.9-1.5,3.8s-2.3,1.4-4,1.4s-3-0.5-3.9-1.4s-1.4-2.2-1.4-3.8V4.5
-        h1.6v9.1c0,1.2,0.3,2.1,1,2.7c0.6,0.6,1.6,0.9,2.8,0.9s2.1-0.3,2.7-0.9c0.6-0.6,1-1.5,1-2.7V4.5H49.6z M59.4,5.7
-        c-1.5,0-2.8,0.5-3.7,1.5s-1.3,2.4-1.3,4.2s0.4,3.3,1.3,4.3c0.9,1,2.1,1.5,3.7,1.5c1,0,2.1-0.2,3.4-0.5v1.4c-1,0.4-2.2,0.5-3.6,0.5
-        c-2.1,0-3.7-0.6-4.8-1.9s-1.7-3-1.7-5.4c0-1.4,0.3-2.7,0.8-3.8c0.5-0.9,1.3-1.8,2.3-2.4s2.2-0.9,3.6-0.9c1.5,0,2.8,0.3,3.9,0.8
-        l-0.7,1.4C61.5,6,60.4,5.7,59.4,5.7z M65.8,18.5v-14h1.6v14.1h-1.6V18.5z M82.5,11.3c0,2.3-0.6,4.1-1.9,5.3s-3.1,1.8-5.4,1.8h-3.9
-        V4.5h4.3c2.2,0,3.9,0.6,5.1,1.8S82.5,9.2,82.5,11.3z M80.8,11.4c0-1.8-0.5-3.2-1.4-4.1s-2.3-1.4-4.1-1.4h-2.4v11.2h2
-        c1.9,0,3.4-0.5,4.4-1.4S80.8,13.3,80.8,11.4z" />
-        </svg>
-        </a>
-
-                 <img src="~/CRMTema/bootstrap5/dist/assets/images/saas1logo.png" width="80px" />*@
-
-
-
                 </div>
             </nav>
 
-            <!-- Sidbar menu -->
             @if (User.Identity!.IsAuthenticated)
             {
-
                 <div id="left-sidebar" class="sidebar">
-
                     <partial name="_NavbarLogin" />
 
-                    <!-- nav tab: menu list -->
                     <ul class="nav nav-tabs text-center mb-2" role="tablist">
-                        <li class="nav-item flex-fill"><a class="nav-link active" id="hr_menu_nav_link" data-bs-toggle="tab" href="#hr_menu" role="tab">Menü</a></li>
-                        @*              <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#project_menu" role="tab">Tab2</a></li>*@
-                        @* <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#sub_menu" role="tab"><i class="fa fa-th-large"></i></a></li>*@
-                        @* <li class="nav-item flex-fill"><a class="nav-link" data-bs-toggle="tab" href="#setting_menu" role="tab"><i class="fa fa-cog"></i></a></li>*@
+                        <li class="nav-item flex-fill">
+                            <a class="nav-link active" id="hr_menu_nav_link" data-bs-toggle="tab" href="#hr_menu" role="tab">Menü</a>
+                        </li>
                     </ul>
 
-                    <!-- nav tab: content -->
-
                     <div class="tab-content px-0">
-
                         <div class="tab-pane fade show active" id="hr_menu" role="tabpanel">
-
-
                             <nav class="sidebar-nav">
                                 <ul class="metismenu list-unstyled">
 
                                     <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-home"></i>Ana Sayfam</a>
-        </li>
-
-
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                                            <i class="fa fa-home"></i>Ana Sayfam
+                                        </a>
+                                    </li>
 
                                     @if (userModules.Contains(ModuleType.SocialMedia))
                                     {
@@ -332,7 +268,6 @@
                                             </a>
                                         </li>
 
-
                                         @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("SocialMediaAdmin"))
                                         {
                                             <li class="nav-item">
@@ -341,11 +276,13 @@
                                                 </a>
                                             </li>
                                         }
+
                                         <li class="nav-item">
                                             <a asp-area="" asp-controller="SocialMedia" asp-action="Calendar">
                                                 <i class="fa fa-calendar"></i><span>Sosyal Medya Takvim</span>
                                             </a>
                                         </li>
+
                                         <li class="nav-item">
                                             <a asp-area="" asp-controller="PersonalBranding" asp-action="Index">
                                                 <i class="fa fa-calendar"></i><span>Kişisel Markalaşma</span>
@@ -353,230 +290,189 @@
                                         </li>
                                     }
 
-
-                                        @if (userModules.Contains(ModuleType.CRM))
+                                    @if (userModules.Contains(ModuleType.CRM))
                                     {
-
-                                    <li class="always-open">
-                                        <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
-                                        <ul class="list-unstyled">
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex"><i class="fa fa-tag"></i>Tümü</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="PositivePipelineTasks"><i class="fa fa-tag"></i>Kazanılan</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="NegativePipelineTasks"><i class="fa fa-tag"></i>Kaybedilen</a>
-                                            </li>
-
-                                        </ul>
-                                    </li>
-
-
-
-                                    @if (userRole == "SuperAdmin" || userRole == "Admin")
-                                    {
-                                        <li class="nav-item">
-                                            <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
-                                                <i class="fa fa-briefcase"></i>Sistemde Kayıtlı Firmalar
-                                            </a>
-                                        </li>
-                                    }
-
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="AfterTask" asp-action="ListPositiveSales"><i class="fa fa-tag"></i>Satış Sonrası Takibasyon</a>
-                                    </li>
-
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="ToDoList" asp-action="ToDoList"><i class="fa fa-calendar"></i>Yapılacaklar</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList"><i class="fa fa-users"></i>Müşterilerim</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList"><i class="fa fa-users"></i>Çalışanlarımız</a>
-                                    </li>
-
-
-
-                                    @if (userRole == "SuperAdmin" || userRole == "Admin" || userRole == "TeamLeader")
-                                    {
-                                        <li class="nav-item">
-                                            <a class="nav-link d-flex align-items-center"
-                                            data-bs-toggle="collapse"
-                                            href="#reportSubmenu"
-                                            role="button"
-                                            aria-expanded="false"
-                                            aria-controls="reportSubmenu">
-                                                <i class="fa fa-chart-bar me-2"></i><span>Rapor</span>
-                                                <i class="fa fa-chevron-down ms-auto"></i>
-                                            </a>
-                                            <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
+                                        <li class="always-open">
+                                            <a href="javascript:void(0);"><i class="fa fa-users"></i><span>Satış</span></a>
+                                            <ul class="list-unstyled">
                                                 <li class="nav-item">
-                                                    <a class="nav-link text-dark" asp-controller="Reports" asp-action="ResponsibleUserTasks">
-                                                        <i class="fa fa-tasks me-2"></i>Süreç Durumu
+                                                    <a class="nav-link text-dark" asp-area="" asp-controller="PipelineTask" asp-action="PipelineIndex">
+                                                        <i class="fa fa-tag"></i>Tümü
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link text-dark" asp-controller="Reports" asp-action="StageByUserReports">
-                                                        <i class="fa fa-layer-group me-2"></i>Görev Sayısı
+                                                    <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="PositivePipelineTasks">
+                                                        <i class="fa fa-tag"></i>Kazanılan
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link text-dark" asp-controller="PipelineAnalysis" asp-action="Index">
-                                                        <i class="fa fa-layer-group me-2"></i>Kişi / Görev Analiz
+                                                    <a class="nav-link text-dark" asp-area="" asp-controller="PipelineStatus" asp-action="NegativePipelineTasks">
+                                                        <i class="fa fa-tag"></i>Kaybedilen
                                                     </a>
                                                 </li>
                                             </ul>
                                         </li>
-                                    }
 
-                                      @if (userRole == "SuperAdmin")
-                                    {
+                                        @if (userRole == "SuperAdmin" || userRole == "Admin")
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyList">
+                                                    <i class="fa fa-briefcase"></i>Sistemde Kayıtlı Firmalar
+                                                </a>
+                                            </li>
+                                        }
+
                                         <li class="nav-item">
-                                            <a class="nav-link d-flex align-items-center"
-                                            data-bs-toggle="collapse"
-                                            href="#reportSubmenu"
-                                            role="button"
-                                            aria-expanded="false"
-                                            aria-controls="reportSubmenu">
-                                                <i class="fa fa-chart-bar me-2"></i><span>Rol Yetki</span>
-                                                <i class="fa fa-chevron-down ms-auto"></i>
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="AfterTask" asp-action="ListPositiveSales">
+                                                <i class="fa fa-tag"></i>Satış Sonrası Takibasyon
                                             </a>
-                                            <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
-                                                <li class="nav-item">
-                                                    <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="Index">
-                                                        <i class="fa fa-briefcase"></i>Rol Oluşturma
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">
-                                                        <i class="fa fa-briefcase"></i>Yetki Atama
-                                                    </a>
-                                                </li>
-                                            </ul>
                                         </li>
+
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="ToDoList" asp-action="ToDoList">
+                                                <i class="fa fa-calendar"></i>Yapılacaklar
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="CustomerList">
+                                                <i class="fa fa-users"></i>Müşterilerim
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="EmployeeList">
+                                                <i class="fa fa-users"></i>Çalışanlarımız
+                                            </a>
+                                        </li>
+
+                                        @if (userRole == "SuperAdmin" || userRole == "Admin" || userRole == "TeamLeader")
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center"
+                                                   data-bs-toggle="collapse"
+                                                   href="#reportSubmenu"
+                                                   role="button"
+                                                   aria-expanded="false"
+                                                   aria-controls="reportSubmenu">
+                                                    <i class="fa fa-chart-bar me-2"></i><span>Rapor</span>
+                                                    <i class="fa fa-chevron-down ms-auto"></i>
+                                                </a>
+                                                <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link text-dark" asp-controller="Reports" asp-action="ResponsibleUserTasks">
+                                                            <i class="fa fa-tasks me-2"></i>Süreç Durumu
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link text-dark" asp-controller="Reports" asp-action="StageByUserReports">
+                                                            <i class="fa fa-layer-group me-2"></i>Görev Sayısı
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link text-dark" asp-controller="PipelineAnalysis" asp-action="Index">
+                                                            <i class="fa fa-layer-group me-2"></i>Kişi / Görev Analiz
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        }
+
+                                        @if (userRole == "SuperAdmin")
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center"
+                                                   data-bs-toggle="collapse"
+                                                   href="#roleSubmenu"
+                                                   role="button"
+                                                   aria-expanded="false"
+                                                   aria-controls="roleSubmenu">
+                                                    <i class="fa fa-chart-bar me-2"></i><span>Rol Yetki</span>
+                                                    <i class="fa fa-chevron-down ms-auto"></i>
+                                                </a>
+                                                <ul class="collapse list-unstyled ps-4" id="roleSubmenu">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="Index">
+                                                            <i class="fa fa-briefcase"></i>Rol Oluşturma
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link text-dark" asp-area="" asp-controller="UserRoles" asp-action="Index">
+                                                            <i class="fa fa-briefcase"></i>Yetki Atama
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        }
+
+                                        <li class="nav-item">
+                                            <a asp-area="" asp-controller="ChatApp" asp-action="ChatApp">
+                                                <i class="fa fa-comments"></i><span>Mesajlarım</span>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            <a asp-area="" asp-controller="ApolloSettings" asp-action="Index">
+                                                <i class="fa fa-link"></i><span>Apollo API Tanımla</span>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            <a asp-area="" asp-controller="ApolloPull" asp-action="FetchContacts">
+                                                <i class="fa fa-plug"></i><span>Apollo.io Kontak Çekme</span>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            <a asp-area="" asp-controller="ApolloPull" asp-action="ContactsList">
+                                                <i class="fa fa-id-card"></i><span>Apollo.io Kontak Listesi</span>
+                                            </a>
+                                        </li>
+
+                                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Finance"))
+                                        {
+                                            <li class="nav-item">
+                                                <a asp-area="" asp-controller="Finance" asp-action="Invoices">
+                                                    <i class="fa fa-file-invoice-dollar"></i><span>Finans</span>
+                                                </a>
+                                            </li>
+
+                                            <li class="nav-item">
+                                                <a asp-area="" asp-controller="Finance" asp-action="Dashboard">
+                                                    <i class="fa fa-file-invoice-dollar"></i><span>Finans Analiz</span>
+                                                </a>
+                                            </li>
+                                        }
                                     }
-
-
-
-
-
-                                    @*    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Calendar" asp-action="Calendar"><i class="fa fa-calendar"></i>Takvim</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="EmailList" asp-action="EmailList"><i class="fa fa-envelope-o"></i>Gelen Kutusu</a>
-                                    </li> *@
-
-
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="ApolloSettings" asp-action="Index"><i class="fa fa-link"></i><span>Apollo API Tanımla</span></a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="ApolloPull" asp-action="FetchContacts"><i class="fa fa-plug"></i><span>Apollo.io Kontak Çekme</span></a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="ApolloPull" asp-action="ContactsList"><i class="fa fa-id-card"></i><span>Apollo.io Kontak Listesi</span></a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="Finance" asp-action="Invoices"><i class="fa fa-file-invoice-dollar"></i><span>Finans</span></a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-area="" asp-controller="Finance" asp-action="Dashboard"><i class="fa fa-file-invoice-dollar"></i><span>Finans Analiz</span></a>
-                                    </li>
-                                      }
                                 </ul>
                             </nav>
-
                         </div>
-                        @*
-                            <div class="tab-pane fade" id="project_menu" role="tabpanel">
-                            <nav class="sidebar-nav">
-                            <ul class="metismenu list-unstyled">
-                            <li><a asp-area="" asp-controller="ChatApp" asp-action="ChatApp"><i class="fa fa-comments"></i><span>Mesajlarım</span></a></li>
-                            <li><a class="nav-link text-dark" asp-area="" asp-controller="Task" asp-action="Index"><i class="fa fa-tag"></i>Görevlerim</a></li>
-                            </ul>
-                            </nav>
-                            </div>*@
-
-                        @*
-                            AYARLAR TEMA AYARLAMA*@
-
-                        @*           <div class="tab-pane fade" id="setting_menu" role="tabpanel">
-                            <div class="px-3">
-                            <h6>Tema Seçin</h6>
-                            <ul class="choose-skin list-unstyled">
-                            <li data-theme="purple" class="mb-2"><div class="purple"></div><span>Purple</span></li>
-                            <li data-theme="blue" class="mb-2"><div class="blue"></div><span>Blue</span></li>
-                            <li data-theme="cyan" class="active mb-2"><div class="cyan"></div><span>Cyan</span></li>
-                            <li data-theme="green" class="mb-2"><div class="green"></div><span>Green</span></li>
-                            <li data-theme="orange" class="mb-2"><div class="orange"></div><span>Orange</span></li>
-                            <li data-theme="blush" class="mb-2"><div class="blush"></div><span>Blush</span></li>
-                            </ul>
-                            <hr>
-                            <h6>Görünüm Değiştirin</h6>
-                            <ul class="list-unstyled">
-                            <li class="d-flex align-items-center mb-1">
-                            <div class="form-check form-switch theme-switch">
-                            <input class="form-check-input" type="checkbox" id="theme-switch">
-                            <label class="form-check-label" for="theme-switch">Enable Dark Mode!</label>
-                            </div>
-                            </li>
-                            <li class="d-flex align-items-center mb-1">
-                            <div class="form-check form-switch theme-high-contrast">
-                            <input class="form-check-input" type="checkbox" id="theme-high-contrast">
-                            <label class="form-check-label" for="theme-high-contrast">Enable High Contrast</label>
-                            </div>
-                            </li>
-                            <li class="d-flex align-items-center mb-1">
-                            <div class="form-check form-switch minisidebar-active">
-                            <input class="form-check-input" type="checkbox" id="mini-active">
-                            <label class="form-check-label" for="mini-active">Mini Sidebar</label>
-                            </div>
-                            </li>
-                            </ul>
-                            <hr>
-                            </div>
-                            </div>*@
                     </div>
-
                 </div>
             }
-
 
             <div id="main-content">
                 @RenderSection("BodyContent", required: false)
                 @RenderBody()
             </div>
-
-
-
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-
-
-    @RenderSection("Scripts", required: false)
     <script>
         let unreadMessagesHtml = '';
+
         function toggleDropdown(event) {
             event.stopPropagation();
             $('#messageDropdown').toggle();
-
         }
 
         function hideDropdown() {
             $('#messageDropdown').hide();
         }
 
-
-             $(document).ready(function () {
+        $(document).ready(function () {
             $(".btn-toggle-offcanvas").on("click", function () {
                 $("#left-sidebar").toggleClass("sidebar-closed");
                 $("#main-content").toggleClass("expanded-content");
@@ -584,80 +480,67 @@
         });
 
         $(document).ready(function () {
-
-            // Her 2 saniyede bir bildirim durumunu kontrol etmek için bir fonksiyon tanımlayalım
             setInterval(function () {
                 $.get('/Home/GetNotificationsStatus', function (data) {
                     var hasUnreadMessages = data.message.hasUnreadMessages;
                     var unreadSenderCount = data.message.distinctSenderIdsCount;
-                    if (hasUnreadMessages) {
 
-                        // Bildirim varsa yapılacak işlemler
-                        // Örneğin, bir div'in arka plan rengini yeşil yapabiliriz
+                    if (hasUnreadMessages) {
                         showNotificationDot();
                         $('#notificationCount').text(unreadSenderCount);
-                        //var unreadMessagesHtml = '';
-                        //data.message.unreadMessages.forEach(function (message) {
-                        //    unreadMessagesHtml += '<li>' + message.senderId + '</li>';
-                        //});
+
                         let newUnreadMessagesHtml = '';
                         data.message.unreadMessages.forEach(function (message) {
                             newUnreadMessagesHtml += `<li><a href="javascript:void(0);" onclick="redirectToUserMessages('${message.senderId}','${message.name}')">${message.senderName}</a></li>`;
                         });
+
                         if (newUnreadMessagesHtml !== unreadMessagesHtml) {
                             unreadMessagesHtml = newUnreadMessagesHtml;
                             $('#messageDropdown').html(unreadMessagesHtml);
                         }
                     } else {
-                        // Bildirim yoksa yapılacak işlemler
-                        // Örneğin, bir div'in arka plan rengini varsayılan hale getirebiliriz
                         hideNotificationDot();
                     }
                 });
-            }, 1000); // 2 saniyede bir çağıralım
+            }, 1000);
         });
-        function redirectToUserMessages(userId,name) {
-                // userId'yi localStorage'da sakla
-                localStorage.setItem('selectedUserId', userId);
-                localStorage.setItem('selectedUserName', name);
-                // Sayfayı ChatApp sayfasına yönlendir
-                window.location.href = "/ChatApp/ChatApp";
 
+        function redirectToUserMessages(userId, name) {
+            localStorage.setItem('selectedUserId', userId);
+            localStorage.setItem('selectedUserName', name);
+            window.location.href = "/ChatApp/ChatApp";
         }
-            document.addEventListener('DOMContentLoaded', function () {
-                 var messageIconElement = document.getElementById("messageIcon");
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var messageIconElement = document.getElementById("messageIcon");
+            if (messageIconElement) {
                 messageIconElement.classList.add("pink-light");
-            });
+            }
+        });
 
         function showNotificationDot() {
-                var messageIconElement = document.getElementById("messageIcon");
-                messageIconElement.classList.remove("pink-light"); // Eğer varsa pink-light sınıfını kaldır
-                messageIconElement.classList.add("green-light"); // green-light sınıfını ekle
-
+            var messageIconElement = document.getElementById("messageIcon");
+            if (messageIconElement) {
+                messageIconElement.classList.remove("pink-light");
+                messageIconElement.classList.add("green-light");
+            }
         }
 
-
         function hideNotificationDot() {
-                var messageIconElement = document.getElementById("messageIcon");
-                messageIconElement.classList.remove("green-light"); // Eğer varsa green-light sınıfını kaldır
-                messageIconElement.classList.add("pink-light"); // pink-light sınıfını ekle
+            var messageIconElement = document.getElementById("messageIcon");
+            if (messageIconElement) {
+                messageIconElement.classList.remove("green-light");
+                messageIconElement.classList.add("pink-light");
+            }
+        }
+    </script>
 
-        }</script>
+     <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
 
-
-
-
-    <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
-
-       <script src="~/crmtema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-    <script src="~/crmtema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-    <script src="~/CRMTema/bootstrap4/documentation/assets/vendor/jquery/jquery.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
 
 
+    @RenderSection("Scripts", required: false)
 </body>
-@*    <!-- core js file -->
-    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-
-    <!-- page js file -->
-    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>*@
 </html>

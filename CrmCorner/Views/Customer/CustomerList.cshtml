@@ -1,15 +1,15 @@
 ﻿@using CrmCorner.Extensions;
 @model List<CustomerN>
+
 @{
     ViewData["Title"] = "CustomerList";
-}
-@{
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
 <a href="/Customer/CustomerAdd" target="_self">
-    <input type="button" class="btn btn-success" value="Müşteri Ekle">
+    <input type="button" class="btn btn-success" value="Müşteri Ekle" />
 </a>
+
 <div>&nbsp;</div>
 
 @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
@@ -18,6 +18,7 @@
         @ViewBag.ErrorMessage
     </div>
 }
+
 <table class="table table-bordered" id="customer_List">
     <thead>
         <tr>
@@ -30,7 +31,7 @@
             <th scope="col">Firma Email</th>
             <th scope="col">Sektör</th>
             <th scope="col">Çalışan Sayısı</th>
-            <th scope="col">Atanmış Kullanıcı</th> <!-- Yeni sütun -->
+            <th scope="col">Atanmış Kullanıcı</th>
             <th scope="col">İşlemler</th>
         </tr>
     </thead>
@@ -65,14 +66,18 @@
                         <span class="text-danger">Bilinmiyor</span>
                     }
                 </td>
-                <td>@item.AppUser.UserName</td> <!-- Yeni sütun -->
+                <td>@(item.AppUser != null ? item.AppUser.UserName : "-")</td>
                 <td>
                     <a href="/Customer/CustomerEdit/@item.Id" target="_self">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
                             <i class="fa fa-edit"></i>
                         </button>
                     </a>
-                    <button type="button" class="btn btn-sm btn-outline-danger js-sweetalert" data-customerid="@item.Id" onclick="confirmDelete(this)">
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger js-sweetalert"
+                            data-customerid="@item.Id"
+                            onclick="confirmDelete(this)">
                         <i class="fa fa-trash-o"></i>
                     </button>
                 </td>
@@ -81,33 +86,35 @@
     </tbody>
 </table>
 
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
-<script src="~/CRMTema/bootstrap5/js/pages/widgets/chart-widgets.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    function confirmDelete(button) {
-        if (confirm('Are you sure you want to delete this customer?')) {
-            var customerId = button.getAttribute('data-customerid');
-            var form = document.createElement('form');
-            form.action = '/Customer/CustomerDelete/' + customerId;
-            form.method = 'post';
-            document.body.appendChild(form);
-            form.submit();
+@section Scripts {
+    <script src="~/CRMTema/bootstrap5/dist/assets/bundles/datatables.bundle.js"></script>
+
+    <script>
+        function confirmDelete(button) {
+            if (confirm('Are you sure you want to delete this customer?')) {
+                var customerId = button.getAttribute('data-customerid');
+                var form = document.createElement('form');
+                form.action = '/Customer/CustomerDelete/' + customerId;
+                form.method = 'post';
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
-    }
-</script>
-<script>
-    $(document).ready(function () {
-        $('#customer_List').dataTable({
-            responsive: true,
-            columnDefs: [
-                {
-                    orderable: false,
-                    targets: [0]
-                }
-            ]
+
+        $(document).ready(function () {
+            if ($.fn.DataTable) {
+                $('#customer_List').DataTable({
+                    responsive: true,
+                    columnDefs: [
+                        {
+                            orderable: false,
+                            targets: [10]
+                        }
+                    ]
+                });
+            } else {
+                console.error('DataTables yüklenemedi.');
+            }
         });
-    });
-</script>
+    </script>
+}
