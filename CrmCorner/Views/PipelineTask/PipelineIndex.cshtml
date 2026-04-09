@@ -104,6 +104,34 @@
 
 </style>
 
+
+<div class="d-flex justify-content-end align-items-center mb-3 gap-2">
+    <div>
+        <small class="text-muted">Excel ile toplu veri yükleyebilirsiniz</small>
+    </div>
+
+    <div class="d-flex gap-2">
+    @*     <a asp-controller="PipelineTask" asp-action="DownloadPipelineTemplate" class="btn btn-light border">
+            <i class="fas fa-download me-1"></i> Template
+        </a>  *@
+
+        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+            <i class="fas fa-file-import me-1"></i> Import
+        </button>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6 col-lg-4">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="fas fa-search"></i>
+            </span>
+            <input type="text" id="pipelineSearch" class="form-control" placeholder="Başlık, müşteri, şirket, açıklama ara..." />
+        </div>
+    </div>
+</div>
+
 <div class="row g-3">
     @foreach (var stage in stageList)
     {
@@ -114,7 +142,9 @@
                 <div class="card-header d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kanban-title">@stage.Value</div>
-                        <small class="kanban-sub">Görev Sayısı: @tasksInThisStage.Count()</small>
+                        <small class="kanban-sub">
+                            Görev Sayısı: <span class="stage-count">@tasksInThisStage.Count()</span>
+                        </small>
                     </div>
                     @if ((int)stage.Key == 1)
                     {
@@ -149,16 +179,18 @@
                             }
 
                             <li class="dd-item @outcomeCardClass @outcomeBorderClass"
+                                datli class="dd-item @outcomeCardClass @outcomeBorderClass"
                                 data-taskid="@task.Id"
                                 data-outcome="@task.OutcomeStatus"
                                 data-value="@task.Value"
                                 data-currency="@task.Currency"
-                                data-contract="@task.FileAttachments"
+                                data-contract="@((task.FileAttachments != null && task.FileAttachments.Any()).ToString().ToLower())"
                                 data-customer="@($"{task.CustomerName} {task.CustomerSurname}")"
                                 data-company="@task.CompanyName"
                                 data-desc="@task.Description"
                                 data-takenby="@task.AppUser?.NameSurname"
-                                data-doneby="@task.ResponsibleUser?.NameSurname">
+                                data-doneby="@task.ResponsibleUser?.NameSurname"
+                                data-search="@($"{task.Title} {task.CustomerName} {task.CustomerSurname} {task.CompanyName} {task.Description} {task.Email} {task.Phone} {task.Source} {task.AppUser}{task.ResponsibleUser}")">
                                 <div class="dd-handle">
                                     <strong>@task.Title</strong><br />
                                     <small class="text-muted">
@@ -204,6 +236,39 @@
             </div>
         </div>
     }
+</div>
+
+
+<div class="modal fade" id="importExcelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-controller="PipelineTask" asp-action="ImportPipelineExcel" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Excel ile Pipeline İçeri Aktar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Excel Dosyası</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx" required />
+                    </div>
+
+                    <div class="alert alert-info small mb-0">
+                        Template dosyasını indirip aynı sütunlarla doldurun.<br />
+                        Tüm kayıtlar otomatik olarak <strong>Değerlendirilen</strong> aşamasında açılacaktır.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">İçe Aktar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- MODALLAR -->
@@ -278,163 +343,181 @@
 
 
 
-@* <!-- CSS -->
-<link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/plugins/fontawesome/css/all.min.css" />
-<link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.css" />
-<link rel="stylesheet" href="~/CRMTema/bootstrap5/dist/assets/css/bootstrap.min.css" />
-
-<!-- JS -->
-<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery/jquery.min.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/js/bootstrap.bundle.min.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script> *@
-
-<!-- 1. jQuery (sadece 1 kez yüklenecek) -->
+@*  <!-- 1. jQuery (sadece 1 kez yüklenecek) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+ *@
 <!-- 2. jQuery UI (sortable için gerekli) -->
 <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
 
 <!-- 3. Bootstrap (isteğe bağlı) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
 
+<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
 
+@section Scripts {
+    <script>
+        $(function () {
+            let isDragging = false;
 
-<script>
-    $(function () {
-      // 1) Sürükle-bırak: sadece .dd-handle tutulunca sürüklensin
-      $(".sortable").sortable({
-        handle: ".dd-handle",               // <<< YENİ: Sadece tutamaçtan sürükle
-        connectWith: ".sortable",
-        placeholder: "sortable-placeholder",
-        update: function (event, ui) {
-          // Aşağıdaki kısım senin mevcut kural kontrollerin
-          var taskId = ui.item.data("taskid");
-          var newStage = ui.item.closest(".sortable").data("statusid");
-          var outcome = (ui.item.data("outcome") || "").toString();
-          var offerValue = ui.item.data("value");
-          var contract = ui.item.data("contract");
+            $(".sortable").sortable({
+                handle: ".dd-handle",
+                cancel: ".task-actions, .task-actions *, a, button, .btn, i",
+                connectWith: ".sortable",
+                placeholder: "sortable-placeholder",
+                distance: 8,
 
-          // TEKLİF SUNULDU AŞAMASINA GEÇİŞTE KONTROL
-          if (newStage == 4 && (!offerValue || !contract)) {
-            alert("Teklif Sunuldu aşamasına geçmek için 'Değer' girmeli ve sözleşme yüklemelisiniz.");
-            $(this).sortable('cancel');
-            return;
-          }
+                start: function (event, ui) {
+                    isDragging = true;
+                },
 
-          // SONUÇ AŞAMASINA GEÇİŞTE KONTROL
-          if (newStage == 5 && (outcome === "" || outcome === "None" || outcome === "Unknown")) {
-            alert("Sonuç aşamasına geçmek için lütfen sonucu seçiniz (Kazanıldı/Kaybedildi).");
-            $(this).sortable('cancel');
-            return;
-          }
+                stop: function (event, ui) {
+                    setTimeout(() => {
+                        isDragging = false;
+                    }, 100);
+                },
 
-          if (taskId !== undefined && newStage !== undefined) {
-            $.post("/PipelineTask/UpdateStage", { id: taskId, newStage: newStage });
-          }
+                update: function (event, ui) {
+                    if (!ui.item || !ui.item.data("taskid")) return;
+
+                    var taskId = ui.item.data("taskid");
+                    var newStage = ui.item.closest(".sortable").data("statusid");
+                    var outcome = (ui.item.data("outcome") || "").toString();
+                    var offerValue = ui.item.data("value");
+                    var contract = ui.item.data("contract");
+
+                    if (newStage == 4 && (!offerValue || !contract)) {
+                        alert("Teklif Sunuldu aşamasına geçmek için 'Değer' girmeli ve sözleşme yüklemelisiniz.");
+                        $(".sortable").sortable('cancel');
+                        return;
+                    }
+
+                    if (newStage == 5 && (outcome === "" || outcome === "None" || outcome === "Unknown")) {
+                        alert("Sonuç aşamasına geçmek için lütfen sonucu seçiniz (Kazanıldı/Kaybedildi).");
+                        $(".sortable").sortable('cancel');
+                        return;
+                    }
+
+                    $.post("/PipelineTask/UpdateStage", { id: taskId, newStage: newStage });
+                }
+            }).disableSelection();
+
+            $(document).on('click', '.dd-item', function (e) {
+                if (isDragging) return;
+                if ($(e.target).closest('a, button, .btn, i, .task-actions').length) return;
+
+                var $item = $(this);
+
+                var title = $item.find('strong').first().text() || '-';
+                var customer = $item.data('customer') || '-';
+                var company = $item.data('company') || '-';
+                var priceRaw = $item.data('value');
+                var currency = $item.data('currency');
+                var takenBy = $item.data('takenby') || '-';
+                var doneBy = $item.data('doneby') || '-';
+                var desc = $item.data('desc') || '-';
+
+                var priceText = '-';
+                if (priceRaw !== undefined && priceRaw !== null && priceRaw !== '') {
+                    var n = Number(priceRaw);
+                    if (!isNaN(n) && currency) {
+                        try {
+                            priceText = new Intl.NumberFormat('tr-TR', {
+                                style: 'currency',
+                                currency: currency,
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }).format(n);
+                        } catch {
+                            priceText = n.toFixed(2) + " " + currency;
+                        }
+                    } else {
+                        priceText = String(priceRaw);
+                    }
+                }
+
+                $('#miniTitle').text(title);
+                $('#miniCustomer').text(customer);
+                $('#miniCompany').text(company);
+                $('#miniPriceMain').text(priceText);
+                $('#miniTakenBy').text(takenBy);
+                $('#miniDoneBy').text(doneBy);
+                $('#miniDesc').text(desc);
+
+                new bootstrap.Modal(document.getElementById('miniTaskModal')).show();
+            });
+
+            $(document).on('click', '.btn-delete-task', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const taskId = $(this).data('taskid');
+                $('#deleteTaskId').val(taskId);
+
+                const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                modal.show();
+            });
+
+            $('#confirmDeleteBtn').click(function () {
+                const taskId = $('#deleteTaskId').val();
+
+                $.post('/PipelineTask/DeleteConfirmed', { id: taskId }, function (response) {
+                    if (response.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+                        location.reload();
+                    } else {
+                        alert(response.message || "Silme başarısız oldu.");
+                    }
+                });
+            });
+
+            $(document).on('click', '.btn-contact-method', function () {
+                const taskId = $(this).data('id');
+                $('#modalTaskId').val(taskId);
+                $('#chkLinkedin, #chkColdCall').prop('checked', false);
+
+                const modal = new bootstrap.Modal(document.getElementById('contactMethodModal'));
+                modal.show();
+            });
+
+            $('#contactMethodForm').submit(function (e) {
+                e.preventDefault();
+
+                const taskId = $('#modalTaskId').val();
+                const linkedin = $('#chkLinkedin').is(':checked');
+                const coldcall = $('#chkColdCall').is(':checked');
+
+                $.post('/PipelineTask/UpdateContactMethods', {
+                    taskId: taskId,
+                    contactedViaLinkedIn: linkedin,
+                    contactedViaColdCall: coldcall
+                }, function () {
+                    bootstrap.Modal.getInstance(document.getElementById('contactMethodModal')).hide();
+                    location.reload();
+                });
+            });
+
+                    function updateStageCounts() {
+            $('.card-column').each(function () {
+                const visibleCount = $(this).find('.dd-item:visible').length;
+                $(this).find('.stage-count').text(visibleCount);
+            });
         }
-      }).disableSelection();
 
-      // 2) Kartın boş bir yerine tıklanınca mini detay modalını aç
-      // (Edit/Sil/Detay ikonlarına tıklayınca modal açılmasın)
-      $(document).on('click', '.dd-item', function (e) {
-        if ($(e.target).closest('a, button, .btn, i').length) return; // link/ikon tıklamasını dışla
+        $('#pipelineSearch').on('input', function () {
+            const keyword = $(this).val().toLowerCase().trim();
 
-        var $item = $(this);
+            $('.dd-item').each(function () {
+                const searchText = ($(this).data('search') || '').toString().toLowerCase();
 
-        // Başlık: kart içindeki <strong> ilk metin
-        var title = $item.find('strong').first().text() || '-';
+                if (keyword === '' || searchText.includes(keyword)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
 
-        // Data-* alanları: <li> üzerine eklediklerin
-        var customer = $item.data('customer') || '-';
-        var company  = $item.data('company')  || '-';
-        var priceRaw = $item.data('value');
-        var currency = $item.data('currency');
-        var takenBy  = $item.data('takenby')  || '-';
-        var doneBy   = $item.data('doneby')   || '-';
-        var desc     = $item.data('desc')     || '-';
-
-       // Fiyat gösterimi
-    var priceText = '-';
-    if (priceRaw !== undefined && priceRaw !== null && priceRaw !== '') {
-      var n = Number(priceRaw);
-      if (!isNaN(n) && currency) {
-        try {
-          priceText = new Intl.NumberFormat('tr-TR', {
-            style: 'currency',
-            currency: currency,
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          }).format(n);
-        } catch {
-          // Currency 'TRY','USD','EUR' dışındaysa fallback
-          priceText = n.toFixed(2) + " " + currency;
-        }
-      } else {
-        priceText = String(priceRaw);
-      }
-    }
-
-
-
-    // Modal alanlarını doldur
-    $('#miniTitle').text(title);
-    $('#miniCustomer').text(customer);
-    $('#miniCompany').text(company);
-    $('#miniPriceMain').text(priceText);   // <<< Güncellendi
-    $('#miniTakenBy').text(takenBy);
-    $('#miniDoneBy').text(doneBy);
-    $('#miniDesc').text(desc);
-
-        // Modalı aç
-        new bootstrap.Modal(document.getElementById('miniTaskModal')).show();
-      });
-
-      // 3) SİLME – mevcut kodun
-      $(document).on('click', '.btn-delete-task', function () {
-        const taskId = $(this).data('taskid');
-        $('#deleteTaskId').val(taskId);
-        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-        modal.show();
-      });
-
-      $('#confirmDeleteBtn').click(function () {
-        const taskId = $('#deleteTaskId').val();
-        $.post('/PipelineTask/DeleteConfirmed', { id: taskId }, function (response) {
-          if (response.success) {
-            bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
-            location.reload();
-          } else {
-            alert("Silme başarısız oldu.");
-          }
+            updateStageCounts();
         });
-      });
-
-      // 4) ETİKETLEME – mevcut kodun
-      $(document).on('click', '.btn-contact-method', function () {
-        const taskId = $(this).data('id');
-        $('#modalTaskId').val(taskId);
-        $('#chkLinkedin, #chkColdCall').prop('checked', false);
-        const modal = new bootstrap.Modal(document.getElementById('contactMethodModal'));
-        modal.show();
-      });
-
-      $('#contactMethodForm').submit(function (e) {
-        e.preventDefault();
-        const taskId = $('#modalTaskId').val();
-        const linkedin = $('#chkLinkedin').is(':checked');
-        const coldcall = $('#chkColdCall').is(':checked');
-
-        $.post('/PipelineTask/UpdateContactMethods', {
-          taskId: taskId,
-          contactedViaLinkedIn: linkedin,
-          contactedViaColdCall: coldcall
-        }, function () {
-          bootstrap.Modal.getInstance(document.getElementById('contactMethodModal')).hide();
-          location.reload();
         });
-      });
-    });
-</script>
-
+    </script>
+}

@@ -1,6 +1,63 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+    ViewData["Title"] = "Gizlilik Politikası";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<section class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="page-hero-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                Yasal Bilgilendirme
+            </span>
+
+            <h1 class="page-title">Gizlilik Politikası</h1>
+
+            <p class="page-text mx-auto" style="max-width: 820px;">
+                CRM Corner olarak kullanıcı gizliliğine ve kişisel verilerin korunmasına önem veriyoruz.
+                Bu sayfa, platform kullanımı sırasında işlenen bilgilerin genel çerçevesini açıklamak amacıyla hazırlanmıştır.
+            </p>
+        </div>
+
+        <div class="legal-card">
+            <h3 class="fw-bold mb-3" style="color:#14274a;">1. Toplanan bilgiler</h3>
+            <p class="page-text">
+                Hizmetlerimizi sunarken ad, soyad, e-posta adresi, telefon numarası, şirket bilgileri ve platform kullanımına
+                ilişkin teknik veriler gibi bazı bilgiler toplanabilir.
+            </p>
+
+            <h3 class="fw-bold mt-4 mb-3" style="color:#14274a;">2. Verilerin kullanım amacı</h3>
+            <p class="page-text">
+                Toplanan veriler; kullanıcı hesabı oluşturma, hizmet sunma, sistem güvenliğini sağlama, kullanıcı deneyimini geliştirme,
+                destek süreçlerini yürütme ve yasal yükümlülükleri yerine getirme amaçlarıyla kullanılabilir.
+            </p>
+
+            <h3 class="fw-bold mt-4 mb-3" style="color:#14274a;">3. Veri güvenliği</h3>
+            <p class="page-text">
+                Kullanıcı verilerinin güvenliğini sağlamak amacıyla uygun teknik ve idari önlemler alınır.
+                Yetkisiz erişim, veri kaybı ve kötüye kullanım risklerini azaltmaya yönelik koruma yöntemleri uygulanır.
+            </p>
+
+            <h3 class="fw-bold mt-4 mb-3" style="color:#14274a;">4. Üçüncü taraf hizmetler</h3>
+            <p class="page-text">
+                CRM Corner, hizmet kalitesini artırmak amacıyla belirli üçüncü taraf servislerden yararlanabilir.
+                Bu servislerin veri işleme süreçleri kendi politikalarına tabi olabilir.
+            </p>
+
+            <h3 class="fw-bold mt-4 mb-3" style="color:#14274a;">5. Kullanıcı hakları</h3>
+            <p class="page-text">
+                Kullanıcılar, kendileriyle ilgili verilerin işlenmesine dair bilgi talep etme, düzeltme veya silme taleplerinde bulunma hakkına sahiptir.
+            </p>
+
+            <h3 class="fw-bold mt-4 mb-3" style="color:#14274a;">6. Güncellemeler</h3>
+            <p class="page-text mb-0">
+                Bu gizlilik politikası gerektiğinde güncellenebilir. Güncel versiyon bu sayfa üzerinden yayınlanır.
+            </p>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="/Home/Landing" class="btn btn-light-custom me-2">Ana Sayfa</a>
+            <a href="/Home/About" class="btn btn-main">Hakkımızda</a>
+        </div>
+    </div>
+</section>

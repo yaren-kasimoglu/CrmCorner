@@ -1,0 +1,351 @@
+﻿@{
+    ViewData["Title"] = "Abonelik Paketleri";
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+}
+
+<style>
+    .pricing-page {
+        background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        min-height: 100vh;
+    }
+
+    .pricing-hero {
+        padding: 70px 0 30px 0;
+        text-align: center;
+    }
+
+    .pricing-badge {
+        display: inline-block;
+        background: #eaf2ff;
+        color: #0d6efd;
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .pricing-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 16px;
+    }
+
+    .pricing-subtitle {
+        font-size: 18px;
+        color: #6b7280;
+        max-width: 750px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .user-count-box {
+        max-width: 420px;
+        text-align: center;
+        background: #ffffff;
+        border: 1px solid #eef2f7;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        margin: 0 auto 40px auto;
+    }
+
+    .user-count-label {
+        display: block;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 12px;
+        font-size: 18px;
+    }
+
+    .user-count-select {
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 16px;
+        border: 1px solid #dbe3ee;
+        box-shadow: none;
+    }
+
+    .pricing-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 35px 28px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+        border: 1px solid #eef2f7;
+        height: 100%;
+        transition: 0.3s ease;
+        position: relative;
+    }
+
+        .pricing-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid #0d6efd;
+        }
+
+    .featured-label {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0d6efd;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .plan-name {
+        font-size: 26px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .plan-desc {
+        text-align: center;
+        color: #6b7280;
+        min-height: 48px;
+        margin-bottom: 24px;
+    }
+
+    .plan-price {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+        .plan-price .amount {
+            font-size: 42px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .plan-price .period {
+            color: #6b7280;
+            font-size: 16px;
+            margin-top: 4px;
+        }
+
+    .per-user-note {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    .teklif-text {
+        font-size: 34px !important;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding-left: 0;
+        margin: 0 0 30px 0;
+    }
+
+        .feature-list li {
+            padding: 10px 0;
+            color: #374151;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+            .feature-list li:last-child {
+                border-bottom: none;
+            }
+
+    .buy-btn {
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        background: #0d6efd;
+        color: white;
+        text-decoration: none;
+        padding: 14px 20px;
+        border-radius: 14px;
+        font-weight: 600;
+        transition: 0.3s ease;
+    }
+
+        .buy-btn:hover {
+            background: #0b5ed7;
+            color: white;
+        }
+
+        .buy-btn.secondary {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+            .buy-btn.secondary:hover {
+                background: #e5e7eb;
+                color: #111827;
+            }
+
+    .pricing-note {
+        text-align: center;
+        margin-top: 50px;
+        color: #6b7280;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    @@media (max-width: 768px) {
+        .pricing-title {
+            font-size: 30px;
+        }
+
+        .pricing-subtitle {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<div class="pricing-page">
+    <div class="container">
+        <div class="pricing-hero">
+            <div class="pricing-badge">CRMCorner Abonelik Paketleri</div>
+            <h1 class="pricing-title">İşletmenize Uygun Paketi Seçin</h1>
+            <p class="pricing-subtitle">
+                CRMCorner ile müşteri yönetimi, satış pipeline takibi, ekip organizasyonu ve raporlama süreçlerinizi
+                tek platform üzerinden kolayca yönetin.
+            </p>
+        </div>
+
+        <div class="user-count-box">
+            <label for="userCount" class="user-count-label">Kullanıcı Sayısı</label>
+            <select id="userCount" class="form-select user-count-select">
+                <option value="1">1 Kullanıcı</option>
+                <option value="2">2 Kullanıcı</option>
+                <option value="3">3 Kullanıcı</option>
+                <option value="5">5 Kullanıcı</option>
+                <option value="10">10 Kullanıcı</option>
+                <option value="15">15 Kullanıcı</option>
+                <option value="20">20 Kullanıcı</option>
+            </select>
+            <small class="text-muted d-block mt-2">
+                Gold ve Platinum paketlerde fiyatlar kullanıcı sayısına göre otomatik hesaplanır.
+            </small>
+        </div>
+
+        <div class="row g-4 pb-5 justify-content-center">
+
+            <!-- GOLD -->
+            <div class="col-lg-4 col-md-6">
+                <div class="pricing-card">
+                    <h2 class="plan-name">Gold</h2>
+                    <p class="plan-desc">Temel CRM ihtiyaçları için ideal başlangıç paketi.</p>
+
+                    <div class="plan-price">
+                        <span class="amount" id="goldPrice">₺1.000</span>
+                        <div class="period">toplam / aylık</div>
+                        <div class="per-user-note">₺1.000 kişi başı / aylık</div>
+                    </div>
+
+                    <ul class="feature-list">
+                        <li>Müşteri kayıt yönetimi</li>
+                        <li>Pipeline takibi</li>
+                        <li>Görev yönetimi</li>
+                        <li>Temel raporlama</li>
+                        <li>Bulut erişim</li>
+                    </ul>
+
+                    <a href="#" class="buy-btn secondary">Satın Al</a>
+                </div>
+            </div>
+
+            <!-- PLATINUM -->
+            <div class="col-lg-4 col-md-6">
+                <div class="pricing-card featured">
+                    <div class="featured-label">En Çok Tercih Edilen</div>
+
+                    <h2 class="plan-name">Platinum</h2>
+                    <p class="plan-desc">Gelişmiş özellikler ve ekip yönetimi için ideal çözüm.</p>
+
+                    <div class="plan-price">
+                        <span class="amount" id="platinumPrice">₺5.000</span>
+                        <div class="period">toplam / 3 aylık</div>
+                        <div class="per-user-note">₺5.000 kişi başı / 3 aylık</div>
+                    </div>
+
+                    <ul class="feature-list">
+                        <li>Müşteri yönetimi</li>
+                        <li>Pipeline & satış yönetimi</li>
+                        <li>Görev & süreç yönetimi</li>
+                        <li>Gelişmiş raporlama</li>
+                        <li>Ekip bazlı kullanım</li>
+                        <li>Bulut erişim</li>
+                    </ul>
+
+                    <a href="#" class="buy-btn">Satın Al</a>
+                </div>
+            </div>
+
+            <!-- DIAMOND -->
+            <div class="col-lg-4 col-md-6">
+                <div class="pricing-card">
+                    <h2 class="plan-name">Diamond</h2>
+                    <p class="plan-desc">Kuruma özel yapı, ileri seviye modüller ve özelleştirilmiş çözümler.</p>
+
+                    <div class="plan-price">
+                        <span class="amount teklif-text">Kuruma Özel</span>
+                        <div class="period">yıllık fiyatlandırma</div>
+                        <div class="per-user-note">Detaylı ihtiyaç analizi sonrası teklif sunulur</div>
+                    </div>
+
+                    <ul class="feature-list">
+                        <li>Tüm CRM modülleri</li>
+                        <li>Gelişmiş pipeline yönetimi</li>
+                        <li>Detaylı analiz & raporlama</li>
+                        <li>Özelleştirilebilir yapı</li>
+                        <li>Öncelikli destek</li>
+                        <li>API & entegrasyon desteği</li>
+                    </ul>
+
+                    <a href="/Home/Contact" class="buy-btn">Teklif Al</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="pricing-note pb-3">
+            Gold ve Platinum paketlerde fiyatlar kullanıcı sayısına göre hesaplanır. Diamond paket için ihtiyaçlarınıza özel teklif sunulmaktadır.
+        </div>
+
+        <div class="pricing-note pb-5" style="margin-top: 10px;">
+            Tüm ödemeler güvenli ödeme altyapısı ile alınacaktır. Abonelikler seçilen pakete göre dönemsel olarak
+            yenilenebilir. Detaylı bilgi için iletişim sayfamız üzerinden bize ulaşabilirsiniz.
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const userCountSelect = document.getElementById("userCount");
+        const goldPrice = document.getElementById("goldPrice");
+        const platinumPrice = document.getElementById("platinumPrice");
+
+        const goldUnitPrice = 1000;
+        const platinumUnitPrice = 5000;
+
+        function formatPrice(price) {
+            return "₺" + price.toLocaleString("tr-TR");
+        }
+
+        function calculatePrices() {
+            const userCount = parseInt(userCountSelect.value);
+
+            const goldTotal = goldUnitPrice * userCount;
+            const platinumTotal = platinumUnitPrice * userCount;
+
+            goldPrice.textContent = formatPrice(goldTotal);
+            platinumPrice.textContent = formatPrice(platinumTotal);
+        }
+
+        userCountSelect.addEventListener("change", calculatePrices);
+        calculatePrices();
+    });
+</script>

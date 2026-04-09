@@ -1,13 +1,13 @@
-﻿using CrmCorner.Extensions;
+﻿using ClosedXML.Excel;
+using System.Globalization;
+using CrmCorner.Extensions;
 using CrmCorner.Models;
 using CrmCorner.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Security.Claims;
-
 using Microsoft.EntityFrameworkCore;
-
+using System.Security.Claims;
 using PipelineStage = CrmCorner.Models.Enums.PipelineStage;
 
 namespace CrmCorner.Controllers
@@ -101,6 +101,8 @@ namespace CrmCorner.Controllers
 
             return View(tasks);
         }
+
+
 
 
         #region GÖREV EKLEME
@@ -1003,6 +1005,253 @@ namespace CrmCorner.Controllers
                 .ToList();
         }
 
+
+
+        [HttpGet]
+        public IActionResult DownloadPipelineTemplate()
+        {
+            using var workbook = new XLWorkbook();
+
+            var ws = workbook.Worksheets.Add("Template");
+
+            ws.Cell(1, 1).Value = "Baslik *";
+            ws.Cell(1, 2).Value = "DegerTeklifi";
+            ws.Cell(1, 3).Value = "MusteriAd *";
+            ws.Cell(1, 4).Value = "MusteriSoyad *";
+            ws.Cell(1, 5).Value = "SirketAdi *";
+            ws.Cell(1, 6).Value = "Telefon";
+            ws.Cell(1, 7).Value = "Eposta *";
+            ws.Cell(1, 9).Value = "GorusmeyiAlanEmail";
+            ws.Cell(1, 10).Value = "SorumluKisiEmail *";
+
+            var headerRange = ws.Range("A1:J1");
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            int[] requiredCols = { 1, 3, 4, 5, 7, 8, 10 };
+            foreach (var col in requiredCols)
+            {
+                ws.Cell(1, col).Style.Fill.BackgroundColor = XLColor.LightYellow;
+            }
+
+            ws.SheetView.FreezeRows(1);
+            ws.Columns().AdjustToContents();
+
+            var info = workbook.Worksheets.Add("Aciklamalar");
+
+            info.Cell(1, 1).Value = "ZORUNLU ALANLAR";
+            info.Cell(2, 1).Value = "Baslik, MusteriAd, MusteriSoyad, SirketAdi, Eposta, KaynakKanal, SorumluKisiEmail";
+
+            info.Cell(4, 1).Value = "ASAMA";
+            info.Cell(5, 1).Value = "Import edilen tum kayitlar otomatik olarak Degerlendirilen asamasinda olusur.";
+
+            info.Cell(7, 1).Value = "GORUSMEYI ALAN";
+            info.Cell(8, 1).Value = "GorusmeyiAlanEmail bos birakilirsa import eden kullanici atanir.";
+
+            info.Cell(10, 1).Value = "SORUMLU KISI";
+            info.Cell(11, 1).Value = "SorumluKisiEmail zorunludur ve sistemde kayitli bir kullanici olmalidir.";
+
+            info.Cell(13, 1).Value = "DEGER TEKLIFI";
+            info.Cell(14, 1).Value = "Bos birakilabilir. Sonradan ekran uzerinden duzenlenebilir.";
+
+            info.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Position = 0;
+
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "PipelineTemplate.xlsx"
+            );
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ImportPipelineExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                TempData["ErrorMessage"] = "Lütfen geçerli bir Excel dosyası seçin.";
+                return RedirectToAction("PipelineIndex");
+            }
+
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var me = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == currentUserId);
+            if (me == null) return Unauthorized();
+
+            var userRoles = await _context.UserRoles
+                .Where(ur => ur.UserId == me.Id)
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
+                .ToListAsync();
+
+            bool isSuperAdmin = userRoles.Contains("SuperAdmin");
+
+            bool IsSameCompanyUser(AppUser user)
+            {
+                if (isSuperAdmin) return true;
+                return user.EmailDomain == me.EmailDomain;
+            }
+
+            var successCount = 0;
+            var errorMessages = new List<string>();
+
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            stream.Position = 0;
+
+            using var workbook = new XLWorkbook(stream);
+            var ws = workbook.Worksheet(1);
+
+            var lastRow = ws.LastRowUsed()?.RowNumber() ?? 0;
+            if (lastRow < 2)
+            {
+                TempData["ErrorMessage"] = "Excel dosyasında aktarılacak veri bulunamadı.";
+                return RedirectToAction("PipelineIndex");
+            }
+
+            for (int row = 2; row <= lastRow; row++)
+            {
+                try
+                {
+                    string GetText(int col)
+                    {
+                        return ws.Cell(row, col).GetValue<string>()?.Trim();
+                    }
+
+                    decimal? GetDecimal(int col)
+                    {
+                        var txt = GetText(col);
+                        if (string.IsNullOrWhiteSpace(txt)) return null;
+
+                        txt = txt.Replace(",", ".");
+                        if (decimal.TryParse(txt, NumberStyles.Any, CultureInfo.InvariantCulture, out var val))
+                            return val;
+
+                        return null;
+                    }
+
+                    var title = GetText(1);
+                    var value = GetDecimal(2);
+                    var customerName = GetText(3);
+                    var customerSurname = GetText(4);
+                    var companyName = GetText(5);
+                    var phone = GetText(6);
+                    var email = GetText(7);
+                    var takenByEmail = GetText(8);
+                    var responsibleEmail = GetText(9);
+
+                    if (string.IsNullOrWhiteSpace(title) ||
+                        string.IsNullOrWhiteSpace(customerName) ||
+                        string.IsNullOrWhiteSpace(customerSurname) ||
+                        string.IsNullOrWhiteSpace(companyName) ||
+                        string.IsNullOrWhiteSpace(email) ||
+                        string.IsNullOrWhiteSpace(responsibleEmail))
+                    {
+                        errorMessages.Add($"Satır {row}: Zorunlu alanlardan biri boş.");
+                        continue;
+                    }
+
+                    var responsibleUser = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == responsibleEmail.ToLower());
+
+                    if (responsibleUser == null)
+                    {
+                        errorMessages.Add($"Satır {row}: SorumluKisiEmail sistemde bulunamadı.");
+                        continue;
+                    }
+
+                    if (!IsSameCompanyUser(responsibleUser))
+                    {
+                        errorMessages.Add($"Satır {row}: Sorumlu kişi aynı şirket/domain içinde değil.");
+                        continue;
+                    }
+
+                    AppUser takenByUser = null;
+
+                    if (string.IsNullOrWhiteSpace(takenByEmail))
+                    {
+                        takenByUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
+                    }
+                    else
+                    {
+                        takenByUser = await _context.Users
+                            .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == takenByEmail.ToLower());
+
+                        if (takenByUser == null)
+                        {
+                            errorMessages.Add($"Satır {row}: GorusmeyiAlanEmail sistemde bulunamadı.");
+                            continue;
+                        }
+
+                        if (!IsSameCompanyUser(takenByUser))
+                        {
+                            errorMessages.Add($"Satır {row}: Görüşmeyi alan kişi aynı şirket/domain içinde değil.");
+                            continue;
+                        }
+                    }
+
+                    var newCustomer = new CustomerN
+                    {
+                        Name = customerName,
+                        Surname = customerSurname,
+                        CompanyName = companyName,
+                        PhoneNumber = phone,
+                        CustomerEmail = email,
+                        CreatedDate = DateTime.Now,
+                        AppUserId = responsibleUser.Id
+                    };
+
+                    _context.CustomerNs.Add(newCustomer);
+                    await _context.SaveChangesAsync();
+
+                    var newTask = new PipelineTask
+                    {
+                        Title = title,
+                        Value = value,
+                        CustomerName = customerName,
+                        CustomerSurname = customerSurname,
+                        CompanyName = companyName,
+                        Phone = phone,
+                        Email = email,
+                        AppUserId = takenByUser?.Id,
+                        ResponsibleUserId = responsibleUser.Id,
+                        CustomerId = newCustomer.Id,
+                        CreatedDate = DateTime.Now,
+
+                        // otomatik alanlar
+                        Stage = PipelineStage.Degerlendirilen,
+                        Outcomes = OutcomeType.Surecte,
+                        OutcomeStatus = OutcomeTypeSales.None,
+
+                        // TODO: sende hangi enum uygunsa onunla değiştir
+                        SourceChannel = SourceChannelType.Apollo
+                    };
+
+                    _context.PipelineTasks.Add(newTask);
+                    await _context.SaveChangesAsync();
+
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    errorMessages.Add($"Satır {row}: Beklenmeyen hata - {ex.Message}");
+                }
+            }
+
+            if (errorMessages.Any())
+            {
+                TempData["ErrorMessage"] =
+                    $"Aktarılan kayıt: {successCount}. Hatalı satır: {errorMessages.Count}. İlk hatalar: {string.Join(" | ", errorMessages.Take(5))}";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = $"{successCount} kayıt başarıyla içe aktarıldı.";
+            }
+
+            return RedirectToAction("PipelineIndex");
+        }
 
     }
 }

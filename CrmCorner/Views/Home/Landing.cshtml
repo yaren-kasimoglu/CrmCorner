@@ -1,623 +1,317 @@
 ﻿@{
-    Layout = null;
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+    ViewData["Title"] = "CRM Corner";
 }
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CRM Corner</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
-
-    <style>
-        :root {
-            --primary: #ffb71b;
-            --primary-dark: #e6a514;
-            --secondary: #ffd76a;
-            --soft-bg: #f7f7fb;
-            --card-bg: #ffffff;
-            --text-dark: #1f2937;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --success-soft: #ecfdf3;
-            --warning-soft: #fff7ed;
-            --blue-soft: #eff6ff;
-            --purple-soft: #fff4d6;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #ffffff;
-            color: var(--text-dark);
-        }
-
-        .navbar-custom {
-            background: rgba(255,255,255,.92);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(229,231,235,.8);
-        }
-
-        .brand-box {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 700;
-            font-size: 20px;
-            box-shadow: 0 10px 25px rgba(255,183,27,.25);
-        }
-
-        .hero-section {
-            padding: 90px 0 70px 0;
-            background: radial-gradient(circle at top left, rgba(255,183,27,.15), transparent 30%), radial-gradient(circle at bottom right, rgba(255,215,106,.15), transparent 28%), #fff;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #fff4d6;
-            border: 1px solid #ffe19a;
-            color: var(--primary);
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .hero-title {
-            font-size: 52px;
-            line-height: 1.1;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-top: 22px;
-        }
-
-        .hero-text {
-            font-size: 18px;
-            color: var(--text-muted);
-            max-width: 620px;
-            line-height: 1.75;
-            margin-top: 22px;
-        }
-
-        .btn-main {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            color: white;
-            padding: 14px 26px;
-            border-radius: 14px;
-            font-weight: 600;
-            box-shadow: 0 12px 26px rgba(255,183,27,.25);
-            transition: all .2s ease;
-        }
-
-            .btn-main:hover {
-                transform: translateY(-2px);
-                color: white;
-                background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
-            }
-
-        .btn-light-custom {
-            background: #fff;
-            border: 1px solid var(--border);
-            color: var(--text-dark);
-            padding: 14px 26px;
-            border-radius: 14px;
-            font-weight: 600;
-            transition: all .2s ease;
-        }
-
-            .btn-light-custom:hover {
-                background: #f9fafb;
-                transform: translateY(-2px);
-            }
-
-        .stats-card,
-        .module-card,
-        .feature-card,
-        .preview-card,
-        .dashboard-card,
-        .cta-box {
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            box-shadow: 0 10px 35px rgba(15,23,42,.05);
-        }
-
-        .stats-card {
-            padding: 22px;
-            height: 100%;
-        }
-
-        .stats-number {
-            font-size: 28px;
-            font-weight: 800;
-        }
-
-        .stats-label {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .dashboard-card {
-            padding: 28px;
-        }
-
-        .mini-stat {
-            border-radius: 18px;
-            padding: 18px;
-            height: 100%;
-        }
-
-        .section-space {
-            padding: 90px 0;
-        }
-
-        .section-title {
-            font-size: 38px;
-            font-weight: 800;
-            letter-spacing: -.6px;
-        }
-
-        .section-text {
-            color: var(--text-muted);
-            font-size: 17px;
-            line-height: 1.8;
-            max-width: 720px;
-        }
-
-        .module-card {
-            padding: 34px;
-            transition: all .25s ease;
-            height: 100%;
-        }
-
-            .module-card:hover {
-                transform: translateY(-6px);
-                box-shadow: 0 20px 45px rgba(15,23,42,.08);
-            }
-
-        .module-tag {
-            display: inline-block;
-            padding: 7px 14px;
-            border-radius: 999px;
-            background: var(--purple-soft);
-            color: var(--primary);
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .module-card h3 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-top: 22px;
-        }
-
-        .module-card p {
-            color: var(--text-muted);
-            line-height: 1.8;
-            margin-top: 14px;
-        }
-
-        .pill {
-            display: inline-block;
-            padding: 8px 14px;
-            background: #f9fafb;
-            border: 1px solid var(--border);
-            color: #4b5563;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-            margin: 6px 6px 0 0;
-        }
-
-        .feature-card {
-            padding: 28px;
-            height: 100%;
-        }
-
-        .feature-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            margin-bottom: 18px;
-        }
-
-        .preview-card {
-            padding: 24px;
-            height: 100%;
-        }
-
-        .preview-image {
-            height: 180px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, #fff4d6, #ffffff 55%, #fff8e8);
-            border: 1px solid #ffe7a8;
-        }
-
-        .cta-box {
-            padding: 50px;
-            background: linear-gradient(135deg, #111827, #1f2937);
-            color: white;
-            border: none;
-        }
-
-        .footer-custom {
-            border-top: 1px solid var(--border);
-            color: var(--text-muted);
-        }
-
-        .soft-section {
-            background: #fafafe;
-        }
-
-        @@media (max-width: 992px) {
-            .hero-title {
-                font-size: 40px;
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .hero-title {
-                font-size: 34px;
-            }
-
-            .section-title {
-                font-size: 30px;
-            }
-
-            .cta-box {
-                padding: 28px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <nav class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
-        <div class="container py-2">
-            <a class="navbar-brand d-flex align-items-center gap-3 fw-bold" href="/Home/Landing">
-                <div class="brand-box">C</div>
-                <div>
-                    <div style="font-size:18px; line-height:1;">CRM Corner</div>
-                    <small class="text-muted fw-normal">Multi-module workspace</small>
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-badge">
+                    <i class="fa-solid fa-layer-group"></i>
+                    Tek platform, çoklu modül deneyimi
                 </div>
-            </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#landingNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <h1 class="hero-title">
+                    Satış süreçlerini ve sosyal medya operasyonlarını tek merkezden yönetin.
+                </h1>
 
-            <div class="collapse navbar-collapse" id="landingNav">
-                <ul class="navbar-nav ms-auto me-3 gap-lg-3">
-                    <li class="nav-item"><a class="nav-link fw-semibold" href="#modules">Ürünler</a></li>
-                    <li class="nav-item"><a class="nav-link fw-semibold" href="#features">Özellikler</a></li>
-                    <li class="nav-item"><a class="nav-link fw-semibold" href="#preview">Ekranlar</a></li>
-                </ul>
+                <p class="hero-text">
+                    CRM Corner; CRM yönetimi, sosyal medya operasyonları, kişisel markalaşma ve gelişebilir modül yapısıyla
+                    ekiplerinizi tek bir çalışma alanında buluşturur.
+                </p>
 
-                <div class="d-flex gap-2">
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a href="#modules" class="btn btn-main">Ürünleri İncele</a>
                     <a href="/Home/SignIn" class="btn btn-light-custom">Giriş Yap</a>
-                    <a href="/Home/SignUp" class="btn btn-main">Başla</a>
+                </div>
+
+                <div class="row g-3 mt-4">
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <div class="stats-number">2+</div>
+                            <div class="stats-label">Ana modül</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <div class="stats-number">Role-based</div>
+                            <div class="stats-label">Erişim yapısı</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <div class="stats-number">Company-based</div>
+                            <div class="stats-label">Veri görünümü</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="mb-1 fw-bold">Social Media Dashboard</h5>
+                            <small class="text-muted">Company based overview</small>
+                        </div>
+                        <span class="badge rounded-pill text-bg-light px-3 py-2">Live</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="mini-stat" style="background: var(--warning-soft);">
+                                <small class="text-muted">Onay Bekleyen</small>
+                                <div class="stats-number mt-2">30</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mini-stat" style="background: var(--success-soft);">
+                                <small class="text-muted">Onaylanan</small>
+                                <div class="stats-number mt-2">43</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mini-stat" style="background: var(--blue-soft);">
+                                <small class="text-muted">Bu Hafta</small>
+                                <div class="stats-number mt-2">12</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mini-stat" style="background: #fef2f2;">
+                                <small class="text-muted">Revize</small>
+                                <div class="stats-number mt-2">4</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <div class="stats-card h-100">
+                                <h6 class="fw-bold mb-2">CRM Workspace</h6>
+                                <p class="mb-0 text-muted">
+                                    Müşteri yönetimi, pipeline ve görev akışı için tasarlanmış düzenli çalışma alanı.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stats-card h-100">
+                                <h6 class="fw-bold mb-2">Personal Branding</h6>
+                                <p class="mb-0 text-muted">
+                                    Kişisel içerik planlama, onay ve yayın süreçlerini aynı dashboard içinde takip edin.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
 
-    <section class="hero-section">
-        <div class="container">
-            <div class="row align-items-center g-5">
-                <div class="col-lg-6">
-                    <div class="hero-badge">
-                        <i class="fa-solid fa-layer-group"></i>
-                        Tek platform, çoklu modül deneyimi
-                    </div>
+        <div class="row g-3 mt-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number">2+</div>
+                    <div class="stats-label">Ana modül</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number">Role-based</div>
+                    <div class="stats-label">Erişim yapısı</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number">Company-based</div>
+                    <div class="stats-label">Veri görünümü</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-                    <h1 class="hero-title">
-                        Satış süreçlerini ve sosyal medya operasyonlarını tek merkezden yönetin.
-                    </h1>
+<section id="modules" class="section-space">
+    <div class="container">
+        <div class="mb-5">
+            <div class="text-uppercase fw-bold mb-2" style="color:var(--primary); letter-spacing:2px; font-size:13px;">Ürün Modülleri</div>
+            <h2 class="section-title">İhtiyacın olan çalışma alanlarını tek platformda birleştir.</h2>
+            <p class="section-text mt-3">
+                CRM Corner, tek bir panel içinde farklı operasyon alanlarını yönetebilmen için modüler bir yapı sunar.
+            </p>
+        </div>
 
-                    <p class="hero-text">
-                        CRM Corner; CRM yönetimi, sosyal medya operasyonları, kişisel markalaşma ve gelişebilir modül yapısıyla
-                        ekiplerinizi tek bir çalışma alanında buluşturur.
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="module-card">
+                    <span class="module-tag">Modül</span>
+                    <h3>CRM Management</h3>
+                    <p>
+                        Müşteri takibi, pipeline yönetimi, görev planlama ve ekip koordinasyonunu tek panelden yönetin.
                     </p>
 
-                    <div class="d-flex flex-wrap gap-3 mt-4">
-                        <a href="#modules" class="btn btn-main">Ürünleri İncele</a>
-                        <a href="/Home/SignIn" class="btn btn-light-custom">Giriş Yap</a>
+                    <div class="mt-4">
+                        <span class="pill">Pipeline Takibi</span>
+                        <span class="pill">Müşteri Yönetimi</span>
+                        <span class="pill">Görev Kontrolü</span>
+                        <span class="pill">Raporlama</span>
                     </div>
 
-                    <div class="row g-3 mt-4">
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <div class="stats-number">2+</div>
-                                <div class="stats-label">Ana modül</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <div class="stats-number">Role-based</div>
-                                <div class="stats-label">Erişim yapısı</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <div class="stats-number">Company-based</div>
-                                <div class="stats-label">Veri görünümü</div>
-                            </div>
-                        </div>
-                    </div>
+                    <a href="/Home/SignIn" class="btn btn-main mt-4">CRM'i Keşfet</a>
                 </div>
+            </div>
 
-                <div class="col-lg-6">
-                    <div class="dashboard-card">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <h5 class="mb-1 fw-bold">Social Media Dashboard</h5>
-                                <small class="text-muted">Company based overview</small>
-                            </div>
-                            <span class="badge rounded-pill text-bg-light px-3 py-2">Live</span>
-                        </div>
+            <div class="col-lg-6">
+                <div class="module-card">
+                    <span class="module-tag">Modül</span>
+                    <h3>Social Media Management</h3>
+                    <p>
+                        İçerik planlama, onay akışları, yayın takvimi ve kişisel markalaşma süreçlerini kolaylaştırın.
+                    </p>
 
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="mini-stat" style="background: var(--warning-soft);">
-                                    <small class="text-muted">Onay Bekleyen</small>
-                                    <div class="stats-number mt-2">30</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="mini-stat" style="background: var(--success-soft);">
-                                    <small class="text-muted">Onaylanan</small>
-                                    <div class="stats-number mt-2">43</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="mini-stat" style="background: var(--blue-soft);">
-                                    <small class="text-muted">Bu Hafta</small>
-                                    <div class="stats-number mt-2">12</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="mini-stat" style="background: #fef2f2;">
-                                    <small class="text-muted">Revize</small>
-                                    <div class="stats-number mt-2">4</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-6">
-                                <div class="stats-card h-100">
-                                    <h6 class="fw-bold mb-2">CRM Workspace</h6>
-                                    <p class="mb-0 text-muted">
-                                        Müşteri yönetimi, pipeline ve görev akışı için tasarlanmış düzenli çalışma alanı.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="stats-card h-100">
-                                    <h6 class="fw-bold mb-2">Personal Branding</h6>
-                                    <p class="mb-0 text-muted">
-                                        Kişisel içerik planlama, onay ve yayın süreçlerini aynı dashboard içinde takip edin.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mt-4">
+                        <span class="pill">İçerik Planlama</span>
+                        <span class="pill">Onay Süreci</span>
+                        <span class="pill">Takvim Yönetimi</span>
+                        <span class="pill">Personal Branding</span>
                     </div>
+
+                    <a href="/Home/SignIn" class="btn btn-main mt-4">Social Media'yı Keşfet</a>
                 </div>
             </div>
         </div>
+    </div>
+</section>
 
-    </section>
+<section id="features" class="section-space soft-section">
+    <div class="container">
+        <div class="mb-5">
+            <div class="text-uppercase fw-bold mb-2" style="color:var(--primary); letter-spacing:2px; font-size:13px;">Öne Çıkan Özellikler</div>
+            <h2 class="section-title">Büyüyen ekipler için düzenli, güvenli ve esnek altyapı.</h2>
+        </div>
 
-    <section id="modules" class="section-space">
-        <div class="container">
-            <div class="mb-5">
-                <div class="text-uppercase fw-bold mb-2" style="color:var(--primary); letter-spacing:2px; font-size:13px;">Ürün Modülleri</div>
-                <h2 class="section-title">İhtiyacın olan çalışma alanlarını tek platformda birleştir.</h2>
-                <p class="section-text mt-3">
-                    CRM Corner, tek bir panel içinde farklı operasyon alanlarını yönetebilmen için modüler bir yapı sunar.
-                </p>
+        <div class="row g-4">
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#fff4d6; color:#ffb71b;">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <h5 class="fw-bold">Çoklu Modül Yapısı</h5>
+                    <p class="text-muted mb-0">Kullanıcılar ihtiyaç duydukları modülleri aynı platform içinde görüntüleyebilir.</p>
+                </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="module-card">
-                        <span class="module-tag">Modül</span>
-                        <h3>CRM Management</h3>
-                        <p>
-                            Müşteri takibi, pipeline yönetimi, görev planlama ve ekip koordinasyonunu tek panelden yönetin.
-                        </p>
-
-                        <div class="mt-4">
-                            <span class="pill">Pipeline Takibi</span>
-                            <span class="pill">Müşteri Yönetimi</span>
-                            <span class="pill">Görev Kontrolü</span>
-                            <span class="pill">Raporlama</span>
-                        </div>
-
-                        <a href="/Home/SignIn" class="btn btn-main mt-4">CRM'i Keşfet</a>
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#eff6ff; color:#2563eb;">
+                        <i class="fa-solid fa-user-shield"></i>
                     </div>
+                    <h5 class="fw-bold">Rol ve Yetki Yönetimi</h5>
+                    <p class="text-muted mb-0">Her kullanıcıya şirketine ve yetkisine göre doğru ekranları gösterin.</p>
                 </div>
+            </div>
 
-                <div class="col-lg-6">
-                    <div class="module-card">
-                        <span class="module-tag">Modül</span>
-                        <h3>Social Media Management</h3>
-                        <p>
-                            İçerik planlama, onay akışları, yayın takvimi ve kişisel markalaşma süreçlerini kolaylaştırın.
-                        </p>
-
-                        <div class="mt-4">
-                            <span class="pill">İçerik Planlama</span>
-                            <span class="pill">Onay Süreci</span>
-                            <span class="pill">Takvim Yönetimi</span>
-                            <span class="pill">Personal Branding</span>
-                        </div>
-
-                        <a href="/Home/SignIn" class="btn btn-main mt-4">Social Media'yı Keşfet</a>
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#ecfdf3; color:#16a34a;">
+                        <i class="fa-solid fa-chart-line"></i>
                     </div>
+                    <h5 class="fw-bold">Dashboard Deneyimi</h5>
+                    <p class="text-muted mb-0">Şirket bazlı verileri, içerik özetlerini ve satış görünümünü tek bakışta takip edin.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#fff7ed; color:#d97706;">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <h5 class="fw-bold">Takvim ve Planlama</h5>
+                    <p class="text-muted mb-0">Sosyal medya içerikleri ve operasyonel süreçler için düzenli çalışma alanı oluşturun.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#fef2f2; color:#dc2626;">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <h5 class="fw-bold">Şirket Bazlı Görünüm</h5>
+                    <p class="text-muted mb-0">Her kullanıcı yalnızca kendi şirketine ait verileri görsün, adminler toplam tabloyu izlesin.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:#fff4d6; color:#ffb71b;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h5 class="fw-bold">Geliştirilebilir Altyapı</h5>
+                    <p class="text-muted mb-0">Finance, automation ve yeni modüller için genişleyebilen bir yapı sunar.</p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section id="features" class="section-space soft-section">
-        <div class="container">
-            <div class="mb-5">
-                <div class="text-uppercase fw-bold mb-2" style="color:var(--primary); letter-spacing:2px; font-size:13px;">Öne Çıkan Özellikler</div>
-                <h2 class="section-title">Büyüyen ekipler için düzenli, güvenli ve esnek altyapı.</h2>
+<section id="preview" class="section-space">
+    <div class="container">
+        <div class="mb-5">
+            <div class="text-uppercase fw-bold mb-2" style="color:var(--primary); letter-spacing:2px; font-size:13px;">Ekran Deneyimi</div>
+            <h2 class="section-title">Her modül kendi iş akışına göre tasarlanır.</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="preview-card">
+                    <div class="preview-image"></div>
+                    <h5 class="fw-bold mt-4">CRM Workspace</h5>
+                    <p class="text-muted mb-0">
+                        Satış süreçlerini, müşteri listesini ve pipeline akışını yönetmek için tasarlandı.
+                    </p>
+                </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-md-6 col-xl-4">
-                    <div class="feature-card">
-                        <div class="feature-icon" style="background:#fff4d6; color:#ffb71b;">
-                            <i class="fa-solid fa-cubes"></i>
-                        </div>
-                        <h5 class="fw-bold">Çoklu Modül Yapısı</h5>
-                        <p class="text-muted mb-0">Kullanıcılar ihtiyaç duydukları modülleri aynı platform içinde görüntüleyebilir.</p>
-                    </div>
+            <div class="col-lg-4">
+                <div class="preview-card">
+                    <div class="preview-image"></div>
+                    <h5 class="fw-bold mt-4">Social Media Dashboard</h5>
+                    <p class="text-muted mb-0">
+                        İçerik sayıları, onay süreçleri, yaklaşan paylaşımlar ve kişisel markalaşma kartlarıyla modern bir görünüm sunar.
+                    </p>
                 </div>
+            </div>
 
-                <div class="col-md-6 col-xl-4">
-                    <div class="feature-card">
-                        <div class="feature-icon" style="background:#eff6ff; color:#2563eb;">
-                            <i class="fa-solid fa-user-shield"></i>
-                        </div>
-                        <h5 class="fw-bold">Rol ve Yetki Yönetimi</h5>
-                        <p class="text-muted mb-0">Her kullanıcıya şirketine ve yetkisine göre doğru ekranları gösterin.</p>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-4">
-                    <div class="feature-card">
-                        <div class="feature-icon" style="background:#ecfdf3; color:#16a34a;">
-                            <i class="fa-solid fa-chart-line"></i>
-                        </div>
-                        <h5 class="fw-bold">Dashboard Deneyimi</h5>
-                        <p class="text-muted mb-0">Şirket bazlı verileri, içerik özetlerini ve satış görünümünü tek bakışta takip edin.</p>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-4">
-                    <div class="feature-card">
-                        <div class="feature-icon" style="background:#fff7ed; color:#d97706;">
-                            <i class="fa-solid fa-calendar-days"></i>
-                        </div>
-                        <h5 class="fw-bold">Takvim ve Planlama</h5>
-                        <p class="text-muted mb-0">Sosyal medya içerikleri ve operasyonel süreçler için düzenli çalışma alanı oluşturun.</p>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-4">
-                    <div class="feature-card">
-                        <div class="feature-icon" style="background:#fef2f2; color:#dc2626;">
-                            <i class="fa-solid fa-building"></i>
-                        </div>
-                        <h5 class="fw-bold">Şirket Bazlı Görünüm</h5>
-                        <p class="text-muted mb-0">Her kullanıcı yalnızca kendi şirketine ait verileri görsün, adminler toplam tabloyu izlesin.</p>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-4">
-                    <div class="feature-card">
-                        <div class="feature-icon" style="background:#fff4d6; color:#ffb71b;">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        </div>
-                        <h5 class="fw-bold">Geliştirilebilir Altyapı</h5>
-                        <p class="text-muted mb-0">Finance, automation ve yeni modüller için genişleyebilen bir yapı sunar.</p>
-                    </div>
+            <div class="col-lg-4">
+                <div class="preview-card">
+                    <div class="preview-image"></div>
+                    <h5 class="fw-bold mt-4">Şirket Bazlı Yönetim</h5>
+                    <p class="text-muted mb-0">
+                        Her modülde kullanıcı bazlı filtreleme ve role özel erişim ile güvenli kullanım sağlar.
+                    </p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section id="preview" class="section-space">
-        <div class="container">
-            <div class="mb-5">
-                <div class="text-uppercase fw-bold mb-2" style="color:var(--primary); letter-spacing:2px; font-size:13px;">Ekran Deneyimi</div>
-                <h2 class="section-title">Her modül kendi iş akışına göre tasarlanır.</h2>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-lg-4">
-                    <div class="preview-card">
-                        <div class="preview-image"></div>
-                        <h5 class="fw-bold mt-4">CRM Workspace</h5>
-                        <p class="text-muted mb-0">
-                            Satış süreçlerini, müşteri listesini ve pipeline akışını yönetmek için tasarlandı.
-                        </p>
-                    </div>
+<section class="pb-5">
+    <div class="container">
+        <div class="cta-box">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <div class="text-uppercase fw-bold mb-2" style="color:#ffd76a; letter-spacing:2px; font-size:13px;">CRM Corner</div>
+                    <h2 class="fw-bold" style="font-size:38px;">
+                        İş süreçlerini tek platformda toparlamaya hazır mısın?
+                    </h2>
+                    <p class="mt-3 mb-0 text-white-50" style="line-height:1.8;">
+                        Modüllerini seç, ekibini yönet ve şirket bazlı görünüm ile operasyonlarını daha düzenli hale getir.
+                    </p>
                 </div>
-
-                <div class="col-lg-4">
-                    <div class="preview-card">
-                        <div class="preview-image"></div>
-                        <h5 class="fw-bold mt-4">Social Media Dashboard</h5>
-                        <p class="text-muted mb-0">
-                            İçerik sayıları, onay süreçleri, yaklaşan paylaşımlar ve kişisel markalaşma kartlarıyla modern bir görünüm sunar.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="preview-card">
-                        <div class="preview-image"></div>
-                        <h5 class="fw-bold mt-4">Şirket Bazlı Yönetim</h5>
-                        <p class="text-muted mb-0">
-                            Her modülde kullanıcı bazlı filtreleme ve role özel erişim ile güvenli kullanım sağlar.
-                        </p>
-                    </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="/Home/SignIn" class="btn btn-main me-2 mb-2">Giriş Yap</a>
+                    <a href="#modules" class="btn btn-light-custom mb-2">Ürünleri İncele</a>
                 </div>
             </div>
         </div>
-    </section>
-
-    <section class="pb-5">
-        <div class="container">
-            <div class="cta-box">
-                <div class="row align-items-center g-4">
-                    <div class="col-lg-8">
-                        <div class="text-uppercase fw-bold mb-2" style="color:#ffd76a; letter-spacing:2px; font-size:13px;">CRM Corner</div>
-                        <h2 class="fw-bold" style="font-size:38px;">
-                            İş süreçlerini tek platformda toparlamaya hazır mısın?
-                        </h2>
-                        <p class="mt-3 mb-0 text-white-50" style="line-height:1.8;">
-                            Modüllerini seç, ekibini yönet ve şirket bazlı görünüm ile operasyonlarını daha düzenli hale getir.
-                        </p>
-                    </div>
-                    <div class="col-lg-4 text-lg-end">
-                        <a href="/Home/SignIn" class="btn btn-main me-2 mb-2">Giriş Yap</a>
-                        <a href="#modules" class="btn btn-light-custom mb-2">Ürünleri İncele</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer-custom py-4">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-            <div>© 2026 CRM Corner. Tüm hakları saklıdır.</div>
-            <div class="d-flex gap-4">
-                <a href="#modules" class="text-decoration-none text-muted">CRM</a>
-                <a href="#modules" class="text-decoration-none text-muted">Social Media</a>
-                <a href="/Home/SignIn" class="text-decoration-none text-muted">Giriş Yap</a>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </div>
+</section>
