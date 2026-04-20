@@ -6,12 +6,14 @@ using CrmCorner.Hubs;
 using CrmCorner.Models;
 using CrmCorner.OptionModels;
 using CrmCorner.Services;
+using CrmCorner.Services.ChatCorner;
 using Google.Apis.Gmail.v1;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using System;
+using CrmCorner.Models.Settings;
 using static CrmCorner.Hubs.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +50,17 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddSingleton<IFileProvider>(
     new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
 );
+builder.Services.Configure<IyzicoSettings>(
+    builder.Configuration.GetSection("Iyzico"));
+
+builder.Services.AddScoped<IChatCornerService, ChatCornerService>();
+builder.Services.AddScoped<IChatAnalyticsService, ChatAnalyticsService>();
+builder.Services.AddScoped<IChatAuthorizationService, ChatAuthorizationService>();
+
+builder.Services.Configure<OpenAISettings>(
+    builder.Configuration.GetSection("OpenAI"));
+
+builder.Services.AddHttpClient<IAiSummaryService, AiSummaryService>();
 
 // Form seçenekleri
 builder.Services.Configure<FormOptions>(x =>

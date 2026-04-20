@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "w7fHKis64lQ=",
+  "dgSpecHash": "1SjdMtmXTFU=",
   "success": true,
   "projectFilePath": "C:\\Users\\Lenovo\\Source\\Repos\\CrmCorner\\CrmCorner\\CrmCorner.csproj",
   "expectedPackageFiles": [
@@ -73,6 +73,7 @@
     "C:\\Users\\Lenovo\\.nuget\\packages\\humanizer.core.zh-hans\\2.14.1\\humanizer.core.zh-hans.2.14.1.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\humanizer.core.zh-hant\\2.14.1\\humanizer.core.zh-hant.2.14.1.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\independentsoft.graph\\1.1.970\\independentsoft.graph.1.1.970.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\iyzipay\\2.1.78\\iyzipay.2.1.78.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\jquery\\1.6.4\\jquery.1.6.4.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\k4os.compression.lz4\\1.3.5\\k4os.compression.lz4.1.3.5.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\k4os.compression.lz4.streams\\1.3.5\\k4os.compression.lz4.streams.1.3.5.nupkg.sha512",

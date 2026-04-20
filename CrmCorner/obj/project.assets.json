@@ -895,6 +895,18 @@
           "Lib/Independentsoft.Graph.dll": {}
         }
       },
+      "Iyzipay/2.1.78": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.2"
+        },
+        "compile": {
+          "lib/netstandard2.1/Iyzipay.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/Iyzipay.dll": {}
+        }
+      },
       "jQuery/1.6.4": {
         "type": "package"
       },
@@ -14945,6 +14957,19 @@
         "independentsoft.graph.nuspec"
       ]
     },
+    "Iyzipay/2.1.78": {
+      "sha512": "Fq537JZGTXgqdek6/+mQ801pfByLaQyQ9M0K/6ujiHybhxcDmKKGIwXzbhFEAp23C9x8YV91upbsp6ZUSE0r8A==",
+      "type": "package",
+      "path": "iyzipay/2.1.78",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "iyzipay.2.1.78.nupkg.sha512",
+        "iyzipay.nuspec",
+        "lib/net45/Iyzipay.dll",
+        "lib/netstandard2.1/Iyzipay.dll"
+      ]
+    },
     "jQuery/1.6.4": {
       "sha512": "8RzoZQFeFYL/cINRXksLWyl8D5TKctZ/2G8hrlOLLM5OgFNI9h3t3l5tB+BBbsBUxaPUageVe0p9ruU5jrFeow==",
       "type": "package",
@@ -21604,6 +21629,7 @@
       "Google.Apis.Calendar.v3 >= 1.66.0.3297",
       "Google.Apis.Gmail.v1 >= 1.66.0.3287",
       "Independentsoft.Graph >= 1.1.970",
+      "Iyzipay >= 2.1.78",
       "Microsoft.AspNet.SignalR >= 2.4.3",
       "Microsoft.AspNet.SignalR.Owin >= 1.2.2",
       "Microsoft.AspNetCore.Identity >= 2.1.39",
@@ -21714,6 +21740,10 @@
           "Independentsoft.Graph": {
             "target": "Package",
             "version": "[1.1.970, )"
+          },
+          "Iyzipay": {
+            "target": "Package",
+            "version": "[2.1.78, )"
           },
           "Microsoft.AspNet.SignalR": {
             "target": "Package",

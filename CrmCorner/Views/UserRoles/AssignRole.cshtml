@@ -3,6 +3,12 @@
 @{
     ViewData["Title"] = "Rol Atama";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+
+    var assignedModules = ViewBag.UserModules as List<CrmCorner.Models.Enums.ModuleType>;
+    var teamLeaderUsers = ViewBag.TeamLeaderUsers as IList<CrmCorner.Models.AppUser>;
+    var selectedTeamLeaderIds = ViewBag.SelectedTeamLeaderIds as List<string> ?? new List<string>();
+
+    var teamMemberIndex = Model.FindIndex(x => x.RoleName == "TeamMember");
 }
 
 <h2>@ViewBag.UserName kullanıcısına rol atama</h2>
@@ -20,12 +26,18 @@
         <tbody>
             @for (int i = 0; i < Model.Count; i++)
             {
+                var isTeamMemberRole = Model[i].RoleName == "TeamMember";
+
                 <tr>
                     <td>@Model[i].RoleName</td>
                     <td>
                         <input type="hidden" name="[@i].RoleId" value="@Model[i].RoleId" />
                         <input type="hidden" name="[@i].RoleName" value="@Model[i].RoleName" />
-                        <input type="checkbox" name="[@i].IsAssigned" value="true" @(Model[i].IsAssigned ? "checked" : "") />
+                        <input type="checkbox"
+                               name="[@i].IsAssigned"
+                               value="true"
+                               @(Model[i].IsAssigned ? "checked" : "")
+                               @(isTeamMemberRole ? "id=teamMemberCheckbox" : "") />
                     </td>
                 </tr>
             }
@@ -33,10 +45,39 @@
     </table>
 
     <hr />
+
+    <div id="teamLeaderSelectionArea" style="display:none;">
+        <h4>Bağlı Olacağı Takım Liderleri</h4>
+
+        @if (teamLeaderUsers != null && teamLeaderUsers.Any())
+        {
+            @foreach (var leader in teamLeaderUsers)
+            {
+                <div class="form-check mb-2">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="SelectedTeamLeaderIds"
+                           value="@leader.Id"
+                           id="leader_@leader.Id"
+                           @(selectedTeamLeaderIds.Contains(leader.Id) ? "checked" : "") />
+
+                    <label class="form-check-label" for="leader_@leader.Id">
+                        @leader.NameSurname (@leader.UserName)
+                    </label>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                Sistemde TeamLeader rolünde kullanıcı bulunamadı.
+            </div>
+        }
+
+        <hr />
+    </div>
+
     <h4>Modules</h4>
-    @{
-        var assignedModules = ViewBag.UserModules as List<CrmCorner.Models.Enums.ModuleType>;
-    }
 
     <div class="form-check">
         <input class="form-check-input"
@@ -61,3 +102,30 @@
     <button type="submit" class="btn btn-success">Kaydet</button>
     <a asp-action="Index" class="btn btn-secondary">Geri</a>
 </form>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var teamMemberCheckbox = document.getElementById("teamMemberCheckbox");
+            var teamLeaderSelectionArea = document.getElementById("teamLeaderSelectionArea");
+
+            function toggleTeamLeaderArea() {
+                if (teamMemberCheckbox && teamMemberCheckbox.checked) {
+                    teamLeaderSelectionArea.style.display = "block";
+                } else {
+                    teamLeaderSelectionArea.style.display = "none";
+
+                    var checkboxes = teamLeaderSelectionArea.querySelectorAll("input[type='checkbox']");
+                    checkboxes.forEach(function (cb) {
+                        cb.checked = false;
+                    });
+                }
+            }
+
+            if (teamMemberCheckbox) {
+                toggleTeamLeaderArea();
+                teamMemberCheckbox.addEventListener("change", toggleTeamLeaderArea);
+            }
+        });
+    </script>
+}

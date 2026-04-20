@@ -254,7 +254,11 @@
                         <li>Bulut erişim</li>
                     </ul>
 
-                    <a href="#" class="buy-btn secondary">Satın Al</a>
+                    <form method="get" action="/Payment/Checkout">
+                        <input type="hidden" name="planName" value="Gold" />
+                        <input type="hidden" id="goldUserCountInput" name="userCount" value="1" />
+                        <button type="submit" class="buy-btn secondary">Satın Al</button>
+                    </form>
                 </div>
             </div>
 
@@ -281,7 +285,11 @@
                         <li>Bulut erişim</li>
                     </ul>
 
-                    <a href="#" class="buy-btn">Satın Al</a>
+                    <form method="get" action="/Payment/Checkout">
+                        <input type="hidden" name="planName" value="Platinum" />
+                        <input type="hidden" id="platinumUserCountInput" name="userCount" value="1" />
+                        <button type="submit" class="buy-btn">Satın Al</button>
+                    </form>
                 </div>
             </div>
 
@@ -348,4 +356,39 @@
         userCountSelect.addEventListener("change", calculatePrices);
         calculatePrices();
     });
+
+
+
+
+     document.addEventListener("DOMContentLoaded", function () {
+        const userCountSelect = document.getElementById("userCount");
+        const goldPrice = document.getElementById("goldPrice");
+        const platinumPrice = document.getElementById("platinumPrice");
+        const goldUserCountInput = document.getElementById("goldUserCountInput");
+        const platinumUserCountInput = document.getElementById("platinumUserCountInput");
+
+        const goldUnitPrice = 1000;
+        const platinumUnitPrice = 5000;
+
+        function formatPrice(price) {
+            return "₺" + price.toLocaleString("tr-TR");
+        }
+
+        function calculatePrices() {
+            const userCount = parseInt(userCountSelect.value);
+
+            const goldTotal = goldUnitPrice * userCount;
+            const platinumTotal = platinumUnitPrice * userCount;
+
+            goldPrice.textContent = formatPrice(goldTotal);
+            platinumPrice.textContent = formatPrice(platinumTotal);
+
+            goldUserCountInput.value = userCount;
+            platinumUserCountInput.value = userCount;
+        }
+
+        userCountSelect.addEventListener("change", calculatePrices);
+        calculatePrices();
+    });
+
 </script>

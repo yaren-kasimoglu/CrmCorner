@@ -200,6 +200,242 @@
                 flex-shrink: 0;
             }
         }
+
+#chatCornerWidget {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 9999;
+    font-family: inherit;
+}
+
+#chatCornerToggle {
+    border: none;
+    border-radius: 999px;
+    padding: 14px 18px;
+    background: #ffb71b;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 10px 30px rgba(255,183,27,.28);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.chatcorner-panel {
+    width: 380px;
+    height: 560px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(255,183,27,.18);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+    border: 1px solid #ffe3a3;
+}
+
+.chatcorner-header {
+    background: linear-gradient(135deg, #ffb71b, #ff9800);
+    color: #fff;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatcorner-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.chatcorner-subtitle {
+    font-size: 12px;
+    opacity: .85;
+    margin-top: 2px;
+}
+
+.chatcorner-close {
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.chatcorner-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #fffaf0;
+}
+
+.chat-msg {
+    display: flex;
+    margin-bottom: 12px;
+}
+
+.chat-msg.user {
+    justify-content: flex-end;
+}
+
+.chat-msg.bot {
+    justify-content: flex-start;
+}
+
+..chat-bubble {
+    max-width: 90%;
+    padding: 13px 15px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-line;
+    word-break: break-word;
+}
+
+.chat-msg.user .chat-bubble {
+    background: #ffb71b;
+    color: #fff;
+    border-bottom-right-radius: 6px;
+}
+
+.chat-msg.bot .chat-bubble {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ececf3;
+    border-bottom-left-radius: 6px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.04);
+}
+
+.chatcorner-suggestions {
+    padding: 10px 14px 0 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #fff;
+}
+
+.chatcorner-suggestions button {
+    border: 1px solid #ddd;
+    background: #fafafa;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.chatcorner-suggestions button:hover {
+    background: #f3ebfb;
+    border-color: #caa7eb;
+    color: #4b1d73;
+}
+
+.chatcorner-input-area-wrapper {
+    position: relative;
+    padding: 14px;
+    background: #fff;
+    border-top: 1px solid #eee;
+}
+
+.chatcorner-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-user-suggestions {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 68px;
+    background: #fff;
+    border: 1px solid #e6d6f5;
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.08);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 20;
+}
+
+.chat-user-suggestion-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3ecfa;
+}
+
+.chat-user-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.chat-user-suggestion-item:hover {
+    background: #faf5ff;
+}
+
+.chat-user-suggestion-name {
+    font-weight: 600;
+    color: #4b1d73;
+    font-size: 13px;
+}
+
+.chat-user-suggestion-email {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.chatcorner-send-btn {
+    background: #ffb71b;
+    border: none;
+    color: #ffffff;
+    padding: 0 18px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 92px;
+    transition: all .2s ease;
+    box-shadow: 0 4px 12px rgba(255, 183, 27, 0.28);
+}
+
+.chatcorner-send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(255, 183, 27, 0.38);
+    filter: brightness(1.03);
+}
+
+.chatcorner-send-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(255, 183, 27, 0.25);
+}
+
+.chatcorner-send-btn:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.d-none {
+    display: none !important;
+}
+
+@@media (max-width: 576px) {
+    #chatCornerWidget {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+    }
+
+    .chatcorner-panel {
+        width: 100%;
+        height: 70vh;
+    }
+
+    #chatCornerToggle {
+        margin-left: auto;
+    }
+}
     </style>
 </head>
 
@@ -535,12 +771,273 @@
         }
     </script>
 
-     <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
 
+        <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
+
+   @*  <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>*@
 
 
     @RenderSection("Scripts", required: false)
+
+
+
+    <div id="chatCornerWidget">
+    <button id="chatCornerToggle" type="button" onclick="toggleChatCorner()">
+        <span>💬</span>
+        <span>ChatCorner</span>
+    </button>
+
+    <div id="chatCornerPanel" class="chatcorner-panel d-none">
+        <div class="chatcorner-header">
+            <div>
+                <div class="chatcorner-title">ChatCorner</div>
+                <div class="chatcorner-subtitle">CRM asistanınız</div>
+            </div>
+            <button type="button" class="chatcorner-close" onclick="toggleChatCorner()">×</button>
+        </div>
+
+        <div id="chatCornerMessages" class="chatcorner-messages">
+            <div class="chat-msg bot">
+                <div class="chat-bubble">
+                    Merhaba, ben ChatCorner. CRM verilerinizi analiz edebilirim.
+                </div>
+            </div>
+        </div>
+
+<div class="chatcorner-suggestions">
+    <button type="button" onclick="setChatQuestion('Bu ayki tasklarım ne durumda?')">Bu ayki tasklarım</button>
+    <button type="button" onclick="setChatQuestion('Geçen ay durumum nasıldı?')">Geçen ay durumum</button>
+    <button type="button" onclick="setChatQuestion('Bu yıl performansım nasıl?')">Bu yıl performansım</button>
+</div>
+
+        <div class="chatcorner-input-area-wrapper">
+    <div id="chatUserSuggestions" class="chat-user-suggestions d-none"></div>
+
+<div class="chatcorner-input-area-wrapper">
+    <div id="chatUserSuggestions" class="chat-user-suggestions d-none"></div>
+
+    <div class="chatcorner-input-area">
+        <input type="text"
+               id="chatCornerQuestion"
+               placeholder="Örn: @@yaren bu ay nasıldı?"
+               onkeydown="handleChatCornerKey(event)"
+               oninput="handleMentionSearch()"
+               autocomplete="off" />
+        <button type="button" class="chatcorner-send-btn"  onclick="askChatCorner()">Gönder</button>
+    </div>
+</div>
+</div>
+    </div>
+</div>
+
+
+
+<script>
+    let selectedMentionUser = null;
+    let mentionSearchTimeout = null;
+
+    function toggleChatCorner() {
+        const panel = document.getElementById("chatCornerPanel");
+        panel.classList.toggle("d-none");
+
+        setTimeout(function () {
+            const input = document.getElementById("chatCornerQuestion");
+            if (input && !panel.classList.contains("d-none")) {
+                input.focus();
+            }
+        }, 150);
+    }
+     function setChatQuestion(text) {
+        const input = document.getElementById("chatCornerQuestion");
+        input.value = text;
+        input.focus();
+        handleMentionSearch();
+    }
+
+ function handleChatCornerKey(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            askChatCorner();
+        }
+    }
+
+    function appendMessage(sender, text, isHtml, elementId) {
+        const messages = document.getElementById("chatCornerMessages");
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "chat-msg " + sender;
+
+        const bubble = document.createElement("div");
+        bubble.className = "chat-bubble";
+
+        if (elementId) {
+            bubble.id = elementId;
+        }
+
+        if (isHtml) {
+            bubble.innerHTML = text;
+        } else {
+            bubble.textContent = text;
+        }
+
+        wrapper.appendChild(bubble);
+        messages.appendChild(wrapper);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+
+     async function searchChatUsers(query) {
+        const suggestionsBox = document.getElementById("chatUserSuggestions");
+
+        if (!query || query.trim().length < 1) {
+            suggestionsBox.classList.add("d-none");
+            suggestionsBox.innerHTML = "";
+            return;
+        }
+         try {
+            const response = await fetch("/ChatCorner/SearchUsers?q=" + encodeURIComponent(query));
+            const users = await response.json();
+
+            if (!users || users.length === 0) {
+                suggestionsBox.classList.add("d-none");
+                suggestionsBox.innerHTML = "";
+                return;
+            }
+
+            suggestionsBox.innerHTML = "";
+
+            users.forEach(function (user) {
+                const item = document.createElement("div");
+                item.className = "chat-user-suggestion-item";
+                item.onclick = function () {
+                    selectMentionUser(user.id, user.name || "", user.email || "");
+                };
+
+                const nameDiv = document.createElement("div");
+                nameDiv.className = "chat-user-suggestion-name";
+                nameDiv.textContent = user.name || "";
+
+                const emailDiv = document.createElement("div");
+                emailDiv.className = "chat-user-suggestion-email";
+                emailDiv.textContent = user.email || "";
+
+                item.appendChild(nameDiv);
+                item.appendChild(emailDiv);
+                suggestionsBox.appendChild(item);
+            });
+
+            suggestionsBox.classList.remove("d-none");
+        } catch (error) {
+            suggestionsBox.classList.add("d-none");
+            suggestionsBox.innerHTML = "";
+        }
+    }
+
+
+    function selectMentionUser(userId, userName, userEmail) {
+        const input = document.getElementById("chatCornerQuestion");
+        const suggestionsBox = document.getElementById("chatUserSuggestions");
+
+        selectedMentionUser = {
+            id: userId,
+            name: userName,
+            email: userEmail
+        };
+
+        const currentText = input.value;
+        const atIndex = currentText.lastIndexOf("@@");
+
+        if (atIndex >= 0) {
+            const beforeAt = currentText.substring(0, atIndex);
+            input.value = beforeAt + "@@" + userEmail + " ";
+        } else {
+            input.value = "@@" + userEmail + " ";
+        }
+
+        suggestionsBox.classList.add("d-none");
+        suggestionsBox.innerHTML = "";
+        input.focus();
+    }
+
+
+     function handleMentionSearch() {
+        const input = document.getElementById("chatCornerQuestion");
+        const suggestionsBox = document.getElementById("chatUserSuggestions");
+        const text = input.value;
+
+        const atIndex = text.lastIndexOf("@@");
+        if (atIndex < 0) {
+            suggestionsBox.classList.add("d-none");
+            suggestionsBox.innerHTML = "";
+            return;
+        }
+        const afterAt = text.substring(atIndex + 1).trim();
+
+        if (afterAt.indexOf(" ") >= 0) {
+            suggestionsBox.classList.add("d-none");
+            suggestionsBox.innerHTML = "";
+            return;
+        }
+
+        clearTimeout(mentionSearchTimeout);
+        mentionSearchTimeout = setTimeout(function () {
+            searchChatUsers(afterAt);
+        }, 250);
+    }
+
+    async function askChatCorner() {
+        const input = document.getElementById("chatCornerQuestion");
+        const suggestionsBox = document.getElementById("chatUserSuggestions");
+        const question = input.value.trim();
+
+        if (!question) return;
+
+        suggestionsBox.classList.add("d-none");
+        suggestionsBox.innerHTML = "";
+
+        appendMessage("user", question, false, null);
+        input.value = "";
+        input.focus();
+
+        appendMessage("bot", "Yazıyor...", false, "chatcorner-typing");
+
+        try {
+            const response = await fetch("/ChatCorner/Ask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question: question })
+            });
+
+            const data = await response.json();
+
+            const typing = document.getElementById("chatcorner-typing");
+            if (typing) {
+                typing.parentElement.remove();
+            }
+
+            if (data.success) {
+                appendMessage("bot", data.answer, false, null);
+            } else {
+                appendMessage("bot", "Hata: " + (data.errorMessage || "Bilinmeyen hata oluştu."), false, null);
+            }
+        } catch (error) {
+            const typing = document.getElementById("chatcorner-typing");
+            if (typing) {
+                typing.parentElement.remove();
+            }
+
+            appendMessage("bot", "Hata: İstek sırasında bir sorun oluştu.", false, null);
+        }
+    }
+
+</script>
+
+
+
+
 </body>
 </html>

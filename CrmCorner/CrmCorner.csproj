@@ -34,6 +34,7 @@
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="EPPlus" Version="7.4.0" />
+    <PackageReference Include="Iyzipay" Version="2.1.78" />
     <PackageReference Include="Microsoft.AspNet.SignalR" Version="2.4.3" />
     <PackageReference Include="Microsoft.AspNet.SignalR.Owin" Version="1.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.39" />
@@ -87,6 +88,7 @@
   <ItemGroup>
     <Folder Include="Areas\" />
     <Folder Include="Views\Calendar\" />
+    <Folder Include="wwwroot\images\payment\" />
 
     <Folder Include="wwwroot\json\" />
     <Folder Include="Views\ToDoList\" />
