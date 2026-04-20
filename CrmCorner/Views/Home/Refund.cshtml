@@ -1,0 +1,180 @@
+﻿@{
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+    ViewData["Title"] = "Teslimat ve İade Politikası";
+}
+
+<style>
+    .policy-page {
+        background: linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);
+        min-height: 100vh;
+        padding: 70px 0;
+    }
+
+    .policy-card {
+        max-width: 950px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 26px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 18px 45px rgba(15,23,42,.08);
+        padding: 55px;
+    }
+
+    .policy-title {
+        font-size: 42px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .policy-subtitle {
+        text-align: center;
+        color: #6b7280;
+        font-size: 17px;
+        margin-bottom: 45px;
+        line-height: 1.7;
+    }
+
+    .policy-section {
+        margin-bottom: 34px;
+    }
+
+        .policy-section h2 {
+            font-size: 24px;
+            font-weight: 750;
+            color: #111827;
+            margin-bottom: 14px;
+        }
+
+        .policy-section p,
+        .policy-section li {
+            color: #4b5563;
+            font-size: 16px;
+            line-height: 1.9;
+        }
+
+        .policy-section ul {
+            padding-left: 22px;
+            margin-bottom: 0;
+        }
+
+    .highlight-box {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 22px;
+        margin-top: 18px;
+    }
+
+    .contact-box {
+        background: linear-gradient(135deg,#0d6efd 0%,#2563eb 100%);
+        color: #fff;
+        border-radius: 20px;
+        padding: 28px;
+        margin-top: 25px;
+    }
+
+        .contact-box h3 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .contact-box p {
+            margin-bottom: 8px;
+            line-height: 1.8;
+            color: rgba(255,255,255,.95);
+        }
+
+        .contact-box a {
+            color: #fff;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+    @@media(max-width:768px) {
+        .policy-card {
+            padding: 28px;
+        }
+
+        .policy-title {
+            font-size: 32px;
+        }
+    }
+</style>
+
+<div class="policy-page">
+    <div class="container">
+        <div class="policy-card">
+
+            <h1 class="policy-title">Teslimat ve İade Politikası</h1>
+
+            <p class="policy-subtitle">
+                CRM Corner, işletmelerin satış süreçlerini yönetmesine yardımcı olan dijital bir yazılım hizmetidir.
+                Bu sayfada satın alma sonrası erişim, teslimat, iptal ve iade süreçleri hakkında bilgilendirme yer almaktadır.
+            </p>
+
+            <div class="policy-section">
+                <h2>1. Hizmet Teslimatı</h2>
+                <p>
+                    CRM Corner üzerinden satın alınan paketler fiziksel ürün değildir. Satın alma işlemi sonrasında
+                    kullanıcı hesabına dijital erişim tanımlanır ve hizmet çevrim içi olarak sunulur.
+                </p>
+
+                <div class="highlight-box">
+                    <p class="mb-0">
+                        Paket aktivasyonu ödeme onayı sonrasında otomatik veya manuel kontrol sonrası kısa süre içinde tamamlanır.
+                    </p>
+                </div>
+            </div>
+
+            <div class="policy-section">
+                <h2>2. Abonelik ve Kullanım Süresi</h2>
+                <p>
+                    Satın alınan paketler seçilen plana göre aylık, dönemsel veya yıllık kullanım hakkı sağlar.
+                    Paket süresi ve kullanıcı limitleri satın alma sırasında belirtilen plana göre tanımlanır.
+                </p>
+            </div>
+
+            <div class="policy-section">
+                <h2>3. İptal Politikası</h2>
+                <p>
+                    Kullanıcı, yenilenecek abonelikleri bir sonraki dönem başlamadan önce iptal talebinde bulunabilir.
+                    İptal sonrası mevcut dönem sonuna kadar erişim devam edebilir.
+                </p>
+            </div>
+
+            <div class="policy-section">
+                <h2>4. İade Politikası</h2>
+                <ul>
+                    <li>Yanlış / mükerrer ödeme durumlarında inceleme sonrası iade yapılabilir.</li>
+                    <li>Teknik nedenlerle hizmetin sunulamaması halinde talep değerlendirilir.</li>
+                    <li>Aktif şekilde kullanılan dijital hizmetlerde kısmi veya tam iade duruma göre değerlendirilir.</li>
+                    <li>İade talepleri ödeme yöntemi kurallarına uygun şekilde sonuçlandırılır.</li>
+                </ul>
+            </div>
+
+            <div class="policy-section">
+                <h2>5. Değerlendirme Süreci</h2>
+                <p>
+                    Tüm iptal ve iade talepleri kullanıcı bilgileri, ödeme kaydı ve kullanım durumu dikkate alınarak incelenir.
+                    Sonuç, başvuru sahibine e-posta yoluyla bildirilir.
+                </p>
+            </div>
+
+            <div class="policy-section">
+                <h2>6. İletişim</h2>
+
+                <div class="contact-box">
+                    <h3>Destek ve Başvuru</h3>
+                    <p>İptal veya iade talepleriniz için bizimle iletişime geçebilirsiniz.</p>
+                    <p>E-posta: <a href="mailto:info@saascorner.co">info@saascorner.co</a></p>
+                    <p>Marka: SAAS Corner</p>
+                    <p>Ürün: CRM Corner</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

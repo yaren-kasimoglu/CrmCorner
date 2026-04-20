@@ -37,7 +37,6 @@ namespace CrmCorner.Controllers
             var roles = await _roleManager.Roles.ToListAsync();
             var userRoles = await _userManager.GetRolesAsync(user);
 
-            // Kullanıcının modüllerini getir
             var userModules = await _context.UserModules
                 .Where(x => x.UserId == userId)
                 .Select(x => x.Module)
@@ -50,25 +49,57 @@ namespace CrmCorner.Controllers
                 IsAssigned = userRoles.Contains(r.Name)
             }).ToList();
 
+            // TeamLeader rolündeki kullanıcıları getir
+            var teamLeaderUsers = await _userManager.GetUsersInRoleAsync("TeamLeader");
+
+            // Bu kullanıcıya atanmış TeamLeader'ları getir
+            var selectedTeamLeaderIds = await _context.TeamLeaderMembers
+                .Where(x => x.TeamMemberId == userId)
+                .Select(x => x.TeamLeaderId)
+                .ToListAsync();
+
             ViewBag.UserId = userId;
             ViewBag.UserName = user.UserName;
             ViewBag.UserModules = userModules;
+            ViewBag.TeamLeaderUsers = teamLeaderUsers;
+            ViewBag.SelectedTeamLeaderIds = selectedTeamLeaderIds;
 
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AssignRole(string userId, List<UserRoleAssignViewModel> model, List<int> SelectedModules)
+        public async Task<IActionResult> AssignRole(
+    string userId,
+    List<UserRoleAssignViewModel> model,
+    List<int> SelectedModules,
+    List<string> SelectedTeamLeaderIds)
         {
             if (!ModelState.IsValid)
+            {
+                var userModules = await _context.UserModules
+                    .Where(x => x.UserId == userId)
+                    .Select(x => x.Module)
+                    .ToListAsync();
+
+                var teamLeaderUsers = await _userManager.GetUsersInRoleAsync("TeamLeader");
+                var selectedTeamLeaderIdsFromDb = await _context.TeamLeaderMembers
+                    .Where(x => x.TeamMemberId == userId)
+                    .Select(x => x.TeamLeaderId)
+                    .ToListAsync();
+
+                ViewBag.UserId = userId;
+                ViewBag.UserModules = userModules;
+                ViewBag.TeamLeaderUsers = teamLeaderUsers;
+                ViewBag.SelectedTeamLeaderIds = selectedTeamLeaderIdsFromDb;
+
                 return View(model);
+            }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return NotFound($"User {userId} bulunamadı!");
             }
-
 
             foreach (var role in model)
             {
@@ -87,6 +118,24 @@ namespace CrmCorner.Controllers
                         if (!result.Succeeded)
                         {
                             ModelState.AddModelError("", $"Rol eklenemedi: {role.RoleName} - {string.Join(", ", result.Errors.Select(e => e.Description))}");
+
+                            var userModules = await _context.UserModules
+                                .Where(x => x.UserId == userId)
+                                .Select(x => x.Module)
+                                .ToListAsync();
+
+                            var teamLeaderUsers = await _userManager.GetUsersInRoleAsync("TeamLeader");
+                            var selectedTeamLeaderIdsFromDb = await _context.TeamLeaderMembers
+                                .Where(x => x.TeamMemberId == userId)
+                                .Select(x => x.TeamLeaderId)
+                                .ToListAsync();
+
+                            ViewBag.UserId = userId;
+                            ViewBag.UserName = user.UserName;
+                            ViewBag.UserModules = userModules;
+                            ViewBag.TeamLeaderUsers = teamLeaderUsers;
+                            ViewBag.SelectedTeamLeaderIds = selectedTeamLeaderIdsFromDb;
+
                             return View(model);
                         }
                     }
@@ -100,6 +149,7 @@ namespace CrmCorner.Controllers
                 }
             }
 
+            // Module kayıtlarını güncelle
             var existingModules = _context.UserModules.Where(x => x.UserId == userId);
             _context.UserModules.RemoveRange(existingModules);
 
@@ -115,10 +165,34 @@ namespace CrmCorner.Controllers
                 }
             }
 
+            // Kullanıcı TeamMember mi kontrol et
+            var isTeamMemberSelected = model.Any(x => x.RoleName == "TeamMember" && x.IsAssigned);
+
+            // Önce eski eşleşmeleri sil
+            var existingTeamLeaderRelations = _context.TeamLeaderMembers.Where(x => x.TeamMemberId == userId);
+            _context.TeamLeaderMembers.RemoveRange(existingTeamLeaderRelations);
+
+            // Eğer TeamMember ise seçilen TeamLeader'ları kaydet
+            if (isTeamMemberSelected && SelectedTeamLeaderIds != null && SelectedTeamLeaderIds.Any())
+            {
+                foreach (var teamLeaderId in SelectedTeamLeaderIds.Distinct())
+                {
+                    if (teamLeaderId != userId) // kendisini lider seçemesin
+                    {
+                        _context.TeamLeaderMembers.Add(new TeamLeaderMember
+                        {
+                            TeamMemberId = userId,
+                            TeamLeaderId = teamLeaderId
+                        });
+                    }
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Index");
         }
+
 
     }
 }

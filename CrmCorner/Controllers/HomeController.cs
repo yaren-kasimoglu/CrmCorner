@@ -64,6 +64,12 @@ namespace CrmCorner.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        public IActionResult Refund()
+        {
+            return View();
+        }
+
 
         public async Task<IActionResult> Index()
         {

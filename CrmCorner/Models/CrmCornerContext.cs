@@ -74,7 +74,7 @@ namespace CrmCorner.Models
         public DbSet<GoogleCalendarToken> GoogleCalendarTokens { get; set; }
 
 
-
+        public DbSet<TeamLeaderMember> TeamLeaderMembers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -208,6 +208,19 @@ namespace CrmCorner.Models
             modelBuilder.Entity<FinanceInvoice>()
       .HasIndex(x => new { x.CompanyId, x.ContractId, x.PeriodYear, x.PeriodMonth })
       .IsUnique();
+
+
+            modelBuilder.Entity<TeamLeaderMember>()
+       .HasOne(x => x.TeamMember)
+       .WithMany()
+       .HasForeignKey(x => x.TeamMemberId)
+       .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TeamLeaderMember>()
+                .HasOne(x => x.TeamLeader)
+                .WithMany()
+                .HasForeignKey(x => x.TeamLeaderId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             OnModelCreatingPartial(modelBuilder);

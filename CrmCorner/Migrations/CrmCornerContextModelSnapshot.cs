@@ -297,34 +297,21 @@ namespace CrmCorner.Migrations
                     b.Property<string>("AppUserId")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)");
 
-                    b.Property<string>("Email")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<DateTime?>("EndDate")
+                    b.Property<DateTime>("EndDate")
                         .HasMaxLength(50)
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("GoogleEventId")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Guid")
-                        .HasColumnType("longtext");
-
                     b.Property<bool>("IsSyncedWithGoogle")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("StartDate")
+                    b.Property<DateTime>("StartDate")
                         .HasMaxLength(50)
                         .HasColumnType("datetime(6)");
 
@@ -332,9 +319,6 @@ namespace CrmCorner.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
-
-                    b.Property<int?>("ToId")
-                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
@@ -1336,6 +1320,29 @@ namespace CrmCorner.Migrations
                     b.ToTable("TaskCompNotes");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.TeamLeaderMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("TeamLeaderId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("TeamMemberId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamLeaderId");
+
+                    b.HasIndex("TeamMemberId");
+
+                    b.ToTable("TeamLeaderMembers");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.TodoBoard", b =>
                 {
                     b.Property<int>("Id")
@@ -1805,6 +1812,25 @@ namespace CrmCorner.Migrations
                         .IsRequired();
 
                     b.Navigation("TaskComp");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.TeamLeaderMember", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "TeamLeader")
+                        .WithMany()
+                        .HasForeignKey("TeamLeaderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CrmCorner.Models.AppUser", "TeamMember")
+                        .WithMany()
+                        .HasForeignKey("TeamMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TeamLeader");
+
+                    b.Navigation("TeamMember");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.TodoEntry", b =>

@@ -1,0 +1,352 @@
+﻿@{
+    ViewData["Title"] = "Ödeme";
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+
+    var planName = ViewBag.PlanName as string;
+    var userCount = ViewBag.UserCount ?? 1;
+    var totalPrice = ViewBag.TotalPrice ?? 0;
+}
+
+<style>
+    .checkout-page {
+        background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        min-height: 100vh;
+        padding: 60px 0 80px 0;
+    }
+
+    .checkout-wrapper {
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    .checkout-title {
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 42px;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .checkout-subtitle {
+        text-align: center;
+        color: #6b7280;
+        margin-bottom: 42px;
+        font-size: 17px;
+    }
+
+    .checkout-card {
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid #e9eef5;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        padding: 32px;
+        height: 100%;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 22px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
+        color: #374151;
+    }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+    .summary-total {
+        font-size: 30px;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .secure-box {
+        background: linear-gradient(180deg, #f9fbff 0%, #f4f8ff 100%);
+        border: 1px solid #dbe7ff;
+        border-radius: 20px;
+        padding: 22px;
+        margin-top: 24px;
+    }
+
+    .secure-badge {
+        display: inline-block;
+        background: #eaf2ff;
+        color: #0d6efd;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .payment-logos {
+        background: #fff;
+        padding: 10px 14px;
+        border-radius: 14px;
+        display: inline-flex;
+        gap: 14px;
+        align-items: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,.05);
+    }
+
+    footer {
+        border-top: 1px solid #ececec;
+    }
+
+    .logo-chip {
+        padding: 10px 16px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .info-list {
+        padding-left: 18px;
+        color: #4b5563;
+        line-height: 1.8;
+        margin-bottom: 0;
+    }
+
+    .order-mini-box {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 20px;
+        margin-top: 24px;
+    }
+
+    .order-mini-badge {
+        display: inline-block;
+        background: #eef2ff;
+        color: #4f46e5;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .form-card {
+        margin-top: 24px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border-radius: 14px;
+        min-height: 48px;
+        border: 1px solid #dbe3ee;
+        box-shadow: none;
+    }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+        }
+
+    .pay-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        text-align: center;
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        color: #fff;
+        text-decoration: none;
+        padding: 16px 20px;
+        border-radius: 16px;
+        font-weight: 700;
+        border: none;
+        transition: .3s ease;
+        margin-top: 24px;
+        box-shadow: 0 10px 25px rgba(13, 110, 253, 0.22);
+    }
+
+        .pay-btn:hover {
+            background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+    .pay-btn-sub {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        opacity: .92;
+        margin-top: 3px;
+    }
+
+    .checkout-footer-note {
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.8;
+        margin-top: 28px;
+    }
+
+        .checkout-footer-note a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+            .checkout-footer-note a:hover {
+                text-decoration: underline;
+            }
+
+    @@media (max-width: 768px) {
+        .checkout-title {
+            font-size: 32px;
+        }
+
+        .checkout-card {
+            padding: 24px;
+        }
+
+        .summary-total {
+            font-size: 26px;
+        }
+    }
+</style>
+
+<div class="checkout-page">
+    <div class="container checkout-wrapper">
+        <h1 class="checkout-title">Güvenli Ödeme</h1>
+        <p class="checkout-subtitle">
+            Seçtiğiniz paketi gözden geçirin ve ödeme adımına güvenle ilerleyin.
+        </p>
+
+        <form method="post" action="/Payment/StartCheckout">
+            <input type="hidden" name="planName" value="@planName" />
+            <input type="hidden" name="userCount" value="@userCount" />
+
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="checkout-card">
+                        <h2 class="section-title">Sipariş Özeti</h2>
+
+                        <div class="summary-row">
+                            <span>Paket</span>
+                            <strong>@planName</strong>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Kullanıcı Sayısı</span>
+                            <strong>@userCount</strong>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Ara Toplam</span>
+                            <strong>₺@Convert.ToDecimal(totalPrice).ToString("N0")</strong>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Toplam</span>
+                            <span class="summary-total">₺@Convert.ToDecimal(totalPrice).ToString("N0")</span>
+                        </div>
+
+                        <div class="secure-box">
+                            <div class="secure-badge">iyzico ile güvenli ödeme</div>
+                            <p class="mb-2 text-muted">
+                                Ödeme işlemleriniz güvenli altyapı üzerinden gerçekleştirilecektir.
+                            </p>
+
+                            <div class="payment-logos">
+                                <img src="~/images/payment/iyzico.jpeg" />
+                            </div>
+                            <div class="secure-note">
+                                <i class="fa-solid fa-lock me-1"></i>
+                                256-bit SSL korumalı güvenli ödeme
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="checkout-card">
+                        <h2 class="section-title">Ödeme Bilgileri</h2>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Ad Soyad</label>
+                                <input type="text" name="fullName" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">E-posta</label>
+                                <input type="email" name="email" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Telefon</label>
+                                <input type="text" name="phone" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Şehir</label>
+                                <input type="text" name="city" class="form-control" required />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Adres</label>
+                                <textarea name="address" class="form-control" rows="3" required></textarea>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Ülke</label>
+                                <input type="text" name="country" class="form-control" value="Turkey" required />
+                            </div>
+                        </div>
+
+                        <div class="order-mini-box">
+                            <div class="order-mini-badge">Sipariş Bilgisi</div>
+                            <p class="mb-2"><strong>Plan:</strong> @planName</p>
+                            <p class="mb-2"><strong>Kullanıcı Sayısı:</strong> @userCount</p>
+                            <p class="mb-0"><strong>Ödenecek Tutar:</strong> ₺@Convert.ToDecimal(totalPrice).ToString("N0")</p>
+                        </div>
+
+                        <div class="form-card">
+                            <h2 class="section-title">Bilgilendirme</h2>
+                            <ul class="info-list">
+                                <li>Seçtiğiniz pakete göre ödeme tutarı sistem tarafından hesaplanır.</li>
+                                <li>Ödeme tamamlandıktan sonra paket aktivasyonu başlatılır.</li>
+                                <li>Kurumsal ve özel ihtiyaçlar için bizimle iletişime geçebilirsiniz.</li>
+                                <li>Detaylı bilgi için gizlilik politikası ve kullanım şartları sayfalarımızı inceleyebilirsiniz.</li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" class="pay-btn">
+                            <span>
+                                iyzico ile Güvenli Öde
+                                <span class="pay-btn-sub">Güvenli ödeme adımına devam edin</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="checkout-footer-note">
+            Ödeme sürecine devam ederek
+            <a href="/Home/Privacy">Gizlilik Politikası</a>,
+            <a href="/Home/Terms">Kullanım Şartları</a> ve
+            <a href="/Home/DeliveryReturn">Teslimat ve İade</a>
+            sayfalarını okuduğunuzu kabul etmiş olursunuz.
+        </div>
+    </div>
+</div>

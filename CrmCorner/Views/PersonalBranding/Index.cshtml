@@ -4,21 +4,37 @@
 
 @{
     ViewData["Title"] = "Personal Branding İçerikleri";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
     var currentUser = await UserManager.GetUserAsync(User);
     var roles = await UserManager.GetRolesAsync(currentUser);
     bool isAdmin = roles.Contains("SocialMediaAdmin") || roles.Contains("Admin") || roles.Contains("SuperAdmin");
 }
 
+<style>
+    .create-btn-wrap {
+        flex: 0 0 auto;
+    }
+
+    .create-btn {
+        width: auto !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+</style>
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
             <h4 class="fw-bold mb-0">Personal Branding İçerikleri</h4>
+
             @if (isAdmin)
             {
-                <a asp-action="Create" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                    <i class="fa fa-plus me-1"></i> Yeni Yazı
-                </a>
-
+                <div class="create-btn-wrap">
+                    <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm create-btn">
+                        <i class="fa fa-plus me-1"></i> Yeni Yazı
+                    </a>
+                </div>
             }
         </div>
 
