@@ -3,17 +3,17 @@
 @using CrmCorner.Models.Enums
 @using Microsoft.EntityFrameworkCore
 @inject CrmCornerContext _context
-@inject Microsoft.AspNetCore.Identity.UserManager<CrmCorner.Models.AppUser> UserManager
 @inject UserManager<AppUser> UserManager
 
 @{
-    var currentUser = UserManager.GetUserAsync(User).Result;
+    var currentUser = await UserManager.GetUserAsync(User);
     string userRole = "";
     string userEmail = "";
+    string currentArea = ViewContext.RouteData.Values["area"]?.ToString();
 
     if (currentUser != null)
     {
-        var roles = UserManager.GetRolesAsync(currentUser).Result;
+        var roles = await UserManager.GetRolesAsync(currentUser);
         if (roles.Contains("SuperAdmin")) userRole = "SuperAdmin";
         else if (roles.Contains("Admin")) userRole = "Admin";
         else if (roles.Contains("SocialMediaAdmin")) userRole = "SocialMediaAdmin";
@@ -24,7 +24,7 @@
         userEmail = currentUser.Email;
     }
 
-    var user = await UserManager.GetUserAsync(User);
+    var user = currentUser;
 
     List<ModuleType> userModules = new List<ModuleType>();
 
@@ -75,46 +75,131 @@
             object-fit: contain;
         }
 
-        .green-light {
-            box-shadow: 0 0 5px 2px #2eacb3;
-            border: 1px solid #2eacb3;
+        .message-nav-item {
+            position: relative;
+            list-style: none;
+            margin-right: 12px;
         }
 
-        .pink-light {
-            box-shadow: 0 0 5px 2px white;
-            border: 1px solid white;
+        .message-nav-link {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none !important;
+            background: #fff8e8;
+            border: 1px solid #ffe2a0;
+            color: #ffb71b !important;
+            transition: all .2s ease;
+            position: relative;
+            box-shadow: 0 6px 18px rgba(255, 183, 27, 0.14);
+        }
+
+        .message-nav-link:hover {
+            background: #ffb71b;
+            color: #fff !important;
+            transform: translateY(-1px);
+        }
+
+        .message-nav-link i {
+            font-size: 18px;
         }
 
         .notification-count {
             position: absolute;
-            bottom: -5px;
-            right: 0;
-            color: #2eacb3;
-            font-size: 12px;
-            font-weight: bold;
+            top: -6px;
+            right: -6px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #dc2626;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            line-height: 1;
         }
 
-        #messageDropdown {
+        .message-dropdown {
             display: none;
             position: absolute;
-            top: 100%;
+            top: calc(100% + 10px);
             right: 0;
-            background-color: white;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            z-index: 1;
-            list-style: none;
-            padding: 0;
+            width: 300px;
+            min-height: 56px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 14px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .10);
+            z-index: 9999;
+            padding: 8px 0;
             margin: 0;
-            width: 200px;
+            list-style: none;
+            overflow: hidden;
         }
 
-        #messageDropdown li {
-            padding: 8px 16px;
-            border-bottom: 1px solid #ddd;
+        .message-dropdown li {
+            border-bottom: 1px solid #f3f4f6;
         }
 
-        #messageDropdown li:hover {
-            background-color: #f1f1f1;
+        .message-dropdown li:last-child {
+            border-bottom: none;
+        }
+
+        .message-dropdown li a {
+            display: block;
+            padding: 12px 14px;
+            color: #1f2937;
+            text-decoration: none;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message-dropdown li a:hover {
+            background: #fff8e8;
+            color: #b77900;
+        }
+
+        .message-sender {
+            font-weight: 700;
+            font-size: 13px;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+
+        .message-preview {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .message-empty {
+            padding: 14px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .message-nav-item.has-unread .message-nav-link {
+            animation: pulseMessageIcon 1.8s infinite;
+        }
+
+        @@keyframes pulseMessageIcon {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 183, 27, 0.35);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(255, 183, 27, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 183, 27, 0);
+            }
         }
 
         .always-open > ul {
@@ -199,243 +284,430 @@
                 display: block;
                 flex-shrink: 0;
             }
+
+            .message-dropdown {
+                right: -10px;
+                width: 240px;
+            }
         }
 
-#chatCornerWidget {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    z-index: 9999;
-    font-family: inherit;
+        #chatCornerWidget {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 9999;
+            font-family: inherit;
+        }
+
+        #chatCornerToggle {
+            border: none;
+            border-radius: 999px;
+            padding: 14px 18px;
+            background: #ffb71b;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(255,183,27,.28);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .chatcorner-panel {
+            width: 380px;
+            height: 560px;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(255,183,27,.18);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 14px;
+            border: 1px solid #ffe3a3;
+        }
+
+        .chatcorner-header {
+            background: linear-gradient(135deg, #ffb71b, #ff9800);
+            color: #fff;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatcorner-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .chatcorner-subtitle {
+            font-size: 12px;
+            opacity: .85;
+            margin-top: 2px;
+        }
+
+        .chatcorner-close {
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: 26px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .chatcorner-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #fffaf0;
+        }
+
+        .chat-msg {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .chat-msg.user {
+            justify-content: flex-end;
+        }
+
+        .chat-msg.bot {
+            justify-content: flex-start;
+        }
+
+        .chat-bubble {
+            max-width: 90%;
+            padding: 13px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-line;
+            word-break: break-word;
+        }
+
+        .chat-msg.user .chat-bubble {
+            background: #ffb71b;
+            color: #fff;
+            border-bottom-right-radius: 6px;
+        }
+
+        .chat-msg.bot .chat-bubble {
+            background: #fff;
+            color: #333;
+            border: 1px solid #ececf3;
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.04);
+        }
+
+        .chatcorner-suggestions {
+            padding: 10px 14px 0 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: #fff;
+        }
+
+        .chatcorner-suggestions button {
+            border: 1px solid #ddd;
+            background: #fafafa;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        .chatcorner-suggestions button:hover {
+            background: #f3ebfb;
+            border-color: #caa7eb;
+            color: #4b1d73;
+        }
+
+        .chatcorner-input-area-wrapper {
+            position: relative;
+            padding: 14px;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .chatcorner-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chatcorner-input-area input {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0 14px;
+            height: 44px;
+            outline: none;
+        }
+
+        .chatcorner-input-area input:focus {
+            border-color: #ffb71b;
+            box-shadow: 0 0 0 3px rgba(255, 183, 27, 0.12);
+        }
+
+        .chat-user-suggestions {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 68px;
+            background: #fff;
+            border: 1px solid #e6d6f5;
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(0,0,0,.08);
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+        .chat-user-suggestion-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3ecfa;
+        }
+
+        .chat-user-suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .chat-user-suggestion-item:hover {
+            background: #faf5ff;
+        }
+
+        .chat-user-suggestion-name {
+            font-weight: 600;
+            color: #4b1d73;
+            font-size: 13px;
+        }
+
+        .chat-user-suggestion-email {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .chatcorner-send-btn {
+            background: #ffb71b;
+            border: none;
+            color: #ffffff;
+            padding: 0 18px;
+            height: 44px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 92px;
+            transition: all .2s ease;
+            box-shadow: 0 4px 12px rgba(255, 183, 27, 0.28);
+        }
+
+        .chatcorner-send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(255, 183, 27, 0.38);
+            filter: brightness(1.03);
+        }
+
+        .chatcorner-send-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 8px rgba(255, 183, 27, 0.25);
+        }
+
+        .chatcorner-send-btn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .d-none {
+            display: none !important;
+        }
+
+        @@media (max-width: 576px) {
+            #chatCornerWidget {
+                right: 12px;
+                left: 12px;
+                bottom: 12px;
+            }
+
+            .chatcorner-panel {
+                width: 100%;
+                height: 70vh;
+            }
+
+            #chatCornerToggle {
+                margin-left: auto;
+            }
+        }
+
+
+        .topbar-icon-item {
+    position: relative;
+    list-style: none;
+    margin-right: 12px;
 }
 
-#chatCornerToggle {
-    border: none;
-    border-radius: 999px;
-    padding: 14px 18px;
+.topbar-icon-link {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+    background: #fff8e8;
+    border: 1px solid #ffe2a0;
+    color: #ffb71b !important;
+    transition: all .2s ease;
+    position: relative;
+    box-shadow: 0 6px 18px rgba(255, 183, 27, 0.14);
+}
+
+.topbar-icon-link:hover {
     background: #ffb71b;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 10px 30px rgba(255,183,27,.28);
-    cursor: pointer;
-    font-weight: 600;
+    color: #fff !important;
+    transform: translateY(-1px);
 }
 
-.chatcorner-panel {
-    width: 380px;
-    height: 560px;
-    background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(255,183,27,.18);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 14px;
-    border: 1px solid #ffe3a3;
-}
-
-.chatcorner-header {
-    background: linear-gradient(135deg, #ffb71b, #ff9800);
-    color: #fff;
-    padding: 18px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chatcorner-title {
+.topbar-icon-link i {
     font-size: 18px;
-    font-weight: 700;
 }
 
-.chatcorner-subtitle {
-    font-size: 12px;
-    opacity: .85;
-    margin-top: 2px;
-}
-
-.chatcorner-close {
-    border: none;
-    background: transparent;
+.topbar-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #dc2626;
     color: #fff;
-    font-size: 26px;
-    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
     line-height: 1;
 }
 
-.chatcorner-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    background: #fffaf0;
+.topbar-icon-item.has-unread .topbar-icon-link {
+    animation: pulseTopbarIcon 1.8s infinite;
 }
 
-.chat-msg {
-    display: flex;
-    margin-bottom: 12px;
+@@keyframes pulseTopbarIcon {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 183, 27, 0.35);
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(255, 183, 27, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 183, 27, 0);
+    }
 }
 
-.chat-msg.user {
-    justify-content: flex-end;
-}
-
-.chat-msg.bot {
-    justify-content: flex-start;
-}
-
-..chat-bubble {
-    max-width: 90%;
-    padding: 13px 15px;
-    border-radius: 18px;
-    font-size: 14px;
-    line-height: 1.6;
-    white-space: pre-line;
-    word-break: break-word;
-}
-
-.chat-msg.user .chat-bubble {
-    background: #ffb71b;
-    color: #fff;
-    border-bottom-right-radius: 6px;
-}
-
-.chat-msg.bot .chat-bubble {
-    background: #fff;
-    color: #333;
-    border: 1px solid #ececf3;
-    border-bottom-left-radius: 6px;
-    box-shadow: 0 4px 14px rgba(0,0,0,.04);
-}
-
-.chatcorner-suggestions {
-    padding: 10px 14px 0 14px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    background: #fff;
-}
-
-.chatcorner-suggestions button {
-    border: 1px solid #ddd;
-    background: #fafafa;
-    border-radius: 999px;
-    padding: 8px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all .2s ease;
-}
-
-.chatcorner-suggestions button:hover {
-    background: #f3ebfb;
-    border-color: #caa7eb;
-    color: #4b1d73;
-}
-
-.chatcorner-input-area-wrapper {
-    position: relative;
-    padding: 14px;
-    background: #fff;
-    border-top: 1px solid #eee;
-}
-
-.chatcorner-input-area {
-    display: flex;
-    gap: 10px;
-}
-
-.chat-user-suggestions {
+.topbar-dropdown {
+    display: none;
     position: absolute;
-    left: 14px;
-    right: 14px;
-    bottom: 68px;
-    background: #fff;
-    border: 1px solid #e6d6f5;
-    border-radius: 14px;
-    box-shadow: 0 10px 24px rgba(0,0,0,.08);
-    max-height: 220px;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 340px;
+    min-height: 56px;
+    max-height: 420px;
     overflow-y: auto;
-    z-index: 20;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .10);
+    z-index: 9999;
+    padding: 8px 0;
+    margin: 0;
+    list-style: none;
 }
 
-.chat-user-suggestion-item {
-    padding: 10px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #f3ecfa;
+.topbar-dropdown li {
+    border-bottom: 1px solid #f3f4f6;
 }
 
-.chat-user-suggestion-item:last-child {
+.topbar-dropdown li:last-child {
     border-bottom: none;
 }
 
-.chat-user-suggestion-item:hover {
-    background: #faf5ff;
-}
-
-.chat-user-suggestion-name {
-    font-weight: 600;
-    color: #4b1d73;
-    font-size: 13px;
-}
-
-.chat-user-suggestion-email {
-    font-size: 12px;
-    color: #666;
-    margin-top: 2px;
-}
-
-.chatcorner-send-btn {
-    background: #ffb71b;
-    border: none;
-    color: #ffffff;
-    padding: 0 18px;
-    height: 44px;
-    border-radius: 12px;
+.topbar-dropdown li a,
+.topbar-dropdown li button {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    color: #1f2937;
+    text-decoration: none;
     font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    min-width: 92px;
-    transition: all .2s ease;
-    box-shadow: 0 4px 12px rgba(255, 183, 27, 0.28);
+    line-height: 1.4;
+    background: transparent;
+    border: none;
+    text-align: left;
 }
 
-.chatcorner-send-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(255, 183, 27, 0.38);
-    filter: brightness(1.03);
+.topbar-dropdown li a:hover,
+.topbar-dropdown li button:hover {
+    background: #fff8e8;
+    color: #b77900;
 }
 
-.chatcorner-send-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 8px rgba(255, 183, 27, 0.25);
+.topbar-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
 }
 
-.chatcorner-send-btn:disabled {
-    opacity: .65;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-.d-none {
-    display: none !important;
+.topbar-meta {
+    font-size: 12px;
+    color: #6b7280;
 }
 
-@@media (max-width: 576px) {
-    #chatCornerWidget {
-        right: 12px;
-        left: 12px;
-        bottom: 12px;
+.topbar-empty {
+    padding: 14px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.topbar-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.topbar-type-badge.assigned {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.topbar-type-badge.deadline {
+    background: #fff4e5;
+    color: #d97706;
+}
+
+.topbar-type-badge.overdue {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+@@media (max-width: 768px) {
+    .topbar-dropdown {
+        right: -10px;
+        width: 280px;
     }
-
-    .chatcorner-panel {
-        width: 100%;
-        height: 70vh;
-    }
-
-    #chatCornerToggle {
-        margin-left: auto;
-    }
 }
+
     </style>
 </head>
 
@@ -445,7 +717,7 @@
             <nav class="navbar navbar-fixed-top">
                 <div class="container-fluid">
                     <div class="logo-container">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index" asp-area="@currentArea">
                             <img src="/CRMTema/bootstrap5/dist/assets/images/CRMCornerLogo.png" alt="Logo">
                         </a>
                     </div>
@@ -454,23 +726,48 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
-                    <div id="notificationDiv" class="flex-grow-1">
-                        <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
-                            <li id="messageIcon" class="d-none d-sm-block" style="position: relative;">
-                                <a href="/ChatApp/ChatApp" class="text-decoration-none position-relative me-3" title="Mesajlar">
-                                    <i class="fa fa-comments fa-lg text-primary"></i>
-                                </a>
-                                <span id="notificationCount" class="notification-count"></span>
-                                <ul id="messageDropdown" class="dropdown-menu"></ul>
-                            </li>
+    <div id="notificationDiv" class="flex-grow-1">
+    <ul class="nav navbar-nav flex-row justify-content-end align-items-center">
 
-                            <li>
-                                <a class="icon-menu" asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout">
-                                    <i class="fa fa-sign-out"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+   <li id="notificationBell" class="topbar-icon-item">
+    <a href="javascript:void(0);"
+       class="topbar-icon-link"
+       title="Bildirimler"
+       onclick="toggleBellDropdown(event)">
+        <i class="fa-solid fa-bell"></i>
+        <span id="notificationBellCount" class="topbar-badge d-none"></span>
+    </a>
+
+    <ul id="notificationBellDropdown" class="topbar-dropdown">
+        <li>
+            <div class="topbar-empty">Bildirimler yükleniyor...</div>
+        </li>
+    </ul>
+</li>
+
+        <li id="messageIcon" class="message-nav-item">
+            <a href="javascript:void(0);"
+               class="message-nav-link"
+               title="Mesajlar"
+               onclick="toggleDropdown(event)">
+                <i class="fa-solid fa-comments"></i>
+                <span id="notificationCount" class="notification-count d-none"></span>
+            </a>
+
+            <ul id="messageDropdown" class="message-dropdown">
+                <li>
+                    <div class="message-empty">Mesajlar kontrol ediliyor...</div>
+                </li>
+            </ul>
+        </li>
+
+        <li>
+            <a class="icon-menu" asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="Logout">
+                <i class="fa fa-sign-out"></i>
+            </a>
+        </li>
+    </ul>
+</div>
                 </div>
             </nav>
 
@@ -699,13 +996,147 @@
     <script>
         let unreadMessagesHtml = '';
 
+        const notificationsUrl = '@Url.Action("GetNotificationsStatus", "Home", new { area = currentArea })';
+        const chatAppUrl = '@Url.Action("ChatApp", "ChatApp", new { area = currentArea })';
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         function toggleDropdown(event) {
             event.stopPropagation();
-            $('#messageDropdown').toggle();
+
+            const dropdown = document.getElementById("messageDropdown");
+            if (!dropdown) return;
+
+            if (dropdown.style.display === "block") {
+                dropdown.style.display = "none";
+            } else {
+                dropdown.style.display = "block";
+            }
         }
 
         function hideDropdown() {
-            $('#messageDropdown').hide();
+            const dropdown = document.getElementById("messageDropdown");
+            if (dropdown) {
+                dropdown.style.display = "none";
+            }
+        }
+
+        function redirectToUserMessages(userId, name) {
+            localStorage.setItem('selectedUserId', userId);
+            localStorage.setItem('selectedUserName', name);
+            window.location.href = chatAppUrl;
+        }
+
+        function showNotificationDot() {
+            const messageIconElement = document.getElementById("messageIcon");
+            if (messageIconElement) {
+                messageIconElement.classList.add("has-unread");
+            }
+        }
+
+        function hideNotificationDot() {
+            const messageIconElement = document.getElementById("messageIcon");
+            if (messageIconElement) {
+                messageIconElement.classList.remove("has-unread");
+            }
+        }
+
+        function updateNotificationCount(count) {
+            const countElement = document.getElementById("notificationCount");
+            if (!countElement) return;
+
+            if (count && count > 0) {
+                countElement.textContent = count > 99 ? "99+" : count;
+                countElement.classList.remove("d-none");
+            } else {
+                countElement.textContent = "";
+                countElement.classList.add("d-none");
+            }
+        }
+
+        function renderEmptyDropdown() {
+            const emptyHtml = `
+                <li>
+                    <a href="${chatAppUrl}">
+                        <div class="message-empty">Yeni okunmamış mesaj yok.</div>
+                    </a>
+                </li>
+            `;
+
+            if (emptyHtml !== unreadMessagesHtml) {
+                unreadMessagesHtml = emptyHtml;
+                $('#messageDropdown').html(emptyHtml);
+            }
+        }
+
+        function loadNotifications() {
+            $.get(notificationsUrl, function (data) {
+                const payload = data.message || data.Message;
+
+                if (!payload) {
+                    hideNotificationDot();
+                    updateNotificationCount(0);
+                    renderEmptyDropdown();
+                    return;
+                }
+
+                const hasUnreadMessages = payload.hasUnreadMessages ?? payload.HasUnreadMessages ?? false;
+                const unreadSenderCount = payload.distinctSenderIdsCount ?? payload.DistinctSenderIdsCount ?? 0;
+                const unreadMessages = payload.unreadMessages ?? payload.UnreadMessages ?? [];
+
+                if (hasUnreadMessages && unreadMessages.length > 0) {
+                    showNotificationDot();
+                    updateNotificationCount(unreadSenderCount);
+
+                    let newUnreadMessagesHtml = '';
+
+                    unreadMessages.forEach(function (message) {
+                        const senderId = message.senderId || message.SenderId;
+                        const senderName = escapeHtml(message.senderName || message.SenderName || "Kullanıcı");
+                        const name = escapeHtml(message.name || message.Name || senderName);
+
+                        newUnreadMessagesHtml += `
+                            <li>
+                                <a href="javascript:void(0);" onclick="redirectToUserMessages('${senderId}','${name}')">
+                                    <div class="message-sender">${senderName}</div>
+                                    <div class="message-preview">Okunmamış mesaj var</div>
+                                </a>
+                            </li>`;
+                    });
+
+                    if (newUnreadMessagesHtml !== unreadMessagesHtml) {
+                        unreadMessagesHtml = newUnreadMessagesHtml;
+                        $('#messageDropdown').html(unreadMessagesHtml);
+                    }
+                } else {
+                    hideNotificationDot();
+                    updateNotificationCount(0);
+                    renderEmptyDropdown();
+                }
+            }).fail(function (xhr, status, error) {
+                console.error("Bildirimler alınırken hata oluştu:", error);
+                hideNotificationDot();
+                updateNotificationCount(0);
+
+                const errorHtml = `
+                    <li>
+                        <div class="message-empty">Mesajlar yüklenemedi.</div>
+                    </li>
+                `;
+
+                if (errorHtml !== unreadMessagesHtml) {
+                    unreadMessagesHtml = errorHtml;
+                    $('#messageDropdown').html(errorHtml);
+                }
+            });
         }
 
         $(document).ready(function () {
@@ -713,331 +1144,399 @@
                 $("#left-sidebar").toggleClass("sidebar-closed");
                 $("#main-content").toggleClass("expanded-content");
             });
+
+            loadNotifications();
+            loadBellNotifications();
+
+            setInterval(loadNotifications, 5000);
+            setInterval(loadBellNotifications, 60000);
         });
 
-        $(document).ready(function () {
-            setInterval(function () {
-                $.get('/Home/GetNotificationsStatus', function (data) {
-                    var hasUnreadMessages = data.message.hasUnreadMessages;
-                    var unreadSenderCount = data.message.distinctSenderIdsCount;
+    document.addEventListener('click', function (event) {
+    const messageDropdown = document.getElementById("messageDropdown");
+    const messageIcon = document.getElementById("messageIcon");
 
-                    if (hasUnreadMessages) {
-                        showNotificationDot();
-                        $('#notificationCount').text(unreadSenderCount);
+    const bellDropdown = document.getElementById("notificationBellDropdown");
+    const bellIcon = document.getElementById("notificationBell");
 
-                        let newUnreadMessagesHtml = '';
-                        data.message.unreadMessages.forEach(function (message) {
-                            newUnreadMessagesHtml += `<li><a href="javascript:void(0);" onclick="redirectToUserMessages('${message.senderId}','${message.name}')">${message.senderName}</a></li>`;
-                        });
+    if (messageDropdown && messageIcon && !messageIcon.contains(event.target)) {
+        hideDropdown();
+    }
 
-                        if (newUnreadMessagesHtml !== unreadMessagesHtml) {
-                            unreadMessagesHtml = newUnreadMessagesHtml;
-                            $('#messageDropdown').html(unreadMessagesHtml);
-                        }
-                    } else {
-                        hideNotificationDot();
-                    }
-                });
-            }, 1000);
-        });
+    if (bellDropdown && bellIcon && !bellIcon.contains(event.target)) {
+        hideBellDropdown();
+    }
+});
 
-        function redirectToUserMessages(userId, name) {
-            localStorage.setItem('selectedUserId', userId);
-            localStorage.setItem('selectedUserName', name);
-            window.location.href = "/ChatApp/ChatApp";
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            var messageIconElement = document.getElementById("messageIcon");
-            if (messageIconElement) {
-                messageIconElement.classList.add("pink-light");
-            }
-        });
-
-        function showNotificationDot() {
-            var messageIconElement = document.getElementById("messageIcon");
-            if (messageIconElement) {
-                messageIconElement.classList.remove("pink-light");
-                messageIconElement.classList.add("green-light");
-            }
-        }
-
-        function hideNotificationDot() {
-            var messageIconElement = document.getElementById("messageIcon");
-            if (messageIconElement) {
-                messageIconElement.classList.remove("green-light");
-                messageIconElement.classList.add("pink-light");
-            }
-        }
     </script>
 
-
-        <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
-
-   @*  <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/CRMTema/bootstrap5/dist/assets/plugins/jquery-ui/jquery-ui.min.js"></script>*@
-
+    <script src="~/CRMTema/bootstrap5/js/pages/index.js"></script>
 
     @RenderSection("Scripts", required: false)
 
-
-
     <div id="chatCornerWidget">
-    <button id="chatCornerToggle" type="button" onclick="toggleChatCorner()">
-        <span>💬</span>
-        <span>ChatCorner</span>
-    </button>
+        <button id="chatCornerToggle" type="button" onclick="toggleChatCorner()">
+            <span>💬</span>
+            <span>ChatCorner</span>
+        </button>
 
-    <div id="chatCornerPanel" class="chatcorner-panel d-none">
-        <div class="chatcorner-header">
-            <div>
-                <div class="chatcorner-title">ChatCorner</div>
-                <div class="chatcorner-subtitle">CRM asistanınız</div>
+        <div id="chatCornerPanel" class="chatcorner-panel d-none">
+            <div class="chatcorner-header">
+                <div>
+                    <div class="chatcorner-title">ChatCorner</div>
+                    <div class="chatcorner-subtitle">CRM asistanınız</div>
+                </div>
+                <button type="button" class="chatcorner-close" onclick="toggleChatCorner()">×</button>
             </div>
-            <button type="button" class="chatcorner-close" onclick="toggleChatCorner()">×</button>
-        </div>
 
-        <div id="chatCornerMessages" class="chatcorner-messages">
-            <div class="chat-msg bot">
-                <div class="chat-bubble">
-                    Merhaba, ben ChatCorner. CRM verilerinizi analiz edebilirim.
+            <div id="chatCornerMessages" class="chatcorner-messages">
+                <div class="chat-msg bot">
+                    <div class="chat-bubble">
+                        Merhaba, ben ChatCorner. CRM verilerinizi analiz edebilirim.
+                    </div>
+                </div>
+            </div>
+
+            <div class="chatcorner-suggestions">
+                <button type="button" onclick="setChatQuestion('Bu ayki tasklarım ne durumda?')">Bu ayki tasklarım</button>
+                <button type="button" onclick="setChatQuestion('Geçen ay durumum nasıldı?')">Geçen ay durumum</button>
+                <button type="button" onclick="setChatQuestion('Bu yıl performansım nasıl?')">Bu yıl performansım</button>
+            </div>
+
+            <div class="chatcorner-input-area-wrapper">
+                <div id="chatUserSuggestions" class="chat-user-suggestions d-none"></div>
+
+                <div class="chatcorner-input-area">
+                    <input type="text"
+                           id="chatCornerQuestion"
+                           placeholder="Örn: @@yaren bu ay nasıldı?"
+                           onkeydown="handleChatCornerKey(event)"
+                           oninput="handleMentionSearch()"
+                           autocomplete="off" />
+                    <button type="button" class="chatcorner-send-btn" onclick="askChatCorner()">Gönder</button>
                 </div>
             </div>
         </div>
-
-<div class="chatcorner-suggestions">
-    <button type="button" onclick="setChatQuestion('Bu ayki tasklarım ne durumda?')">Bu ayki tasklarım</button>
-    <button type="button" onclick="setChatQuestion('Geçen ay durumum nasıldı?')">Geçen ay durumum</button>
-    <button type="button" onclick="setChatQuestion('Bu yıl performansım nasıl?')">Bu yıl performansım</button>
-</div>
-
-        <div class="chatcorner-input-area-wrapper">
-    <div id="chatUserSuggestions" class="chat-user-suggestions d-none"></div>
-
-<div class="chatcorner-input-area-wrapper">
-    <div id="chatUserSuggestions" class="chat-user-suggestions d-none"></div>
-
-    <div class="chatcorner-input-area">
-        <input type="text"
-               id="chatCornerQuestion"
-               placeholder="Örn: @@yaren bu ay nasıldı?"
-               onkeydown="handleChatCornerKey(event)"
-               oninput="handleMentionSearch()"
-               autocomplete="off" />
-        <button type="button" class="chatcorner-send-btn"  onclick="askChatCorner()">Gönder</button>
     </div>
-</div>
-</div>
-    </div>
-</div>
 
+    <script>
+        let selectedMentionUser = null;
+        let mentionSearchTimeout = null;
 
+        function toggleChatCorner() {
+            const panel = document.getElementById("chatCornerPanel");
+            panel.classList.toggle("d-none");
 
-<script>
-    let selectedMentionUser = null;
-    let mentionSearchTimeout = null;
+            setTimeout(function () {
+                const input = document.getElementById("chatCornerQuestion");
+                if (input && !panel.classList.contains("d-none")) {
+                    input.focus();
+                }
+            }, 150);
+        }
 
-    function toggleChatCorner() {
-        const panel = document.getElementById("chatCornerPanel");
-        panel.classList.toggle("d-none");
-
-        setTimeout(function () {
+        function setChatQuestion(text) {
             const input = document.getElementById("chatCornerQuestion");
-            if (input && !panel.classList.contains("d-none")) {
-                input.focus();
+            input.value = text;
+            input.focus();
+            handleMentionSearch();
+        }
+
+        function handleChatCornerKey(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                askChatCorner();
             }
-        }, 150);
-    }
-     function setChatQuestion(text) {
-        const input = document.getElementById("chatCornerQuestion");
-        input.value = text;
-        input.focus();
-        handleMentionSearch();
-    }
-
- function handleChatCornerKey(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            askChatCorner();
-        }
-    }
-
-    function appendMessage(sender, text, isHtml, elementId) {
-        const messages = document.getElementById("chatCornerMessages");
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "chat-msg " + sender;
-
-        const bubble = document.createElement("div");
-        bubble.className = "chat-bubble";
-
-        if (elementId) {
-            bubble.id = elementId;
         }
 
-        if (isHtml) {
-            bubble.innerHTML = text;
-        } else {
-            bubble.textContent = text;
+        function appendMessage(sender, text, isHtml, elementId) {
+            const messages = document.getElementById("chatCornerMessages");
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "chat-msg " + sender;
+
+            const bubble = document.createElement("div");
+            bubble.className = "chat-bubble";
+
+            if (elementId) {
+                bubble.id = elementId;
+            }
+
+            if (isHtml) {
+                bubble.innerHTML = text;
+            } else {
+                bubble.textContent = text;
+            }
+
+            wrapper.appendChild(bubble);
+            messages.appendChild(wrapper);
+            messages.scrollTop = messages.scrollHeight;
         }
 
-        wrapper.appendChild(bubble);
-        messages.appendChild(wrapper);
-        messages.scrollTop = messages.scrollHeight;
-    }
+        async function searchChatUsers(query) {
+            const suggestionsBox = document.getElementById("chatUserSuggestions");
 
-
-     async function searchChatUsers(query) {
-        const suggestionsBox = document.getElementById("chatUserSuggestions");
-
-        if (!query || query.trim().length < 1) {
-            suggestionsBox.classList.add("d-none");
-            suggestionsBox.innerHTML = "";
-            return;
-        }
-         try {
-            const response = await fetch("/ChatCorner/SearchUsers?q=" + encodeURIComponent(query));
-            const users = await response.json();
-
-            if (!users || users.length === 0) {
+            if (!query || query.trim().length < 1) {
                 suggestionsBox.classList.add("d-none");
                 suggestionsBox.innerHTML = "";
                 return;
             }
 
-            suggestionsBox.innerHTML = "";
+            try {
+                const response = await fetch("/ChatCorner/SearchUsers?q=" + encodeURIComponent(query));
+                const users = await response.json();
 
-            users.forEach(function (user) {
-                const item = document.createElement("div");
-                item.className = "chat-user-suggestion-item";
-                item.onclick = function () {
-                    selectMentionUser(user.id, user.name || "", user.email || "");
-                };
+                if (!users || users.length === 0) {
+                    suggestionsBox.classList.add("d-none");
+                    suggestionsBox.innerHTML = "";
+                    return;
+                }
 
-                const nameDiv = document.createElement("div");
-                nameDiv.className = "chat-user-suggestion-name";
-                nameDiv.textContent = user.name || "";
+                suggestionsBox.innerHTML = "";
 
-                const emailDiv = document.createElement("div");
-                emailDiv.className = "chat-user-suggestion-email";
-                emailDiv.textContent = user.email || "";
+                users.forEach(function (user) {
+                    const item = document.createElement("div");
+                    item.className = "chat-user-suggestion-item";
+                    item.onclick = function () {
+                        selectMentionUser(user.id, user.name || "", user.email || "");
+                    };
 
-                item.appendChild(nameDiv);
-                item.appendChild(emailDiv);
-                suggestionsBox.appendChild(item);
-            });
+                    const nameDiv = document.createElement("div");
+                    nameDiv.className = "chat-user-suggestion-name";
+                    nameDiv.textContent = user.name || "";
 
-            suggestionsBox.classList.remove("d-none");
-        } catch (error) {
-            suggestionsBox.classList.add("d-none");
-            suggestionsBox.innerHTML = "";
-        }
-    }
+                    const emailDiv = document.createElement("div");
+                    emailDiv.className = "chat-user-suggestion-email";
+                    emailDiv.textContent = user.email || "";
 
+                    item.appendChild(nameDiv);
+                    item.appendChild(emailDiv);
+                    suggestionsBox.appendChild(item);
+                });
 
-    function selectMentionUser(userId, userName, userEmail) {
-        const input = document.getElementById("chatCornerQuestion");
-        const suggestionsBox = document.getElementById("chatUserSuggestions");
-
-        selectedMentionUser = {
-            id: userId,
-            name: userName,
-            email: userEmail
-        };
-
-        const currentText = input.value;
-        const atIndex = currentText.lastIndexOf("@@");
-
-        if (atIndex >= 0) {
-            const beforeAt = currentText.substring(0, atIndex);
-            input.value = beforeAt + "@@" + userEmail + " ";
-        } else {
-            input.value = "@@" + userEmail + " ";
-        }
-
-        suggestionsBox.classList.add("d-none");
-        suggestionsBox.innerHTML = "";
-        input.focus();
-    }
-
-
-     function handleMentionSearch() {
-        const input = document.getElementById("chatCornerQuestion");
-        const suggestionsBox = document.getElementById("chatUserSuggestions");
-        const text = input.value;
-
-        const atIndex = text.lastIndexOf("@@");
-        if (atIndex < 0) {
-            suggestionsBox.classList.add("d-none");
-            suggestionsBox.innerHTML = "";
-            return;
-        }
-        const afterAt = text.substring(atIndex + 1).trim();
-
-        if (afterAt.indexOf(" ") >= 0) {
-            suggestionsBox.classList.add("d-none");
-            suggestionsBox.innerHTML = "";
-            return;
-        }
-
-        clearTimeout(mentionSearchTimeout);
-        mentionSearchTimeout = setTimeout(function () {
-            searchChatUsers(afterAt);
-        }, 250);
-    }
-
-    async function askChatCorner() {
-        const input = document.getElementById("chatCornerQuestion");
-        const suggestionsBox = document.getElementById("chatUserSuggestions");
-        const question = input.value.trim();
-
-        if (!question) return;
-
-        suggestionsBox.classList.add("d-none");
-        suggestionsBox.innerHTML = "";
-
-        appendMessage("user", question, false, null);
-        input.value = "";
-        input.focus();
-
-        appendMessage("bot", "Yazıyor...", false, "chatcorner-typing");
-
-        try {
-            const response = await fetch("/ChatCorner/Ask", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ question: question })
-            });
-
-            const data = await response.json();
-
-            const typing = document.getElementById("chatcorner-typing");
-            if (typing) {
-                typing.parentElement.remove();
+                suggestionsBox.classList.remove("d-none");
+            } catch (error) {
+                suggestionsBox.classList.add("d-none");
+                suggestionsBox.innerHTML = "";
             }
+        }
 
-            if (data.success) {
-                appendMessage("bot", data.answer, false, null);
+        function selectMentionUser(userId, userName, userEmail) {
+            const input = document.getElementById("chatCornerQuestion");
+            const suggestionsBox = document.getElementById("chatUserSuggestions");
+
+            selectedMentionUser = {
+                id: userId,
+                name: userName,
+                email: userEmail
+            };
+
+            const currentText = input.value;
+            const atIndex = currentText.lastIndexOf("@@");
+
+            if (atIndex >= 0) {
+                const beforeAt = currentText.substring(0, atIndex);
+                input.value = beforeAt + "@@" + userEmail + " ";
             } else {
-                appendMessage("bot", "Hata: " + (data.errorMessage || "Bilinmeyen hata oluştu."), false, null);
-            }
-        } catch (error) {
-            const typing = document.getElementById("chatcorner-typing");
-            if (typing) {
-                typing.parentElement.remove();
+                input.value = "@@" + userEmail + " ";
             }
 
-            appendMessage("bot", "Hata: İstek sırasında bir sorun oluştu.", false, null);
+            suggestionsBox.classList.add("d-none");
+            suggestionsBox.innerHTML = "";
+            input.focus();
+        }
+
+        function handleMentionSearch() {
+            const input = document.getElementById("chatCornerQuestion");
+            const suggestionsBox = document.getElementById("chatUserSuggestions");
+            const text = input.value;
+
+            const atIndex = text.lastIndexOf("@@");
+            if (atIndex < 0) {
+                suggestionsBox.classList.add("d-none");
+                suggestionsBox.innerHTML = "";
+                return;
+            }
+
+            const afterAt = text.substring(atIndex + 2).trim();
+
+            if (afterAt.indexOf(" ") >= 0) {
+                suggestionsBox.classList.add("d-none");
+                suggestionsBox.innerHTML = "";
+                return;
+            }
+
+            clearTimeout(mentionSearchTimeout);
+            mentionSearchTimeout = setTimeout(function () {
+                searchChatUsers(afterAt);
+            }, 250);
+        }
+
+        async function askChatCorner() {
+            const input = document.getElementById("chatCornerQuestion");
+            const suggestionsBox = document.getElementById("chatUserSuggestions");
+            const question = input.value.trim();
+
+            if (!question) return;
+
+            suggestionsBox.classList.add("d-none");
+            suggestionsBox.innerHTML = "";
+
+            appendMessage("user", question, false, null);
+            input.value = "";
+            input.focus();
+
+            appendMessage("bot", "Yazıyor...", false, "chatcorner-typing");
+
+            try {
+                const response = await fetch("/ChatCorner/Ask", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+
+                const typing = document.getElementById("chatcorner-typing");
+                if (typing) {
+                    typing.parentElement.remove();
+                }
+
+                if (data.success) {
+                    appendMessage("bot", data.answer, false, null);
+                } else {
+                    appendMessage("bot", "Hata: " + (data.errorMessage || "Bilinmeyen hata oluştu."), false, null);
+                }
+            } catch (error) {
+                const typing = document.getElementById("chatcorner-typing");
+                if (typing) {
+                    typing.parentElement.remove();
+                }
+
+                appendMessage("bot", "Hata: İstek sırasında bir sorun oluştu.", false, null);
+            }
+        }
+    </script>
+
+    <script>
+    let bellNotificationsHtml = '';
+
+    const bellNotificationsUrl = '@Url.Action("GetTopbarNotifications", "Home", new { area = currentArea })';
+    const todoListBaseUrl = '@Url.Action("ToDoList", "ToDoList", new { area = currentArea })';
+
+    function toggleBellDropdown(event) {
+        event.stopPropagation();
+
+        const dropdown = document.getElementById("notificationBellDropdown");
+        const messageDropdown = document.getElementById("messageDropdown");
+
+        if (messageDropdown) {
+            messageDropdown.style.display = "none";
+        }
+
+        if (!dropdown) return;
+
+        if (dropdown.style.display === "block") {
+            dropdown.style.display = "none";
+        } else {
+            dropdown.style.display = "block";
         }
     }
 
+    function hideBellDropdown() {
+        const dropdown = document.getElementById("notificationBellDropdown");
+        if (dropdown) {
+            dropdown.style.display = "none";
+        }
+    }
+
+    function updateBellCount(count) {
+        const bell = document.getElementById("notificationBell");
+        const badge = document.getElementById("notificationBellCount");
+
+        if (!bell || !badge) return;
+
+        if (count && count > 0) {
+            badge.textContent = count > 99 ? "99+" : count;
+            badge.classList.remove("d-none");
+            bell.classList.add("has-unread");
+        } else {
+            badge.textContent = "";
+            badge.classList.add("d-none");
+            bell.classList.remove("has-unread");
+        }
+    }
+
+    function getTypeBadge(type) {
+        if (type === "assigned") {
+            return '<span class="topbar-type-badge assigned">Atanan Görev</span>';
+        }
+        if (type === "overdue") {
+            return '<span class="topbar-type-badge overdue">Süresi Geçti</span>';
+        }
+        return '<span class="topbar-type-badge deadline">Yaklaşan Son Tarih</span>';
+    }
+
+    function loadBellNotifications() {
+        $.get(bellNotificationsUrl, function (data) {
+            const notifications = data.notifications || [];
+            const unreadCount = data.unreadCount || 0;
+
+            updateBellCount(unreadCount);
+
+            if (!notifications.length) {
+                const emptyHtml = `
+                    <li>
+                        <div class="topbar-empty">Şu anda todo tarafında yeni bildirim yok.</div>
+                    </li>
+                `;
+
+                if (emptyHtml !== bellNotificationsHtml) {
+                    bellNotificationsHtml = emptyHtml;
+                    $('#notificationBellDropdown').html(emptyHtml);
+                }
+
+                return;
+            }
+
+            let html = '';
+
+            notifications.forEach(function (item) {
+                const targetUrl = `${todoListBaseUrl}/${item.boardId}`;
+
+                html += `
+                    <li>
+                        <a href="${targetUrl}">
+                            ${getTypeBadge(item.type)}
+                            <div class="topbar-title">${item.title}</div>
+                            <div class="topbar-meta">${item.meta}${item.deadline ? ' • Son tarih: ' + item.deadline : ''}</div>
+                        </a>
+                    </li>
+                `;
+            });
+
+            if (html !== bellNotificationsHtml) {
+                bellNotificationsHtml = html;
+                $('#notificationBellDropdown').html(html);
+            }
+        }).fail(function () {
+            updateBellCount(0);
+
+            const errorHtml = `
+                <li>
+                    <div class="topbar-empty">Bildirimler yüklenemedi.</div>
+                </li>
+            `;
+
+            if (errorHtml !== bellNotificationsHtml) {
+                bellNotificationsHtml = errorHtml;
+                $('#notificationBellDropdown').html(errorHtml);
+            }
+        });
+    }
 </script>
-
-
-
 
 </body>
 </html>

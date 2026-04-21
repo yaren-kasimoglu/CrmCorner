@@ -1375,9 +1375,6 @@ namespace CrmCorner.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("AssignedById")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("AssignedByUserId")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("AssigneeId")
@@ -1389,7 +1386,34 @@ namespace CrmCorner.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("DeadlineReminder2HoursSent")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("DeadlineReminder3DaysSent")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("DeadlineReminderLastDaySent")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("DeadlineReminderWeekSent")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("ExpirationWarningSent")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDayBoardTask")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("IsDone")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsImportant")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Text")
@@ -1405,7 +1429,7 @@ namespace CrmCorner.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedByUserId");
+                    b.HasIndex("AssignedById");
 
                     b.HasIndex("AssigneeId");
 
@@ -1837,9 +1861,9 @@ namespace CrmCorner.Migrations
                 {
                     b.HasOne("CrmCorner.Models.AppUser", "AssignedByUser")
                         .WithMany()
-                        .HasForeignKey("AssignedByUserId");
+                        .HasForeignKey("AssignedById");
 
-                    b.HasOne("CrmCorner.Models.AppUser", "Assignee")
+                    b.HasOne("CrmCorner.Models.AppUser", "AssigneeUser")
                         .WithMany()
                         .HasForeignKey("AssigneeId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -1852,7 +1876,7 @@ namespace CrmCorner.Migrations
 
                     b.Navigation("AssignedByUser");
 
-                    b.Navigation("Assignee");
+                    b.Navigation("AssigneeUser");
 
                     b.Navigation("TodoBoard");
                 });

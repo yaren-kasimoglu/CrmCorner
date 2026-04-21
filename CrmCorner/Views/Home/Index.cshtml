@@ -168,69 +168,169 @@
         line-height: 1.1;
     }
 
-    .todo-panel {
-        min-height: 330px;
-    }
-
-    .todo-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .todo-item {
+    .todo-item-modern {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 14px;
-        padding: 14px 16px;
-        border: 1px solid #eef2f7;
-        border-radius: var(--crm-radius-md);
-        background: #fbfcfe;
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: #fff;
+        border: 1px solid #eef1f6;
         text-decoration: none;
-        transition: all .2s ease;
+        transition: all 0.25s ease;
+        margin-bottom: 12px;
     }
 
-        .todo-item:hover {
+        .todo-item-modern:hover {
             transform: translateY(-2px);
-            background: #ffffff;
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            border-color: #e3e8f1;
         }
 
-    .todo-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-width: 0;
+    .todo-item-modern-urgent {
+        border-color: #fecaca;
+        background: linear-gradient(180deg, #fffefe 0%, #fff7f7 100%);
     }
 
-    .todo-icon {
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
-        border-radius: 12px;
-        background: #fff3d6;
-        color: #cf8c00;
+    .todo-item-modern-overdue {
+        border-color: #fca5a5;
+        background: linear-gradient(180deg, #fff7f7 0%, #fff1f1 100%);
+    }
+
+    .todo-item-modern-left {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .todo-item-modern-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: #f3f6fb;
+        color: #5b6472;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
     }
 
-    .todo-text {
+        .todo-item-modern-icon.urgent {
+            background: #fff4e5;
+            color: #d97706;
+        }
+
+        .todo-item-modern-icon.overdue {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    .todo-item-modern-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .todo-item-modern-title-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .todo-item-modern-text {
         font-size: 14px;
-        font-weight: 600;
-        color: var(--crm-text);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 360px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.45;
+        word-break: break-word;
     }
 
-    .todo-date {
+    .todo-item-modern-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
         font-size: 12px;
-        color: var(--crm-muted);
-        white-space: nowrap;
-        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .todo-meta-dot {
+        color: #c0c7d1;
+    }
+
+    .todo-badge-modern {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        line-height: 1;
+    }
+
+        .todo-badge-modern.normal {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .todo-badge-modern.urgent {
+            background: #fff4e5;
+            color: #d97706;
+        }
+
+        .todo-badge-modern.overdue {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .todo-badge-modern.assigned {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+    .todo-item-modern-right {
+        color: #b9c1cc;
+        font-size: 14px;
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+    }
+
+    .todo-item-modern:hover .todo-item-modern-right {
+        transform: translateX(3px);
+    }
+
+    @@media (max-width: 768px) {
+        .todo-item-modern
+
+    {
+        padding: 14px;
+        align-items: flex-start;
+    }
+
+    .todo-item-modern-left {
+        gap: 12px;
+    }
+
+    .todo-item-modern-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 16px;
+    }
+
+    .todo-item-modern-text {
+        font-size: 13px;
+    }
+
+    .todo-item-modern-meta {
+        font-size: 11px;
+    }
+
     }
 
     .custom-card {
@@ -422,7 +522,7 @@
             <div class="dashboard-card w-100 todo-panel">
                 <div class="dashboard-card-header">
                     <h5 class="section-title">Yapılacaklar</h5>
-                    <p class="section-subtitle">Son eklenen 5 görev</p>
+                    <p class="section-subtitle">Yaklaşan ve son eklenen 5 görev</p>
                 </div>
 
                 <div class="dashboard-card-body fixed-todo-height">
@@ -435,17 +535,64 @@
                             {
                                 foreach (var item in tasks)
                                 {
-                                    <a href="/ToDoList/ToDoList/@item.BoardId" class="todo-item">
-                                        <div class="todo-left">
-                                            <div class="todo-icon">
-                                                <i class="fa fa-calendar"></i>
+                                    var isOverdue = item.UrgencyText == "Süresi geçti";
+
+                                    <a href="/ToDoList/ToDoList/@item.BoardId"
+                                       class="todo-item-modern @(item.IsUrgent ? "todo-item-modern-urgent" : "") @(isOverdue ? "todo-item-modern-overdue" : "")">
+
+                                        <div class="todo-item-modern-left">
+                                            <div class="todo-item-modern-icon @(item.IsUrgent ? "urgent" : "") @(isOverdue ? "overdue" : "")">
+                                                @if (isOverdue)
+                                                {
+                                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                                }
+                                                else if (item.IsUrgent)
+                                                {
+                                                    <i class="fa-solid fa-bell"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                }
                                             </div>
 
-                                            <div class="todo-text">@item.Text</div>
+                                            <div class="todo-item-modern-content">
+                                                <div class="todo-item-modern-title-row">
+                                                    <div class="todo-item-modern-text">@item.Text</div>
+
+                                                    @if (item.IsAssignedToMe)
+                                                    {
+                                                        <span class="todo-badge-modern assigned">Bana Atandı</span>
+                                                    }
+
+                                                    @if (isOverdue)
+                                                    {
+                                                        <span class="todo-badge-modern overdue">Süresi Geçti</span>
+                                                    }
+                                                    else if (item.IsUrgent)
+                                                    {
+                                                        <span class="todo-badge-modern urgent">@item.UrgencyText</span>
+                                                    }
+                                                    else if (item.Deadline.HasValue)
+                                                    {
+                                                        <span class="todo-badge-modern normal">@item.UrgencyText</span>
+                                                    }
+                                                </div>
+
+                                                <div class="todo-item-modern-meta">
+                                                    <span>Eklenme: @item.CreatedDate.ToString("dd.MM.yyyy")</span>
+
+                                                    @if (item.Deadline.HasValue)
+                                                    {
+                                                        <span class="todo-meta-dot">•</span>
+                                                        <span>Son tarih: @item.Deadline.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                                                    }
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div class="todo-date">
-                                            @item.CreatedDate.ToString("dd.MM.yyyy")
+                                        <div class="todo-item-modern-right">
+                                            <i class="fa-solid fa-chevron-right"></i>
                                         </div>
                                     </a>
                                 }
@@ -463,6 +610,8 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <div class="row dashboard-row mt-1">

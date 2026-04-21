@@ -1,77 +1,29 @@
 ﻿using CrmCorner.Models;
+using CrmCorner.Services;
 using CrmCorner.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using CrmCorner.Services;
 using Microsoft.EntityFrameworkCore;
-using MySqlX.XDevAPI;
-using System;
 
 namespace CrmCorner.Controllers
 {
-    //  ChatAppController
-    // Şirket içi mesajlaşma (chat) işlemlerini yönetir.
-    // Erişim: SuperAdmin, Admin, TeamLeader, TeamMember (sosyal medya rollerine kapalı)
     [Authorize(Roles = "SuperAdmin,Admin,TeamLeader,TeamMember")]
     public class ChatAppController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly CrmCornerContext _context;
         private readonly AiChatService _aiChatService;
-        public ChatAppController(CrmCornerContext context, UserManager<AppUser> userManager, AiChatService aiChatService)
+
+        public ChatAppController(
+            CrmCornerContext context,
+            UserManager<AppUser> userManager,
+            AiChatService aiChatService)
         {
             _context = context;
             _userManager = userManager;
             _aiChatService = aiChatService;
         }
-
-        public async Task<IActionResult> ChatApp()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-                return RedirectToAction("SignIn", "Home");
-
-            ViewBag.PictureUrl = string.IsNullOrWhiteSpace(currentUser.Picture)
-                ? "/userprofilepicture/defaultpp.png"
-                : "/userprofilepicture/" + currentUser.Picture;
-
-            ViewBag.GetUserId = currentUser.Id;
-
-            var searchPeople = _context.Users
-                .Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id)
-                .ToList();
-
-            List<UserViewModel> userViewModels = new List<UserViewModel>();
-
-            foreach (var item in searchPeople)
-            {
-                bool hasUnreadMessages = _context.ChatHistories.Any(m =>
-                    m.ReceiverId == currentUser.Id &&
-                    !m.IsRead &&
-                    m.SenderId == item.Id);
-
-                var userViewModel = new UserViewModel
-                {
-                    Email = item.Email,
-                    UserName = item.UserName,
-                    NameSurname = item.NameSurname,
-                    PhoneNumber = item.PhoneNumber,
-                    UserId = item.Id,
-                    PictureUrl = string.IsNullOrWhiteSpace(item.Picture)
-                        ? "/userprofilepicture/defaultpp.png"
-                        : "/userprofilepicture/" + item.Picture,
-                    HasUnreadMessages = hasUnreadMessages
-                };
-
-                userViewModels.Add(userViewModel);
-            }
-
-            ViewBag.UserNames = userViewModels;
-
-            return View();
-        }
-
 
         [HttpGet]
         public async Task<IActionResult> ChatApp(string search)
@@ -85,43 +37,7 @@ namespace CrmCorner.Controllers
                 : "/userprofilepicture/" + currentUser.Picture;
 
             ViewBag.GetUserId = currentUser.Id;
-
-            IQueryable<AppUser> query = _context.Users
-                .Where(c => c.CompanyId == currentUser.CompanyId && c.Id != currentUser.Id);
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(c => c.NameSurname.Contains(search));
-            }
-
-            var searchPeople = query.ToList();
-
-            List<UserViewModel> userViewModels = new List<UserViewModel>();
-
-            foreach (var item in searchPeople)
-            {
-                bool hasUnreadMessages = _context.ChatHistories.Any(m =>
-                    m.ReceiverId == currentUser.Id &&
-                    !m.IsRead &&
-                    m.SenderId == item.Id);
-
-                var userViewModel = new UserViewModel
-                {
-                    Email = item.Email,
-                    UserName = item.UserName,
-                    NameSurname = item.NameSurname,
-                    PhoneNumber = item.PhoneNumber,
-                    UserId = item.Id,
-                    PictureUrl = string.IsNullOrWhiteSpace(item.Picture)
-                        ? "/userprofilepicture/defaultpp.png"
-                        : "/userprofilepicture/" + item.Picture,
-                    HasUnreadMessages = hasUnreadMessages
-                };
-
-                userViewModels.Add(userViewModel);
-            }
-
-            ViewBag.UserNames = userViewModels;
+            ViewBag.UserNames = await GetUserListAsync(currentUser, search);
 
             return View();
         }
@@ -130,47 +46,49 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> GetUserMessages(string userId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
+            if (currentUser == null || string.IsNullOrWhiteSpace(userId))
+            {
+                return Json(new { Message = new List<ChatHistory>() });
+            }
 
-            var messagesSent = _context.ChatHistories
-                                .Where(c => c.SenderId == currentUser.Id && c.ReceiverId == userId)
-                                .OrderByDescending(c => c.MessageTime)
-                                .ToList();
+            ViewBag.PictureUrl = string.IsNullOrWhiteSpace(currentUser.Picture)
+                ? "/userprofilepicture/defaultpp.png"
+                : "/userprofilepicture/" + currentUser.Picture;
 
-            var messagesReceived = _context.ChatHistories
-                                            .Where(c => c.SenderId == userId && c.ReceiverId == currentUser.Id)
-                                            .OrderByDescending(c => c.MessageTime)
-                                            .ToList();
+            var allMessages = await _context.ChatHistories
+                .Where(x =>
+                    (x.SenderId == currentUser.Id && x.ReceiverId == userId) ||
+                    (x.SenderId == userId && x.ReceiverId == currentUser.Id))
+                .OrderBy(x => x.MessageTime)
+                .ToListAsync();
 
-            var allMessages = messagesSent.Concat(messagesReceived)
-                                            .OrderBy(c => c.MessageTime)
-                                            .ToList();
-            #region Update
-            var notReadMessages = allMessages.Where(m => !m.IsRead).ToList();
-            if (notReadMessages.Any())  // notReadMessages boş olup olmadığını kontrol et
+            var notReadMessages = allMessages
+                .Where(x => x.ReceiverId == currentUser.Id && !x.IsRead)
+                .ToList();
+
+            if (notReadMessages.Any())
             {
                 foreach (var message in notReadMessages)
                 {
-                    message.IsRead = true;  // Mesajı okundu olarak işaretle
+                    message.IsRead = true;
                 }
 
-                // Değişiklikleri veritabanına uygula
                 _context.UpdateRange(notReadMessages);
                 await _context.SaveChangesAsync();
 
                 var cookieOptions = new CookieOptions
                 {
-                    HttpOnly = false, // JavaScript tarafından erişilebilir yapmak için HttpOnly 'false'
-                    Expires = DateTime.Now.AddDays(1), // Çerezin geçerlilik süresi 1 gün
-                    Path = "/" // Çerezin tüm site genelinde geçerli olması
+                    HttpOnly = false,
+                    Expires = DateTime.Now.AddDays(1),
+                    Path = "/"
                 };
 
-                // "HasUnreadMessages" çerezini "false" olarak güncelle
                 Response.Cookies.Append("HasUnreadMessages", "false", cookieOptions);
             }
-            #endregion Update
+
             ViewBag.GetUserMessage = allMessages;
             ViewBag.GetUserId = currentUser.Id;
+
             return Json(new { Message = allMessages });
         }
 
@@ -178,47 +96,57 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> GetUserName(string userId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-            if (currentUser == null)
-            {
-                return Json(new { Message = "Current user not found" });
-            }
-
-            var peopleName = _context.Users
-                                     .Where(c => c.CompanyId == currentUser.CompanyId && c.Id == userId)
-                                     .FirstOrDefault();
-
-            if (peopleName == null)
+            if (currentUser == null || string.IsNullOrWhiteSpace(userId))
             {
                 return Json(new { Message = "User not found" });
             }
 
-            return Json(new { Message = peopleName.NameSurname });
+            var peopleName = await _context.Users
+                .AsNoTracking()
+                .Where(x => x.CompanyId == currentUser.CompanyId && x.Id == userId)
+                .Select(x => x.NameSurname)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrWhiteSpace(peopleName))
+            {
+                return Json(new { Message = "User not found" });
+            }
+
+            return Json(new { Message = peopleName });
         }
 
         [HttpPost]
         public async Task<IActionResult> GetSuggestions([FromBody] List<string> messages)
         {
-            if (messages == null)
+            if (messages == null || !messages.Any())
+            {
                 return Json(new { success = false, suggestions = new List<string>() });
+            }
 
             var suggestions = await _aiChatService.GenerateReplySuggestionsAsync(messages);
-
             return Json(new { success = true, suggestions });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAiReplySuggestions(string userId)
         {
-            if (string.IsNullOrEmpty(userId))
-                return Json(new { success = false, suggestions = new List<string>() });
+            var currentUser = await _userManager.GetUserAsync(User);
 
-            // burada basitçe geçmiş mesajları alıyoruz (örnek)
-            var messages = new List<string>
-    {
-        "Merhaba",
-        "Toplantıyı yarına alalım mı?"
-    };
+            if (currentUser == null || string.IsNullOrWhiteSpace(userId))
+            {
+                return Json(new { success = false, suggestions = new List<string>() });
+            }
+
+            var messages = await _context.ChatHistories
+                .AsNoTracking()
+                .Where(x =>
+                    (x.SenderId == currentUser.Id && x.ReceiverId == userId) ||
+                    (x.SenderId == userId && x.ReceiverId == currentUser.Id))
+                .OrderByDescending(x => x.MessageTime)
+                .Take(10)
+                .OrderBy(x => x.MessageTime)
+                .Select(x => x.Message)
+                .ToListAsync();
 
             var suggestions = await _aiChatService.GenerateReplySuggestionsAsync(messages);
 
@@ -228,14 +156,27 @@ namespace CrmCorner.Controllers
         [HttpPost]
         public async Task<IActionResult> GetAiReplySuggestionsLive(string userId, string draftMessage)
         {
-            if (string.IsNullOrEmpty(userId))
-                return Json(new { success = false, suggestions = new List<string>() });
+            var currentUser = await _userManager.GetUserAsync(User);
 
-            var messages = new List<string>();
-
-            if (!string.IsNullOrEmpty(draftMessage))
+            if (currentUser == null || string.IsNullOrWhiteSpace(userId))
             {
-                messages.Add(draftMessage);
+                return Json(new { success = false, suggestions = new List<string>() });
+            }
+
+            var messages = await _context.ChatHistories
+                .AsNoTracking()
+                .Where(x =>
+                    (x.SenderId == currentUser.Id && x.ReceiverId == userId) ||
+                    (x.SenderId == userId && x.ReceiverId == currentUser.Id))
+                .OrderByDescending(x => x.MessageTime)
+                .Take(10)
+                .OrderBy(x => x.MessageTime)
+                .Select(x => x.Message)
+                .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(draftMessage))
+            {
+                messages.Add(draftMessage.Trim());
             }
 
             var suggestions = await _aiChatService.GenerateReplySuggestionsAsync(messages);
@@ -243,89 +184,48 @@ namespace CrmCorner.Controllers
             return Json(new { success = true, suggestions });
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAiReplySuggestions(string userId)
-        //{
-        //    var currentUser = await _userManager.GetUserAsync(User);
-        //    ViewBag.PictureUrl = "/userprofilepicture/" + (currentUser.Picture ?? "defaultpp.png");
-        //    if (currentUser == null)
-        //        return Json(new { success = false, message = "Kullanıcı bulunamadı." });
+        private async Task<List<UserViewModel>> GetUserListAsync(AppUser currentUser, string? search)
+        {
+            var query = _context.Users
+                .AsNoTracking()
+                .Where(x => x.CompanyId == currentUser.CompanyId && x.Id != currentUser.Id);
 
-        //    if (string.IsNullOrEmpty(userId))
-        //        return Json(new { success = false, message = "UserId boş olamaz." });
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                query = query.Where(x => x.NameSurname.Contains(search));
+            }
 
-        //    var messagesSent = _context.ChatHistories
-        //        .Where(c => c.SenderId == currentUser.Id && c.ReceiverId == userId)
-        //        .OrderBy(c => c.MessageTime)
-        //        .ToList();
+            var users = await query
+                .OrderBy(x => x.NameSurname)
+                .ToListAsync();
 
-        //    var messagesReceived = _context.ChatHistories
-        //        .Where(c => c.SenderId == userId && c.ReceiverId == currentUser.Id)
-        //        .OrderBy(c => c.MessageTime)
-        //        .ToList();
+            var userIds = users.Select(x => x.Id).ToList();
 
-        //    var allMessages = messagesSent
-        //        .Concat(messagesReceived)
-        //        .OrderBy(c => c.MessageTime)
-        //        .TakeLast(10)
-        //        .ToList();
+            var unreadSenderIds = await _context.ChatHistories
+                .AsNoTracking()
+                .Where(x =>
+                    x.ReceiverId == currentUser.Id &&
+                    !x.IsRead &&
+                    userIds.Contains(x.SenderId))
+                .Select(x => x.SenderId)
+                .Distinct()
+                .ToListAsync();
 
-        //    var suggestions = await _aiChatService.GenerateReplySuggestionsAsync(allMessages, currentUser.Id);
+            var result = users.Select(item => new UserViewModel
+            {
+                Email = item.Email,
+                UserName = item.UserName,
+                NameSurname = item.NameSurname,
+                PhoneNumber = item.PhoneNumber,
+                UserId = item.Id,
+                PictureUrl = string.IsNullOrWhiteSpace(item.Picture)
+                    ? "/userprofilepicture/defaultpp.png"
+                    : "/userprofilepicture/" + item.Picture,
+                HasUnreadMessages = unreadSenderIds.Contains(item.Id)
+            }).ToList();
 
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        suggestions = suggestions
-        //    });
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> GetAiReplySuggestionsLive(string userId, string draftMessage)
-        //{
-        //    var currentUser = await _userManager.GetUserAsync(User);
-        //    if (currentUser == null)
-        //        return Json(new { success = false, message = "Kullanıcı bulunamadı." });
-
-        //    if (string.IsNullOrEmpty(userId))
-        //        return Json(new { success = false, message = "UserId boş olamaz." });
-
-        //    var messagesSent = _context.ChatHistories
-        //        .Where(c => c.SenderId == currentUser.Id && c.ReceiverId == userId)
-        //        .OrderBy(c => c.MessageTime)
-        //        .ToList();
-
-        //    var messagesReceived = _context.ChatHistories
-        //        .Where(c => c.SenderId == userId && c.ReceiverId == currentUser.Id)
-        //        .OrderBy(c => c.MessageTime)
-        //        .ToList();
-
-        //    var allMessages = messagesSent
-        //        .Concat(messagesReceived)
-        //        .OrderBy(c => c.MessageTime)
-        //        .TakeLast(10)
-        //        .ToList();
-
-        //    if (!string.IsNullOrWhiteSpace(draftMessage))
-        //    {
-        //        allMessages.Add(new ChatHistory
-        //        {
-        //            SenderId = currentUser.Id,
-        //            ReceiverId = userId,
-        //            Message = draftMessage,
-        //            MessageTime = DateTime.Now
-        //        });
-        //    }
-
-        //    var suggestions = await _aiChatService.GenerateReplySuggestionsAsync(allMessages, currentUser.Id);
-
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        suggestions = suggestions
-        //    });
-        //}
+            return result;
+        }
     }
 }
-
-
-

@@ -62,6 +62,10 @@ builder.Services.Configure<OpenAISettings>(
 
 builder.Services.AddHttpClient<IAiSummaryService, AiSummaryService>();
 
+builder.Services.AddHostedService<DayBoardExpirationService>();
+
+builder.Services.AddHostedService<TodoDeadlineReminderService>();
+
 // Form seçenekleri
 builder.Services.Configure<FormOptions>(x =>
 {

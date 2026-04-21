@@ -200,7 +200,7 @@ namespace CrmCorner.Models
 
 
             modelBuilder.Entity<TodoEntry>()
-    .HasOne<AppUser>(t => t.Assignee)
+    .HasOne<AppUser>(t => t.AssigneeUser)
     .WithMany()
     .HasForeignKey(t => t.AssigneeId)
     .OnDelete(DeleteBehavior.SetNull);

@@ -1,6 +1,23 @@
 @model CrmCorner.ViewModels.ToDoPageViewModel
 @inject IJsonHelper JsonHelper
 
+@functions {
+    public string GetInitials(string? fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            return "?";
+
+        var parts = fullName
+            .Trim()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 1)
+            return parts[0].Substring(0, 1).ToUpper();
+
+        return (parts[0].Substring(0, 1) + parts[1].Substring(0, 1)).ToUpper();
+    }
+}
+
 @{
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
     ViewData["Title"] = "ToDoList";
@@ -9,16 +26,20 @@
 <style>
     .todo-page {
         font-family: "Segoe UI", sans-serif;
-        background-color: #f3f4f6;
+        background-color: #f5f6fa;
         overflow-x: hidden;
+        width: 100%;
+    }
+
+    .todo-layout-row {
+        min-height: calc(100vh - 80px);
     }
 
     .todo-sidebar {
         background: #ffffff;
-        height: calc(100vh - 80px);
-        padding: 20px;
-        border-right: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
+        min-height: calc(100vh - 80px);
+        padding: 22px 20px;
+        border-right: 1px solid #ececec;
         position: relative;
         z-index: 5;
     }
@@ -28,62 +49,67 @@
         align-items: center;
         gap: 12px;
         padding: 12px 15px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 16px;
-        font-weight: 500;
+        font-weight: 600;
         color: #374151;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         white-space: nowrap;
+        margin-bottom: 4px;
     }
 
         .todo-menu-item:hover {
-            background: #e6f4f5;
-            color: #2eacb3;
+            background: #fff5df;
+            color: #d99200;
+            transform: translateX(2px);
         }
 
         .todo-menu-item i {
             font-size: 20px;
+            min-width: 20px;
         }
 
     hr.todo-menu-divider {
         border: none;
-        border-top: 1px solid #e5e7eb;
-        margin: 20px 0;
+        border-top: 1px solid #ececec;
+        margin: 18px 0 20px 0;
     }
 
     .todo-dropdown-toggle {
         width: 100%;
-        background: #2eacb3;
+        background: linear-gradient(135deg, #ffb71b, #f2a800);
         color: white;
         border: none;
-        border-radius: 10px;
-        padding: 10px 15px;
-        font-weight: 500;
+        border-radius: 14px;
+        padding: 12px 15px;
+        font-weight: 700;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        box-shadow: 0 10px 24px rgba(255, 183, 27, 0.25);
     }
 
     .todo-dropdown-menu {
         width: 100%;
         border: none;
-        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-        border-radius: 8px;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        border-radius: 12px;
+        padding: 8px 0;
     }
 
     .todo-dropdown-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 15px;
+        padding: 10px 14px;
         color: #333;
         cursor: pointer;
-        transition: background 0.3s ease;
+        transition: background 0.25s ease;
     }
 
         .todo-dropdown-item:hover {
-            background: #f3f4f6;
+            background: #fff8e8;
         }
 
     .todo-addlist-input {
@@ -94,23 +120,27 @@
     }
 
         .todo-addlist-input input {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 10px 12px;
             flex: 1;
+            min-width: 0;
         }
 
         .todo-addlist-input button {
-            background: #4B0082;
+            background: linear-gradient(135deg, #6a11cb, #5700a8);
             border: none;
             color: white;
-            border-radius: 8px;
-            padding: 8px 15px;
-            transition: background 0.3s ease;
+            border-radius: 12px;
+            padding: 10px 16px;
+            transition: all 0.25s ease;
+            font-weight: 700;
+            flex-shrink: 0;
         }
 
             .todo-addlist-input button:hover {
-                background: #350063;
+                transform: translateY(-1px);
+                box-shadow: 0 8px 18px rgba(87, 0, 168, 0.25);
             }
 
     .todo-container {
@@ -118,12 +148,11 @@
         min-height: calc(100vh - 80px);
         position: relative;
         overflow: hidden;
-        border-left: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
+        border-left: 1px solid #ececec;
     }
 
     .todo-overlay {
-        background: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.5));
+        background: linear-gradient(to bottom, rgba(255,255,255,0.16), rgba(0,0,0,0.56));
         position: absolute;
         inset: 0;
     }
@@ -131,85 +160,143 @@
     .todo-content {
         position: relative;
         z-index: 2;
-        padding: 40px;
+        padding: 34px 28px 120px 28px;
         color: white;
+        width: 100%;
     }
 
-    .todo-header h1 {
-        font-size: 30px;
+    .todo-header {
+        margin-bottom: 16px;
+    }
+
+        .todo-header h1 {
+            font-size: 30px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .todo-header h4 {
+            font-size: 16px;
+            color: #e7e7e7;
+            margin-bottom: 0;
+        }
+
+    .todo-alert {
+        margin-top: 16px;
+        background: rgba(220, 38, 38, 0.90);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 14px;
         font-weight: 600;
-        margin-bottom: 5px;
+        box-shadow: 0 10px 22px rgba(0,0,0,0.14);
     }
 
-    .todo-header h4 {
-        font-size: 16px;
-        color: #d1d5db;
+    .todo-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 18px 0 20px 0;
     }
+
+    .todo-filter-btn {
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+
+        .todo-filter-btn:hover,
+        .todo-filter-btn.active {
+            background: #ffb71b;
+            border-color: #ffb71b;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(255, 183, 27, 0.22);
+        }
 
     .todo-lists-wrapper {
-        margin-top: 30px;
-        background: rgba(0,0,0,0.35);
-        border-radius: 14px;
-        padding: 20px 25px;
+        background: rgba(0,0,0,0.32);
+        border-radius: 18px;
+        padding: 20px;
         display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        gap: 20px;
-        backdrop-filter: blur(6px);
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 18px;
+        backdrop-filter: blur(7px);
+    }
+
+    .todo-column {
+        min-width: 0;
     }
 
     .todo-section-title {
         font-size: 15px;
-        font-weight: 600;
-        margin-bottom: 8px;
+        font-weight: 800;
+        margin-bottom: 10px;
         display: flex;
         align-items: center;
         gap: 8px;
-        color: rgba(255,255,255,0.9);
+        color: rgba(255,255,255,0.96);
     }
 
-        .todo-section-title i {
-            font-size: 16px;
-        }
-
     .todo-items-list {
-        max-height: 380px;
+        max-height: 430px;
         overflow-y: auto;
-        padding-right: 5px;
+        padding-right: 4px;
     }
 
     .todo-item-card {
-        background: rgba(0,0,0,0.25);
-        border-radius: 10px;
-        padding: 10px 12px;
+        background: rgba(16, 23, 42, 0.42);
+        border-radius: 16px;
+        padding: 14px;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
-        margin-bottom: 8px;
-        transition: background 0.2s ease, transform 0.1s ease;
+        margin-bottom: 10px;
+        transition: all 0.22s ease;
+        border: 1px solid rgba(255,255,255,0.04);
+        gap: 12px;
     }
 
         .todo-item-card:hover {
-            background: rgba(0,0,0,0.4);
-            transform: translateY(-1px);
+            background: rgba(16, 23, 42, 0.58);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.14);
         }
 
     .todo-item-left {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 10px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .todo-item-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        width: 100%;
+        min-width: 0;
     }
 
     .todo-checkbox-button {
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        border: 2px solid #9ca3af;
+        border: 2px solid #d7dce5;
         background: transparent;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0;
         cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 3px;
     }
 
         .todo-checkbox-button.done {
@@ -222,9 +309,49 @@
             color: white;
         }
 
+    .todo-star-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        color: rgba(255,255,255,0.72);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+        margin-top: -1px;
+    }
+
+        .todo-star-btn:hover {
+            background: rgba(255,255,255,0.08);
+            color: #ffb71b;
+        }
+
+        .todo-star-btn.active {
+            color: #ffb71b;
+        }
+
+    .todo-item-body {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .todo-item-title-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
     .todo-item-text {
         font-size: 14px;
-        color: rgba(255,255,255,0.92);
+        font-weight: 700;
+        color: rgba(255,255,255,0.97);
+        word-break: break-word;
     }
 
         .todo-item-text.done {
@@ -232,10 +359,95 @@
             color: rgba(209,213,219,0.8);
         }
 
+    .todo-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .2px;
+    }
+
+    .todo-badge-assigned {
+        background: rgba(255,183,27,0.16);
+        color: #ffd777;
+        border: 1px solid rgba(255,183,27,0.26);
+    }
+
+    .todo-badge-important {
+        background: rgba(255,255,255,0.1);
+        color: #ffe29b;
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .todo-item-actions-inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        margin-bottom: 4px;
+    }
+
+    .todo-assign-btn {
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.06);
+        color: white;
+        font-weight: 700;
+        padding: 6px 10px;
+        transition: all 0.2s ease;
+    }
+
+        .todo-assign-btn:hover {
+            background: #ffb71b;
+            border-color: #ffb71b;
+            color: white;
+        }
+
     .todo-item-meta {
         font-size: 11px;
-        color: rgba(209,213,219,0.7);
-        margin-top: 2px;
+        color: rgba(228,232,239,0.85);
+        margin-top: 3px;
+        word-break: break-word;
+    }
+
+        .todo-item-meta strong {
+            color: rgba(255,255,255,0.98);
+        }
+
+    .todo-user-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 6px;
+    }
+
+    .todo-user-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 999px;
+        padding: 5px 9px 5px 6px;
+        font-size: 11px;
+        color: #fff;
+    }
+
+    .todo-user-avatar {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ffb71b;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 800;
+        flex-shrink: 0;
     }
 
     .todo-item-delete-btn {
@@ -243,32 +455,25 @@
         border: none;
         color: #fca5a5;
         cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 6px;
     }
 
     .todo-task-input-area {
         position: absolute;
-        bottom: 25px;
+        bottom: 22px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        width: min(90%, 1000px);
-        background: rgba(255,255,255,0.9);
-        border-radius: 30px;
-        padding: 10px 20px;
         align-items: center;
+        gap: 12px;
+        width: min(92%, 980px);
+        background: rgba(255,255,255,0.94);
+        border-radius: 40px;
+        padding: 12px 16px;
         z-index: 3;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.22);
     }
-
-        .todo-task-input-area input[type="date"] {
-            border: none;
-            background: transparent;
-            color: #333;
-            width: 130px;
-            margin-right: 10px;
-            outline: none;
-            font-size: 13px;
-        }
 
         .todo-task-input-area input[type="text"] {
             flex: 1;
@@ -277,49 +482,297 @@
             outline: none;
             font-size: 15px;
             color: #333;
+            min-width: 0;
+        }
+
+        .todo-task-input-area .task-input-icon {
+            color: #9ca3af;
+            flex-shrink: 0;
         }
 
         .todo-task-input-area button {
-            background: #2eacb3;
+            background: linear-gradient(135deg, #ffb71b, #f2a800);
             border: none;
             color: white;
-            border-radius: 25px;
-            padding: 8px 20px;
-            font-weight: 500;
-            transition: background 0.3s ease;
+            border-radius: 999px;
+            padding: 10px 22px;
+            font-weight: 800;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
         }
 
             .todo-task-input-area button:hover {
-                background: #248b91;
+                background: linear-gradient(135deg, #f2a800, #de9900);
+                transform: translateY(-1px);
             }
 
+    .todo-deadline-input {
+        border: 1px solid #e5e7eb;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #333;
+        min-width: 220px;
+        background: #fff;
+        outline: none;
+        flex-shrink: 0;
+    }
+
+    .todo-list-delete-btn {
+        border: none;
+        background: transparent;
+        color: #dc2626;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .todo-list-delete-btn:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+    .assign-popup-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.38);
+        z-index: 9998;
+        backdrop-filter: blur(2px);
+    }
+
+    .assign-popup-box {
+        display: none;
+        position: fixed;
+        top: 28%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 360px;
+        background: #fffdf8;
+        border: 1px solid #ffe0a3;
+        border-radius: 20px;
+        padding: 20px;
+        z-index: 9999;
+        box-shadow: 0 18px 45px rgba(0,0,0,0.22);
+    }
+
+    .assign-popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .assign-popup-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #7a4b00;
+        margin: 0;
+    }
+
+    .assign-popup-subtitle {
+        font-size: 12px;
+        color: #8d7a52;
+        margin-top: 2px;
+    }
+
+    .assign-popup-close {
+        border: none;
+        background: #fff3d6;
+        color: #8a5a00;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+        .assign-popup-close:hover {
+            background: #ffb71b;
+            color: #fff;
+        }
+
+    .assign-popup-select {
+        border: 1px solid #ffd36b !important;
+        border-radius: 14px !important;
+        min-height: 46px;
+        box-shadow: none !important;
+    }
+
+    .assign-popup-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .assign-cancel-btn {
+        width: 50%;
+        border: none;
+        border-radius: 14px;
+        padding: 11px 14px;
+        background: #fff3d6;
+        color: #7a4b00;
+        font-weight: 700;
+    }
+
+        .assign-cancel-btn:hover {
+            background: #ffe4a0;
+        }
+
+    .assign-save-btn {
+        width: 50%;
+        border: none;
+        border-radius: 14px;
+        padding: 11px 14px;
+        background: #ffb71b;
+        color: #fff;
+        font-weight: 800;
+    }
+
+        .assign-save-btn:hover {
+            background: #f2a800;
+        }
+
+    .todo-empty-text {
+        font-size: 13px;
+        color: rgba(255,255,255,0.7);
+    }
+
+    @@media (max-width: 1200px) {
+        .todo-lists-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+
     @@media (max-width: 992px) {
+        .todo-layout-row {
+            min-height: auto;
+        }
+
         .todo-sidebar {
-            height: auto;
-            border-bottom: 1px solid #e5e7eb;
+            min-height: auto;
+            border-bottom: 1px solid #ececec;
+            border-right: none;
+        }
+
+        .todo-container {
+            border-left: none;
+            min-height: auto;
         }
 
         .todo-content {
-            padding: 20px;
+            padding: 20px 16px 115px 16px;
         }
 
-        .todo-lists-wrapper {
-            grid-template-columns: 1fr;
-            max-height: none;
+        .todo-header h1 {
+            font-size: 26px;
         }
 
         .todo-task-input-area {
-            bottom: 15px;
-            width: 95%;
+            width: calc(100% - 24px);
+            left: 12px;
+            right: 12px;
+            transform: none;
+            bottom: 14px;
+            border-radius: 22px;
+            padding: 10px 12px;
+        }
+
+            .todo-task-input-area button {
+                padding: 10px 16px;
+            }
+
+        .assign-popup-box {
+            width: calc(100% - 24px);
+            top: 20%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .todo-sidebar {
+            padding: 16px 14px;
+        }
+
+        .todo-content {
+            padding: 16px 12px 110px 12px;
+        }
+
+        .todo-lists-wrapper {
+            padding: 14px;
+            border-radius: 14px;
+        }
+
+        .todo-item-card {
+            padding: 12px;
+        }
+
+        .todo-item-main {
+            gap: 8px;
+        }
+
+        .todo-task-input-area {
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+            .todo-task-input-area input[type="text"],
+            .todo-deadline-input,
+            .todo-task-input-area button {
+                width: 100%;
+            }
+
+            .todo-task-input-area button {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+        .todo-addlist-input {
+            flex-direction: column;
+        }
+
+            .todo-addlist-input button {
+                width: 100%;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .todo-header h1 {
+            font-size: 24px;
+        }
+
+        .todo-header h4 {
+            font-size: 14px;
+        }
+
+        .todo-toolbar {
+            gap: 8px;
+        }
+
+        .todo-filter-btn {
+            font-size: 12px;
+            padding: 7px 12px;
+        }
+
+        .todo-item-title-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .assign-popup-title {
+            font-size: 20px;
         }
     }
 </style>
 
 <div class="todo-page container-fluid px-0">
-    <div class="row g-0">
+    <div class="row g-0 todo-layout-row">
 
-        <!-- SOL MENÜ -->
-        <div class="col-lg-3 col-md-4 todo-sidebar">
+        <div class="col-12 col-lg-3 col-md-4 todo-sidebar">
 
             <div class="todo-menu-item" onclick="clickToday()">
                 <i class="fa-solid fa-sun"></i>
@@ -340,16 +793,32 @@
 
             <div class="dropdown">
                 <button class="todo-dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fa-solid fa-list-ul"></i> Listelerim
+                    <span><i class="fa-solid fa-list-ul me-2"></i> Listelerim</span>
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
 
                 <ul class="dropdown-menu todo-dropdown-menu">
                     @foreach (var item in Model.Boards)
                     {
-                        <li class="todo-dropdown-item" onclick="handleListItemClick('@item.Id')">
-                            <span>@item.Title</span>
-                            <span class="badge bg-light text-dark">@item.Count</span>
+                        <li class="todo-dropdown-item">
+                            <div class="d-flex justify-content-between align-items-center w-100 gap-2">
+                                <div onclick="handleListItemClick('@item.Id')"
+                                     style="flex:1; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>@item.Title</span>
+                                    <span class="badge bg-light text-dark">@item.Count</span>
+                                </div>
+
+                                <form asp-action="DeleteBoard"
+                                      asp-controller="ToDoList"
+                                      method="post"
+                                      style="margin:0;"
+                                      onsubmit="return confirm('Bu listeyi silmek istediğinize emin misiniz? Listedeki görevler de silinecek.');">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="todo-list-delete-btn" title="Listeyi sil">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </li>
                     }
                 </ul>
@@ -359,54 +828,126 @@
                 <input type="text" name="title" placeholder="Yeni Liste Oluştur" />
                 <button type="submit">Ekle</button>
             </form>
-
         </div>
 
-        <!-- SAĞ PANEL -->
-        <div class="col-lg-9 col-md-8 todo-container">
+        <div class="col-12 col-lg-9 col-md-8 todo-container">
             <div class="todo-overlay"></div>
 
             <div class="todo-content">
                 <div class="todo-header">
                     <h1>@Model.Title</h1>
                     <h4>@DateTime.Now.ToString("dd MMMM yyyy dddd", new System.Globalization.CultureInfo("tr-TR"))</h4>
+
+                    @if (TempData["TodoError"] != null)
+                    {
+                        <div class="todo-alert">
+                            @TempData["TodoError"]
+                        </div>
+                    }
+                </div>
+
+                <div class="todo-toolbar">
+                    <button type="button" class="todo-filter-btn active" data-filter="all">Tümü</button>
+                    <button type="button" class="todo-filter-btn" data-filter="important">Önemli</button>
+                    <button type="button" class="todo-filter-btn" data-filter="assigned">Atanan</button>
+                    <button type="button" class="todo-filter-btn" data-filter="unassigned">Atanmayan</button>
                 </div>
 
                 <div class="todo-lists-wrapper">
-                    <!-- Açık görevler -->
-                    <div>
+                    <div class="todo-column">
                         <div class="todo-section-title">
                             <i class="fa-regular fa-circle"></i>
                             <span>Görevler</span>
                         </div>
-                        <div class="todo-items-list">
+
+                        <div class="todo-items-list" id="openTaskList">
                             @if (Model.NotDoneItems.Any())
                             {
                                 foreach (var item in Model.NotDoneItems)
                                 {
-                                    <div class="todo-item-card">
+                                    var isAssigned = !string.IsNullOrWhiteSpace(item.AssigneeId) && item.AssigneeUser != null;
+                                    <div class="todo-item-card task-card"
+                                         data-important="@(item.IsImportant ? "true" : "false")"
+                                         data-assigned="@(isAssigned ? "true" : "false")">
                                         <div class="todo-item-left">
-                                            <form id="toggleForm-@item.Id" method="post" action="@Url.Action("ToggleEntry", "ToDoList")">
-                                                <input type="hidden" name="id" value="@item.Id" />
-                                                <input type="hidden" name="boardId" value="@Model.CurrentBoardId" />
-                                                <button type="button"
-                                                        class="todo-checkbox-button"
-                                                        onclick="document.getElementById('toggleForm-@item.Id').submit();">
-                                                </button>
-                                            </form>
+                                            <div class="todo-item-main">
+                                                <form id="toggleForm-@item.Id" method="post" action="@Url.Action("ToggleEntry", "ToDoList")">
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <input type="hidden" name="boardId" value="@Model.CurrentBoardId" />
+                                                    <button type="button"
+                                                            class="todo-checkbox-button"
+                                                            onclick="document.getElementById('toggleForm-@item.Id').submit();">
+                                                    </button>
+                                                </form>
 
-                                            <div>
-                                                <div class="todo-item-text">@item.Text</div>
+                                                <form method="post" action="@Url.Action("ToggleImportant", "ToDoList")" style="margin:0;">
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <input type="hidden" name="boardId" value="@Model.CurrentBoardId" />
+                                                    <button type="submit"
+                                                            class="todo-star-btn @(item.IsImportant ? "active" : "")"
+                                                            title="Önemli olarak işaretle">
+                                                        <i class="fa-@(item.IsImportant ? "solid" : "regular") fa-star"></i>
+                                                    </button>
+                                                </form>
 
-                                                <button type="button"
-                                                        class="btn btn-sm btn-outline-light"
-                                                        onclick="openAssign(@item.Id)">
-                                                    <i class="fa-solid fa-user-plus"></i>
-                                                </button>
+                                                <div class="todo-item-body">
+                                                    <div class="todo-item-title-row">
+                                                        <div class="todo-item-text">@item.Text</div>
 
+                                                        @if (item.IsImportant)
+                                                        {
+                                                            <span class="todo-badge todo-badge-important">
+                                                                <i class="fa-solid fa-star"></i> Önemli
+                                                            </span>
+                                                        }
 
-                                                <div class="todo-item-meta">
-                                                    @item.CreatedDate.ToString("dd.MM.yyyy HH:mm")
+                                                        @if (isAssigned)
+                                                        {
+                                                            <span class="todo-badge todo-badge-assigned">
+                                                                <i class="fa-solid fa-user-check"></i> Atandı
+                                                            </span>
+                                                        }
+                                                    </div>
+
+                                                    <div class="todo-item-actions-inline">
+                                                        @if (!isAssigned)
+                                                        {
+                                                            <button type="button"
+                                                                    class="todo-assign-btn"
+                                                                    onclick="openAssign(@item.Id)">
+                                                                <i class="fa-solid fa-user-plus me-1"></i> Görev Ata
+                                                            </button>
+                                                        }
+                                                    </div>
+
+                                                    <div class="todo-item-meta">
+                                                        <strong>Oluşturulma:</strong> @item.CreatedDate.ToString("dd.MM.yyyy HH:mm")
+                                                    </div>
+
+                                                    @if (item.Deadline.HasValue && !item.IsDayBoardTask)
+                                                    {
+                                                        <div class="todo-item-meta">
+                                                            <strong>Son Tarih:</strong> @item.Deadline.Value.ToString("dd.MM.yyyy HH:mm")
+                                                        </div>
+                                                    }
+
+                                                    <div class="todo-user-chip-row">
+                                                        @if (isAssigned)
+                                                        {
+                                                            <div class="todo-user-chip">
+                                                                <span class="todo-user-avatar">@GetInitials(item.AssigneeUser?.NameSurname)</span>
+                                                                <span><strong>Atanan:</strong> @item.AssigneeUser?.NameSurname</span>
+                                                            </div>
+                                                        }
+
+                                                        @if (!string.IsNullOrWhiteSpace(item.AssignedById) && item.AssignedByUser != null)
+                                                        {
+                                                            <div class="todo-user-chip">
+                                                                <span class="todo-user-avatar">@GetInitials(item.AssignedByUser?.NameSurname)</span>
+                                                                <span><strong>Atayan:</strong> @item.AssignedByUser?.NameSurname</span>
+                                                            </div>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -423,43 +964,97 @@
                             }
                             else
                             {
-                                <div class="text-muted" style="font-size:13px;">
-                                    Henüz görev eklenmemiş.
-                                </div>
+                                <div class="todo-empty-text">Henüz görev eklenmemiş.</div>
                             }
                         </div>
                     </div>
 
-                    <!-- Tamamlananlar -->
-                    <div>
+                    <div class="todo-column">
                         <div class="todo-section-title">
                             <i class="fa-solid fa-check"></i>
                             <span>Tamamlananlar</span>
                         </div>
+
                         <div class="todo-items-list">
                             @if (Model.DoneItems.Any())
                             {
                                 foreach (var item in Model.DoneItems)
                                 {
+                                    var isAssigned = !string.IsNullOrWhiteSpace(item.AssigneeId) && item.AssigneeUser != null;
                                     <div class="todo-item-card">
                                         <div class="todo-item-left">
-                                            <form id="toggleForm-@item.Id" method="post" action="@Url.Action("ToggleEntry", "ToDoList")">
-                                                <input type="hidden" name="id" value="@item.Id" />
-                                                <input type="hidden" name="boardId" value="@Model.CurrentBoardId" />
-                                                <button type="button"
-                                                        class="todo-checkbox-button done"
-                                                        onclick="document.getElementById('toggleForm-@item.Id').submit();">
-                                                    <i class="fa-solid fa-check"></i>
-                                                </button>
-                                            </form>
+                                            <div class="todo-item-main">
+                                                <form id="toggleDoneForm-@item.Id" method="post" action="@Url.Action("ToggleEntry", "ToDoList")">
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <input type="hidden" name="boardId" value="@Model.CurrentBoardId" />
+                                                    <button type="button"
+                                                            class="todo-checkbox-button done"
+                                                            onclick="document.getElementById('toggleDoneForm-@item.Id').submit();">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                </form>
 
-                                            <div>
-                                                <div class="todo-item-text done">@item.Text</div>
-                                                <div class="todo-item-meta">
-                                                    @if (item.CompletedDate.HasValue)
+                                                <form method="post" action="@Url.Action("ToggleImportant", "ToDoList")" style="margin:0;">
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <input type="hidden" name="boardId" value="@Model.CurrentBoardId" />
+                                                    <button type="submit"
+                                                            class="todo-star-btn @(item.IsImportant ? "active" : "")"
+                                                            title="Önemli olarak işaretle">
+                                                        <i class="fa-@(item.IsImportant ? "solid" : "regular") fa-star"></i>
+                                                    </button>
+                                                </form>
+
+                                                <div class="todo-item-body">
+                                                    <div class="todo-item-title-row">
+                                                        <div class="todo-item-text done">@item.Text</div>
+
+                                                        @if (item.IsImportant)
+                                                        {
+                                                            <span class="todo-badge todo-badge-important">
+                                                                <i class="fa-solid fa-star"></i> Önemli
+                                                            </span>
+                                                        }
+
+                                                        @if (isAssigned)
+                                                        {
+                                                            <span class="todo-badge todo-badge-assigned">
+                                                                <i class="fa-solid fa-user-check"></i> Atandı
+                                                            </span>
+                                                        }
+                                                    </div>
+
+                                                    <div class="todo-item-meta">
+                                                        @if (item.CompletedDate.HasValue)
+                                                        {
+                                                            <strong>Tamamlandı:</strong>
+                                                            @item.CompletedDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                                        }
+                                                    </div>
+
+                                                    @if (item.Deadline.HasValue && !item.IsDayBoardTask)
                                                     {
-                                                        @:Tamamlandı: @item.CompletedDate.Value.ToString("dd.MM.yyyy HH:mm")
+                                                        <div class="todo-item-meta">
+                                                            <strong>Son Tarih:</strong> @item.Deadline.Value.ToString("dd.MM.yyyy HH:mm")
+                                                        </div>
                                                     }
+
+                                                    <div class="todo-user-chip-row">
+                                                        @if (isAssigned)
+                                                        {
+                                                            <div class="todo-user-chip">
+                                                                <span class="todo-user-avatar">@GetInitials(item.AssigneeUser?.NameSurname)</span>
+                                                                <span><strong>Atanan:</strong> @item.AssigneeUser?.NameSurname</span>
+                                                            </div>
+                                                        }
+
+                                                        @if (!string.IsNullOrWhiteSpace(item.AssignedById) && item.AssignedByUser != null)
+                                                        {
+                                                            <div class="todo-user-chip">
+                                                                <span class="todo-user-avatar">@GetInitials(item.AssignedByUser?.NameSurname)</span>
+                                                                <span><strong>Atayan:</strong> @item.AssignedByUser?.NameSurname</span>
+                                                            </div>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -476,49 +1071,81 @@
                             }
                             else
                             {
-                                <div class="text-muted" style="font-size:13px;">
-                                    Tamamlanan görev yok.
-                                </div>
+                                <div class="todo-empty-text">Tamamlanan görev yok.</div>
                             }
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Görev ekleme barı -->
             <form id="taskForm"
                   method="post"
                   action="@Url.Action("AddEntry", "ToDoList")"
                   class="todo-task-input-area">
+                <i class="fa-regular fa-square-plus task-input-icon"></i>
                 <input type="hidden" name="boardId" value="@Model.CurrentBoardId" />
-                <input type="date" name="date" placeholder="GG.AA.YYYY" />
-                <input type="text" name="text" placeholder="Görev ekle..." />
+                <input type="text" id="taskTextInput" name="text" placeholder="Görev ekle..." />
+
+                @if (Model.Title != "Günüm")
+                {
+                    <input type="datetime-local"
+                           id="deadlineInput"
+                           name="deadline"
+                           class="todo-deadline-input" />
+                }
+
                 <button type="submit">Ekle</button>
             </form>
         </div>
-
     </div>
 </div>
-<!-- Görev Atama Popup -->
-<div id="assignPopup"
-     style="display:none; position:fixed; top:30%; left:50%; transform:translateX(-50%);
-            background:white; padding:20px; border-radius:10px; z-index:9999; width:300px;
-            box-shadow:0 4px 10px rgba(0,0,0,0.25);">
 
-    <h4 class="mb-3">Görevi Ata</h4>
+<div id="assignPopupOverlay" class="assign-popup-overlay" onclick="closeAssignPopup()"></div>
 
-    <!-- Atanacak olan task id tutulacak -->
+<div id="assignPopup" class="assign-popup-box">
+    <div class="assign-popup-header">
+        <div>
+            <h4 class="assign-popup-title">Görevi Ata</h4>
+            <div class="assign-popup-subtitle">Bir görev yalnızca bir kullanıcıya atanabilir.</div>
+        </div>
+        <button type="button" class="assign-popup-close" onclick="closeAssignPopup()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
     <input type="hidden" id="assignTaskId" />
 
-    <select id="assignUserSelect" class="form-control mb-3">
+    <select id="assignUserSelect" class="form-control assign-popup-select">
         @foreach (var user in ViewBag.Users)
         {
             <option value="@user.Id">@user.NameSurname</option>
-
         }
     </select>
 
-    <button onclick="assignTask()" class="btn btn-success w-100">Ata</button>
+    <div class="assign-popup-actions">
+        <button type="button" onclick="closeAssignPopup()" class="assign-cancel-btn">Vazgeç</button>
+        <button type="button" onclick="assignTask()" class="assign-save-btn">Ata</button>
+    </div>
+</div>
+
+<div id="todoToast"
+     style="display:none; position:fixed; top:24px; right:24px; z-index:10050; min-width:280px; max-width:360px;
+            background:#fff8e6; border:1px solid #ffd36b; border-radius:18px; box-shadow:0 12px 30px rgba(0,0,0,0.18);
+            padding:14px 16px;">
+    <div style="display:flex; align-items:flex-start; gap:10px;">
+        <div style="width:34px; height:34px; border-radius:50%; background:#ffb71b; color:white; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <div style="flex:1;">
+            <div style="font-weight:800; color:#7a4b00; font-size:14px;">İşlem başarılı</div>
+            <div id="todoToastMessage" style="font-size:13px; color:#6b5b3e; margin-top:2px;">Görev başarıyla atandı.</div>
+        </div>
+        <button type="button"
+                onclick="closeTodoToast()"
+                style="border:none; background:transparent; color:#8a6a26; font-size:16px; line-height:1; cursor:pointer;">
+            ×
+        </button>
+    </div>
 </div>
 
 <script>
@@ -542,29 +1169,93 @@
         window.location.href = baseUrl + "ToDoList/ToDoList/" + id;
     }
 
-
-        function openAssign(taskId) {
+    function openAssign(taskId) {
         $("#assignTaskId").val(taskId);
-        $("#assignPopup").fadeIn(200);
+        $("#assignPopupOverlay").fadeIn(150);
+        $("#assignPopup").fadeIn(180);
+    }
+
+    function closeAssignPopup() {
+        $("#assignPopup").fadeOut(150);
+        $("#assignPopupOverlay").fadeOut(150);
+    }
+
+    function showTodoToast(message) {
+        $("#todoToastMessage").text(message);
+        $("#todoToast").stop(true, true).fadeIn(180);
+
+        setTimeout(function () {
+            $("#todoToast").fadeOut(220);
+        }, 2200);
+    }
+
+    function closeTodoToast() {
+        $("#todoToast").fadeOut(180);
     }
 
     function assignTask() {
         let taskId = $("#assignTaskId").val();
-        let username = $("#assignUserSelect").val();
+        let userId = $("#assignUserSelect").val();
 
-        $.post("/ToDoList/AssignTask",
-        {
+        $.post("/ToDoList/AssignTask", {
             taskId: taskId,
-     assigneeUserId: userId
+            assigneeUserId: userId
+        }, function (res) {
+            closeAssignPopup();
+            showTodoToast(res.message || "Görev başarıyla atandı.");
 
-        },
-        function (res) {
-            alert(res.message);
-            location.reload();
+            setTimeout(function () {
+                location.reload();
+            }, 700);
         });
     }
 
+    document.addEventListener("DOMContentLoaded", function () {
+        const taskInput = document.getElementById("taskTextInput");
+        const taskForm = document.getElementById("taskForm");
+
+        if (taskInput && taskForm) {
+            taskInput.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    taskForm.submit();
+                }
+            });
+        }
+
+        const filterButtons = document.querySelectorAll(".todo-filter-btn");
+        const taskCards = document.querySelectorAll(".task-card");
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener("click", function () {
+                filterButtons.forEach(x => x.classList.remove("active"));
+                this.classList.add("active");
+
+                const filter = this.getAttribute("data-filter");
+
+                taskCards.forEach(card => {
+                    const isImportant = card.getAttribute("data-important") === "true";
+                    const isAssigned = card.getAttribute("data-assigned") === "true";
+
+                    let visible = true;
+
+                    if (filter === "important") visible = isImportant;
+                    if (filter === "assigned") visible = isAssigned;
+                    if (filter === "unassigned") visible = !isAssigned;
+
+                    card.style.display = visible ? "flex" : "none";
+                });
+            });
+        });
+    });
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            closeAssignPopup();
+        }
+    });
 </script>
-<script src="~/crmtema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
+
+@* <script src="~/crmtema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 <script src="~/crmtema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
-<script src="~/CRMTema/bootstrap4/documentation/assets/vendor/jquery/jquery.min.js"></script>
+<script src="~/CRMTema/bootstrap4/documentation/assets/vendor/jquery/jquery.min.js"></script> *@
