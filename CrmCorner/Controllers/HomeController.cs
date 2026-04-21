@@ -827,36 +827,138 @@ namespace CrmCorner.Controllers
                 return RedirectToAction("NotFound", "Error");
             }
         }
+
+
         [HttpGet]
         public async Task<IActionResult> GetNotificationsStatus()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            var unreadMessages = _context.ChatHistories
-                                        .Where(m => m.ReceiverId == currentUser.Id && !m.IsRead)
-                                        .Select(m => new { m.SenderId })
-                                        .ToList();
 
-            var senderIds = unreadMessages.Select(m => m.SenderId).Distinct().ToList();
-            var senders = await _userManager.Users
-                                .Where(u => senderIds.Contains(u.Id))
-                                .Select(u => new { u.Id, u.UserName,u.NameSurname })
-                                .ToListAsync();
-
-            var senderDetails = senders.Select(s => new
+            if (currentUser == null)
             {
-                SenderId = s.Id,
-                SenderName = s.UserName,
-                Name=s.NameSurname
+                return Json(new
+                {
+                    message = new
+                    {
+                        hasUnreadMessages = false,
+                        distinctSenderIdsCount = 0,
+                        unreadMessages = new List<object>()
+                    }
+                });
+            }
+
+            var senderIds = await _context.ChatHistories
+                .AsNoTracking()
+                .Where(m => m.ReceiverId == currentUser.Id && !m.IsRead)
+                .Select(m => m.SenderId)
+                .Distinct()
+                .ToListAsync();
+
+            var senders = await _userManager.Users
+                .AsNoTracking()
+                .Where(u => senderIds.Contains(u.Id))
+                .Select(u => new
+                {
+                    senderId = u.Id,
+                    senderName = u.UserName,
+                    name = u.NameSurname
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                message = new
+                {
+                    hasUnreadMessages = senders.Any(),
+                    distinctSenderIdsCount = senders.Count,
+                    unreadMessages = senders
+                }
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetTopbarNotifications()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new
+                {
+                    notifications = new List<object>(),
+                    unreadCount = 0
+                });
+            }
+
+            var now = DateTime.Now;
+            var fiveDaysLater = now.AddDays(5);
+
+            var todoNotifications = await _context.TodoEntries
+                .AsNoTracking()
+                .Where(t =>
+                    !t.IsDone &&
+                    (
+                        t.UserId == currentUser.Id
+                        || t.AssigneeId == currentUser.Id
+                    ) &&
+                    t.Deadline.HasValue &&
+                    t.Deadline.Value <= fiveDaysLater)
+                .OrderBy(t => t.Deadline)
+                .Take(10)
+                .Select(t => new
+                {
+                    id = t.Id,
+                    text = t.Text,
+                    boardId = t.TodoBoardId,
+                    deadline = t.Deadline,
+                    isAssignedToMe = t.AssigneeId == currentUser.Id && t.UserId != currentUser.Id
+                })
+                .ToListAsync();
+
+            var notifications = todoNotifications.Select(t =>
+            {
+                string type;
+                string meta;
+
+                if (t.deadline.HasValue && t.deadline.Value < now)
+                {
+                    type = "overdue";
+                    meta = "Süresi geçti";
+                }
+                else if (t.isAssignedToMe)
+                {
+                    type = "assigned";
+                    var daysLeft = t.deadline.HasValue ? (t.deadline.Value.Date - now.Date).Days : 0;
+                    meta = daysLeft <= 0 ? "Bugün son gün" : $"{daysLeft} gün kaldı";
+                }
+                else
+                {
+                    type = "deadline";
+                    var daysLeft = t.deadline.HasValue ? (t.deadline.Value.Date - now.Date).Days : 0;
+
+                    if (daysLeft <= 0)
+                        meta = "Bugün son gün";
+                    else if (daysLeft == 1)
+                        meta = "1 gün kaldı";
+                    else
+                        meta = $"{daysLeft} gün kaldı";
+                }
+
+                return new
+                {
+                    id = t.id,
+                    title = t.text,
+                    type = type,
+                    meta = meta,
+                    boardId = t.boardId,
+                    deadline = t.deadline.HasValue ? t.deadline.Value.ToString("dd.MM.yyyy HH:mm") : ""
+                };
             }).ToList();
 
-            var jsonData = new
+            return Json(new
             {
-                HasUnreadMessages = unreadMessages.Any(),
-                DistinctSenderIdsCount = senderDetails.Count,
-                UnreadMessages = senderDetails
-            };
-
-            return Json(new { Message = jsonData });
+                notifications,
+                unreadCount = notifications.Count
+            });
         }
 
         [AllowAnonymous]

@@ -114,18 +114,91 @@ namespace CrmCorner.Controllers.Admin
                     // 🟣 YENİ TODO SİSTEMİNDEN SON 5 GÖREVİ GETİRİYORUZ
                     // ============================================================
 
-                    var latestTasks = await _context.TodoEntries
-                        .Where(t => t.UserId == currentUser.Id && !t.IsDone)
-                        .OrderByDescending(t => t.CreatedDate)
-                        .Take(5)
-                        .Select(t => new LatestTaskDto
+                    var latestTasksRaw = await _context.TodoEntries
+          .Where(t =>
+              !t.IsDone &&
+              (
+                  t.UserId == currentUser.Id ||
+                  t.AssigneeId == currentUser.Id
+              ))
+          .Select(t => new
+          {
+              t.Id,
+              t.Text,
+              t.CreatedDate,
+              BoardId = t.TodoBoardId,
+              t.Deadline,
+              t.UserId,
+              t.AssigneeId
+          })
+          .ToListAsync();
+
+                    var now = DateTime.Now;
+
+                    var latestTasks = latestTasksRaw
+                        .Select(t =>
                         {
-                            Id = t.Id,
-                            Text = t.Text,
-                            CreatedDate = t.CreatedDate,
-                            BoardId = t.TodoBoardId
+                            bool isUrgent = false;
+                            string urgencyText = t.CreatedDate.ToString("dd.MM.yyyy");
+
+                            if (t.Deadline.HasValue)
+                            {
+                                var remaining = t.Deadline.Value - now;
+
+                                if (remaining.TotalMinutes <= 0)
+                                {
+                                    isUrgent = true;
+                                    urgencyText = "Süresi geçti";
+                                }
+                                else if (remaining.TotalHours <= 2)
+                                {
+                                    isUrgent = true;
+                                    urgencyText = "2 saat kaldı";
+                                }
+                                else if (remaining.TotalDays <= 1)
+                                {
+                                    isUrgent = true;
+                                    urgencyText = "Bugün";
+                                }
+                                else if (remaining.TotalDays <= 2)
+                                {
+                                    isUrgent = true;
+                                    urgencyText = "Yarın";
+                                }
+                                else if (remaining.TotalDays <= 3)
+                                {
+                                    isUrgent = true;
+                                    urgencyText = "3 gün kaldı";
+                                }
+                                else if (remaining.TotalDays <= 7)
+                                {
+                                    urgencyText = "1 hafta içinde";
+                                }
+                                else
+                                {
+                                    urgencyText = t.Deadline.Value.ToString("dd.MM.yyyy");
+                                }
+                            }
+
+                            return new LatestTaskDto
+                            {
+                                Id = t.Id,
+                                Text = t.Text,
+                                CreatedDate = t.CreatedDate,
+                                BoardId = t.BoardId,
+                                Deadline = t.Deadline,
+                                IsUrgent = isUrgent,
+                                UrgencyText = urgencyText,
+                                IsAssignedToMe = t.AssigneeId == currentUser.Id && t.UserId != currentUser.Id
+                            };
                         })
-                        .ToListAsync();
+                        .OrderBy(t => t.Deadline.HasValue ? 0 : 1)
+                        .ThenBy(t => t.Deadline ?? DateTime.MaxValue)
+                        .ThenByDescending(t => t.CreatedDate)
+                        .Take(5)
+                        .ToList();
+
+                    ViewBag.LatestTasks = latestTasks;
 
                     ViewBag.LatestTasks = latestTasks;
 
