@@ -15,6 +15,7 @@
     {
         var roles = await UserManager.GetRolesAsync(currentUser);
         if (roles.Contains("SuperAdmin")) userRole = "SuperAdmin";
+        if (roles.Contains("SuperAdmin")) userRole = "SuperAdmin";
         else if (roles.Contains("Admin")) userRole = "Admin";
         else if (roles.Contains("SocialMediaAdmin")) userRole = "SocialMediaAdmin";
         else if (roles.Contains("TeamMember")) userRole = "TeamMember";
@@ -892,19 +893,30 @@
                                                     <i class="fa fa-chevron-down ms-auto"></i>
                                                 </a>
                                                 <ul class="collapse list-unstyled ps-4" id="reportSubmenu">
-                                                    <li class="nav-item">
+                                                    @*<li class="nav-item">
                                                         <a class="nav-link text-dark" asp-controller="Reports" asp-action="ResponsibleUserTasks">
                                                             <i class="fa fa-tasks me-2"></i>Süreç Durumu
                                                         </a>
-                                                    </li>
+                                                    </li>*@
                                                     <li class="nav-item">
                                                         <a class="nav-link text-dark" asp-controller="Reports" asp-action="StageByUserReports">
                                                             <i class="fa fa-layer-group me-2"></i>Görev Sayısı
                                                         </a>
                                                     </li>
+                                                              <li class="nav-item">
+                                                        <a class="nav-link text-dark" asp-controller="Reports" asp-action="TeamDashboard">
+                                                            <i class="fa fa-layer-group me-2"></i>Takım Performans
+                                                        </a>
+                                                    </li>
                                                     <li class="nav-item">
                                                         <a class="nav-link text-dark" asp-controller="PipelineAnalysis" asp-action="Index">
                                                             <i class="fa fa-layer-group me-2"></i>Kişi / Görev Analiz
+                                                        </a>
+                                                    </li>
+
+                                                     <li class="nav-item">
+                                                        <a class="nav-link text-dark" asp-controller="Reports" asp-action="WeeklyMeetingReport">
+                                                            <i class="fa fa-layer-group me-2"></i>Haftalık Değerlendirme
                                                         </a>
                                                     </li>
                                                 </ul>

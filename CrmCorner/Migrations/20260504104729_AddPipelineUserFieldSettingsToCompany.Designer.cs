@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20260504104729_AddPipelineUserFieldSettingsToCompany")]
+    partial class AddPipelineUserFieldSettingsToCompany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -451,52 +454,6 @@ namespace CrmCorner.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("CustomerNs");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.DailyReport", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("ActivityType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("ActualValue")
-                        .HasColumnType("int");
-
-                    b.Property<string>("AppUserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("ProspectTarget")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReportDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("WeekEndDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("WeekStartDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("DailyReports");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.EmailList", b =>
@@ -1646,17 +1603,6 @@ namespace CrmCorner.Migrations
                     b.HasOne("CrmCorner.Models.AppUser", "AppUser")
                         .WithMany("Customers")
                         .HasForeignKey("AppUserId");
-
-                    b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("CrmCorner.Models.DailyReport", b =>
-                {
-                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
-                        .WithMany()
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("AppUser");
                 });

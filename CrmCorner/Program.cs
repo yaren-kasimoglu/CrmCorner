@@ -60,6 +60,8 @@ builder.Services.AddScoped<IChatAuthorizationService, ChatAuthorizationService>(
 builder.Services.Configure<OpenAISettings>(
     builder.Configuration.GetSection("OpenAI"));
 
+builder.Services.AddHttpClient<IOpenAiIntentParserService, OpenAiIntentParserService>();
+
 builder.Services.AddHttpClient<IAiSummaryService, AiSummaryService>();
 
 builder.Services.AddHostedService<DayBoardExpirationService>();

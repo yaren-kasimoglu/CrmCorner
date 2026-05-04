@@ -1,5 +1,7 @@
 ﻿@model CrmCorner.Models.PipelineTask
+@using Microsoft.AspNetCore.Mvc.Rendering
 @using CrmCorner.Models.Enums
+
 @{
     ViewData["Title"] = "Yeni Görev Oluştur";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
@@ -9,6 +11,7 @@
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
+
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
@@ -25,8 +28,9 @@
 }
 
 <form asp-action="PipelineTaskCreate" method="post">
+    @Html.AntiForgeryToken()
+
     <div class="row">
-        <!-- Sol taraf: Görev Bilgileri -->
         <div class="col-lg-6">
             <div class="form-group">
                 <label asp-for="Title">Başlık</label>
@@ -65,7 +69,6 @@
             </div>
         </div>
 
-        <!-- Sağ taraf: Müşteri Bilgileri -->
         <div class="col-lg-6">
             <div class="form-group">
                 <label asp-for="CustomerName">Ad</label>
@@ -109,24 +112,56 @@
                 <span asp-validation-for="SourceChannel" class="text-danger"></span>
             </div>
 
-            <!-- Kişiler -->
-            <div class="form-group">
-                <label asp-for="AppUserId">Görüşmeyi Alan</label>
-                <select asp-for="AppUserId" class="form-control"
-                        asp-items="@(ViewBag.Users as List<SelectListItem>)" required>
-                    <option value="">Lütfen seçiniz</option>
-                </select>
-                <span asp-validation-for="AppUserId" class="text-danger"></span>
-            </div>
+            <hr />
+            <h5>Kişiler</h5>
 
-            <div class="form-group">
-                <label asp-for="ResponsibleUserId">Sorumlu Kişi</label>
-                <select asp-for="ResponsibleUserId" class="form-control"
-                        asp-items="@(ViewBag.Users as List<SelectListItem>)" required>
-                    <option value="">Lütfen seçiniz</option>
-                </select>
-                <span asp-validation-for="ResponsibleUserId" class="text-danger"></span>
-            </div>
+            @if (ViewBag.UseAppUser == true)
+            {
+                <div class="form-group">
+                    <label asp-for="AppUserId">Görüşmeyi Alan</label>
+                    <select asp-for="AppUserId" class="form-control"
+                            asp-items="@(ViewBag.Users as List<SelectListItem>)">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="AppUserId" class="text-danger"></span>
+                </div>
+            }
+
+            @if (ViewBag.UseResponsibleUser == true)
+            {
+                <div class="form-group">
+                    <label asp-for="ResponsibleUserId">SDR</label>
+                    <select asp-for="ResponsibleUserId" class="form-control"
+                            asp-items="@(ViewBag.Users as List<SelectListItem>)">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="ResponsibleUserId" class="text-danger"></span>
+                </div>
+            }
+
+            @if (ViewBag.UseMeetingUser == true)
+            {
+                <div class="form-group">
+                    <label asp-for="MeetingUserId">Görüşmeyi Gerçekleştiren</label>
+                    <select asp-for="MeetingUserId" class="form-control"
+                            asp-items="@(ViewBag.Users as List<SelectListItem>)">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="MeetingUserId" class="text-danger"></span>
+                </div>
+            }
+
+            @if (ViewBag.UseReporterUser == true)
+            {
+                <div class="form-group">
+                    <label asp-for="ReporterUserId">Raporlamacı</label>
+                    <select asp-for="ReporterUserId" class="form-control"
+                            asp-items="@(ViewBag.Users as List<SelectListItem>)">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="ReporterUserId" class="text-danger"></span>
+                </div>
+            }
         </div>
     </div>
 
@@ -138,6 +173,7 @@
 
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

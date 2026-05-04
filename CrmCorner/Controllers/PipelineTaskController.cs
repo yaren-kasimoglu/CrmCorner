@@ -78,9 +78,11 @@ namespace CrmCorner.Controllers
                     .ToList();
 
                 tasksQuery = tasksQuery.Where(t =>
-                    (t.AppUserId != null && sameCompanyUserIds.Contains(t.AppUserId)) ||
-                    (t.ResponsibleUserId != null && sameCompanyUserIds.Contains(t.ResponsibleUserId))
-                );
+        (t.AppUserId != null && sameCompanyUserIds.Contains(t.AppUserId)) ||
+        (t.ResponsibleUserId != null && sameCompanyUserIds.Contains(t.ResponsibleUserId)) ||
+        (t.MeetingUserId != null && sameCompanyUserIds.Contains(t.MeetingUserId)) ||
+        (t.ReporterUserId != null && sameCompanyUserIds.Contains(t.ReporterUserId))
+    );
             }
             else if (isTeamLeader)
             {
@@ -95,14 +97,19 @@ namespace CrmCorner.Controllers
                 teamMemberIds.Add(currentUserId);
 
                 tasksQuery = tasksQuery.Where(t =>
-                    (t.AppUserId != null && teamMemberIds.Contains(t.AppUserId)) ||
-                    (t.ResponsibleUserId != null && teamMemberIds.Contains(t.ResponsibleUserId))
-                );
+       (t.AppUserId != null && teamMemberIds.Contains(t.AppUserId)) ||
+       (t.ResponsibleUserId != null && teamMemberIds.Contains(t.ResponsibleUserId)) ||
+       (t.MeetingUserId != null && teamMemberIds.Contains(t.MeetingUserId)) ||
+       (t.ReporterUserId != null && teamMemberIds.Contains(t.ReporterUserId))
+   );
             }
             else if (isTeamMember)
             {
                 tasksQuery = tasksQuery.Where(t =>
-                    t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId
+    t.AppUserId == currentUserId ||
+    t.ResponsibleUserId == currentUserId ||
+    t.MeetingUserId == currentUserId ||
+    t.ReporterUserId == currentUserId
                 );
             }
 
@@ -124,9 +131,11 @@ namespace CrmCorner.Controllers
                     .ToList();
 
                 ViewBag.PipelineTaskCount = await _context.PipelineTasks.CountAsync(t =>
-                    (t.AppUserId != null && sameCompanyUserIds.Contains(t.AppUserId)) ||
-                    (t.ResponsibleUserId != null && sameCompanyUserIds.Contains(t.ResponsibleUserId))
-                );
+      (t.AppUserId != null && sameCompanyUserIds.Contains(t.AppUserId)) ||
+      (t.ResponsibleUserId != null && sameCompanyUserIds.Contains(t.ResponsibleUserId)) ||
+      (t.MeetingUserId != null && sameCompanyUserIds.Contains(t.MeetingUserId)) ||
+      (t.ReporterUserId != null && sameCompanyUserIds.Contains(t.ReporterUserId))
+  );
             }
             else if (isTeamLeader)
             {
@@ -139,14 +148,19 @@ namespace CrmCorner.Controllers
                 teamMemberIds.Add(currentUserId);
 
                 ViewBag.PipelineTaskCount = await _context.PipelineTasks.CountAsync(t =>
-                    (t.AppUserId != null && teamMemberIds.Contains(t.AppUserId)) ||
-                    (t.ResponsibleUserId != null && teamMemberIds.Contains(t.ResponsibleUserId))
-                );
+       (t.AppUserId != null && teamMemberIds.Contains(t.AppUserId)) ||
+       (t.ResponsibleUserId != null && teamMemberIds.Contains(t.ResponsibleUserId)) ||
+       (t.MeetingUserId != null && teamMemberIds.Contains(t.MeetingUserId)) ||
+       (t.ReporterUserId != null && teamMemberIds.Contains(t.ReporterUserId))
+   );
             }
             else
             {
-                ViewBag.PipelineTaskCount = await _context.PipelineTasks.CountAsync(t =>
-                    t.AppUserId == currentUserId || t.ResponsibleUserId == currentUserId);
+               ViewBag.PipelineTaskCount = await _context.PipelineTasks.CountAsync(t =>
+    t.AppUserId == currentUserId ||
+    t.ResponsibleUserId == currentUserId ||
+    t.MeetingUserId == currentUserId ||
+    t.ReporterUserId == currentUserId);
             }
 
             return View(tasks);
@@ -168,6 +182,8 @@ namespace CrmCorner.Controllers
                 }).ToList();
 
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            SetPipelineUserFieldSettings(currentUserId);
 
             // 🔒 sadece aynı domain kullanıcıları
             ViewBag.Users = BuildCompanyUsersSelectList(currentUserId ?? string.Empty);
@@ -313,6 +329,7 @@ namespace CrmCorner.Controllers
 
             // Aktif kullanıcı bilgisi
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            SetPipelineUserFieldSettings(currentUserId);
             var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
             if (me == null) return Unauthorized();
 
@@ -790,7 +807,7 @@ namespace CrmCorner.Controllers
                 return fieldName switch
                 {
                     nameof(PipelineTask.AppUserId) => "Görüşmeyi Alan",
-                    nameof(PipelineTask.ResponsibleUserId) => "Sorumlu Kişi",
+                    nameof(PipelineTask.ResponsibleUserId) => "SDR",
                     nameof(PipelineTask.Title) => "Başlık",
                     nameof(PipelineTask.Description) => "Açıklama",
                     nameof(PipelineTask.Value) => "Değer Teklifi",
@@ -811,6 +828,8 @@ namespace CrmCorner.Controllers
                     nameof(PipelineTask.ContactedViaLinkedIn) => "LinkedIn ile iletişim kuruldu",
                     nameof(PipelineTask.ContactedViaColdCall) => "Soğuk arama yapıldı",
                     nameof(PipelineTask.CustomerId) => "Müşteri",
+                    nameof(PipelineTask.MeetingUserId) => "Görüşmeyi Gerçekleştiren",
+                    nameof(PipelineTask.ReporterUserId) => "Raporlamacı",
                     _ => fieldName
                 };
             }
@@ -925,6 +944,8 @@ namespace CrmCorner.Controllers
 
             LogIfChanged(nameof(model.AppUserId), existing.AppUserId, model.AppUserId);
             LogIfChanged(nameof(model.ResponsibleUserId), existing.ResponsibleUserId, model.ResponsibleUserId);
+            LogIfChanged(nameof(model.MeetingUserId), existing.MeetingUserId, model.MeetingUserId);
+            LogIfChanged(nameof(model.ReporterUserId), existing.ReporterUserId, model.ReporterUserId);
             LogIfChanged(nameof(model.Title), existing.Title, model.Title);
             LogIfChanged(nameof(model.Description), existing.Description, model.Description);
             LogIfChanged(nameof(model.Value), existing.Value, model.Value);
@@ -949,6 +970,8 @@ namespace CrmCorner.Controllers
             // Güncelle
             existing.AppUserId = model.AppUserId;
             existing.ResponsibleUserId = model.ResponsibleUserId;
+            existing.MeetingUserId = model.MeetingUserId;
+            existing.ReporterUserId = model.ReporterUserId;
             existing.Title = model.Title;
             existing.Description = model.Description;
             existing.Value = model.Value;
@@ -1095,6 +1118,7 @@ namespace CrmCorner.Controllers
 
             // --- Aktif kullanıcı ve rol bilgisi ---
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            SetPipelineUserFieldSettings(currentUserId);
             var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
             if (me == null) return Unauthorized();
 
@@ -1329,7 +1353,23 @@ namespace CrmCorner.Controllers
         }
 
 
+        private void SetPipelineUserFieldSettings(string? currentUserId)
+        {
+            var me = _context.Users
+                .AsNoTracking()
+                .FirstOrDefault(u => u.Id == currentUserId);
 
+            var company = me?.CompanyId == null
+                ? null
+                : _context.Companies
+                    .AsNoTracking()
+                    .FirstOrDefault(c => c.CompanyId == me.CompanyId);
+
+            ViewBag.UseAppUser = company?.UseAppUser ?? true;
+            ViewBag.UseResponsibleUser = company?.UseResponsibleUser ?? true;
+            ViewBag.UseMeetingUser = company?.UseMeetingUser ?? false;
+            ViewBag.UseReporterUser = company?.UseReporterUser ?? false;
+        }
         private List<SelectListItem> BuildCompanyUsersSelectList(string currentUserId)
         {
             var me = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == currentUserId);
@@ -1389,7 +1429,7 @@ namespace CrmCorner.Controllers
             info.Cell(7, 1).Value = "GORUSMEYI ALAN";
             info.Cell(8, 1).Value = "GorusmeyiAlanEmail bos birakilirsa import eden kullanici atanir.";
 
-            info.Cell(10, 1).Value = "SORUMLU KISI";
+            info.Cell(10, 1).Value = "SDR";
             info.Cell(11, 1).Value = "SorumluKisiEmail zorunludur ve sistemde kayitli bir kullanici olmalidir.";
 
             info.Cell(13, 1).Value = "DEGER TEKLIFI";
@@ -1593,6 +1633,8 @@ namespace CrmCorner.Controllers
 
             return RedirectToAction("PipelineIndex");
         }
+
+
 
     }
 }

@@ -7,7 +7,6 @@
     ViewData["Title"] = "PipelineEdit";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 
-    var stageList = new SelectList(Enum.GetValues(typeof(PipelineStage)).Cast<PipelineStage>(), Model.Stage);
     var outcomeList = new SelectList(Enum.GetValues(typeof(OutcomeType)).Cast<OutcomeType>(), Model.Outcomes);
 }
 
@@ -42,10 +41,8 @@
     </div>
 }
 
-
-
-
 <form asp-action="PipelineEdit" asp-controller="PipelineTask" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
 
     <div class="row">
@@ -133,21 +130,52 @@
                 </select>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="AppUserId">Görüşmeyi Alan</label>
-                <select asp-for="AppUserId" asp-items="ViewBag.Users" class="form-select">
-                    <option value="">Lütfen seçiniz</option>
-                </select>
-                <span asp-validation-for="AppUserId" class="text-danger"></span>
-            </div>
+            <hr />
+            <h5>Kişiler</h5>
 
-            <div class="form-group mb-3">
-                <label asp-for="ResponsibleUserId">Sorumlu Kullanıcı</label>
-                <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-select">
-                    <option value="">Lütfen seçiniz</option>
-                </select>
-                <span asp-validation-for="ResponsibleUserId" class="text-danger"></span>
-            </div>
+            @if (ViewBag.UseAppUser == true)
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="AppUserId">Görüşmeyi Alan</label>
+                    <select asp-for="AppUserId" asp-items="ViewBag.Users" class="form-select">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="AppUserId" class="text-danger"></span>
+                </div>
+            }
+
+            @if (ViewBag.UseResponsibleUser == true)
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="ResponsibleUserId">SDR</label>
+                    <select asp-for="ResponsibleUserId" asp-items="ViewBag.Users" class="form-select">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="ResponsibleUserId" class="text-danger"></span>
+                </div>
+            }
+
+            @if (ViewBag.UseMeetingUser == true)
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="MeetingUserId">Görüşmeyi Gerçekleştiren</label>
+                    <select asp-for="MeetingUserId" asp-items="ViewBag.Users" class="form-select">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="MeetingUserId" class="text-danger"></span>
+                </div>
+            }
+
+            @if (ViewBag.UseReporterUser == true)
+            {
+                <div class="form-group mb-3">
+                    <label asp-for="ReporterUserId">Raporlamacı</label>
+                    <select asp-for="ReporterUserId" asp-items="ViewBag.Users" class="form-select">
+                        <option value="">Lütfen seçiniz</option>
+                    </select>
+                    <span asp-validation-for="ReporterUserId" class="text-danger"></span>
+                </div>
+            }
 
             <div class="form-group mb-3">
                 <label asp-for="CustomerName">Ad</label>
@@ -199,9 +227,7 @@
         <a href="/PipelineTask/PipelineIndex" class="btn btn-secondary">İptal</a>
         <a href="/PipelineTask/PipelineDetails/@Model.Id" class="btn btn-info">Detay Sayfasına Git</a>
     </div>
-
 </form>
-
 
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/libscripts.bundle.js"></script>
 <script src="~/CRMTema/bootstrap5/dist/assets/bundles/mainscripts.bundle.js"></script>
@@ -224,53 +250,54 @@
         });
     </script>
 
-
     <script>
         $(function () {
-          // Elemanlar
-          const $outcomes = $('#Outcomes');                 // asp-for="Outcomes"
-          const $status   = $('#outcomeStatusDropdown');    // Sonuç (OutcomeStatus)
-          const $negGrp   = $('#negativeReasonGroup');      // Olumsuz Sebep alan grubu (div)
-          const $negTxt   = $('#NegativeReason');           // Olumsuz Sebep textbox
-          const $submit   = $('#submitBtn');                // Kaydet/Güncelle butonu
+          const $outcomes = $('#Outcomes');
+          const $status   = $('#outcomeStatusDropdown');
+          const $negGrp   = $('#negativeReasonGroup');
+          const $negTxt   = $('#NegativeReason');
           const bannerId  = 'reportBanner';
 
-          // Önceki değer (Tutarlılık kilidi için geri al)
           let prevOutcome = $outcomes.val();
 
           function ensureBanner() {
             let $b = $('#' + bannerId);
             if ($b.length === 0) {
               $b = $('<div>', { id: bannerId, class: 'alert alert-warning mt-3', style: 'display:none;' });
-              // Sonuç dropdown'unun altına ekle
               $status.closest('.form-group').append($b);
             }
             return $b;
           }
-          function showBanner(msg) { const $b = ensureBanner(); $b.text(msg).show(); }
-          function hideBanner()    { const $b = ensureBanner(); $b.hide().text(''); }
+
+          function showBanner(msg) {
+              const $b = ensureBanner();
+              $b.text(msg).show();
+          }
+
+          function hideBanner() {
+              const $b = ensureBanner();
+              $b.hide().text('');
+          }
 
           function applyRules() {
-            const o = ($outcomes.val() || '').trim();  // Surecte | Olumlu | Olumsuz
-            const s = ($status.val()   || '').trim();  // None | Won | Lost | "" (Seçiniz)
+            const o = ($outcomes.val() || '').trim();
+            const s = ($status.val() || '').trim();
 
-            // 1) Süreçte iken Sonuç kilidi: otomatik None + disable
             if (o === 'Surecte') {
-              if (s !== 'None') { $status.val('None').trigger('change'); }
+              if (s !== 'None') {
+                  $status.val('None').trigger('change');
+              }
               $status.prop('disabled', true);
             } else {
               $status.prop('disabled', false);
             }
 
-            // 2) Tutarlılık kilidi: Won/Lost seçiliyken Outcomes'u "Süreçte"ye çekemez
             if ((s === 'Won' || s === 'Lost') && o === 'Surecte') {
               alert('Sonuç "Kazanıldı/Kaybedildi" seçiliyken "Süreçte" yapılamaz. Önce sonucu "Hiçbiri" yapın.');
-              // Geri al
               $outcomes.val(prevOutcome).trigger('change');
               return;
             }
 
-            // 3) Negatif gerekçe görünürlüğü
             if (o === 'Olumsuz' || s === 'Lost') {
               $negGrp.show();
             } else {
@@ -278,58 +305,56 @@
               $negTxt.val('');
             }
 
-            // 4) Raporlama standardı banner: Olumlu & None → uyarı
             if (o === 'Olumlu' && s === 'None') {
               showBanner('Uyarı: Sonuç belirlenmedi, raporlarda “Açık” görünecek.');
             } else {
               hideBanner();
             }
-
-            // Submit butonu default açık kalsın (engellemeleri submit’te yapacağız)
           }
 
-          // Submit sırasında son kontroller
           $('form').on('submit', function (e) {
             const o = ($outcomes.val() || '').trim();
-            const s = ($status.val()   || '').trim();
+            const s = ($status.val() || '').trim();
             const neg = ($negTxt.val() || '').trim();
 
-            // Süreçte iken Sonuç Won/Lost olamaz
             if (o === 'Surecte' && (s === 'Won' || s === 'Lost')) {
               e.preventDefault();
               alert('Süreçte iken sonuç "Kazanıldı/Kaybedildi" olamaz. Lütfen sonucu "Hiçbiri" yapın.');
               return false;
             }
 
-            // Olumlu iken Kaybedildi olamaz
             if (o === 'Olumlu' && s === 'Lost') {
               e.preventDefault();
               alert('Süreç durumu "Olumlu" iken sonuç "Kaybedildi" olamaz.');
               return false;
             }
 
-            // Olumsuz iken Kazanıldı olamaz
             if (o === 'Olumsuz' && s === 'Won') {
               e.preventDefault();
               alert('Süreç durumu "Olumsuz" iken sonuç "Kazanıldı" olamaz.');
               return false;
             }
 
-            // Negatif gerekçe zorunlu: Outcomes=Olumsuz veya OutcomeStatus=Lost
             if ((o === 'Olumsuz' || s === 'Lost') && !neg) {
               e.preventDefault();
               alert('Olumsuz durumda "Olumsuz Sebep" zorunludur.');
-              $negGrp.show(); $negTxt.focus();
+              $negGrp.show();
+              $negTxt.focus();
               return false;
             }
           });
 
-          // Değişim yakalayıcılar
-          $outcomes.on('focus', function(){ prevOutcome = $outcomes.val(); });
-          $outcomes.on('change', function(){ applyRules(); prevOutcome = $outcomes.val(); });
+          $outcomes.on('focus', function () {
+              prevOutcome = $outcomes.val();
+          });
+
+          $outcomes.on('change', function () {
+              applyRules();
+              prevOutcome = $outcomes.val();
+          });
+
           $status.on('change', applyRules);
 
-          // İlk yüklemede uygula
           applyRules();
         });
     </script>

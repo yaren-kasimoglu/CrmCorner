@@ -1,0 +1,194 @@
+﻿@model TeamUserDetailVm
+
+@{
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+    ViewData["Title"] = "Kullanıcı Performans Detayı";
+
+    var successRate = Model.Total == 0 ? 0 : (Model.Won * 100 / Model.Total);
+}
+
+<style>
+    .crm-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 11px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .2px;
+        min-width: 76px;
+    }
+
+    .badge-stage {
+        background: #f1edf8;
+        color: #4b1d73;
+    }
+
+    .badge-success {
+        background: #e8f8f1;
+        color: #13a66f;
+    }
+
+    .badge-danger {
+        background: #fdecef;
+        color: #e84b6a;
+    }
+
+    .badge-warning {
+        background: #fff5d9;
+        color: #b77900;
+    }
+
+    .badge-muted {
+        background: #f1f1f1;
+        color: #777;
+    }
+
+    .card {
+        border-radius: 16px;
+        border: 0;
+    }
+</style>
+
+<h3>@Model.Name - Performans Detayı</h3>
+<p class="text-muted">Seçili tarih aralığındaki görev performansı.</p>
+
+<form method="get" asp-action="TeamUserDetail" class="row g-3 mb-4">
+    <input type="hidden" name="userId" value="@Model.UserId" />
+
+    <div class="col-md-3">
+        <label class="form-label">Başlangıç Tarihi</label>
+        <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Bitiş Tarihi</label>
+        <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+    </div>
+
+    <div class="col-md-3 align-self-end">
+        <button type="submit" class="btn btn-primary">Filtrele</button>
+
+        <a asp-action="TeamDashboard" class="btn btn-outline-secondary ms-2">
+            Geri Dön
+        </a>
+    </div>
+</form>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3">
+            <h6>Toplam Görev</h6>
+            <h3>@Model.Total</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3">
+            <h6>Süreçte</h6>
+            <h3>@Model.Ongoing</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3">
+            <h6>Kazanılan</h6>
+            <h3 class="text-success">@Model.Won</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3">
+            <h6>Kaybedilen</h6>
+            <h3 class="text-danger">@Model.Lost</h3>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4 mb-4">
+    <h5>Başarı Oranı</h5>
+
+    <div class="progress" style="height: 18px;">
+        <div class="progress-bar bg-warning" style="width:@successRate%">
+            %@successRate
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4">
+    <h5 class="mb-3">Görev Listesi</h5>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Başlık</th>
+                    <th>Aşama</th>
+                    <th>Durum</th>
+                    <th>Sonuç</th>
+                    <th>Oluşturulma Tarihi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Tasks.Any())
+                {
+                    foreach (var task in Model.Tasks)
+                    {
+                        <tr>
+                            <td>@task.Title</td>
+
+                            <!-- STAGE -->
+                            <td>
+                                <span class="crm-badge badge-stage">
+                                    @task.Stage
+                                </span>
+                            </td>
+
+                            <!-- OUTCOME -->
+                            <td>
+                                @{
+                                    var outcomeClass = task.Outcomes.ToString() == "Olumlu"
+                                    ? "badge-success"
+                                    : task.Outcomes.ToString() == "Olumsuz"
+                                    ? "badge-danger"
+                                    : "badge-warning";
+                                }
+
+                                <span class="crm-badge @outcomeClass">
+                                    @task.Outcomes
+                                </span>
+                            </td>
+
+                            <!-- RESULT -->
+                            <td>
+                                @{
+                                    var statusClass = task.OutcomeStatus.ToString() == "Won"
+                                    ? "badge-success"
+                                    : task.OutcomeStatus.ToString() == "Lost"
+                                    ? "badge-danger"
+                                    : "badge-muted";
+                                }
+
+                                <span class="crm-badge @statusClass">
+                                    @task.OutcomeStatus
+                                </span>
+                            </td>
+
+                            <td>@task.CreatedDate.ToString("dd.MM.yyyy")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            Bu tarih aralığında görev bulunamadı.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
