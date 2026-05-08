@@ -1,0 +1,115 @@
+﻿@model List<CrmCorner.ViewModels.DailyReportingUserListViewModel>
+
+@{
+    ViewData["Title"] = "Daily Reporting";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<style>
+    .daily-reporting-page {
+        padding: 24px;
+    }
+
+    .daily-reporting-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+        .daily-reporting-header h3 {
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1f2937;
+        }
+
+        .daily-reporting-header p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+    .daily-user-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 18px;
+    }
+
+    .daily-user-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        text-decoration: none;
+        color: inherit;
+        transition: all .2s ease;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+
+        .daily-user-card:hover {
+            transform: translateY(-2px);
+            border-color: #ffb71b;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            color: inherit;
+        }
+
+    .daily-user-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: #ffb71b;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 18px;
+    }
+
+    .daily-user-card h5 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 2px;
+        color: #111827;
+    }
+
+    .daily-user-card span {
+        font-size: 13px;
+        color: #6b7280;
+    }
+</style>
+
+<div class="container-fluid daily-reporting-page">
+
+    <div class="daily-reporting-header">
+        <div>
+            <h3>Daily Reporting</h3>
+            <p>Haftalık SDR performans tabloları</p>
+        </div>
+    </div>
+
+    <div class="daily-user-grid">
+        @foreach (var user in Model)
+        {
+            <a class="daily-user-card"
+               asp-controller="DailyReporting"
+               asp-action="Detail"
+               asp-route-userId="@user.UserId">
+
+                <div class="daily-user-avatar">
+                    @((!string.IsNullOrWhiteSpace(user.FullName) ? user.FullName.Substring(0, 1) : "?").ToUpper())
+                </div>
+
+                <div>
+                    <h5>@user.FullName</h5>
+                    <span>@user.Email</span>
+                </div>
+
+            </a>
+        }
+    </div>
+
+</div>
+

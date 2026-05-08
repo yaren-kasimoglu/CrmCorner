@@ -1,0 +1,621 @@
+﻿@model TeamDashboardVm
+
+@{
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+    ViewData["Title"] = "Takım Performans Özeti";
+
+    var topPerformer = Model.Users
+        .Where(x => x.Total > 0)
+        .OrderByDescending(x => x.Won)
+        .ThenByDescending(x => x.Total)
+        .FirstOrDefault();
+
+    var leaderboard = Model.Users
+        .Where(x => x.Total > 0)
+        .OrderByDescending(x => x.Won)
+        .ThenByDescending(x => x.Total)
+        .Take(5)
+        .ToList();
+}
+
+<style>
+    .team-dashboard-page {
+        padding: 10px 0 40px;
+    }
+
+    .dashboard-title {
+        font-weight: 800;
+        color: #2d174d;
+        margin-bottom: 6px;
+    }
+
+    .dashboard-subtitle {
+        color: #8a8195;
+        margin-bottom: 24px;
+        font-size: 14px;
+    }
+
+    .filter-card,
+    .top-card,
+    .leaderboard-card,
+    .kpi-card,
+    .team-user-card {
+        border: 0;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 12px 30px rgba(45, 23, 77, 0.08);
+    }
+
+    .filter-card {
+        padding: 18px;
+        margin-bottom: 24px;
+    }
+
+    .btn-crm {
+        background: #4b1d73;
+        color: #fff;
+        border-radius: 12px;
+        border: 0;
+        padding: 9px 18px;
+        font-weight: 700;
+    }
+
+    .btn-crm:hover {
+        background: #351150;
+        color: #fff;
+    }
+
+    .btn-crm-outline {
+        border: 1px solid #4b1d73;
+        color: #4b1d73;
+        border-radius: 12px;
+        padding: 8px 14px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .btn-crm-outline:hover {
+        background: #4b1d73;
+        color: #fff;
+    }
+
+    .top-card {
+        padding: 22px;
+        background: linear-gradient(135deg, #4b1d73, #6f2aa5);
+        color: #fff;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .top-card::after {
+        content: "🏆";
+        position: absolute;
+        right: 18px;
+        top: 10px;
+        font-size: 54px;
+        opacity: .22;
+    }
+
+    .top-label {
+        font-size: 13px;
+        opacity: .8;
+        font-weight: 700;
+    }
+
+    .top-name {
+        font-size: 24px;
+        font-weight: 900;
+        margin-top: 8px;
+    }
+
+    .top-stats {
+        margin-top: 18px;
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .top-stat-box {
+        background: rgba(255,255,255,.14);
+        border-radius: 14px;
+        padding: 10px 14px;
+    }
+
+    .leaderboard-card {
+        padding: 22px;
+        height: 100%;
+    }
+
+    .leaderboard-title {
+        font-weight: 800;
+        color: #2d174d;
+        margin-bottom: 14px;
+    }
+
+    .leaderboard-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 0;
+        border-bottom: 1px solid #f1edf5;
+        font-size: 13px;
+    }
+
+    .leaderboard-row:last-child {
+        border-bottom: 0;
+    }
+
+    .rank-badge {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #ffb71b;
+        color: #2d174d;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        margin-right: 8px;
+    }
+
+    .kpi-card {
+        padding: 22px;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .kpi-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 6px;
+        height: 100%;
+        background: #ffb71b;
+    }
+
+    .kpi-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #6c6478;
+    }
+
+    .kpi-number {
+        font-size: 30px;
+        font-weight: 900;
+        color: #2d174d;
+        margin-top: 6px;
+    }
+
+    .kpi-won {
+        color: #13a66f;
+    }
+
+    .kpi-lost {
+        color: #e84b6a;
+    }
+
+    .budget-box {
+        background: #faf7ff;
+        border: 1px solid #f0e7ff;
+        border-radius: 14px;
+        padding: 10px 12px;
+        margin-top: 12px;
+    }
+
+    .budget-title {
+        font-size: 12px;
+        font-weight: 800;
+        color: #4b1d73;
+        margin-bottom: 6px;
+    }
+
+    .budget-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #4e4658;
+        margin-bottom: 4px;
+    }
+
+    .budget-row strong {
+        color: #2d174d;
+    }
+
+    .contribution-text {
+        font-size: 11px;
+        color: #8a8195;
+        display: block;
+        margin-bottom: 7px;
+    }
+
+    .team-user-card {
+        padding: 18px;
+        transition: all .2s ease;
+        height: 100%;
+    }
+
+    .team-user-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 40px rgba(45, 23, 77, 0.14);
+    }
+
+    .avatar-circle {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        background: linear-gradient(135deg, #4b1d73, #ffb71b);
+        color: #fff;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        margin-right: 10px;
+    }
+
+    .user-name {
+        font-weight: 800;
+        color: #2d174d;
+        font-size: 14px;
+    }
+
+    .user-role {
+        font-size: 12px;
+        color: #8a8195;
+    }
+
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 7px;
+        color: #4e4658;
+    }
+
+    .metric-row strong {
+        color: #2d174d;
+    }
+
+    .text-won {
+        color: #13a66f !important;
+    }
+
+    .text-lost {
+        color: #e84b6a !important;
+    }
+
+    .success-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #6c6478;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .progress {
+        height: 12px;
+        border-radius: 999px;
+        background: #f1edf5;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, #ffb71b, #4b1d73);
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .dashboard-divider {
+        border-color: #f0edf4;
+        margin: 16px 0;
+    }
+</style>
+
+<div class="team-dashboard-page">
+
+    <h3 class="dashboard-title">Takım Performans Özeti</h3>
+    <p class="dashboard-subtitle">
+        Firmanıza ait kullanıcıların görev performansını özet olarak görüntüleyin.
+    </p>
+
+    <form method="get" asp-action="TeamDashboard" class="filter-card">
+        <div class="row align-items-end">
+            <div class="col-md-4 mb-2">
+                <label class="form-label">Başlangıç Tarihi</label>
+                <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <label class="form-label">Bitiş Tarihi</label>
+                <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+            </div>
+
+            <div class="col-md-4 mb-2 d-flex gap-2">
+                <button type="submit" class="btn btn-crm">Filtrele</button>
+
+                <a asp-action="TeamDashboard" class="btn btn-crm-outline">
+                    Temizle
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <div class="row mb-4">
+        <div class="col-md-8 mb-3">
+            <div class="top-card">
+                <div class="top-label">Top Performer</div>
+
+                @if (topPerformer != null)
+                {
+                    var topRate = topPerformer.Total == 0 ? 0 : (topPerformer.Won * 100 / topPerformer.Total);
+
+                    <div class="top-name">@topPerformer.Name</div>
+
+                    <div class="top-stats">
+                        <div class="top-stat-box">
+                            <strong>@topPerformer.Won</strong><br />
+                            <small>Kazanılan</small>
+                        </div>
+
+                        <div class="top-stat-box">
+                            <strong>@topPerformer.Total</strong><br />
+                            <small>Toplam Görev</small>
+                        </div>
+
+                        <div class="top-stat-box">
+                            <strong>%@topRate</strong><br />
+                            <small>Başarı Oranı</small>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="top-name">Henüz veri yok</div>
+                    <small>Bu tarih aralığında görev bulunamadı.</small>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="leaderboard-card">
+                <div class="leaderboard-title">Leaderboard</div>
+
+                @if (leaderboard.Any())
+                {
+                    var rank = 1;
+
+                    foreach (var user in leaderboard)
+                    {
+                        <div class="leaderboard-row">
+                            <div>
+                                <span class="rank-badge">@rank</span>
+                                <strong>@user.Name</strong>
+                            </div>
+                            <span>@user.Won kazanım</span>
+                        </div>
+
+                        rank++;
+                    }
+                }
+                else
+                {
+                    <small class="text-muted">Henüz sıralama oluşturulamadı.</small>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Toplam Görev</div>
+                <div class="kpi-number">@Model.TotalTasks</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Süreçte</div>
+                <div class="kpi-number">@Model.Ongoing</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Kazanılan</div>
+                <div class="kpi-number kpi-won">@Model.Won</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Kaybedilen</div>
+                <div class="kpi-number kpi-lost">@Model.Lost</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Toplam Teklif Bütçesi</div>
+
+                @if (Model.TotalBudgetByCurrency.Any())
+                {
+                    foreach (var item in Model.TotalBudgetByCurrency)
+                    {
+                        <div class="budget-row mt-2">
+                            <span>@item.Key</span>
+                            <strong>@item.Value.ToString("N2")</strong>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <small class="text-muted d-block mt-2">Bütçe yok</small>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Kazanılan Bütçe</div>
+
+                @if (Model.WonBudgetByCurrency.Any())
+                {
+                    foreach (var item in Model.WonBudgetByCurrency)
+                    {
+                        <div class="budget-row mt-2">
+                            <span>@item.Key</span>
+                            <strong class="text-won">@item.Value.ToString("N2")</strong>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <small class="text-muted d-block mt-2">Kazanılan bütçe yok</small>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Kaybedilen Bütçe</div>
+
+                @if (Model.LostBudgetByCurrency.Any())
+                {
+                    foreach (var item in Model.LostBudgetByCurrency)
+                    {
+                        <div class="budget-row mt-2">
+                            <span>@item.Key</span>
+                            <strong class="text-lost">@item.Value.ToString("N2")</strong>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <small class="text-muted d-block mt-2">Kaybedilen bütçe yok</small>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var user in Model.Users)
+        {
+            var successRate = user.Total == 0 ? 0 : (user.Won * 100 / user.Total);
+
+            <div class="col-md-3 mb-4">
+                <div class="team-user-card">
+
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="avatar-circle">
+                            @(string.IsNullOrWhiteSpace(user.Name) ? "?" : user.Name.Substring(0, 1).ToUpper())
+                        </div>
+
+                        <div>
+                            <div class="user-name">@user.Name</div>
+                            <div class="user-role">@user.Role</div>
+                        </div>
+                    </div>
+
+                    <hr class="dashboard-divider" />
+
+                    <div class="metric-row">
+                        <span>Toplam</span>
+                        <strong>@user.Total</strong>
+                    </div>
+
+                    <div class="metric-row">
+                        <span>Kazanılan</span>
+                        <strong class="text-won">@user.Won</strong>
+                    </div>
+
+                    <div class="metric-row">
+                        <span>Kaybedilen</span>
+                        <strong class="text-lost">@user.Lost</strong>
+                    </div>
+
+                    <div class="budget-box">
+                        <div class="budget-title">Toplam Teklif Bütçesi</div>
+
+                        @if (user.TotalBudgetByCurrency.Any())
+                        {
+                            foreach (var item in user.TotalBudgetByCurrency)
+                            {
+                                var rate = user.TotalBudgetContributionRateByCurrency.ContainsKey(item.Key)
+                                    ? user.TotalBudgetContributionRateByCurrency[item.Key]
+                                    : 0;
+
+                                <div class="budget-row">
+                                    <span>@item.Key</span>
+                                    <strong>@item.Value.ToString("N2")</strong>
+                                </div>
+
+                                <small class="contribution-text">
+                                    Toplam teklif bütçesinin %@rate.ToString("N2")
+                                </small>
+                            }
+                        }
+                        else
+                        {
+                            <small class="text-muted">Bütçe yok</small>
+                        }
+                    </div>
+
+                    <div class="budget-box">
+                        <div class="budget-title">Kazanılan Bütçe Katkısı</div>
+
+                        @if (user.WonBudgetByCurrency.Any())
+                        {
+                            foreach (var item in user.WonBudgetByCurrency)
+                            {
+                                var rate = user.WonBudgetContributionRateByCurrency.ContainsKey(item.Key)
+                                    ? user.WonBudgetContributionRateByCurrency[item.Key]
+                                    : 0;
+
+                                <div class="budget-row">
+                                    <span>@item.Key</span>
+                                    <strong class="text-won">@item.Value.ToString("N2")</strong>
+                                </div>
+
+                                <small class="contribution-text">
+                                    Kazanılan bütçenin %@rate.ToString("N2")
+                                </small>
+                            }
+                        }
+                        else
+                        {
+                            <small class="text-muted">Kazanılan katkı yok</small>
+                        }
+                    </div>
+
+                    <div class="mt-3">
+                        <span class="success-label">Başarı Oranı</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width:@successRate%">
+                                %@successRate
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <a asp-action="TeamUserDetail"
+                           asp-route-userId="@user.UserId"
+                           asp-route-startDate="@ViewBag.StartDate"
+                           asp-route-endDate="@ViewBag.EndDate"
+                           class="btn btn-crm-outline w-100">
+                            Detaya Git
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+
+</div>

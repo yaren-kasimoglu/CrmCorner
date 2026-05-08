@@ -42,28 +42,21 @@ namespace CrmCorner.Controllers
             if (currentUser is null) return Unauthorized();
 
             var roles = await _userManager.GetRolesAsync(currentUser);
-            bool isSuperAdmin = roles.Contains("SuperAdmin");
-            bool isAdmin = roles.Contains("Admin");
+
             bool isTeamLeader = roles.Contains("TeamLeader");
             bool isTeamMember = roles.Contains("TeamMember");
 
             // 2) Kapsama girecek kullanıcılar
             IQueryable<AppUser> usersQ = _context.Users.AsNoTracking();
 
-            if (isSuperAdmin)
-            {
-                // SuperAdmin -> tüm kullanıcılar
-                // Herhangi bir filtre uygulanmaz
-            }
-            else if (isAdmin)
-            {
-                // Admin -> kendi şirketindeki herkes
-                usersQ = usersQ.Where(u => u.CompanyId == currentUser.CompanyId);
-            }
-            else if (isTeamLeader)
+            // Her rol önce kendi firmasına göre filtrelensin
+            usersQ = usersQ.Where(u => u.CompanyId == currentUser.CompanyId);
+
+            if (isTeamLeader)
             {
                 // TeamLeader -> kendi şirketindeki TeamMember'lar ve kendisi
                 var teamMembers = await _userManager.GetUsersInRoleAsync("TeamMember");
+
                 var teamMemberIds = teamMembers
                     .Where(u => u.CompanyId == currentUser.CompanyId)
                     .Select(u => u.Id)
@@ -74,7 +67,7 @@ namespace CrmCorner.Controllers
 
                 usersQ = usersQ.Where(u => teamMemberIds.Contains(u.Id));
             }
-            else
+            else if (isTeamMember)
             {
                 // TeamMember -> sadece kendi verileri
                 usersQ = usersQ.Where(u => u.Id == currentUser.Id);
@@ -101,12 +94,18 @@ namespace CrmCorner.Controllers
                 })
                 .ToListAsync();
 
-            // 4) Tüm enum başlıkları (tabloda sütun sırası için)
-            var allStages = Enum.GetValues(typeof(PipelineStageEnum)).Cast<PipelineStageEnum>().ToArray();
-            var allOutcomes = Enum.GetValues(typeof(OutcomeTypeSales)).Cast<OutcomeTypeSales>().ToArray();
+            // 4) Tüm enum başlıkları
+            var allStages = Enum.GetValues(typeof(PipelineStageEnum))
+                .Cast<PipelineStageEnum>()
+                .ToArray();
+
+            var allOutcomes = Enum.GetValues(typeof(OutcomeTypeSales))
+                .Cast<OutcomeTypeSales>()
+                .ToArray();
 
             // 5) Satırlar
             var rows = new List<UserPipelineSummaryViewModel>();
+
             foreach (var u in users)
             {
                 var myTasks = tasks.Where(t => t.OwnerId == u.Id).ToList();
@@ -121,11 +120,9 @@ namespace CrmCorner.Controllers
                     OutcomeCounts = new Dictionary<OutcomeTypeSales, int>()
                 };
 
-                // Stage kırılımları
                 foreach (var st in allStages)
                     row.StageCounts[st] = myTasks.Count(t => t.Stage == st);
 
-                // Outcome kırılımları (null'ları None say)
                 foreach (var oc in allOutcomes)
                     row.OutcomeCounts[oc] = myTasks.Count(t => (t.OutcomeStatus ?? OutcomeTypeSales.None) == oc);
 
@@ -139,11 +136,16 @@ namespace CrmCorner.Controllers
                     .OrderByDescending(r => r.Total)
                     .ThenBy(r => r.NameSurname ?? r.UserName)
                     .ToList(),
+
                 AllStages = allStages,
                 AllOutcomes = allOutcomes,
+
+                IsAdminOrManager = roles.Contains("SuperAdmin") ||
+                                   roles.Contains("Admin") ||
+                                   roles.Contains("TeamLeader")
             };
 
-            return View(vm); // Views/PipelineAnalysis/Index.cshtml
+            return View(vm);
         }
     }
 

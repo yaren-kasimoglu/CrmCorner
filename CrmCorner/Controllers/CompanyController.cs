@@ -49,9 +49,19 @@ namespace CrmCorner.Controllers
         public async Task<IActionResult> ApproveCompany(int id)
         {
             var company = await _context.Companies.FindAsync(id);
+
             if (company != null)
             {
                 company.IsApproved = true;
+
+                // 🔥 TRIAL BAŞLAT
+                if (!company.IsTrialActive)
+                {
+                    company.IsTrialActive = true;
+                    company.TrialStartDate = DateTime.Now;
+                    company.TrialEndDate = DateTime.Now.AddDays(14);
+                }
+
                 await _context.SaveChangesAsync();
             }
 

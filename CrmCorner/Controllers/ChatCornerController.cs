@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CrmCorner.Models.ChatCorner;
@@ -14,7 +15,9 @@ namespace CrmCorner.Controllers
         private readonly IChatCornerService _chatCornerService;
         private readonly CrmCornerContext _context;
 
-        public ChatCornerController(IChatCornerService chatCornerService, CrmCornerContext context)
+        public ChatCornerController(
+            IChatCornerService chatCornerService,
+            CrmCornerContext context)
         {
             _chatCornerService = chatCornerService;
             _context = context;

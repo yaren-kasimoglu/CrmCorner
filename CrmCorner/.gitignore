@@ -4,15 +4,22 @@
 *.suo
 
 # Build outputs
+*.pubxml.user
 bin/
 obj/
 *.cache
 *.log
 *.tlog
 *.rar
-
+*.pdb
+*.exe
+*.dll
 # Rider
 .idea/
 
 # VS Code
 .vscode/
+
+publish/
+appsettings.json
+appsettings.*.json

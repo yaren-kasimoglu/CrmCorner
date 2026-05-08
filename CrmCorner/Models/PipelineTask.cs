@@ -71,6 +71,12 @@ namespace CrmCorner.Models
 
         public virtual PostSaleInfo? PostSaleInfo { get; set; }
 
+        public string? MeetingUserId { get; set; }
+        public AppUser? MeetingUser { get; set; }
+
+        public string? ReporterUserId { get; set; }
+        public AppUser? ReporterUser { get; set; }
+
 
         public virtual ICollection<PipelineTaskNote> Notes { get; set; } = new List<PipelineTaskNote>();
 

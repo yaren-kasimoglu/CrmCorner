@@ -5,56 +5,178 @@
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 }
 
-<h3 class="mb-4">Kullanıcı Bazlı Görev Aşamaları</h3>
+<style>
+    .stage-report-page {
+        padding: 10px 0 40px;
+    }
 
-<!-- Tarih filtresi -->
-<form method="get" asp-action="StageByUserReports" class="row g-3 mb-4">
-    <div class="col-md-3">
-        <label for="startDate" class="form-label">Başlangıç Tarihi</label>
-        <input type="date" class="form-control" id="startDate" name="startDate"
-               value="@Context.Request.Query["startDate"]" />
-    </div>
-    <div class="col-md-3">
-        <label for="endDate" class="form-label">Bitiş Tarihi</label>
-        <input type="date" class="form-control" id="endDate" name="endDate"
-               value="@Context.Request.Query["endDate"]" />
-    </div>
-    <div class="col-md-3 align-self-end">
-        <button type="submit" class="btn btn-primary">Filtrele</button>
-    </div>
-</form>
+    .stage-title {
+        font-weight: 800;
+        color: #2d174d;
+        margin-bottom: 6px;
+    }
 
-<!-- Grafik -->
-<div>
-    <canvas id="stageUserChart" height="120"></canvas>
-</div>
+    .stage-subtitle {
+        color: #8a8195;
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
 
-<!-- Tablo -->
-<table id="stageUserTable" class="table table-striped table-bordered mt-4">
-    <thead>
-        <tr>
-            <th>Kullanıcı</th>
-            <th>Değerlendirilen</th>
-            <th>İletişim Kuruldu</th>
-            <th>Toplantı Düzenlendi</th>
-            <th>Teklif Sunuldu</th>
-            <th>Sonuç</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.ResponsibleUserName</td>
-                <td>@item.Degerlendirilen</td>
-                <td>@item.IletisimKuruldu</td>
-                <td>@item.ToplantiDuzenlendi</td>
-                <td>@item.TeklifSunuldu</td>
-                <td>@item.Sonuc</td>
-            </tr>
+    .stage-card,
+    .filter-card,
+    .table-card {
+        background: #fff;
+        border: 0;
+        border-radius: 22px;
+        box-shadow: 0 12px 30px rgba(255, 183, 27, 0.12);
+    }
+
+    .stage-card {
+        padding: 22px;
+        margin-bottom: 24px;
+    }
+
+    .filter-card {
+        padding: 18px;
+        margin-bottom: 24px;
+    }
+
+    .table-card {
+        padding: 20px;
+    }
+
+    .btn-crm {
+        background: #ffb71b;
+        color: #2d174d;
+        border: 0;
+        border-radius: 12px;
+        padding: 9px 20px;
+        font-weight: 800;
+    }
+
+        .btn-crm:hover {
+            background: #e6a317;
+            color: #2d174d;
         }
-    </tbody>
-</table>
+
+    .btn-crm-outline {
+        border: 1px solid #ffb71b;
+        color: #2d174d;
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+        .btn-crm-outline:hover {
+            background: #ffb71b;
+            color: #2d174d;
+        }
+
+    .chart-wrapper {
+        position: relative;
+        height: 420px;
+        width: 100%;
+    }
+
+    #stageUserTable {
+        font-size: 13px;
+    }
+
+        #stageUserTable thead th {
+            background: #fff8e8;
+            color: #2d174d;
+            font-weight: 800;
+            border-bottom: 1px solid #ffe4a3;
+            white-space: nowrap;
+        }
+</style>
+
+<div class="stage-report-page">
+
+    <h3 class="stage-title">Kullanıcı Bazlı Görev Aşamaları</h3>
+    <p class="stage-subtitle">
+        Kullanıcıların satış pipeline aşamalarındaki görev dağılımını görüntüleyin.
+    </p>
+
+    <form method="get" asp-action="StageByUserReports" class="filter-card">
+        <div class="row align-items-end">
+            <div class="col-md-4 mb-2">
+                <label for="startDate" class="form-label">Başlangıç Tarihi</label>
+                <input type="date"
+                       class="form-control"
+                       id="startDate"
+                       name="startDate"
+                       value="@Context.Request.Query["startDate"]" />
+            </div>
+
+            <div class="col-md-4 mb-2">
+                <label for="endDate" class="form-label">Bitiş Tarihi</label>
+                <input type="date"
+                       class="form-control"
+                       id="endDate"
+                       name="endDate"
+                       value="@Context.Request.Query["endDate"]" />
+            </div>
+
+            <div class="col-md-4 mb-2 d-flex gap-2">
+                <button type="submit" class="btn btn-crm">
+                    Filtrele
+                </button>
+
+                <a asp-action="StageByUserReports" class="btn btn-crm-outline">
+                    Temizle
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <div class="stage-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="mb-1" style="font-weight:800; color:#2d174d;">
+                    Aşama Dağılım Grafiği
+                </h5>
+                <small class="text-muted">
+                    Her kullanıcı için pipeline aşama yoğunluğu
+                </small>
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <canvas id="stageUserChart"></canvas>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table id="stageUserTable" class="table table-hover align-middle w-100">
+            <thead>
+                <tr>
+                    <th>Kullanıcı</th>
+                    <th>Değerlendirilen</th>
+                    <th>İletişim Kuruldu</th>
+                    <th>Toplantı Düzenlendi</th>
+                    <th>Teklif Sunuldu</th>
+                    <th>Sonuç</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong>@item.ResponsibleUserName</strong></td>
+                        <td>@item.Degerlendirilen</td>
+                        <td>@item.IletisimKuruldu</td>
+                        <td>@item.ToplantiDuzenlendi</td>
+                        <td>@item.TeklifSunuldu</td>
+                        <td>@item.Sonuc</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -64,16 +186,22 @@
 
     <script>
         var data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
-
         var users = data.map(d => d.ResponsibleUserName);
 
-        // Sabit renkler
         var stageColors = {
-            "Değerlendirilen": "rgba(255, 99, 132, 0.7)",
-            "İletişim Kuruldu": "rgba(54, 162, 235, 0.7)",
-            "Toplantı Düzenlendi": "rgba(255, 206, 86, 0.7)",
-            "Teklif Sunuldu": "rgba(75, 192, 192, 0.7)",
-            "Sonuç": "rgba(153, 102, 255, 0.7)"
+            "Değerlendirilen": "rgba(255, 183, 27, 0.95)",
+            "İletişim Kuruldu": "rgba(255, 183, 27, 0.70)",
+            "Toplantı Düzenlendi": "rgba(255, 183, 27, 0.45)",
+            "Teklif Sunuldu": "rgba(55, 55, 55, 0.45)",
+            "Sonuç": "rgba(19, 166, 111, 0.75)"
+        };
+
+        var borderColors = {
+            "Değerlendirilen": "#ffb71b",
+            "İletişim Kuruldu": "#ffb71b",
+            "Toplantı Düzenlendi": "#ffb71b",
+            "Teklif Sunuldu": "#6c757d",
+            "Sonuç": "#13a66f"
         };
 
         var datasets = Object.keys(stageColors).map(stageName => {
@@ -89,9 +217,12 @@
                         default: return 0;
                     }
                 }),
-                // Tooltip için görev listeleri
                 taskTitles: data.map(u => u.TaskTitlesByStage[stageName] || []),
-                backgroundColor: stageColors[stageName]
+                backgroundColor: stageColors[stageName],
+                borderColor: borderColors[stageName],
+                borderWidth: 1,
+                borderRadius: 8,
+                borderSkipped: false
             };
         });
 
@@ -103,34 +234,85 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
-                    legend: { position: 'bottom' },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 18,
+                            color: '#4e4658',
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            }
+                        }
+                    },
                     tooltip: {
+                        backgroundColor: '#1f1f1f',
+                        titleColor: '#ffb71b',
+                        bodyColor: '#fff',
+                        borderColor: '#ffb71b',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 12,
                         callbacks: {
                             label: function (context) {
                                 var dataset = context.dataset;
                                 var userIndex = context.dataIndex;
                                 var value = context.raw;
+                                var tasks = dataset.taskTitles[userIndex] || [];
 
-                            var tasks = dataset.taskTitles[userIndex] || [];
+                                var lines = [dataset.label + ": " + value];
 
-            // İlk satır: stage + sayı
-            var lines = [dataset.label + ": " + value];
+                                if (tasks.length) {
+                                    lines = lines.concat(tasks);
+                                }
 
-            // Görevler varsa her biri ayrı satır
-            if (tasks.length) {
-                lines = lines.concat(tasks);
-            }
-
-            return lines; // array döndür, alt alta çıkar
+                                return lines;
                             }
                         }
                     }
                 },
-                scales: { x: { stacked: true }, y: { stacked: true } }
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6c6478',
+                            font: {
+                                size: 11,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 183, 27, 0.13)'
+                        },
+                        ticks: {
+                            color: '#6c6478',
+                            precision: 0
+                        }
+                    }
+                }
             }
         });
 
-        $('#stageUserTable').DataTable();
+        $('#stageUserTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/tr.json'
+            },
+            pageLength: 10
+        });
     </script>
 }

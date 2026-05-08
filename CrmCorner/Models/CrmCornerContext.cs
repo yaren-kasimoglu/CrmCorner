@@ -76,6 +76,8 @@ namespace CrmCorner.Models
 
         public DbSet<TeamLeaderMember> TeamLeaderMembers { get; set; }
 
+        public DbSet<DailyReport> DailyReports { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #warning Connection string'i appsettings.json içine taşı!
@@ -185,6 +187,18 @@ namespace CrmCorner.Models
                 .HasOne(t => t.ResponsibleUser)
                 .WithMany()
                 .HasForeignKey(t => t.ResponsibleUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PipelineTask>()
+    .HasOne(x => x.MeetingUser)
+    .WithMany()
+    .HasForeignKey(x => x.MeetingUserId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PipelineTask>()
+                .HasOne(x => x.ReporterUser)
+                .WithMany()
+                .HasForeignKey(x => x.ReporterUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Feedback ↔ SocialMediaContent

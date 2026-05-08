@@ -1,0 +1,145 @@
+﻿@model List<CrmCorner.ViewModels.WeeklyMeetingReportViewModel>
+
+@{
+    ViewData["Title"] = "Haftalık Görüşme Raporu";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+
+    var totalMeetingCount = Model?.Sum(x => x.MeetingCount) ?? 0;
+    var topUser = Model?.OrderByDescending(x => x.MeetingCount).FirstOrDefault();
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-1">Haftalık Görüşme Raporu</h4>
+            <small class="text-muted">
+                @(ViewBag.WeekStart?.ToString("dd.MM.yyyy")) -
+                @(ViewBag.WeekEnd?.ToString("dd.MM.yyyy"))
+            </small>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-2">Toplam Görüşme</h6>
+                            <h3 class="mb-0">@totalMeetingCount</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-2">En Çok Görüşme Yapan</h6>
+                            <h3 class="mb-0">
+                                @(topUser != null ? topUser.UserName : "-")
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="mb-4">
+                    <canvas id="meetingChart" height="100"></canvas>
+                </div>
+
+                <hr />
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Görüşmeyi Gerçekleştiren</th>
+                                <th>Bu Hafta Gerçekleştirilen Görüşme</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var index = 1;
+                            }
+
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td>@item.UserName</td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            @item.MeetingCount
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                index++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    Bu hafta görüşme gerçekleştiren kullanıcı bulunamadı.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const labels = [
+            @foreach (var item in Model ?? new List<CrmCorner.ViewModels.WeeklyMeetingReportViewModel>())
+            {
+                @: "@item.UserName",
+            }
+        ];
+
+        const data = [
+            @foreach (var item in Model ?? new List<CrmCorner.ViewModels.WeeklyMeetingReportViewModel>())
+            {
+                @: @item.MeetingCount,
+            }
+        ];
+
+        if (document.getElementById('meetingChart')) {
+            const ctx = document.getElementById('meetingChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Bu Hafta Görüşme Sayısı',
+                        data: data,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}

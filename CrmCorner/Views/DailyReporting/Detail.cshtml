@@ -1,0 +1,406 @@
+﻿@model CrmCorner.ViewModels.DailyReportingUserDetailViewModel
+
+@{
+    ViewData["Title"] = "Daily Reporting Detail";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+
+    var days = new[]
+    {
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday
+    };
+
+    string GetDate(DayOfWeek day)
+    {
+        var diff = ((int)day - (int)DayOfWeek.Monday);
+        return Model.WeekStartDate.AddDays(diff).ToString("yyyy-MM-dd");
+    }
+}
+
+<style>
+    .daily-detail-page {
+        padding: 24px;
+    }
+
+    .daily-detail-header {
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 8px;
+        color: #6b21a8;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .daily-detail-header h3 {
+        margin: 0;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .daily-detail-header p {
+        margin: 4px 0 0;
+        color: #6b7280;
+    }
+
+    .new-table-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+    }
+
+    .new-table-input {
+        min-width: 230px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        outline: none;
+    }
+
+    .new-table-input:focus {
+        border-color: #6b21a8;
+        box-shadow: 0 0 0 3px rgba(107, 33, 168, .12);
+    }
+
+    .new-table-btn {
+        border: none;
+        background: #6b21a8;
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .new-table-btn:hover {
+        background: #581c87;
+    }
+
+    .daily-company-block {
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        margin-bottom: 28px;
+        overflow: hidden;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, .06);
+    }
+
+    .company-title {
+        background: #1f2937;
+        color: #fff;
+        font-weight: 800;
+        padding: 10px 14px;
+        text-align: center;
+    }
+
+    .daily-excel-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1250px;
+        font-size: 12px;
+    }
+
+    .daily-excel-table th {
+        background: #263aa8;
+        color: #fff;
+        border: 1px solid #111827;
+        padding: 5px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .daily-excel-table td {
+        border: 1px solid #cbd5e1;
+        padding: 4px;
+        text-align: center;
+        background: #fff;
+    }
+
+    .activity-col {
+        min-width: 170px;
+    }
+
+    .activity-name {
+        text-align: left !important;
+        font-weight: 700;
+        background: #f8fafc !important;
+        color: #111827;
+    }
+
+    .daily-input {
+        width: 48px;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font-size: 12px;
+        outline: none;
+    }
+
+    .daily-input:focus {
+        background: #fff7cc;
+        border: 1px solid #ffb71b;
+        border-radius: 4px;
+    }
+
+    .percent-cell,
+    .total-percent {
+        color: #ef4444;
+        font-weight: 800;
+    }
+
+    .gap-cell,
+    .total-gap {
+        color: #ef4444;
+        font-weight: 700;
+    }
+
+    .total-p,
+    .total-a,
+    .total-percent,
+    .total-gap {
+        background: #f1f5f9 !important;
+        font-weight: 800;
+    }
+
+    @@media (max-width: 768px) {
+        .new-table-form {
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .new-table-input {
+            min-width: 100%;
+        }
+
+        .new-table-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container-fluid daily-detail-page">
+
+    <div class="daily-detail-header">
+        <div>
+            <a asp-action="Index" class="back-link">← Geri</a>
+            <h3>@Model.FullName</h3>
+            <p>
+                @Model.WeekStartDate.ToString("dd.MM.yyyy")
+                -
+                @Model.WeekEndDate.ToString("dd.MM.yyyy")
+            </p>
+        </div>
+
+        <form asp-action="AddCustomTable" method="post" class="new-table-form">
+            <input type="hidden" name="userId" value="@Model.UserId" />
+
+            <input type="text"
+                   name="tableName"
+                   class="new-table-input"
+                   placeholder="Yeni tablo adı"
+                   required />
+
+            <button type="submit" class="new-table-btn">
+                + Yeni Tablo
+            </button>
+        </form>
+    </div>
+
+    @foreach (var company in Model.CompanyTables)
+    {
+        <div class="daily-company-block">
+           <div class="company-title position-relative text-center">
+
+    <span>@company.CompanyName</span>
+
+    @if (company.CompanyName != "SAAS Corner")
+    {
+        <form asp-action="DeleteCustomTable"
+              method="post"
+              style="position:absolute; right:10px; top:50%; transform:translateY(-50%);"
+              onsubmit="return confirm('Bu tabloyu silmek istediğine emin misin?');">
+
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <input type="hidden" name="tableName" value="@company.CompanyName" />
+
+            <button type="submit" class="btn btn-sm btn-danger">
+                Sil
+            </button>
+        </form>
+    }
+
+</div>
+
+            <div class="table-responsive">
+                <table class="daily-excel-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="activity-col">SAAS Corner</th>
+
+                            @foreach (var day in days)
+                            {
+                                <th colspan="4">@day.ToString()</th>
+                            }
+
+                            <th colspan="4">TOTAL</th>
+                        </tr>
+
+                        <tr>
+                            @foreach (var day in days)
+                            {
+                                <th>P</th>
+                                <th>A</th>
+                                <th>%</th>
+                                <th>GAP</th>
+                            }
+
+                            <th>P</th>
+                            <th>A</th>
+                            <th>%</th>
+                            <th>GAP</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var row in company.Rows)
+                        {
+                            <tr>
+                                <td class="activity-name">@row.ActivityType</td>
+
+                                @foreach (var day in days)
+                                {
+                                    var cell = row.Days.ContainsKey(day)
+                                        ? row.Days[day]
+                                        : new CrmCorner.ViewModels.DailyReportingDayCellViewModel();
+
+                                    var date = GetDate(day);
+
+                                    <td>
+                                        <input class="daily-input p-input"
+                                               type="number"
+                                               value="@cell.P"
+                                               data-userid="@Model.UserId"
+                                               data-company="@company.CompanyName"
+                                               data-date="@date"
+                                               data-activity="@row.ActivityType"
+                                               data-type="P" />
+                                    </td>
+
+                                    <td>
+                                        <input class="daily-input a-input"
+                                               type="number"
+                                               value="@cell.A"
+                                               data-userid="@Model.UserId"
+                                               data-company="@company.CompanyName"
+                                               data-date="@date"
+                                               data-activity="@row.ActivityType"
+                                               data-type="A" />
+                                    </td>
+
+                                    <td class="percent-cell">@cell.Percent%</td>
+                                    <td class="gap-cell">@cell.Gap</td>
+                                }
+
+                                <td class="total-p">@row.TotalP</td>
+                                <td class="total-a">@row.TotalA</td>
+                                <td class="total-percent">@row.TotalPercent%</td>
+                                <td class="total-gap">@row.TotalGap</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    document.querySelectorAll(".daily-input").forEach(input => {
+        input.addEventListener("change", function () {
+            const value = parseInt(this.value) || 0;
+
+            const data = {
+                userId: this.dataset.userid,
+                companyName: this.dataset.company,
+                date: this.dataset.date,
+                activityType: this.dataset.activity,
+                type: this.dataset.type,
+                value: value
+            };
+
+            fetch('/DailyReporting/SaveCell', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    updateRow(this);
+                }
+            });
+        });
+    });
+
+    function updateRow(input) {
+        const row = input.closest("tr");
+
+        let totalP = 0;
+        let totalA = 0;
+
+        row.querySelectorAll(".p-input").forEach(x => {
+            totalP += parseInt(x.value) || 0;
+        });
+
+        row.querySelectorAll(".a-input").forEach(x => {
+            totalA += parseInt(x.value) || 0;
+        });
+
+        const dayGroups = row.querySelectorAll(".p-input");
+
+        dayGroups.forEach(pInput => {
+            const pTd = pInput.closest("td");
+            const aTd = pTd.nextElementSibling;
+            const percentTd = aTd.nextElementSibling;
+            const gapTd = percentTd.nextElementSibling;
+
+            const p = parseInt(pInput.value) || 0;
+            const a = parseInt(aTd.querySelector(".a-input").value) || 0;
+
+            const percent = p === 0 ? 0 : Math.round((a / p) * 100);
+            const gap = a - p;
+
+            percentTd.innerText = percent + "%";
+            gapTd.innerText = gap;
+        });
+
+        const totalPercent = totalP === 0 ? 0 : Math.round((totalA / totalP) * 100);
+        const totalGap = totalA - totalP;
+
+        row.querySelector(".total-p").innerText = totalP;
+        row.querySelector(".total-a").innerText = totalA;
+        row.querySelector(".total-percent").innerText = totalPercent + "%";
+        row.querySelector(".total-gap").innerText = totalGap;
+    }
+</script>

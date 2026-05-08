@@ -379,6 +379,51 @@ namespace CrmCorner.Migrations
                     b.Property<bool?>("IsApproved")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("IsLegacyCustomer")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsPaymentActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsTrialActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<decimal>("LastPaymentAmount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime?>("LastPaymentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("PaidUserCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PlanName")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("SubscriptionEndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("SubscriptionStartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("TrialEndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("TrialStartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("UseAppUser")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("UseMeetingUser")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("UseReporterUser")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("UseResponsibleUser")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("CompanyId");
 
                     b.ToTable("Companies");
@@ -439,6 +484,52 @@ namespace CrmCorner.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("CustomerNs");
+                });
+
+            modelBuilder.Entity("CrmCorner.Models.DailyReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ActivityType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ActualValue")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("ProspectTarget")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReportDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("WeekEndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("WeekStartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("DailyReports");
                 });
 
             modelBuilder.Entity("CrmCorner.Models.EmailList", b =>
@@ -565,6 +656,10 @@ namespace CrmCorner.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("KimSattiUserId")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NormalizedCompanyName")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<decimal?>("SaleAmountUsd")
@@ -898,6 +993,9 @@ namespace CrmCorner.Migrations
                     b.Property<string>("LinkedinUrl")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("MeetingUserId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("NegativeReason")
                         .HasColumnType("longtext");
 
@@ -909,6 +1007,9 @@ namespace CrmCorner.Migrations
 
                     b.Property<string>("Phone")
                         .HasColumnType("longtext");
+
+                    b.Property<string>("ReporterUserId")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ResponsibleUserId")
                         .HasColumnType("varchar(255)");
@@ -934,6 +1035,10 @@ namespace CrmCorner.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("MeetingUserId");
+
+                    b.HasIndex("ReporterUserId");
 
                     b.HasIndex("ResponsibleUserId");
 
@@ -1582,6 +1687,17 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("CrmCorner.Models.DailyReport", b =>
+                {
+                    b.HasOne("CrmCorner.Models.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("CrmCorner.Models.Feedback", b =>
                 {
                     b.HasOne("CrmCorner.Models.SocialMediaContent", "SocialMediaContent")
@@ -1695,6 +1811,16 @@ namespace CrmCorner.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
+                    b.HasOne("CrmCorner.Models.AppUser", "MeetingUser")
+                        .WithMany()
+                        .HasForeignKey("MeetingUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CrmCorner.Models.AppUser", "ReporterUser")
+                        .WithMany()
+                        .HasForeignKey("ReporterUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CrmCorner.Models.AppUser", "ResponsibleUser")
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId")
@@ -1703,6 +1829,10 @@ namespace CrmCorner.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("MeetingUser");
+
+                    b.Navigation("ReporterUser");
 
                     b.Navigation("ResponsibleUser");
                 });

@@ -15,17 +15,20 @@ namespace CrmCorner.Services.ChatCorner
         private readonly IChatAnalyticsService _chatAnalyticsService;
         private readonly IAiSummaryService _aiSummaryService;
         private readonly IChatAuthorizationService _chatAuthorizationService;
+        private readonly IOpenAiIntentParserService _openAiIntentParserService;
         private readonly CrmCornerContext _context;
 
         public ChatCornerService(
             IChatAnalyticsService chatAnalyticsService,
             IAiSummaryService aiSummaryService,
             IChatAuthorizationService chatAuthorizationService,
+            IOpenAiIntentParserService openAiIntentParserService,
             CrmCornerContext context)
         {
             _chatAnalyticsService = chatAnalyticsService;
             _aiSummaryService = aiSummaryService;
             _chatAuthorizationService = chatAuthorizationService;
+            _openAiIntentParserService = openAiIntentParserService;
             _context = context;
         }
 
@@ -43,7 +46,26 @@ namespace CrmCorner.Services.ChatCorner
                     };
                 }
 
-                var parsed = ParseQuestion(question);
+                ParsedChatQueryDto parsed = null;
+
+                // Önce OpenAI ile intent parse etmeyi dene
+                try
+                {
+                    var aiParsed = await _openAiIntentParserService.ParseIntentAsync(question);
+                    parsed = MapFromOpenAiResult(aiParsed);
+                }
+                catch
+                {
+                    // OpenAI parse patlarsa sessizce fallback'e düş
+                    parsed = null;
+                }
+
+                // Fallback: mevcut regex tabanlı parse
+                if (parsed == null)
+                {
+                    parsed = ParseQuestion(question);
+                }
+
                 var lowerQuestion = (question ?? string.Empty).ToLowerInvariant();
 
                 var isSelfQuery =
@@ -60,7 +82,7 @@ namespace CrmCorner.Services.ChatCorner
                 {
                     parsed = new ParsedChatQueryDto
                     {
-                        Intent = "UserTaskSummary"
+                        Intent = ChatIntentNames.UserTaskSummary
                     };
 
                     ResolveDateRange(lowerQuestion, parsed);
@@ -75,7 +97,8 @@ namespace CrmCorner.Services.ChatCorner
                     };
                 }
 
-                if (parsed.Intent != "UserTaskSummary")
+                // Şimdilik sadece bu intent destekleniyor
+                if (parsed.Intent != ChatIntentNames.UserTaskSummary)
                 {
                     return new ChatCornerResponseDto
                     {
@@ -95,9 +118,9 @@ namespace CrmCorner.Services.ChatCorner
                 }
 
                 var authResult = await _chatAuthorizationService.CanViewUserAsync(
-    currentUserId,
-    parsed.TargetEmail,
-    parsed.TargetName);
+                    currentUserId,
+                    parsed.TargetEmail,
+                    parsed.TargetName);
 
                 if (!authResult.Success)
                 {
@@ -143,6 +166,76 @@ namespace CrmCorner.Services.ChatCorner
             }
         }
 
+        private ParsedChatQueryDto MapFromOpenAiResult(ChatIntentParseResultDto aiParsed)
+        {
+            if (aiParsed == null)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(aiParsed.Intent) || aiParsed.Intent == ChatIntentNames.Unknown)
+                return null;
+
+            var parsed = new ParsedChatQueryDto
+            {
+                Intent = aiParsed.Intent,
+                TargetEmail = aiParsed.TargetEmail,
+                TargetName = aiParsed.TargetName
+            };
+
+            ResolveDateRangeFromAi(aiParsed, parsed);
+
+            return parsed;
+        }
+
+        private void ResolveDateRangeFromAi(ChatIntentParseResultDto aiParsed, ParsedChatQueryDto parsed)
+        {
+            var now = DateTime.Now;
+
+            switch ((aiParsed.PeriodType ?? string.Empty).ToLowerInvariant())
+            {
+                case "this_year":
+                    parsed.PeriodStart = new DateTime(now.Year, 1, 1);
+                    parsed.PeriodEnd = new DateTime(now.Year, 12, 31, 23, 59, 59);
+                    parsed.PeriodLabel = "Bu Yıl";
+                    break;
+
+                case "last_year":
+                    var lastYear = now.Year - 1;
+                    parsed.PeriodStart = new DateTime(lastYear, 1, 1);
+                    parsed.PeriodEnd = new DateTime(lastYear, 12, 31, 23, 59, 59);
+                    parsed.PeriodLabel = "Geçen Yıl";
+                    break;
+
+                case "last_month":
+                    var lastMonthDate = now.AddMonths(-1);
+                    parsed.PeriodStart = new DateTime(lastMonthDate.Year, lastMonthDate.Month, 1);
+                    parsed.PeriodEnd = parsed.PeriodStart.AddMonths(1).AddSeconds(-1);
+                    parsed.PeriodLabel = "Geçen Ay";
+                    break;
+
+                case "custom_year":
+                    var customYear = aiParsed.Year ?? now.Year;
+                    parsed.PeriodStart = new DateTime(customYear, 1, 1);
+                    parsed.PeriodEnd = new DateTime(customYear, 12, 31, 23, 59, 59);
+                    parsed.PeriodLabel = customYear.ToString();
+                    break;
+
+                case "custom_month":
+                    var year = aiParsed.Year ?? now.Year;
+                    var month = aiParsed.Month ?? now.Month;
+                    parsed.PeriodStart = new DateTime(year, month, 1);
+                    parsed.PeriodEnd = parsed.PeriodStart.AddMonths(1).AddSeconds(-1);
+                    parsed.PeriodLabel = $"{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(parsed.PeriodStart.ToString("MMMM"))} {year}";
+                    break;
+
+                case "this_month":
+                default:
+                    parsed.PeriodStart = new DateTime(now.Year, now.Month, 1);
+                    parsed.PeriodEnd = parsed.PeriodStart.AddMonths(1).AddSeconds(-1);
+                    parsed.PeriodLabel = "Bu Ay";
+                    break;
+            }
+        }
+
         private ParsedChatQueryDto ParseQuestion(string question)
         {
             if (string.IsNullOrWhiteSpace(question))
@@ -152,7 +245,7 @@ namespace CrmCorner.Services.ChatCorner
 
             var parsed = new ParsedChatQueryDto
             {
-                Intent = "UserTaskSummary"
+                Intent = ChatIntentNames.UserTaskSummary
             };
 
             var emailMatch = Regex.Match(text, @"[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}");
