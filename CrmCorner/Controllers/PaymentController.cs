@@ -51,11 +51,15 @@ namespace CrmCorner.Controllers
 
                 // localhost callback bazen sandbox testlerinde sorun çıkarabilir.
                 // Mümkünse ngrok/https bir adres kullan.
-                CallbackUrl = Url.Action(
-                    "Callback",
-                    "Payment",
-                    null,
-                    Request.Scheme)
+                //    CallbackUrl = Url.Action(
+                //        "Callback",
+                //        "Payment",
+                //        null,
+                //        Request.Scheme)
+
+
+                CallbackUrl = "https://crmcorner.co/Payment/Callback"
+
             };
 
             request.Buyer = new Buyer
@@ -111,8 +115,6 @@ namespace CrmCorner.Controllers
             return Redirect(checkoutFormInitialize.PaymentPageUrl);
         }
 
-
-
         private string GetFirstName(string fullName)
         {
             if (string.IsNullOrWhiteSpace(fullName))
@@ -152,7 +154,7 @@ namespace CrmCorner.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Callback(string token)
+        public async Task<IActionResult> Callback([FromForm] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -204,11 +206,11 @@ namespace CrmCorner.Controllers
             switch (planName)
             {
                 case "Gold":
-                    return 1000 * userCount;
+                    return 1 * userCount;
                 case "Platinum":
                     return 5000 * userCount;
                 default:
-                    return 0;
+                    throw new Exception("Geçersiz paket seçimi.");
             }
         }
 

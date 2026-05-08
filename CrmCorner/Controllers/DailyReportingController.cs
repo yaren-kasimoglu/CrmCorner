@@ -158,6 +158,19 @@ namespace CrmCorner.Controllers
             .ToListAsync();
 
             companies.AddRange(pipelineCompanies);
+
+            var customCompanies = await _context.DailyReports
+                .AsNoTracking()
+                .Where(x =>
+                    x.AppUserId == userId &&
+                    x.ReportDate >= weekStart &&
+                    x.ReportDate <= weekEnd)
+                .Select(x => x.CompanyName)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct()
+                .ToListAsync();
+
+            companies.AddRange(customCompanies);
             companies = companies.Distinct().ToList();
 
             var activityTypes = new List<string>
@@ -226,5 +239,92 @@ namespace CrmCorner.Controllers
 
             return View(model);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> AddCustomTable(string userId, string tableName)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(tableName))
+                return RedirectToAction("Detail", new { userId });
+
+            tableName = tableName.Trim();
+
+            var today = DateTime.Today;
+            var diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var weekStart = today.AddDays(-diff).Date;
+            var weekEnd = weekStart.AddDays(4).Date;
+
+            var activityTypes = new List<string>
+    {
+        "LinkedIn Bağlantı Sayısı",
+        "E-Mails",
+        "LinkedIn Gönderilen Mesaj",
+        "LinkedIn Gönderilen Bağlantı",
+        "Arama",
+        "Meeting Planlama",
+        "Meeting Gerçekleşen"
+    };
+
+            var alreadyExists = await _context.DailyReports.AnyAsync(x =>
+                x.AppUserId == userId &&
+                x.CompanyName == tableName &&
+                x.ReportDate >= weekStart &&
+                x.ReportDate <= weekEnd);
+
+            if (!alreadyExists)
+            {
+                for (var date = weekStart; date <= weekEnd; date = date.AddDays(1))
+                {
+                    foreach (var activity in activityTypes)
+                    {
+                        _context.DailyReports.Add(new DailyReport
+                        {
+                            AppUserId = userId,
+                            CompanyName = tableName,
+                            ReportDate = date,
+                            ActivityType = activity,
+                            ProspectTarget = 0,
+                            ActualValue = 0,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now
+                        });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Detail", new { userId });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteCustomTable(string userId, string tableName)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(tableName))
+                return RedirectToAction("Detail", new { userId });
+
+            var today = DateTime.Today;
+            var diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var weekStart = today.AddDays(-diff).Date;
+            var weekEnd = weekStart.AddDays(4).Date;
+
+            var reports = await _context.DailyReports
+                .Where(x =>
+                    x.AppUserId == userId &&
+                    x.CompanyName == tableName &&
+                    x.ReportDate >= weekStart &&
+                    x.ReportDate <= weekEnd)
+                .ToListAsync();
+
+            if (reports.Any())
+            {
+                _context.DailyReports.RemoveRange(reports);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Detail", new { userId });
+        }
+
     }
 }

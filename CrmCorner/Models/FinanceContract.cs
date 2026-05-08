@@ -12,6 +12,8 @@ namespace CrmCorner.Models
 
         public string CompanyName { get; set; }
 
+        public string NormalizedCompanyName { get; set; }
+
         // Sözleşme
         public DateTime? ContractStartDate { get; set; }
         public int? ContractMonths { get; set; }

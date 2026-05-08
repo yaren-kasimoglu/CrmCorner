@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using System;
 using CrmCorner.Models.Settings;
+using CrmCorner.Services.DailyReporting;
 using static CrmCorner.Hubs.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,6 +68,14 @@ builder.Services.AddHttpClient<IAiSummaryService, AiSummaryService>();
 builder.Services.AddHostedService<DayBoardExpirationService>();
 
 builder.Services.AddHostedService<TodoDeadlineReminderService>();
+
+builder.Services.AddScoped<WeeklyDailyReportEmailService>();
+builder.Services.AddHostedService<WeeklyDailyReportBackgroundService>();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<CompanyAccessFilter>();
+});
 
 // Form seçenekleri
 builder.Services.Configure<FormOptions>(x =>

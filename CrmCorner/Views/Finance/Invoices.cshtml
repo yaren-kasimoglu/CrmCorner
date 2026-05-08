@@ -471,7 +471,7 @@
                 </td>
 
                 <td class="remaining-amount">
-                    @((i.ExpectedNet - i.PaidAmount).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")))
+                    @((i.GrossAmount - i.PaidAmount).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")))
                 </td>
 
                 <td>
@@ -566,7 +566,7 @@
             <td id="sumPaid">@Model.Sum(x => x.PaidAmount).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
 
             <!-- ✅ KALAN: ExpectedNet - PaidAmount -->
-            <td id="sumRemaining">@Model.Sum(x => (x.ExpectedNet - x.PaidAmount)).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
+            <td id="sumRemaining">@Model.Sum(x => (x.GrossAmount - x.PaidAmount)).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))</td>
 
             <td></td>
             <td></td>
@@ -896,7 +896,7 @@ else
                 const vat = parseSmartNumber(vatText);
                 const gross = parseSmartNumber(grossText);
 
-                const remaining = expected - paid;
+                const remaining = gross - paid;
 
                 sumExpected += expected;
                 sumPaid += paid;
@@ -956,7 +956,7 @@ else
                 const vat = parseSmartNumber(vatText);
                 const gross = parseSmartNumber(grossText);
 
-                const remaining = expected - paid;
+                const remaining = gross - paid;
 
                 selectedExpected += expected;
                 selectedVat += vat;

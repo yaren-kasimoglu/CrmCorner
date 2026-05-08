@@ -1,0 +1,86 @@
+﻿@model CrmCorner.ViewModels.FinanceImportExcelVm
+
+@{
+    ViewData["Title"] = "Excel Import";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h4 class="mb-3">
+                Excel'den Finans Verisi Aktar
+            </h4>
+
+            <p class="text-muted">
+                Aynı firma tekrar gelirse mevcut sözleşmeyle eşleşir.
+                Sadece ilgili ayın invoice kaydı oluşturulur/güncellenir.
+            </p>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Success"]
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["Error"]
+                </div>
+            }
+
+            <form method="post"
+                  enctype="multipart/form-data"
+                  asp-action="ImportExcel">
+
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">Yıl</label>
+
+                        <input asp-for="Year"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Ay</label>
+
+                        <select asp-for="Month" class="form-select">
+
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i">
+                                    @System.Globalization.CultureInfo.GetCultureInfo("tr-TR").DateTimeFormat.GetMonthName(i)
+                                </option>
+                            }
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Excel Dosyası</label>
+
+                        <input type="file"
+                               asp-for="ExcelFile"
+                               class="form-control"
+                               accept=".xlsx" />
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <button class="btn btn-primary">
+                    Exceli İçeri Aktar
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

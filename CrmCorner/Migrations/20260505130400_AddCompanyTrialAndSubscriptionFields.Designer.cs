@@ -3,6 +3,7 @@ using System;
 using CrmCorner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrmCorner.Migrations
 {
     [DbContext(typeof(CrmCornerContext))]
-    partial class CrmCornerContextModelSnapshot : ModelSnapshot
+    [Migration("20260505130400_AddCompanyTrialAndSubscriptionFields")]
+    partial class AddCompanyTrialAndSubscriptionFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -379,9 +382,6 @@ namespace CrmCorner.Migrations
                     b.Property<bool?>("IsApproved")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("IsLegacyCustomer")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<bool>("IsPaymentActive")
                         .HasColumnType("tinyint(1)");
 
@@ -656,10 +656,6 @@ namespace CrmCorner.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("KimSattiUserId")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("NormalizedCompanyName")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<decimal?>("SaleAmountUsd")

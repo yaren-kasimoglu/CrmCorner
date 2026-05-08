@@ -19,6 +19,7 @@
         return Model.WeekStartDate.AddDays(diff).ToString("yyyy-MM-dd");
     }
 }
+
 <style>
     .daily-detail-page {
         padding: 24px;
@@ -26,6 +27,11 @@
 
     .daily-detail-header {
         margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
     }
 
     .back-link {
@@ -45,6 +51,47 @@
     .daily-detail-header p {
         margin: 4px 0 0;
         color: #6b7280;
+    }
+
+    .new-table-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+    }
+
+    .new-table-input {
+        min-width: 230px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        outline: none;
+    }
+
+    .new-table-input:focus {
+        border-color: #6b21a8;
+        box-shadow: 0 0 0 3px rgba(107, 33, 168, .12);
+    }
+
+    .new-table-btn {
+        border: none;
+        background: #6b21a8;
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .new-table-btn:hover {
+        background: #581c87;
     }
 
     .daily-company-block {
@@ -132,7 +179,24 @@
         background: #f1f5f9 !important;
         font-weight: 800;
     }
+
+    @@media (max-width: 768px) {
+        .new-table-form {
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .new-table-input {
+            min-width: 100%;
+        }
+
+        .new-table-btn {
+            width: 100%;
+        }
+    }
 </style>
+
 <div class="container-fluid daily-detail-page">
 
     <div class="daily-detail-header">
@@ -145,14 +209,46 @@
                 @Model.WeekEndDate.ToString("dd.MM.yyyy")
             </p>
         </div>
+
+        <form asp-action="AddCustomTable" method="post" class="new-table-form">
+            <input type="hidden" name="userId" value="@Model.UserId" />
+
+            <input type="text"
+                   name="tableName"
+                   class="new-table-input"
+                   placeholder="Yeni tablo adı"
+                   required />
+
+            <button type="submit" class="new-table-btn">
+                + Yeni Tablo
+            </button>
+        </form>
     </div>
 
     @foreach (var company in Model.CompanyTables)
     {
         <div class="daily-company-block">
-            <div class="company-title">
-                @company.CompanyName
-            </div>
+           <div class="company-title position-relative text-center">
+
+    <span>@company.CompanyName</span>
+
+    @if (company.CompanyName != "SAAS Corner")
+    {
+        <form asp-action="DeleteCustomTable"
+              method="post"
+              style="position:absolute; right:10px; top:50%; transform:translateY(-50%);"
+              onsubmit="return confirm('Bu tabloyu silmek istediğine emin misin?');">
+
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <input type="hidden" name="tableName" value="@company.CompanyName" />
+
+            <button type="submit" class="btn btn-sm btn-danger">
+                Sil
+            </button>
+        </form>
+    }
+
+</div>
 
             <div class="table-responsive">
                 <table class="daily-excel-table">
@@ -236,8 +332,6 @@
         </div>
     }
 </div>
-
-
 
 <script>
     document.querySelectorAll(".daily-input").forEach(input => {
