@@ -33,6 +33,7 @@ namespace CrmCorner.ViewModels
     public class DailyReportingActivityRowViewModel
     {
         public string ActivityType { get; set; }
+        public int TotalDifference { get; set; }
 
         public Dictionary<DayOfWeek, DailyReportingDayCellViewModel> Days { get; set; }
             = new Dictionary<DayOfWeek, DailyReportingDayCellViewModel>();
@@ -73,5 +74,24 @@ namespace CrmCorner.ViewModels
                 return Math.Round(((decimal)A / P) * 100, 0);
             }
         }
+    }
+
+    public class DailyReportingWeeklySummaryViewModel
+    {
+        public DateTime WeekStartDate { get; set; }
+        public DateTime WeekEndDate { get; set; }
+
+        public string UserId { get; set; }
+        public string FullName { get; set; }
+
+        public string CompanyName { get; set; }
+
+        public int LinkedinConnectionCount { get; set; }
+        public int Emails { get; set; }
+        public int LinkedinMessages { get; set; }
+        public int LinkedinSentConnections { get; set; }
+        public int Calls { get; set; }
+        public int MeetingPlanned { get; set; }
+        public int MeetingCompleted { get; set; }
     }
 }

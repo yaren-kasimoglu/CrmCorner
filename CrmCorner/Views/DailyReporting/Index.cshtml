@@ -88,7 +88,17 @@
             <h3>Daily Reporting</h3>
             <p>Haftalık SDR performans tabloları</p>
         </div>
+
+        <div>
+            <a asp-controller="DailyReporting"
+               asp-action="WeeklySummary"
+               class="btn btn-dark mb-3">
+                Haftalık Rapor Geçmişi
+            </a>
+        </div>
     </div>
+
+ 
 
     <div class="daily-user-grid">
         @foreach (var user in Model)

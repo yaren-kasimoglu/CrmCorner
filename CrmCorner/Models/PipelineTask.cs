@@ -77,6 +77,7 @@ namespace CrmCorner.Models
         public string? ReporterUserId { get; set; }
         public AppUser? ReporterUser { get; set; }
 
+        public bool IsHiddenFromPipeline { get; set; } = false;
 
         public virtual ICollection<PipelineTaskNote> Notes { get; set; } = new List<PipelineTaskNote>();
 
