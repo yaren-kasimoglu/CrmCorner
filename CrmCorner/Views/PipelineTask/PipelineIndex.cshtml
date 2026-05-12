@@ -66,19 +66,61 @@
         font-size: 14px;
     }
 
+    .kanban-board {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 14px;
+        scrollbar-width: thin; /* Firefox */
+    }
+
+        /* Chrome / Edge / Safari */
+        .kanban-board::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .kanban-board::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 20px;
+        }
+
+        .kanban-board::-webkit-scrollbar-thumb {
+            background: #9b9b9b;
+            border-radius: 20px;
+        }
+
+            .kanban-board::-webkit-scrollbar-thumb:hover {
+                background: #6f6f6f;
+            }
+
     .card-column {
-        min-width: 220px;
+        flex: 1 1 0;
+        min-width: 240px;
+    }
+
+    @@media (max-width: 1400px) {
+        .card-column
+
+    {
+        flex: 0 0 260px;
+        max-width: 260px;
+    }
+
+    }
+    .container-fluid {
+        margin-top: -10px;
+    }
+
+
+    .card {
+        height: calc(100vh - 220px);
     }
 
     .card-body {
-        height: 420px;
+        height: calc(100vh - 300px);
         overflow-y: auto;
-    }
-
-    .card {
-        border: none;
-        border-radius: 12px;
-        background: #f9fafb;
     }
 
     .card-header {
@@ -102,43 +144,133 @@
         border: 2px solid #dc3545;
     }
 
+    .pipeline-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 320px;
+    }
+
+    .filter-select {
+        width: 210px;
+        height: 38px;
+        font-size: 13px;
+    }
+
+    .toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+    }
+
+    @@media (max-width: 992px) {
+        .toolbar-left, .toolbar-right
+
+    {
+        width: 100%;
+    }
+
+    .search-box,
+    .filter-select {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .toolbar-right {
+        justify-content: flex-end;
+    }
+
+    }
+
 </style>
 
 
-<div class="d-flex justify-content-end align-items-center mb-3 gap-2">
-    <div>
-        <small class="text-muted">Excel ile toplu veri yükleyebilirsiniz</small>
-    </div>
 
-    <div class="d-flex gap-2">
-    @*     <a asp-controller="PipelineTask" asp-action="DownloadPipelineTemplate" class="btn btn-light border">
-            <i class="fas fa-download me-1"></i> Template
-        </a>  *@
 
-        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#importExcelModal">
-            <i class="fas fa-file-import me-1"></i> Import
-        </button>
-    </div>
-</div>
+<div class="pipeline-toolbar mb-3">
 
-<div class="row mb-3">
-    <div class="col-md-6 col-lg-4">
-        <div class="input-group">
+    <div class="toolbar-left">
+
+        <div class="input-group search-box">
             <span class="input-group-text">
                 <i class="fas fa-search"></i>
             </span>
-            <input type="text" id="pipelineSearch" class="form-control" placeholder="Başlık, müşteri, şirket, açıklama ara..." />
+
+            <input type="text"
+                   id="pipelineSearch"
+                   class="form-control"
+                   placeholder="Başlık, müşteri, şirket, açıklama ara..." />
         </div>
+
+        <select id="doneByFilter" class="form-select filter-select">
+            <option value="">Görüşmeyi Gerçekleştiren</option>
+            @foreach (var user in Model
+                        .Where(x => x.ResponsibleUser != null)
+                        .Select(x => x.ResponsibleUser.NameSurname)
+                        .Distinct()
+                        .OrderBy(x => x))
+            {
+                <option value="@user">@user</option>
+            }
+        </select>
+
+        <select id="outcomeFilter" class="form-select filter-select">
+            <option value="">Sonuç</option>
+            <option value="Won">Kazanılan</option>
+            <option value="Lost">Kaybedilen</option>
+        </select>
+
     </div>
+
+    <div class="form-check form-switch mb-0">
+        <input class="form-check-input"
+               type="checkbox"
+               id="showHiddenTasks"
+               @(ViewBag.ShowHidden == true ? "checked" : "")>
+
+        <label class="form-check-label small" for="showHiddenTasks">
+            Arşivlenenleri Göster
+        </label>
+    </div>
+
+    <div class="toolbar-right">
+        <small class="text-muted">
+            Excel ile toplu veri yükleyebilirsiniz
+        </small>
+
+        <button type="button"
+                class="btn btn-dark btn-sm rounded-pill px-3"
+                data-bs-toggle="modal"
+                data-bs-target="#importExcelModal">
+            <i class="fas fa-file-import me-1"></i>
+            Import
+        </button>
+    </div>
+
 </div>
 
-<div class="row g-3">
+<div class="row g-3 kanban-board">
     @foreach (var stage in stageList)
     {
         var tasksInThisStage = Model.Where(task => task.Stage.HasValue && task.Stage.Value == stage.Key).ToList();
 
-        <div class="col-lg-2 col-md-3 col-sm-6 card-column">
-            <div class="card mb-4 shadow-sm" style="height: 500px;">
+        <div class="col card-column">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-start">
                     <div>
                         <div class="kanban-title">@stage.Value</div>
@@ -179,7 +311,6 @@
                             }
 
                             <li class="dd-item @outcomeCardClass @outcomeBorderClass"
-                                datli class="dd-item @outcomeCardClass @outcomeBorderClass"
                                 data-taskid="@task.Id"
                                 data-outcome="@task.OutcomeStatus"
                                 data-value="@task.Value"
@@ -223,6 +354,16 @@
                                         @if (task.Stage == PipelineStage.IletisimKuruldu && task.ContactedViaLinkedIn != true && task.ContactedViaColdCall != true)
                                         {
                                             <button type="button" class="btn btn-sm btn-outline-secondary btn-contact-method" data-id="@task.Id">Etiketle</button>
+                                        }
+
+                                        @if (task.Stage == PipelineStage.Sonuc)
+                                        {
+                                            <a href="javascript:void(0);"
+                                               class="text-secondary me-2 btn-hide-from-pipeline"
+                                               data-taskid="@task.Id"
+                                               title="Pipeline ekranından kaldır">
+                                                <i class="fas fa-eye-slash"></i>
+                                            </a>
                                         }
                                     </div>
                                 </div>
@@ -347,7 +488,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
  *@
 <!-- 2. jQuery UI (sortable için gerekli) -->
-<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+ <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script> 
 
 <!-- 3. Bootstrap (isteğe bağlı) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
@@ -503,21 +644,70 @@
             });
         }
 
-        $('#pipelineSearch').on('input', function () {
-            const keyword = $(this).val().toLowerCase().trim();
+
+                function applyPipelineFilters() {
+            const keyword = $('#pipelineSearch').val().toLowerCase().trim();
+            const selectedDoneBy = $('#doneByFilter').val();
+            const selectedOutcome = $('#outcomeFilter').val();
 
             $('.dd-item').each(function () {
-                const searchText = ($(this).data('search') || '').toString().toLowerCase();
+                const $item = $(this);
 
-                if (keyword === '' || searchText.includes(keyword)) {
-                    $(this).show();
+                const searchText = ($item.data('search') || '').toString().toLowerCase();
+                const doneBy = ($item.data('doneby') || '').toString();
+                const outcome = ($item.data('outcome') || '').toString();
+
+                const matchesSearch =
+                    keyword === '' || searchText.includes(keyword);
+
+                const matchesDoneBy =
+                    selectedDoneBy === '' || doneBy === selectedDoneBy;
+
+                const matchesOutcome =
+                    selectedOutcome === '' || outcome === selectedOutcome;
+
+                if (matchesSearch && matchesDoneBy && matchesOutcome) {
+                    $item.show();
                 } else {
-                    $(this).hide();
+                    $item.hide();
                 }
             });
 
             updateStageCounts();
+        }
+
+        $('#pipelineSearch').on('input', applyPipelineFilters);
+        $('#doneByFilter, #outcomeFilter').on('change', applyPipelineFilters);
+
         });
+
+              $(document).on('click', '.btn-hide-from-pipeline', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const taskId = $(this).data('taskid');
+
+            if (!confirm("Bu görev sadece Pipeline ana ekranından kaldırılacak. Kazanılan/Kaybedilen listesinde görünmeye devam edecek. Emin misiniz?")) {
+                return;
+            }
+
+            $.post('/PipelineTask/HideFromPipeline', { id: taskId }, function (response) {
+                if (response.success) {
+                    $(`.dd-item[data-taskid="${taskId}"]`).fadeOut(200, function () {
+                        $(this).remove();
+                        updateStageCounts();
+                    });
+                } else {
+                    alert(response.message || "İşlem başarısız oldu.");
+                }
+            });
+        });
+
+                $('#showHiddenTasks').on('change', function () {
+            const showHidden = $(this).is(':checked');
+            window.location.href = showHidden
+                ? '/PipelineTask/PipelineIndex?showHidden=true'
+                : '/PipelineTask/PipelineIndex';
         });
     </script>
 }

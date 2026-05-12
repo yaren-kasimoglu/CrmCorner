@@ -27,6 +27,13 @@
     </div>
 }
 
+@if (TempData["DebugMessage"] != null)
+{
+    <div class="alert alert-warning">
+        @TempData["DebugMessage"]
+    </div>
+}
+
 <form asp-action="PipelineTaskCreate" method="post">
     @Html.AntiForgeryToken()
 

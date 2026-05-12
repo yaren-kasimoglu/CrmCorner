@@ -1,0 +1,381 @@
+﻿@model List<CrmCorner.ViewModels.DailyReportingWeeklySummaryViewModel>
+
+@{
+    ViewData["Title"] = "Haftalık Rapor Geçmişi";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<style>
+    .weekly-summary-page {
+        padding: 24px;
+    }
+
+    .weekly-summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+    }
+
+        .weekly-summary-header h3 {
+            margin: 0;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .weekly-summary-header p {
+            margin: 4px 0 0;
+            color: #6b7280;
+        }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 8px;
+        color: #6b21a8;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .summary-filter-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, .06);
+    }
+
+    .summary-filter-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
+        gap: 12px;
+        align-items: end;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 6px;
+    }
+
+    .filter-control {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 9px 10px;
+        font-size: 13px;
+        outline: none;
+        height: 38px;
+    }
+
+        .filter-control:focus {
+            border-color: #6b21a8;
+            box-shadow: 0 0 0 3px rgba(107, 33, 168, .12);
+        }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .btn-filter {
+        border: none;
+        background: #6b21a8;
+        color: #fff;
+        border-radius: 10px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        height: 38px;
+    }
+
+    .btn-clear {
+        text-decoration: none;
+        background: #f3f4f6;
+        color: #374151;
+        border-radius: 10px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 800;
+        height: 38px;
+    }
+
+    .summary-table-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, .06);
+    }
+
+    .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1050px;
+        font-size: 13px;
+    }
+
+        .summary-table th {
+            background: #1f2937;
+            color: #fff;
+            padding: 11px 10px;
+            text-align: center;
+            font-weight: 800;
+            border: 1px solid #111827;
+            white-space: nowrap;
+        }
+
+        .summary-table td {
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+            color: #111827;
+            white-space: nowrap;
+        }
+
+        .summary-table tbody tr:hover td {
+            background: #fff7e6;
+        }
+
+    .text-left {
+        text-align: left !important;
+    }
+
+    .week-badge {
+        display: inline-block;
+        background: #f3f4f6;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-weight: 800;
+        color: #374151;
+    }
+
+    .positive-value {
+        color: #16a34a;
+        font-weight: 900;
+    }
+
+    .zero-value {
+        color: #6b7280;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        padding: 38px;
+        text-align: center;
+        color: #6b7280;
+        background: #fff;
+    }
+
+    @@media (max-width: 1200px) {
+        .summary-filter-grid {
+            grid-template-columns: repeat(2, minmax(160px, 1fr));
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .summary-filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="container-fluid weekly-summary-page">
+
+    <div class="weekly-summary-header">
+        <div>
+            <a asp-action="Index" class="back-link">← Daily Reporting</a>
+            <h3>Haftalık Rapor Geçmişi</h3>
+            <p>Geçmiş haftalarda kullanıcıların firma bazlı yaptığı aktiviteleri görüntüleyin.</p>
+        </div>
+    </div>
+
+    <div class="summary-filter-card">
+        <form asp-action="WeeklySummary" method="get">
+            <div class="summary-filter-grid">
+
+                <div class="filter-group">
+                    <label>Başlangıç Tarihi</label>
+                    <input type="date"
+                           name="startDate"
+                           value="@Context.Request.Query["startDate"]"
+                           class="filter-control" />
+                </div>
+
+                <div class="filter-group">
+                    <label>Bitiş Tarihi</label>
+                    <input type="date"
+                           name="endDate"
+                           value="@Context.Request.Query["endDate"]"
+                           class="filter-control" />
+                </div>
+
+                @{
+                    var selectedUserId = ViewBag.SelectedUserId as string;
+                    var users = ViewBag.Users as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>;
+                }
+
+                <div class="filter-group">
+                    <label>Kullanıcı</label>
+                    <select name="userId" class="filter-control">
+                        <option value="">Tüm Kullanıcılar</option>
+
+                        @if (users != null)
+                        {
+                            foreach (var user in users)
+                            {
+                                <option value="@user.Value" selected="@(selectedUserId == user.Value)">
+                                    @user.Text
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Firma</label>
+                    <input type="text"
+                           name="companyName"
+                           value="@Context.Request.Query["companyName"]"
+                           class="filter-control"
+                           placeholder="SAAS Corner" />
+                </div>
+
+                @{
+                    var today = DateTime.Today;
+
+                    var diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                    var currentWeekStart = today.AddDays(-diff).Date;
+                    var currentWeekEnd = currentWeekStart.AddDays(4).Date;
+
+                    var quickEndDate = currentWeekEnd > today ? currentWeekEnd : today;
+
+                    var monthStart = new DateTime(today.Year, today.Month, 1).ToString("yyyy-MM-dd");
+                    var yearStart = new DateTime(today.Year, 1, 1).ToString("yyyy-MM-dd");
+                    var quickEnd = quickEndDate.ToString("yyyy-MM-dd");
+
+                    var currentUserId = Context.Request.Query["userId"].ToString();
+                    var currentCompanyName = Context.Request.Query["companyName"].ToString();
+                }
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter">
+                        Filtrele
+                    </button>
+
+                    <a asp-action="WeeklySummary"
+                       asp-route-startDate="@monthStart"
+                       asp-route-endDate="@quickEnd"
+                       asp-route-userId="@currentUserId"
+                       asp-route-companyName="@currentCompanyName"
+                       asp-route-summaryType="month"
+                       class="btn-clear">
+                        Bu Ay
+                    </a>
+
+                    <a asp-action="WeeklySummary"
+                       asp-route-startDate="@yearStart"
+                       asp-route-endDate="@quickEnd"
+                       asp-route-userId="@currentUserId"
+                       asp-route-companyName="@currentCompanyName"
+                       asp-route-summaryType="year"
+                       class="btn-clear">
+                        Bu Yıl
+                    </a>
+
+                    <a asp-action="WeeklySummary" class="btn-clear">
+                        Temizle
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <div class="summary-table-card">
+        <div class="table-responsive">
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>
+                            @(Context.Request.Query["summaryType"] == "year" ? "Yıl" :
+                                                        Context.Request.Query["summaryType"] == "month" ? "Ay" :
+                                                        "Hafta")
+                        </th>
+                        <th>Kullanıcı</th>
+                        <th>Firma</th>
+                        <th>LinkedIn Bağlantı</th>
+                        <th>E-Mail</th>
+                        <th>LinkedIn Mesaj</th>
+                        <th>Arama</th>
+                        <th>Gerçekleşen Görüşme</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="week-badge">
+                                        @item.WeekStartDate.ToString("dd.MM")
+                                        -
+                                        @item.WeekEndDate.ToString("dd.MM.yyyy")
+                                    </span>
+                                </td>
+
+                                <td class="text-left">
+                                    <strong>@item.FullName</strong>
+                                </td>
+
+                                <td class="text-left">
+                                    @item.CompanyName
+                                </td>
+
+                                <td>
+                                    @if (item.LinkedinConnectionCount > 0)
+                                    {
+                                        <span class="positive-value">
+                                            +@item.LinkedinConnectionCount
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="zero-value">
+                                            @item.LinkedinConnectionCount
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>@item.Emails</td>
+                                <td>@item.LinkedinMessages</td>
+                                <td>@item.Calls</td>
+                                <td>@item.MeetingCompleted</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                Seçilen filtrelere uygun rapor bulunamadı.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

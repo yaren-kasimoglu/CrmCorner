@@ -320,10 +320,58 @@
                                     <td class="gap-cell">@cell.Gap</td>
                                 }
 
-                                <td class="total-p">@row.TotalP</td>
-                                <td class="total-a">@row.TotalA</td>
-                                <td class="total-percent">@row.TotalPercent%</td>
-                                <td class="total-gap">@row.TotalGap</td>
+                             @if (row.ActivityType == "LinkedIn Bağlantı Sayısı")
+{
+    <td class="total-p">@row.TotalP</td>
+    <td class="total-a">@row.TotalA</td>
+    <td class="total-percent">-</td>
+   <td class="total-gap">
+    @if (row.TotalDifference < 0)
+    {
+        <span style="color:#dc2626;font-weight:700;">
+            @row.TotalDifference
+        </span>
+    }
+    else if (row.TotalDifference > 0)
+    {
+        <span style="color:#16a34a;font-weight:700;">
+            +@row.TotalDifference
+        </span>
+    }
+    else
+    {
+        <span style="font-weight:700;">
+            @row.TotalDifference
+        </span>
+    }
+</td>
+}
+else
+{
+    <td class="total-p">@row.TotalP</td>
+    <td class="total-a">@row.TotalA</td>
+    <td class="total-percent">@row.TotalPercent%</td>
+ <td class="total-gap">
+        @if (row.TotalGap < 0)
+        {
+            <span style="color:#dc2626;font-weight:700;">
+                @row.TotalGap
+            </span>
+        }
+        else if (row.TotalGap > 0)
+        {
+            <span style="color:#16a34a;font-weight:700;">
+                +@row.TotalGap
+            </span>
+        }
+        else
+        {
+            <span style="font-weight:700;">
+                @row.TotalGap
+            </span>
+        }
+    </td>
+}
                             </tr>
                         }
                     </tbody>
@@ -395,12 +443,63 @@
             gapTd.innerText = gap;
         });
 
-        const totalPercent = totalP === 0 ? 0 : Math.round((totalA / totalP) * 100);
-        const totalGap = totalA - totalP;
+const activityName = row.querySelector(".activity-name").innerText.trim();
 
-        row.querySelector(".total-p").innerText = totalP;
-        row.querySelector(".total-a").innerText = totalA;
-        row.querySelector(".total-percent").innerText = totalPercent + "%";
-        row.querySelector(".total-gap").innerText = totalGap;
+if (activityName === "LinkedIn Bağlantı Sayısı") {
+
+    const pInputs = row.querySelectorAll(".p-input");
+    const aInputs = row.querySelectorAll(".a-input");
+
+    const mondayP = parseInt(pInputs[0].value) || 0;
+    const fridayA = parseInt(aInputs[aInputs.length - 1].value) || 0;
+
+    const difference = fridayA - mondayP;
+
+    row.querySelector(".total-p").innerText = mondayP;
+    row.querySelector(".total-a").innerText = fridayA;
+    row.querySelector(".total-percent").innerText = "-";
+
+    const gapElement = row.querySelector(".total-gap");
+
+    if (difference < 0) {
+        gapElement.innerHTML =
+            `<span style="color:#dc2626;font-weight:700;">${difference}</span>`;
+    }
+    else if (difference > 0) {
+        gapElement.innerHTML =
+            `<span style="color:#16a34a;font-weight:700;">+${difference}</span>`;
+    }
+    else {
+        gapElement.innerHTML =
+            `<span style="font-weight:700;">${difference}</span>`;
+    }
+}
+else {
+
+    const totalPercent = totalP === 0
+        ? 0
+        : Math.round((totalA / totalP) * 100);
+
+    const totalGap = totalA - totalP;
+
+    row.querySelector(".total-p").innerText = totalP;
+    row.querySelector(".total-a").innerText = totalA;
+    row.querySelector(".total-percent").innerText = totalPercent + "%";
+
+    const gapElement = row.querySelector(".total-gap");
+
+    if (totalGap < 0) {
+        gapElement.innerHTML =
+            `<span style="color:#dc2626;font-weight:700;">${totalGap}</span>`;
+    }
+    else if (totalGap > 0) {
+        gapElement.innerHTML =
+            `<span style="color:#16a34a;font-weight:700;">+${totalGap}</span>`;
+    }
+    else {
+        gapElement.innerHTML =
+            `<span style="font-weight:700;">${totalGap}</span>`;
+    }
+}
     }
 </script>
