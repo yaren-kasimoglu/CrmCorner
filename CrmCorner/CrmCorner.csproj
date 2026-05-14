@@ -4,8 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <DisableWebStaticAssetBuild>true</DisableWebStaticAssetBuild>
-    <DisableImplicitStaticWebAssets>true</DisableImplicitStaticWebAssets>
     <UserSecretsId>169a1600-8c0a-42a9-8f46-6c8f403ea08b</UserSecretsId>
 
   </PropertyGroup>

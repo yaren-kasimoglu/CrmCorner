@@ -320,7 +320,8 @@
                                     <td class="gap-cell">@cell.Gap</td>
                                 }
 
-                             @if (row.ActivityType == "LinkedIn Bağlantı Sayısı")
+                       @if (row.ActivityType == "LinkedIn Bağlantı Sayısı"
+    && company.CompanyName == "SAAS Corner")
 {
     <td class="total-p">@row.TotalP</td>
     <td class="total-a">@row.TotalA</td>
@@ -445,7 +446,13 @@ else
 
 const activityName = row.querySelector(".activity-name").innerText.trim();
 
-if (activityName === "LinkedIn Bağlantı Sayısı") {
+const companyName =
+    input.dataset.company?.trim();
+
+if (
+    activityName === "LinkedIn Bağlantı Sayısı" &&
+    companyName === "SAAS Corner"
+) {
 
     const pInputs = row.querySelectorAll(".p-input");
     const aInputs = row.querySelectorAll(".a-input");

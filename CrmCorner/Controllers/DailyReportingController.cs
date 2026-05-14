@@ -210,6 +210,8 @@ namespace CrmCorner.Controllers
 
                 foreach (var activity in activityTypes)
                 {
+                    if (company != "SAAS Corner" && activity == "LinkedIn Bağlantı Sayısı")
+                        continue;
                     var row = new DailyReportingActivityRowViewModel
                     {
                         ActivityType = activity
@@ -275,7 +277,6 @@ namespace CrmCorner.Controllers
 
             var activityTypes = new List<string>
     {
-        "LinkedIn Bağlantı Sayısı",
         "E-Mails",
         "LinkedIn Gönderilen Mesaj",
         "LinkedIn Gönderilen Bağlantı",
@@ -445,9 +446,12 @@ namespace CrmCorner.Controllers
                         WeekEndDate = weekEnd,
 
                         LinkedinConnectionCount = GetLinkedinConnectionDifference(),
+
                         Emails = GetTotal("E-Mails"),
                         LinkedinMessages = GetTotal("LinkedIn Gönderilen Mesaj"),
+
                         LinkedinSentConnections = GetTotal("LinkedIn Gönderilen Bağlantı"),
+
                         Calls = GetTotal("Arama"),
                         MeetingPlanned = GetTotal("Meeting Planlama"),
                         MeetingCompleted = GetTotal("Meeting Gerçekleşen")
