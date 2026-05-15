@@ -58,4 +58,6 @@ public class WeeklyMeetingReportViewModel
     public string? UserId { get; set; }
     public string? UserName { get; set; }
     public int MeetingCount { get; set; }
+
+    public string? Companies { get; set; }
 }

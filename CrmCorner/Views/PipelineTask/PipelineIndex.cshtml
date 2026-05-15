@@ -220,8 +220,9 @@
         <select id="doneByFilter" class="form-select filter-select">
             <option value="">Görüşmeyi Gerçekleştiren</option>
             @foreach (var user in Model
-                        .Where(x => x.ResponsibleUser != null)
-                        .Select(x => x.ResponsibleUser.NameSurname)
+                        .Where(x => x.MeetingUser != null)
+                        .Select(x => x.MeetingUser.NameSurname)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
                         .Distinct()
                         .OrderBy(x => x))
             {
@@ -320,7 +321,7 @@
                                 data-company="@task.CompanyName"
                                 data-desc="@task.Description"
                                 data-takenby="@task.AppUser?.NameSurname"
-                                data-doneby="@task.ResponsibleUser?.NameSurname"
+                                data-doneby="@task.MeetingUser?.NameSurname"
                                 data-search="@($"{task.Title} {task.CustomerName} {task.CustomerSurname} {task.CompanyName} {task.Description} {task.Email} {task.Phone} {task.Source} {task.AppUser}{task.ResponsibleUser}")">
                                 <div class="dd-handle">
                                     <strong>@task.Title</strong><br />

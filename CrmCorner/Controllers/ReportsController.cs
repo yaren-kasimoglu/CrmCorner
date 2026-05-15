@@ -301,19 +301,19 @@ namespace CrmCorner.Controllers
                 .ToListAsync();
 
             var report = await _context.PipelineTasks
-                .AsNoTracking()
-                .Where(t =>
-                    t.MeetingUserId != null &&
-                    companyUserIds.Contains(t.MeetingUserId) &&
-                    t.CreatedDate >= weekStart &&
-                    t.CreatedDate < weekEnd)
-                .GroupBy(t => t.MeetingUserId)
-                .Select(g => new WeeklyMeetingReportViewModel
-                {
-                    UserId = g.Key,
-                    MeetingCount = g.Count()
-                })
-                .ToListAsync();
+             .AsNoTracking()
+             .Where(t =>
+                 t.MeetingUserId != null &&
+                 companyUserIds.Contains(t.MeetingUserId) &&
+                 t.CreatedDate >= weekStart &&
+                 t.CreatedDate < weekEnd)
+             .GroupBy(t => t.MeetingUserId)
+             .Select(g => new WeeklyMeetingReportViewModel
+             {
+                 UserId = g.Key,
+                 MeetingCount = g.Count()
+             })
+             .ToListAsync();
 
             var users = await _context.Users.AsNoTracking()
                 .Where(u => companyUserIds.Contains(u.Id))
@@ -322,11 +322,26 @@ namespace CrmCorner.Controllers
             foreach (var item in report)
             {
                 var user = users.FirstOrDefault(u => u.Id == item.UserId);
+
                 item.UserName = user == null
                     ? "Bilinmeyen Kullanıcı"
                     : string.IsNullOrWhiteSpace(user.NameSurname)
                         ? user.UserName
                         : user.NameSurname;
+
+                var companies = await _context.PipelineTasks
+                    .AsNoTracking()
+                    .Where(t =>
+                        t.MeetingUserId == item.UserId &&
+                        t.CreatedDate >= weekStart &&
+                        t.CreatedDate < weekEnd &&
+                        !string.IsNullOrWhiteSpace(t.CompanyName))
+                    .Select(t => t.CompanyName)
+                    .Distinct()
+                    .Take(10)
+                    .ToListAsync();
+
+                item.Companies = string.Join(", ", companies);
             }
 
             ViewBag.WeekStart = weekStart;
