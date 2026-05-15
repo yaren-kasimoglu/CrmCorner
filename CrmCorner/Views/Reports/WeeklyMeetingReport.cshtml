@@ -1,42 +1,178 @@
 ﻿@model List<CrmCorner.ViewModels.WeeklyMeetingReportViewModel>
 
 @{
-    ViewData["Title"] = "Haftalık Görüşme Raporu";
+    ViewData["Title"] = "Haftalık Görüşme Sayıları Özet";
     Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
 
     var totalMeetingCount = Model?.Sum(x => x.MeetingCount) ?? 0;
     var topUser = Model?.OrderByDescending(x => x.MeetingCount).FirstOrDefault();
+
+ var chartLabels = System.Text.Json.JsonSerializer.Serialize(
+    Model?.Select(x => x.UserName).ToList() ?? new List<string>());
+
+var chartCompanies = System.Text.Json.JsonSerializer.Serialize(
+    Model?.Select(x => x.Companies ?? "").ToList() ?? new List<string>());
+    var chartData = System.Text.Json.JsonSerializer.Serialize(Model?.Select(x => x.MeetingCount).ToList() ?? new List<int>());
 }
 
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-1">Haftalık Görüşme Raporu</h4>
-            <small class="text-muted">
+<style>
+    .weekly-report-page {
+        padding: 10px 18px 30px;
+    }
+
+    .report-main-card {
+        border: 0;
+        border-radius: 20px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+        background: #fff;
+    }
+
+    .report-header {
+        border-bottom: 1px solid #eef1f5;
+        padding: 22px 26px;
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 20px 20px 0 0;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 4px;
+    }
+
+    .report-date {
+        font-size: 13px;
+        color: #7b8aa0;
+    }
+
+    .summary-card {
+        border: 0 !important;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        height: 100%;
+    }
+
+    .summary-card .card-body {
+        padding: 22px 24px;
+    }
+
+    .summary-label {
+        font-size: 13px;
+        color: #7b8aa0;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 30px;
+        font-weight: 800;
+        color: #475569;
+        line-height: 1.1;
+    }
+
+    .chart-box {
+        height: 340px;
+        background: #fff;
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+        border: 1px solid #eef1f5;
+    }
+
+    .report-table-card {
+        border: 1px solid #eef1f5;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+    }
+
+    .report-table-card table {
+        margin-bottom: 0;
+    }
+
+    .report-table-card thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 700;
+        border-bottom: 1px solid #eef1f5;
+        padding: 14px;
+    }
+
+    .report-table-card tbody td {
+        padding: 14px;
+        color: #475569;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .meeting-badge {
+        background: #4f46e5;
+        color: #fff;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .empty-box {
+        border-radius: 16px;
+        padding: 18px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+    }
+
+    @@media (max-width: 768px) {
+        .weekly-report-page {
+            padding: 8px;
+        }
+
+        .report-header {
+            padding: 18px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+        }
+
+        .chart-box {
+            height: 300px;
+            padding: 14px;
+        }
+    }
+</style>
+
+<div class="container-fluid weekly-report-page">
+    <div class="card report-main-card">
+        <div class="report-header">
+            <h4 class="report-title">Haftalık Görüşme Raporu</h4>
+            <div class="report-date">
                 @(ViewBag.WeekStart?.ToString("dd.MM.yyyy")) -
                 @(ViewBag.WeekEnd?.ToString("dd.MM.yyyy"))
-            </small>
+            </div>
         </div>
 
-        <div class="card-body">
-
-            <div class="row mb-4">
+        <div class="card-body p-4">
+            <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <div class="card border">
+                    <div class="card summary-card">
                         <div class="card-body">
-                            <h6 class="text-muted mb-2">Toplam Görüşme</h6>
-                            <h3 class="mb-0">@totalMeetingCount</h3>
+                            <div class="summary-label">Toplam Görüşme</div>
+                            <div class="summary-value">@totalMeetingCount</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <div class="card border">
+                    <div class="card summary-card">
                         <div class="card-body">
-                            <h6 class="text-muted mb-2">En Çok Görüşme Yapan</h6>
-                            <h3 class="mb-0">
+                            <div class="summary-label">En Çok Görüşme Yapan</div>
+                            <div class="summary-value">
                                 @(topUser != null ? topUser.UserName : "-")
-                            </h3>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -44,47 +180,47 @@
 
             @if (Model != null && Model.Any())
             {
-                <div class="mb-4">
-                    <canvas id="meetingChart" height="100"></canvas>
+                <div class="chart-box mb-4">
+                    <canvas id="meetingChart"></canvas>
                 </div>
 
-                <hr />
-
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Görüşmeyi Gerçekleştiren</th>
-                                <th>Bu Hafta Gerçekleştirilen Görüşme</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                var index = 1;
-                            }
-
-                            @foreach (var item in Model)
-                            {
+                <div class="report-table-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
                                 <tr>
-                                    <td>@index</td>
-                                    <td>@item.UserName</td>
-                                    <td>
-                                        <span class="badge bg-primary">
-                                            @item.MeetingCount
-                                        </span>
-                                    </td>
+                                    <th style="width:70px;">#</th>
+                                    <th>Görüşmeyi Gerçekleştiren</th>
+                                    <th style="width:260px;">Bu Hafta Gerçekleştirilen Görüşme</th>
                                 </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var index = 1;
+                                }
 
-                                index++;
-                            }
-                        </tbody>
-                    </table>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@index</td>
+                                        <td>@item.UserName</td>
+                                        <td>
+                                            <span class="meeting-badge">
+                                                @item.MeetingCount
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    index++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             }
             else
             {
-                <div class="alert alert-info mb-0">
+                <div class="empty-box">
                     Bu hafta görüşme gerçekleştiren kullanıcı bulunamadı.
                 </div>
             }
@@ -96,19 +232,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const labels = [
-            @foreach (var item in Model ?? new List<CrmCorner.ViewModels.WeeklyMeetingReportViewModel>())
-            {
-                @: "@item.UserName",
-            }
-        ];
-
-        const data = [
-            @foreach (var item in Model ?? new List<CrmCorner.ViewModels.WeeklyMeetingReportViewModel>())
-            {
-                @: @item.MeetingCount,
-            }
-        ];
+        const labels = @Html.Raw(chartLabels);
+        const data = @Html.Raw(chartData);
+        const companies = @Html.Raw(chartCompanies);
 
         if (document.getElementById('meetingChart')) {
             const ctx = document.getElementById('meetingChart').getContext('2d');
@@ -120,21 +246,68 @@
                     datasets: [{
                         label: 'Bu Hafta Görüşme Sayısı',
                         data: data,
-                        borderWidth: 1
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        barThickness: 55
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function (context) {
+                                    const index = context[0].dataIndex;
+                                    return labels[index];
+                                },
+                                label: function (context) {
+                                    const index = context.dataIndex;
+                                    const companyText = companies[index];
+
+                                    let lines = [];
+                                    lines.push(context.raw + ' görüşme');
+
+                                 if (companyText && companyText.trim() !== '') {
+
+    const companyList = companyText.split(',');
+
+    lines.push(' ');
+    lines.push('Firmalar:');
+
+    companyList.forEach(x => {
+        lines.push('• ' + x.trim());
+    });
+}
+
+                                    return lines;
+                                }
+                            }
                         }
                     },
                     scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                },
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        },
                         y: {
                             beginAtZero: true,
                             ticks: {
                                 precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(15, 23, 42, 0.07)'
                             }
                         }
                     }

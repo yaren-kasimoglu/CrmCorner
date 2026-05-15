@@ -57,9 +57,11 @@ namespace CrmCorner.Controllers
             );
 
             var tasksQuery = _context.PipelineTasks
-                .Include(t => t.AppUser)
-                .Include(t => t.ResponsibleUser)
-                .AsNoTracking();
+      .Include(t => t.AppUser)
+      .Include(t => t.ResponsibleUser)
+      .Include(t => t.MeetingUser)
+      .Include(t => t.ReporterUser)
+      .AsNoTracking();
 
             if (!showHidden)
             {
